@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ufpso: #C0272D;
+  --color-ufpso: #D41224;
   --color-ufpso-dark: #9B1F24;
   --color-ufpso-light: #D94F54;
 }
