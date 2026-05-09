@@ -1,0 +1,49 @@
+---
+import { routes } from '../routes/index.ts';
+
+const links = [
+  { label: 'Inicio',    href: routes.home },
+  { label: 'Acerca de', href: routes.about },
+];
+
+const path = Astro.url.pathname;
+---
+
+<header class="border-b border-gray-200 bg-white">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+    <a href={routes.home} class="font-bold text-xl text-ufpso">RazonaPro</a>
+
+    <!-- Links escritorio -->
+    <ul class="hidden md:flex gap-6 text-sm">
+      {links.map(l => (
+        <li>
+          <a href={l.href} class={path === l.href ? 'text-ufpso font-medium' : 'text-gray-600 hover:text-ufpso transition-colors'}>
+            {l.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Botón hamburguesa móvil -->
+    <button id="nav-toggle" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100" aria-label="Abrir menú">
+      <span class="ti ti-menu-2 text-xl" aria-hidden="true"></span>
+    </button>
+
+  </nav>
+
+  <!-- Menú móvil -->
+  <div id="nav-mobile" class="hidden md:hidden border-t border-gray-100 px-4 sm:px-6 py-3 flex flex-col gap-1 bg-white">
+    {links.map(l => (
+      <a href={l.href} class={`py-2 text-sm transition-colors ${path === l.href ? 'text-ufpso font-medium' : 'text-gray-600 hover:text-ufpso'}`}>
+        {l.label}
+      </a>
+    ))}
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('nav-mobile');
+  toggle?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+</script>

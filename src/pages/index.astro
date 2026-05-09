@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="RazonaPro">
+  <Navbar />
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-ufpso">
+      Bienvenido a RazonaPro
+    </h1>
+    <p class="mt-4 text-base sm:text-lg text-gray-600 max-w-xl">
+      Plataforma de razonamiento lógico de la UFPSO.
+    </p>
+  </main>
+  <Footer />
+</BaseLayout>
