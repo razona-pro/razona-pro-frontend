@@ -9,16 +9,37 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <style is:global>
   body {
-    height: 100vh;
-    overflow: hidden;
+    height: 100vh; overflow: hidden;
     background: #F2F0EC;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
-  /* ── Layout ─────────────────────────────────── */
+  /* ════ ROOT ════ */
   .db-root { flex: 1; display: flex; height: 100vh; overflow: hidden; }
 
-  /* ── Sidebar nav items ───────────────────────── */
+  /* ════ SIDEBAR ════ */
+  #sidebar {
+    width: 242px; min-width: 242px;
+    background: #111111;
+    display: flex; flex-direction: column;
+    overflow-y: auto; overflow-x: hidden;
+    border-right: 1px solid rgba(255,255,255,0.055);
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 100;
+  }
+
+  /* ════ OVERLAY ════ */
+  #overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 99;
+    backdrop-filter: blur(2px);
+    animation: fadeOv 0.2s ease;
+  }
+  #overlay.open { display: block; }
+  @keyframes fadeOv { from{opacity:0} to{opacity:1} }
+
+  /* ════ NAV ════ */
   .nav-item {
     display: flex; align-items: center; gap: 9px;
     padding: 9px 10px; color: rgba(255,255,255,0.45);
@@ -27,61 +48,37 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     margin-bottom: 1px; border: none; background: none; width: 100%;
     text-align: left; font-family: inherit;
   }
-  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88); }
+  .nav-item:hover  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88); }
   .nav-item.active { background: rgba(212,18,36,0.18); color: #F87171; }
-  .nav-item.active:hover { background: rgba(212,18,36,0.22); }
-  .nav-item .ti { font-size: 16px; flex-shrink: 0; }
+  .nav-item .ti    { font-size: 16px; flex-shrink: 0; }
   .nav-section {
     color: rgba(255,255,255,0.22); font-size: 10px; font-weight: 700;
     letter-spacing: 0.9px; text-transform: uppercase;
     padding: 0 10px; margin: 14px 0 5px; display: block;
   }
 
-  /* ── Cards ───────────────────────────────────── */
-  .card {
-    background: white; border-radius: 16px;
-    padding: 20px 22px; border: 1px solid #E8E5E0;
-  }
-  .stat-card {
-    background: white; border-radius: 14px;
-    padding: 16px 18px; border: 1px solid #E8E5E0;
-  }
-  .stat-num {
-    font-size: 28px; font-weight: 900; letter-spacing: -0.8px;
-    margin: 0; line-height: 1;
-  }
+  /* ════ CARDS ════ */
+  .card      { background: white; border-radius: 16px; padding: 20px 22px; border: 1px solid #E8E5E0; }
+  .stat-card { background: white; border-radius: 14px; padding: 16px 18px; border: 1px solid #E8E5E0; }
+  .stat-num  { font-size: 28px; font-weight: 900; letter-spacing: -0.8px; margin: 0; line-height: 1; }
 
-  /* ── Quick action buttons ─────────────────────── */
+  /* ════ QUICK ACTIONS ════ */
+  .qa-row { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
   .qa-btn {
     display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 16px; border-radius: 10px;
-    font-size: 13.5px; font-weight: 700; text-decoration: none;
-    transition: all 0.15s; white-space: nowrap; border: none; cursor: pointer;
-    font-family: inherit;
+    padding: 10px 16px; border-radius: 10px; font-size: 13.5px;
+    font-weight: 700; text-decoration: none; transition: all 0.15s;
+    white-space: nowrap; border: none; cursor: pointer; font-family: inherit;
   }
   .qa-btn:hover { transform: translateY(-1px); filter: brightness(0.93); }
-  .qa-btn .ti { font-size: 15px; }
 
-  /* ── Competency progress bars ─────────────────── */
-  .bar-wrap {
-    height: 6px; background: #F3F1EE; border-radius: 3px; overflow: hidden;
-    margin: 6px 0 3px;
-  }
-  .bar-fill {
-    height: 100%; border-radius: 3px;
-    transition: width 1.3s cubic-bezier(0.4,0,0.2,1); width: 0%;
-  }
+  /* ════ PROGRESS BARS ════ */
+  .bar-wrap { height: 6px; background: #F3F1EE; border-radius: 3px; overflow: hidden; margin: 6px 0 3px; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 1.3s cubic-bezier(0.4,0,0.2,1); width: 0%; }
 
-  /* ── Rank rows ────────────────────────────────── */
-  .rank-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 10px; border-radius: 10px; margin-bottom: 3px;
-    transition: background 0.15s; cursor: default;
-  }
+  /* ════ RANK ════ */
+  .rank-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; margin-bottom:3px; transition:background 0.15s; }
   .rank-row:hover { background: #F9F8F5; }
-  .rank-row.is-me { background: #FFF1F2; }
-
-  /* ── Rank filter pills ────────────────────────── */
   .r-pill {
     padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
     border: 1.5px solid #E8E5E0; background: transparent; color: #6B7280;
@@ -90,70 +87,109 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .r-pill:hover { border-color: #D41224; color: #D41224; }
   .r-pill.active { background: #D41224; color: white; border-color: #D41224; }
 
-  /* ── Changelog timeline ───────────────────────── */
-  .cl-item {
-    position: relative; padding-left: 22px; margin-bottom: 20px;
-  }
-  .cl-item::before {
-    content: ''; position: absolute; left: 5px; top: 18px;
-    bottom: -20px; width: 1px; background: #E8E5E0;
-  }
-  .cl-item:last-child::before { display: none; }
-  .cl-dot {
-    position: absolute; left: 0; top: 2px;
-    width: 12px; height: 12px; border-radius: 50%;
-    border: 2px solid #D41224; background: white;
-  }
+  /* ════ CHANGELOG ════ */
+  .cl-item { position:relative; padding-left:22px; margin-bottom:20px; }
+  .cl-item::before { content:''; position:absolute; left:5px; top:18px; bottom:-20px; width:1px; background:#E8E5E0; }
+  .cl-item:last-child::before { display:none; }
+  .cl-dot { position:absolute; left:0; top:2px; width:12px; height:12px; border-radius:50%; border:2px solid #D41224; background:white; }
   .cl-dot.now { background: #D41224; }
 
-  /* ── Test rows ────────────────────────────────── */
-  .test-row {
-    display: flex; align-items: center; padding: 10px 12px;
-    border-radius: 10px; margin-bottom: 6px; border: 1px solid #F3F1EE;
-    background: #FAFAF8; transition: all 0.15s;
+  /* ════ TEST/TREND ROWS ════ */
+  .test-row  { display:flex; align-items:center; padding:10px 12px; border-radius:10px; margin-bottom:6px; border:1px solid #F3F1EE; background:#FAFAF8; transition:all 0.15s; }
+  .test-row:hover { border-color:#E8E5E0; background:white; }
+  .trend-item { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; border:1px solid #F3F1EE; margin-bottom:8px; cursor:pointer; transition:all 0.15s; }
+  .trend-item:hover { border-color:#E8E5E0; background:#FAFAF8; }
+
+  /* ════ ANIMATIONS ════ */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .anim    { animation: fadeUp 0.45s ease both; }
+  .anim-d1 { animation-delay:.05s; }
+  .anim-d2 { animation-delay:.12s; }
+  .anim-d3 { animation-delay:.18s; }
+  .anim-d4 { animation-delay:.24s; }
+
+  /* ════ SCROLLBAR ════ */
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#D1CFC8; border-radius:10px; }
+  #search-input:focus { border-color:#D41224 !important; outline:none; }
+  #tb-user:hover   { border-color:#D41224 !important; }
+  #notif-btn:hover { border-color:#D41224 !important; }
+
+  /* ══════════════════════════════════════════════════════
+     TABLET  ≤ 1023 px  — sidebar becomes overlay
+  ══════════════════════════════════════════════════════ */
+  @media (max-width: 1023px) {
+    body { overflow: auto; }
+    .db-root { overflow: visible; height: auto; min-height: 100vh; }
+
+    #sidebar {
+      position: fixed; top:0; left:0; bottom:0;
+      transform: translateX(-260px);
+      box-shadow: none;
+    }
+    #sidebar.open {
+      transform: translateX(0);
+      box-shadow: 8px 0 32px rgba(0,0,0,0.28);
+    }
+    #hamburger     { display: flex !important; }
+    #right-panel   { display: none !important; }
+    #main-area     { width: 100%; }
+
+    #stats-student,
+    #stats-admin   { grid-template-columns: repeat(2,1fr) !important; }
+
+    #student-content,
+    #admin-content  { grid-template-columns: 1fr !important; }
   }
-  .test-row:hover { border-color: #E8E5E0; background: white; }
 
-  /* ── Trending items ───────────────────────────── */
-  .trend-item {
-    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-    border-radius: 10px; border: 1px solid #F3F1EE; margin-bottom: 8px;
-    cursor: pointer; transition: all 0.15s;
+  /* ══════════════════════════════════════════════════════
+     MOBILE  ≤ 639 px  — compact everything
+  ══════════════════════════════════════════════════════ */
+  @media (max-width: 639px) {
+    #main-scroll  { padding: 14px 14px 0 !important; }
+    #search-wrap  { display: none !important; }
+    #mobile-logo  { display: flex !important; }
+    #tb-name      { display: none; }
+
+    /* Quick actions: horizontal scroll strip */
+    .qa-row {
+      flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .qa-row::-webkit-scrollbar { display: none; }
+
+    /* Stats: 2-col */
+    #stats-student,
+    #stats-admin { grid-template-columns: repeat(2,1fr) !important; gap:10px !important; }
+    .stat-num    { font-size: 24px !important; }
+    .stat-card   { padding: 13px 14px !important; }
+
+    /* Cards less padded */
+    .card        { padding: 16px 16px !important; border-radius: 14px !important; }
+
+    /* Welcome smaller */
+    #welcome-h1  { font-size: 22px !important; }
+
+    /* Topbar */
+    #topbar { gap: 8px !important; margin-bottom: 16px !important; }
+
+    /* Last test score */
+    #lt-score { font-size: 22px !important; }
+
+    /* Admin grids also single col */
+    #admin-content { grid-template-columns: 1fr !important; }
   }
-  .trend-item:hover { border-color: #E8E5E0; background: #FAFAF8; }
-
-  /* ── Animations ───────────────────────────────── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .anim { animation: fadeUp 0.45s ease both; }
-  .anim-d1 { animation-delay: 0.05s; }
-  .anim-d2 { animation-delay: 0.12s; }
-  .anim-d3 { animation-delay: 0.18s; }
-  .anim-d4 { animation-delay: 0.24s; }
-  .anim-d5 { animation-delay: 0.30s; }
-
-  /* ── Scrollbar ────────────────────────────────── */
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #D1CFC8; border-radius: 10px; }
-
-  /* ── Search focus ─────────────────────────────── */
-  #search-input:focus { border-color: #D41224 !important; outline: none; }
-
-  /* ── Topbar hover ─────────────────────────────── */
-  #tb-user:hover { border-color: #D41224 !important; }
-  #notif-btn:hover { border-color: #D41224 !important; }
 </style>
 
-<!-- ════════════════════════════════════════════════════════ -->
-<!--  ROOT                                                     -->
-<!-- ════════════════════════════════════════════════════════ -->
+
+<!-- Overlay — closes sidebar when tapping outside -->
+<div id="overlay" onclick="closeSidebar()"></div>
+
 <div class="db-root">
 
-  <!-- ══════════════ SIDEBAR ══════════════ -->
-  <aside style="width:242px;min-width:242px;background:#111111;display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid rgba(255,255,255,0.055);flex-shrink:0;">
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside id="sidebar">
 
     <!-- Logo -->
     <div style="padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.06);">
@@ -162,13 +198,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <span class="ti ti-brain" style="color:white;font-size:18px;"></span>
         </div>
         <div>
-          <p style="color:white;font-weight:900;font-size:16.5px;letter-spacing:-0.4px;margin:0;line-height:1.1;">Razona<span style="color:#D41224;">Pro</span></p>
+          <p style="color:white;font-weight:900;font-size:16px;letter-spacing:-0.4px;margin:0;line-height:1.1;">Razona<span style="color:#D41224;">Pro</span></p>
           <p style="color:rgba(255,255,255,0.28);font-size:9px;margin:0;letter-spacing:0.9px;text-transform:uppercase;">Plataforma Saber Pro · UFPSO</p>
         </div>
       </div>
     </div>
 
-    <!-- User card -->
+    <!-- User -->
     <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);">
       <div style="display:flex;align-items:center;gap:10px;">
         <div id="sb-avatar" style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:14px;flex-shrink:0;"></div>
@@ -185,77 +221,88 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <!-- Nav -->
     <nav style="padding:10px 10px;flex:1;">
       <span class="nav-section">Principal</span>
-      <a href="/dashboard" class="nav-item active">
-        <span class="ti ti-home"></span> Inicio
-      </a>
-      <a href="/tests" class="nav-item">
-        <span class="ti ti-clipboard-list"></span> Tests disponibles
-      </a>
-      <a href="/ai-practice" class="nav-item">
-        <span class="ti ti-robot"></span> Práctica con IA
-      </a>
+      <a href="/dashboard"        class="nav-item active" onclick="closeSidebar()"><span class="ti ti-home"></span> Inicio</a>
+      <a href="/tests"            class="nav-item"        onclick="closeSidebar()"><span class="ti ti-clipboard-list"></span> Tests disponibles</a>
+      <a href="/ai-practice"      class="nav-item"        onclick="closeSidebar()"><span class="ti ti-robot"></span> Práctica con IA</a>
 
       <span class="nav-section">Competencias Saber Pro</span>
-      <a href="/tests?c=lc" class="nav-item" style="padding-left:10px;">
-        <span style="width:7px;height:7px;border-radius:50%;background:#D41224;flex-shrink:0;"></span> Lectura Crítica
-      </a>
-      <a href="/tests?c=rq" class="nav-item" style="padding-left:10px;">
-        <span style="width:7px;height:7px;border-radius:50%;background:#2563EB;flex-shrink:0;"></span> Razonamiento Cuantit.
-      </a>
-      <a href="/tests?c=cc" class="nav-item" style="padding-left:10px;">
-        <span style="width:7px;height:7px;border-radius:50%;background:#059669;flex-shrink:0;"></span> Comp. Ciudadanas
-      </a>
-      <a href="/tests?c=ce" class="nav-item" style="padding-left:10px;">
-        <span style="width:7px;height:7px;border-radius:50%;background:#7C3AED;flex-shrink:0;"></span> Comunicación Escrita
-      </a>
-      <a href="/tests?c=en" class="nav-item" style="padding-left:10px;">
-        <span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span> Inglés
-      </a>
+      <a href="/tests?c=lc" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#D41224;flex-shrink:0;"></span> Lectura Crítica</a>
+      <a href="/tests?c=rq" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#2563EB;flex-shrink:0;"></span> Razonamiento Cuantit.</a>
+      <a href="/tests?c=cc" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#059669;flex-shrink:0;"></span> Comp. Ciudadanas</a>
+      <a href="/tests?c=ce" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#7C3AED;flex-shrink:0;"></span> Comunicación Escrita</a>
+      <a href="/tests?c=en" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span> Inglés</a>
 
       <span class="nav-section">Mi cuenta</span>
-      <a href="/rankings"    class="nav-item"><span class="ti ti-trophy"></span> Rankings</a>
-      <a href="/mis-intentos" class="nav-item"><span class="ti ti-history"></span> Mi historial</a>
-      <a href="/perfil"      class="nav-item"><span class="ti ti-user-circle"></span> Mi perfil</a>
+      <a href="/rankings"     class="nav-item" onclick="closeSidebar()"><span class="ti ti-trophy"></span> Rankings</a>
+      <a href="/mis-intentos" class="nav-item" onclick="closeSidebar()"><span class="ti ti-history"></span> Mi historial</a>
+      <a href="/perfil"       class="nav-item" onclick="closeSidebar()"><span class="ti ti-user-circle"></span> Mi perfil</a>
 
-      <!-- Admin only -->
       <div id="admin-nav" style="display:none;">
         <span class="nav-section" style="color:rgba(212,18,36,0.55);">Administración</span>
-        <a href="/admin/estudiantes" class="nav-item"><span class="ti ti-users"></span> Estudiantes</a>
-        <a href="/admin/tests"       class="nav-item"><span class="ti ti-file-description"></span> Gestión Tests</a>
-        <a href="/admin/preguntas"   class="nav-item"><span class="ti ti-list-check"></span> Banco Preguntas</a>
-        <a href="/admin/programas"   class="nav-item"><span class="ti ti-school"></span> Programas</a>
+        <a href="/admin/estudiantes" class="nav-item" onclick="closeSidebar()"><span class="ti ti-users"></span> Estudiantes</a>
+        <a href="/admin/tests"       class="nav-item" onclick="closeSidebar()"><span class="ti ti-file-description"></span> Gestión Tests</a>
+        <a href="/admin/preguntas"   class="nav-item" onclick="closeSidebar()"><span class="ti ti-list-check"></span> Banco Preguntas</a>
+        <a href="/admin/programas"   class="nav-item" onclick="closeSidebar()"><span class="ti ti-school"></span> Programas</a>
       </div>
     </nav>
 
     <!-- Logout -->
     <div style="padding:10px 10px;border-top:1px solid rgba(255,255,255,0.06);">
-      <button id="logout-btn" class="nav-item" style="color:rgba(255,100,100,0.55);" onmouseover="this.style.background='rgba(212,18,36,0.09)';this.style.color='rgba(255,100,100,0.85)';" onmouseout="this.style.background='';this.style.color='rgba(255,100,100,0.55)';">
+      <button id="logout-btn" class="nav-item" style="color:rgba(255,100,100,0.55);"
+        onmouseover="this.style.background='rgba(212,18,36,0.09)';this.style.color='rgba(255,100,100,0.85)';"
+        onmouseout="this.style.background='';this.style.color='rgba(255,100,100,0.55)';">
         <span class="ti ti-logout"></span> Cerrar sesión
       </button>
     </div>
   </aside>
 
 
-  <!-- ══════════════ MAIN AREA ══════════════ -->
-  <div style="flex:1;display:flex;overflow:hidden;background:#F2F0EC;">
+  <!-- ══════════ MAIN AREA ══════════ -->
+  <div id="main-area" style="flex:1;display:flex;overflow:hidden;background:#F2F0EC;">
 
-    <!-- ─── CENTER ─── -->
-    <main style="flex:1;overflow-y:auto;padding:22px 24px 0;">
+    <main id="main-scroll" style="flex:1;overflow-y:auto;padding:22px 24px 0;">
 
-      <!-- Top bar -->
-      <div class="anim" style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
-        <div style="flex:1;max-width:450px;position:relative;">
+      <!-- ── TOPBAR ── -->
+      <div id="topbar" class="anim" style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+
+        <!-- Hamburger (shown via CSS on ≤1023px) -->
+        <button id="hamburger" onclick="openSidebar()"
+          style="display:none;width:38px;height:38px;background:white;border:1.5px solid #E8E5E0;
+                 border-radius:10px;align-items:center;justify-content:center;cursor:pointer;
+                 flex-shrink:0;transition:border-color 0.2s;"
+          onmouseover="this.style.borderColor='#D41224'" onmouseout="this.style.borderColor='#E8E5E0'">
+          <span class="ti ti-menu-2" style="font-size:18px;color:#374151;"></span>
+        </button>
+
+        <!-- Mobile logo (hidden on desktop) -->
+        <div id="mobile-logo" style="display:none;align-items:center;gap:8px;flex-shrink:0;">
+          <div style="width:30px;height:30px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <span class="ti ti-brain" style="color:white;font-size:16px;"></span>
+          </div>
+          <span style="font-weight:900;font-size:15px;letter-spacing:-0.3px;color:#111;">Razona<span style="color:#D41224;">Pro</span></span>
+        </div>
+
+        <!-- Search bar (hidden on mobile via CSS) -->
+        <div id="search-wrap" style="flex:1;max-width:450px;position:relative;">
           <span class="ti ti-search" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#B0ADA6;font-size:15px;pointer-events:none;"></span>
-          <input id="search-input" type="text" placeholder="Buscar competencias, tests, preguntas..."
-            style="width:100%;padding:10px 16px 10px 38px;background:white;border:1.5px solid #E8E5E0;border-radius:12px;font-size:13.5px;color:#374151;font-family:inherit;box-sizing:border-box;transition:border-color 0.2s;">
+          <input id="search-input" type="text" placeholder="Buscar competencias, tests..."
+            style="width:100%;padding:10px 16px 10px 38px;background:white;border:1.5px solid #E8E5E0;
+                   border-radius:12px;font-size:13.5px;color:#374151;font-family:inherit;
+                   box-sizing:border-box;transition:border-color 0.2s;">
         </div>
 
         <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-          <button id="notif-btn" title="Notificaciones" style="width:38px;height:38px;background:white;border:1.5px solid #E8E5E0;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:border-color 0.2s;">
+          <button id="notif-btn" title="Notificaciones"
+            style="width:38px;height:38px;background:white;border:1.5px solid #E8E5E0;border-radius:10px;
+                   display:flex;align-items:center;justify-content:center;cursor:pointer;
+                   position:relative;flex-shrink:0;transition:border-color 0.2s;">
             <span class="ti ti-bell" style="font-size:17px;color:#6B7280;"></span>
             <span style="position:absolute;top:7px;right:7px;width:7px;height:7px;background:#D41224;border-radius:50%;border:1.5px solid white;"></span>
           </button>
-          <div id="tb-user" onclick="window.location='/perfil'" style="display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:white;border:1.5px solid #E8E5E0;border-radius:10px;cursor:pointer;transition:border-color 0.2s;">
+
+          <div id="tb-user" onclick="window.location='/perfil'"
+            style="display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:white;
+                   border:1.5px solid #E8E5E0;border-radius:10px;cursor:pointer;transition:border-color 0.2s;">
             <div id="tb-avatar" style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:11px;"></div>
             <span id="tb-name"  style="font-size:13px;font-weight:700;color:#374151;"></span>
             <span id="tb-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;"></span>
@@ -263,23 +310,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
 
-      <!-- Welcome -->
+      <!-- ── WELCOME ── -->
       <div class="anim anim-d1" style="margin-bottom:18px;">
-        <h1 style="font-size:27px;font-weight:900;color:#111111;margin:0 0 3px;letter-spacing:-0.6px;">Hogar</h1>
+        <h1 id="welcome-h1" style="font-size:27px;font-weight:900;color:#111111;margin:0 0 3px;letter-spacing:-0.6px;">Hogar</h1>
         <p id="welcome-msg" style="color:#857F77;font-size:15px;margin:0;"></p>
       </div>
 
-      <!-- Quick actions — student -->
-      <div id="qa-student" class="anim anim-d2" style="display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;">
-        <a href="/tests"        class="qa-btn" style="background:#D41224;color:white;box-shadow:0 4px 14px rgba(212,18,36,0.28);"><span class="ti ti-clipboard-list"></span> Tests disponibles</a>
-        <a href="/ai-practice"  class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-robot"          style="color:#7C3AED;"></span> Práctica con IA</a>
-        <a href="/rankings"     class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-trophy"         style="color:#D97706;"></span> Rankings</a>
-        <a href="/mis-intentos" class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-history"        style="color:#059669;"></span> Mi historial</a>
-        <a href="/tests?mode=simulacro" class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-git-pull-request" style="color:#2563EB;"></span> Simulacros</a>
+      <!-- ── QUICK ACTIONS (student) ── -->
+      <div id="qa-student" class="qa-row anim anim-d2">
+        <a href="/tests"             class="qa-btn" style="background:#D41224;color:white;box-shadow:0 4px 14px rgba(212,18,36,0.28);"><span class="ti ti-clipboard-list"></span> Tests disponibles</a>
+        <a href="/ai-practice"       class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-robot"            style="color:#7C3AED;"></span> Práctica con IA</a>
+        <a href="/rankings"          class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-trophy"           style="color:#D97706;"></span> Rankings</a>
+        <a href="/mis-intentos"      class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-history"          style="color:#059669;"></span> Mi historial</a>
+        <a href="/tests?mode=simul." class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-git-pull-request" style="color:#2563EB;"></span> Simulacros</a>
       </div>
 
-      <!-- Quick actions — admin -->
-      <div id="qa-admin" class="anim anim-d2" style="display:none;gap:8px;margin-bottom:22px;flex-wrap:wrap;">
+      <!-- ── QUICK ACTIONS (admin) ── -->
+      <div id="qa-admin" class="qa-row anim anim-d2" style="display:none;">
         <a href="/admin/estudiantes" class="qa-btn" style="background:#D41224;color:white;box-shadow:0 4px 14px rgba(212,18,36,0.28);"><span class="ti ti-users"></span> Estudiantes</a>
         <a href="/admin/tests"       class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-file-description" style="color:#2563EB;"></span> Gestionar Tests</a>
         <a href="/admin/preguntas"   class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-list-check"       style="color:#059669;"></span> Preguntas</a>
@@ -287,12 +334,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <a href="/admin/programas"   class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-school"           style="color:#7C3AED;"></span> Programas</a>
       </div>
 
-      <!-- ── STATS ROW (student) ── -->
+      <!-- ── STATS (student) ── -->
       <div id="stats-student" class="anim anim-d3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:22px;">
         <div class="stat-card" style="border-left:3px solid #D41224;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-            <span style="font-size:10.5px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Tests realizados</span>
-            <div style="width:29px;height:29px;background:#FEE2E2;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Tests realizados</span>
+            <div style="width:29px;height:29px;background:#FEE2E2;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               <span class="ti ti-clipboard-check" style="color:#D41224;font-size:14px;"></span>
             </div>
           </div>
@@ -301,8 +348,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
         <div class="stat-card" style="border-left:3px solid #2563EB;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-            <span style="font-size:10.5px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Promedio global</span>
-            <div style="width:29px;height:29px;background:#DBEAFE;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Promedio global</span>
+            <div style="width:29px;height:29px;background:#DBEAFE;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               <span class="ti ti-chart-line" style="color:#2563EB;font-size:14px;"></span>
             </div>
           </div>
@@ -311,21 +358,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
         <div class="stat-card" style="border-left:3px solid #D97706;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-            <span style="font-size:10.5px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Posición ranking</span>
-            <div style="width:29px;height:29px;background:#FEF3C7;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Posición ranking</span>
+            <div style="width:29px;height:29px;background:#FEF3C7;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               <span class="ti ti-trophy" style="color:#D97706;font-size:14px;"></span>
             </div>
           </div>
           <div style="display:flex;align-items:baseline;gap:3px;">
-            <p id="st-rank"   class="stat-num" style="color:#D97706;">—</p>
+            <p id="st-rank"       class="stat-num" style="color:#D97706;">—</p>
             <span id="st-rank-of" style="font-size:12px;color:#A09990;"></span>
           </div>
           <p style="font-size:11px;color:#A09990;margin:4px 0 0;">posición actual</p>
         </div>
         <div class="stat-card" style="border-left:3px solid #059669;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-            <span style="font-size:10.5px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Racha activa</span>
-            <div style="width:29px;height:29px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Racha activa</span>
+            <div style="width:29px;height:29px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               <span class="ti ti-flame" style="color:#059669;font-size:14px;"></span>
             </div>
           </div>
@@ -334,54 +381,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
 
-      <!-- ── STATS ROW (admin) ── -->
+      <!-- ── STATS (admin) ── -->
       <div id="stats-admin" class="anim anim-d3" style="display:none;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:22px;">
         <div class="stat-card" style="border-left:3px solid #D41224;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-            <span style="font-size:10.5px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Estudiantes</span>
-            <div style="width:29px;height:29px;background:#FEE2E2;border-radius:7px;display:flex;align-items:center;justify-content:center;">
-              <span class="ti ti-users" style="color:#D41224;font-size:14px;"></span>
-            </div>
-          </div>
-          <p class="stat-num" style="color:#D41224;">247</p>
-          <p style="font-size:11px;color:#A09990;margin:4px 0 0;">activos</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Estudiantes</span><div style="width:29px;height:29px;background:#FEE2E2;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ti ti-users" style="color:#D41224;font-size:14px;"></span></div></div>
+          <p class="stat-num" style="color:#D41224;">247</p><p style="font-size:11px;color:#A09990;margin:4px 0 0;">activos</p>
         </div>
         <div class="stat-card" style="border-left:3px solid #2563EB;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-            <span style="font-size:10.5px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Tests publicados</span>
-            <div style="width:29px;height:29px;background:#DBEAFE;border-radius:7px;display:flex;align-items:center;justify-content:center;">
-              <span class="ti ti-file-description" style="color:#2563EB;font-size:14px;"></span>
-            </div>
-          </div>
-          <p class="stat-num" style="color:#2563EB;">18</p>
-          <p style="font-size:11px;color:#A09990;margin:4px 0 0;">disponibles</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Tests publicados</span><div style="width:29px;height:29px;background:#DBEAFE;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ti ti-file-description" style="color:#2563EB;font-size:14px;"></span></div></div>
+          <p class="stat-num" style="color:#2563EB;">18</p><p style="font-size:11px;color:#A09990;margin:4px 0 0;">disponibles</p>
         </div>
         <div class="stat-card" style="border-left:3px solid #D97706;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-            <span style="font-size:10.5px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Esta semana</span>
-            <div style="width:29px;height:29px;background:#FEF3C7;border-radius:7px;display:flex;align-items:center;justify-content:center;">
-              <span class="ti ti-activity" style="color:#D97706;font-size:14px;"></span>
-            </div>
-          </div>
-          <p class="stat-num" style="color:#D97706;">93</p>
-          <p style="font-size:11px;color:#A09990;margin:4px 0 0;">simulacros</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Esta semana</span><div style="width:29px;height:29px;background:#FEF3C7;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ti ti-activity" style="color:#D97706;font-size:14px;"></span></div></div>
+          <p class="stat-num" style="color:#D97706;">93</p><p style="font-size:11px;color:#A09990;margin:4px 0 0;">simulacros</p>
         </div>
         <div class="stat-card" style="border-left:3px solid #059669;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-            <span style="font-size:10.5px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Puntaje prom.</span>
-            <div style="width:29px;height:29px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;">
-              <span class="ti ti-chart-bar" style="color:#059669;font-size:14px;"></span>
-            </div>
-          </div>
-          <p class="stat-num" style="color:#059669;">71.3</p>
-          <p style="font-size:11px;color:#A09990;margin:4px 0 0;">promedio global</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Puntaje prom.</span><div style="width:29px;height:29px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ti ti-chart-bar" style="color:#059669;font-size:14px;"></span></div></div>
+          <p class="stat-num" style="color:#059669;">71.3</p><p style="font-size:11px;color:#A09990;margin:4px 0 0;">promedio global</p>
         </div>
       </div>
 
-      <!-- ══════════════ STUDENT CONTENT GRID ══════════════ -->
+      <!-- ════ STUDENT CONTENT GRID ════ -->
       <div id="student-content" class="anim anim-d4" style="display:grid;grid-template-columns:1fr 308px;gap:18px;">
 
-        <!-- ── LEFT ── -->
+        <!-- LEFT -->
         <div style="display:flex;flex-direction:column;gap:18px;">
 
           <!-- Competencias -->
@@ -393,30 +416,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <div id="comp-list" style="display:flex;flex-direction:column;gap:16px;"></div>
           </div>
 
-          <!-- Historial de tests -->
+          <!-- Historial -->
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
               <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0;">Historial de tests</h2>
               <a href="/mis-intentos" style="font-size:13px;color:#D41224;font-weight:700;text-decoration:none;">Ver todo →</a>
             </div>
-
             <!-- Last test highlight -->
-            <div style="background:linear-gradient(135deg,#171717,#252525);border-radius:12px;padding:16px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;">
+            <div style="background:linear-gradient(135deg,#171717,#252525);border-radius:12px;padding:16px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
               <div style="width:44px;height:44px;background:rgba(212,18,36,0.18);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <span class="ti ti-clipboard-check" style="color:#D41224;font-size:22px;"></span>
               </div>
-              <div style="flex:1;min-width:0;">
-                <p style="color:rgba(255,255,255,0.45);font-size:10.5px;margin:0 0 2px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">Último test realizado</p>
+              <div style="flex:1;min-width:100px;">
+                <p style="color:rgba(255,255,255,0.45);font-size:10px;margin:0 0 2px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">Último test realizado</p>
                 <p id="lt-comp" style="color:white;font-weight:800;font-size:15px;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
                 <p id="lt-info" style="color:rgba(255,255,255,0.38);font-size:12px;margin:0;"></p>
               </div>
               <div style="text-align:right;flex-shrink:0;">
                 <p id="lt-score" style="font-size:28px;font-weight:900;color:#D41224;margin:0;letter-spacing:-1px;"></p>
-                <p style="color:rgba(255,255,255,0.28);font-size:11px;margin:0;">/ 100 puntos</p>
+                <p style="color:rgba(255,255,255,0.28);font-size:11px;margin:0;">/ 100 pts</p>
               </div>
             </div>
-
-            <!-- Recent tests -->
             <div id="recent-list"></div>
           </div>
 
@@ -433,7 +453,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         </div><!-- /LEFT -->
 
-        <!-- ── RIGHT ── -->
+        <!-- RIGHT -->
         <div style="display:flex;flex-direction:column;gap:16px;">
 
           <!-- Rankings -->
@@ -443,22 +463,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               <a href="/rankings" style="font-size:12px;color:#D41224;font-weight:700;text-decoration:none;">Ver completo →</a>
             </div>
             <div style="display:flex;gap:6px;margin-bottom:12px;">
-              <button class="r-pill active" onclick="switchRank(this,'general')">General</button>
-              <button class="r-pill"        onclick="switchRank(this,'program')">Mi programa</button>
+              <button class="r-pill active" onclick="switchRank(this)">General</button>
+              <button class="r-pill"        onclick="switchRank(this)">Mi programa</button>
             </div>
             <div id="rank-list"></div>
-            <!-- My position -->
             <div style="margin-top:10px;padding:10px 12px;background:#FFF1F2;border-radius:10px;border:1.5px solid #FECACA;display:flex;align-items:center;gap:10px;">
               <span style="font-size:18px;font-weight:900;color:#D41224;min-width:30px;">#<span id="my-rank-num"></span></span>
               <div style="flex:1;">
-                <p id="my-rank-name" style="font-size:13px;font-weight:700;color:#991B1B;margin:0;"></p>
+                <p id="my-rank-name"  style="font-size:13px;font-weight:700;color:#991B1B;margin:0;"></p>
                 <p style="font-size:11px;color:#B91C1C;margin:0;opacity:0.65;">Tu posición actual</p>
               </div>
               <span id="my-rank-score" style="font-size:16px;font-weight:900;color:#D41224;"></span>
             </div>
           </div>
 
-          <!-- User profile card -->
+          <!-- Profile card -->
           <div style="background:linear-gradient(145deg,#D41224 0%,#9B1F24 100%);border-radius:16px;padding:20px;overflow:hidden;position:relative;">
             <div style="position:absolute;right:-18px;top:-18px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.08);"></div>
             <div style="position:absolute;right:18px;bottom:-28px;width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
@@ -466,20 +485,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;">
                 <div id="pc-avatar" style="width:46px;height:46px;border-radius:11px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:17px;flex-shrink:0;"></div>
                 <div>
-                  <p id="pc-name"    style="color:white;font-weight:800;font-size:14.5px;margin:0;line-height:1.2;"></p>
+                  <p id="pc-name"    style="color:white;font-weight:800;font-size:14px;margin:0;line-height:1.2;"></p>
                   <p id="pc-program" style="color:rgba(255,255,255,0.55);font-size:11px;margin:0;"></p>
                 </div>
               </div>
               <div id="pc-badge" style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:rgba(255,255,255,0.18);border-radius:20px;font-size:12px;font-weight:700;color:white;margin-bottom:14px;"></div>
               <div style="border-top:1px solid rgba(255,255,255,0.16);padding-top:12px;">
-                <a href="/perfil" style="color:white;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px;opacity:0.82;transition:opacity 0.15s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.82">
+                <a href="/perfil" style="color:white;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px;opacity:0.82;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.82">
                   <span class="ti ti-user-circle" style="font-size:15px;"></span> Ver mi perfil completo →
                 </a>
               </div>
             </div>
           </div>
 
-          <!-- CTA card -->
+          <!-- CTA -->
           <div style="background:#111111;border-radius:16px;padding:18px 20px;">
             <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
               <span class="ti ti-bolt" style="color:#D41224;font-size:19px;"></span>
@@ -494,7 +513,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div><!-- /RIGHT -->
       </div><!-- /STUDENT GRID -->
 
-      <!-- ══════════════ ADMIN CONTENT GRID ══════════════ -->
+      <!-- ════ ADMIN CONTENT GRID ════ -->
       <div id="admin-content" class="anim anim-d4" style="display:none;grid-template-columns:1fr 300px;gap:18px;">
         <div class="card">
           <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0 0 16px;">Actividad reciente de estudiantes</h2>
@@ -506,18 +525,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
 
-      <div style="height:24px;"></div>
-    </main><!-- /CENTER -->
+      <div style="height:28px;"></div>
+    </main>
 
 
-    <!-- ─── RIGHT PANEL (Changelog) ─── -->
-    <aside style="width:264px;min-width:264px;background:white;border-left:1px solid #E8E5E0;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;">
+    <!-- ── RIGHT PANEL (changelog) ── -->
+    <aside id="right-panel" style="width:264px;min-width:264px;background:white;border-left:1px solid #E8E5E0;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;">
       <div style="padding:22px 18px 13px;border-bottom:1px solid #F3F1EE;position:sticky;top:0;background:white;z-index:1;">
         <h2 style="font-size:14px;font-weight:800;color:#111111;margin:0;">Registro de cambios</h2>
       </div>
-
       <div id="changelog-list" style="padding:18px 18px;flex:1;"></div>
-
       <div style="padding:12px 18px 20px;border-top:1px solid #F3F1EE;">
         <a href="#" style="display:flex;align-items:center;gap:6px;font-size:13px;color:#D41224;font-weight:700;text-decoration:none;margin-bottom:14px;">
           <span class="ti ti-external-link" style="font-size:14px;"></span> Ver registro completo
@@ -533,21 +550,33 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <script>
   import { requireAuth, isAdmin, logout } from '../lib/auth';
 
-  // ── Auth guard ──────────────────────────────────────────────
   let user;
   try { user = requireAuth(); } catch { throw new Error('redir'); }
   const admin = isAdmin();
 
-  // ── MOCK DATA (reemplazar con llamadas API cuando el backend esté listo) ─────
+  // ── Sidebar toggle ──────────────────────────────────────────
+  window.openSidebar = () => {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeSidebar = () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeSidebar(); });
+
+  // ── MOCK DATA ──────────────────────────────────────────────
   const MOCK = {
     student: {
       stats: { tests: 23, avg: 74.5, rank: 15, total: 142, streak: 7 },
       competencies: [
-        { name: 'Lectura Crítica',           short: 'LC', score: 78, tests: 8, lastDate: '12 may 2026', trend: +3,  color: '#D41224', bg: '#FEE2E2' },
-        { name: 'Razonamiento Cuantitativo', short: 'RC', score: 65, tests: 5, lastDate: '08 may 2026', trend: +1,  color: '#2563EB', bg: '#DBEAFE' },
-        { name: 'Competencias Ciudadanas',   short: 'CC', score: 82, tests: 4, lastDate: '10 may 2026', trend: +5,  color: '#059669', bg: '#D1FAE5' },
-        { name: 'Comunicación Escrita',      short: 'CE', score: 70, tests: 4, lastDate: '06 may 2026', trend: -2,  color: '#7C3AED', bg: '#EDE9FE' },
-        { name: 'Inglés',                    short: 'IN', score: 58, tests: 2, lastDate: '01 may 2026', trend: +4,  color: '#D97706', bg: '#FEF3C7' },
+        { name: 'Lectura Crítica',           short: 'LC', score: 78, tests: 8, lastDate: '12 may', trend: +3,  color: '#D41224', bg: '#FEE2E2' },
+        { name: 'Razonamiento Cuantitativo', short: 'RC', score: 65, tests: 5, lastDate: '08 may', trend: +1,  color: '#2563EB', bg: '#DBEAFE' },
+        { name: 'Competencias Ciudadanas',   short: 'CC', score: 82, tests: 4, lastDate: '10 may', trend: +5,  color: '#059669', bg: '#D1FAE5' },
+        { name: 'Comunicación Escrita',      short: 'CE', score: 70, tests: 4, lastDate: '06 may', trend: -2,  color: '#7C3AED', bg: '#EDE9FE' },
+        { name: 'Inglés',                    short: 'IN', score: 58, tests: 2, lastDate: '01 may', trend: +4,  color: '#D97706', bg: '#FEF3C7' },
       ],
       recentTests: [
         { comp: 'Lectura Crítica',           date: '12 may 2026', score: 78, dur: '42 min', type: 'Simulacro completo', color: '#D41224', bg: '#FEE2E2' },
@@ -569,18 +598,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       ],
     },
     changelog: [
-      { time: 'Hace 3 horas', title: 'GPT-5 Reasoning en Práctica IA',          desc: 'Personalización avanzada de preguntas según tu nivel de desempeño detectado.',     now: true },
-      { time: 'Ayer',         title: 'Banco de Inglés ampliado',                 desc: 'Se añadieron 120 nuevas preguntas B1/B2 con ejercicios de audio y comprensión.',   now: false },
-      { time: 'Hace 3 días',  title: 'Rankings en tiempo real',                  desc: 'El ranking se actualiza automáticamente al completar cada simulacro.',             now: false },
-      { time: 'Hace 1 semana','title': 'Nueva competencia: Análisis de datos',   desc: 'Disponible en versión beta para programas de Ingeniería.',                        now: false },
+      { time: 'Hace 3 horas', title: 'GPT-5 Reasoning en Práctica IA',    desc: 'Personalización avanzada de preguntas según tu nivel.',      now: true  },
+      { time: 'Ayer',         title: 'Banco de Inglés ampliado',           desc: 'Se añadieron 120 nuevas preguntas B1/B2 con audio.',         now: false },
+      { time: 'Hace 3 días',  title: 'Rankings en tiempo real',            desc: 'El ranking se actualiza al completar cada simulacro.',       now: false },
+      { time: 'Hace 1 semana','title':'Nueva competencia: Análisis datos', desc: 'Disponible en beta para programas de Ingeniería.',           now: false },
     ],
     admin: {
       activity: [
-        { name: 'María Ordóñez',  action: 'Completó simulacro · Lectura Crítica',   score: 92,   time: 'Hace 5 min',  av: 'MO' },
-        { name: 'Carlos Álvarez', action: 'Completó simulacro · Razon. Cuant.',      score: 78,   time: 'Hace 12 min', av: 'CA' },
-        { name: 'Laura Martínez', action: 'Inició práctica IA · Inglés',             score: null, time: 'Hace 18 min', av: 'LM' },
-        { name: 'Andrés Gómez',   action: 'Completó simulacro · Comp. Ciudadanas',   score: 85,   time: 'Hace 25 min', av: 'AG' },
-        { name: 'Valentina R.',   action: 'Nueva cuenta registrada',                 score: null, time: 'Hace 1 hora', av: 'VR' },
+        { name: 'María Ordóñez',  action: 'Completó simulacro · Lectura Crítica', score: 92,   time: 'Hace 5 min',  av: 'MO' },
+        { name: 'Carlos Álvarez', action: 'Completó simulacro · Razon. Cuant.',   score: 78,   time: 'Hace 12 min', av: 'CA' },
+        { name: 'Laura Martínez', action: 'Inició práctica IA · Inglés',          score: null, time: 'Hace 18 min', av: 'LM' },
+        { name: 'Andrés Gómez',   action: 'Completó simulacro · Comp. Ciudadanas',score: 85,   time: 'Hace 25 min', av: 'AG' },
+        { name: 'Valentina R.',   action: 'Nueva cuenta registrada',              score: null, time: 'Hace 1 hora', av: 'VR' },
       ],
       programs: [
         { name: 'Ing. de Sistemas',   students: 68, pct: 28, color: '#D41224' },
@@ -592,51 +621,42 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     },
   };
 
-  // ── Shared helpers ──────────────────────────────────────────
+  // ── Helpers ─────────────────────────────────────────────────
   const initials = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
   const fullName  = `${user.firstName} ${user.firstSurname}`;
 
   function animCount(el, target, dec = 0) {
     let start; const dur = 900;
-    const step = ts => {
+    const run = ts => {
       if (!start) start = ts;
       const p = Math.min((ts - start) / dur, 1);
       const e = 1 - Math.pow(1 - p, 3);
       el.textContent = dec ? (e * target).toFixed(dec) : Math.floor(e * target);
-      if (p < 1) requestAnimationFrame(step);
+      if (p < 1) requestAnimationFrame(run);
     };
-    requestAnimationFrame(step);
+    requestAnimationFrame(run);
   }
 
-  // ── Sidebar & topbar population ─────────────────────────────
+  // ── Populate shared UI ──────────────────────────────────────
   document.getElementById('sb-avatar').textContent = initials;
   document.getElementById('sb-name').textContent   = fullName;
   document.getElementById('sb-sub').textContent    = admin ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
-
   document.getElementById('tb-avatar').textContent = initials;
   document.getElementById('tb-name').textContent   = user.firstName;
 
   const badge = document.getElementById('tb-badge');
-  if (admin) {
-    badge.textContent    = 'Admin';
-    badge.style.background = '#111111';
-    badge.style.color      = '#F87171';
-  } else {
-    badge.textContent    = 'Estudiante';
-    badge.style.background = '#FEE2E2';
-    badge.style.color      = '#D41224';
-  }
+  if (admin) { badge.textContent='Admin';      badge.style.background='#111111'; badge.style.color='#F87171'; }
+  else        { badge.textContent='Estudiante'; badge.style.background='#FEE2E2'; badge.style.color='#D41224'; }
 
-  // ── Welcome message ─────────────────────────────────────────
   const h = new Date().getHours();
   const greet = h < 12 ? '¡Buenos días' : h < 18 ? '¡Buenas tardes' : '¡Buenas noches';
   document.getElementById('welcome-msg').textContent = admin
     ? `${greet}, ${user.firstName}! Panel de administración activo.`
     : `${greet}, ${user.firstName}! Tienes 3 tests pendientes para hoy.`;
 
-  // ── Role-based visibility ───────────────────────────────────
+  // ── Role visibility ─────────────────────────────────────────
   if (admin) {
-    ['qa-student','stats-student','student-content'].forEach(id => document.getElementById(id).style.display = 'none');
+    ['qa-student','stats-student','student-content'].forEach(id => document.getElementById(id).style.display='none');
     document.getElementById('qa-admin').style.display      = 'flex';
     document.getElementById('stats-admin').style.display   = 'grid';
     document.getElementById('admin-content').style.display = 'grid';
@@ -647,48 +667,44 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   if (!admin) {
     const d = MOCK.student;
 
-    // Stats
     animCount(document.getElementById('st-tests'),  d.stats.tests);
     animCount(document.getElementById('st-avg'),    d.stats.avg, 1);
     document.getElementById('st-rank').textContent    = `#${d.stats.rank}`;
     document.getElementById('st-rank-of').textContent = `de ${d.stats.total}`;
     animCount(document.getElementById('st-streak'), d.stats.streak);
 
-    // Profile card
     document.getElementById('pc-avatar').textContent  = initials;
     document.getElementById('pc-name').textContent    = fullName;
     document.getElementById('pc-program').textContent = user.programId ?? 'UFPSO';
     document.getElementById('pc-badge').innerHTML     = '<span class="ti ti-school" style="font-size:13px;"></span> Estudiante';
 
-    // Competencies
+    // Competencias
     const compList = document.getElementById('comp-list');
     d.competencies.forEach((c, i) => {
-      const sign  = c.trend > 0 ? '+' : '';
-      const tcol  = c.trend > 0 ? '#059669' : c.trend < 0 ? '#D41224' : '#A09990';
-      const div   = document.createElement('div');
+      const sign = c.trend > 0 ? '+' : '';
+      const tcol = c.trend > 0 ? '#059669' : c.trend < 0 ? '#D41224' : '#A09990';
+      const div  = document.createElement('div');
       div.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:27px;height:27px;border-radius:7px;background:${c.bg};display:flex;align-items:center;justify-content:center;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+            <div style="width:27px;height:27px;border-radius:7px;background:${c.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               <span style="font-size:9px;font-weight:900;color:${c.color};">${c.short}</span>
             </div>
-            <span style="font-size:13px;font-weight:600;color:#374151;">${c.name}</span>
+            <span style="font-size:13px;font-weight:600;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</span>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <span style="font-size:11px;font-weight:700;color:${tcol};">${sign}${c.trend} pts</span>
             <span style="font-size:16px;font-weight:900;color:${c.color};">${c.score}</span>
             <span style="font-size:11px;color:#A09990;">/100</span>
           </div>
         </div>
-        <div class="bar-wrap">
-          <div class="bar-fill" id="bar-${i}" style="background:${c.color};"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:3px;">
+        <div class="bar-wrap"><div class="bar-fill" id="bar-${i}" style="background:${c.color};"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px;gap:4px;flex-wrap:wrap;">
           <span style="font-size:11px;color:#A09990;">${c.tests} tests realizados</span>
           <span style="font-size:11px;color:#A09990;">Último: ${c.lastDate}</span>
         </div>`;
       compList.appendChild(div);
-      setTimeout(() => { document.getElementById(`bar-${i}`).style.width = `${c.score}%`; }, 280 + i * 90);
+      setTimeout(() => { document.getElementById(`bar-${i}`).style.width=`${c.score}%`; }, 280+i*90);
     });
 
     // Last test
@@ -697,7 +713,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     document.getElementById('lt-info').textContent  = `${lt.date} · ${lt.type} · ${lt.dur}`;
     document.getElementById('lt-score').textContent = lt.score;
 
-    // Recent tests list
+    // Recent list
     const recentList = document.getElementById('recent-list');
     d.recentTests.slice(1).forEach(t => {
       const div = document.createElement('div');
@@ -724,7 +740,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const div = document.createElement('div');
       div.className = 'rank-row';
       div.innerHTML = `
-        <span style="font-size:15px;min-width:26px;text-align:center;">${medals[r.pos-1] || r.pos}</span>
+        <span style="font-size:15px;min-width:26px;text-align:center;">${medals[r.pos-1]||r.pos}</span>
         <div style="flex:1;min-width:0;">
           <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</p>
           <p style="font-size:11px;color:#A09990;margin:0;">${r.prog}</p>
@@ -751,9 +767,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
         <div style="text-align:right;flex-shrink:0;margin-left:8px;">
           <span style="font-size:10px;padding:3px 8px;border-radius:12px;font-weight:800;background:${t.bg};color:${t.color};">${t.lang}</span>
-          <p style="font-size:11px;color:#A09990;margin:4px 0 0;display:flex;align-items:center;gap:3px;justify-content:flex-end;">
-            <span class="ti ti-star" style="font-size:11px;"></span>${t.stars}
-          </p>
+          <p style="font-size:11px;color:#A09990;margin:4px 0 0;display:flex;align-items:center;gap:3px;justify-content:flex-end;"><span class="ti ti-star" style="font-size:11px;"></span>${t.stars}</p>
         </div>`;
       trendList.appendChild(div);
     });
@@ -772,7 +786,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <p style="font-size:11px;color:#A09990;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.action}</p>
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          ${a.score !== null ? `<p style="font-size:16px;font-weight:900;color:#D41224;margin:0;">${a.score}</p>` : ''}
+          ${a.score!==null?`<p style="font-size:16px;font-weight:900;color:#D41224;margin:0;">${a.score}</p>`:''}
           <p style="font-size:11px;color:#A09990;margin:0;">${a.time}</p>
         </div>`;
       actList.appendChild(div);
@@ -792,9 +806,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>`;
       progList.appendChild(div);
     });
-    setTimeout(() => {
-      progList.querySelectorAll('[data-pct]').forEach(el => { el.style.width = el.dataset.pct + '%'; });
-    }, 300);
+    setTimeout(() => { progList.querySelectorAll('[data-pct]').forEach(el => el.style.width=el.dataset.pct+'%'); }, 300);
   }
 
   // ── Changelog ───────────────────────────────────────────────
@@ -803,21 +815,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const div = document.createElement('div');
     div.className = 'cl-item';
     div.innerHTML = `
-      <div class="cl-dot${item.now ? ' now' : ''}"></div>
+      <div class="cl-dot${item.now?' now':''}"></div>
       <p style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 3px;">${item.time}</p>
       <p style="font-size:13px;font-weight:700;color:#111111;margin:0 0 4px;line-height:1.35;">${item.title}</p>
       <p style="font-size:12px;color:#A09990;margin:0;line-height:1.55;">${item.desc}</p>`;
     clList.appendChild(div);
   });
 
-  // ── Event listeners ─────────────────────────────────────────
+  // ── Events ──────────────────────────────────────────────────
   document.getElementById('logout-btn').addEventListener('click', logout);
-
-  // Rank pill switch
-  window.switchRank = function(btn) {
+  window.switchRank = btn => {
     document.querySelectorAll('.r-pill').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    // Future: reload ranking data for chosen scope
   };
 </script>
 
