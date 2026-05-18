@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Dashboard · RazonaPro">
+  <Navbar />
+
+  <main class="flex-1 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+
+      <!-- Header bienvenida (se llena con JS) -->
+      <div class="mb-10">
+        <p class="text-sm text-gray-400 font-medium uppercase tracking-wide mb-1">Panel de control</p>
+        <h1 id="welcome-title" class="text-2xl sm:text-3xl font-bold text-gray-900">
+          Cargando...
+        </h1>
+        <p id="welcome-sub" class="mt-1 text-gray-500 text-sm"></p>
+      </div>
+
+      <!-- Cards de acceso rápido -->
+      <div id="student-cards" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+            <span class="ti ti-brain text-2xl text-ufpso"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Tests disponibles</h3>
+          <p class="text-sm text-gray-400 mb-4">Practica con tests formales por competencia.</p>
+          <a href="/tests" class="text-sm font-semibold text-ufpso hover:underline">Ver tests →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center mb-4">
+            <span class="ti ti-robot text-2xl text-purple-600"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Práctica con IA</h3>
+          <p class="text-sm text-gray-400 mb-4">Sesiones personalizadas generadas por inteligencia artificial.</p>
+          <a href="/ai-practice" class="text-sm font-semibold text-purple-600 hover:underline">Practicar →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center mb-4">
+            <span class="ti ti-trophy text-2xl text-amber-500"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Rankings</h3>
+          <p class="text-sm text-gray-400 mb-4">Consulta tu posición entre los demás estudiantes.</p>
+          <a href="/rankings" class="text-sm font-semibold text-amber-600 hover:underline">Ver ranking →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-green-50 flex items-center justify-center mb-4">
+            <span class="ti ti-clipboard-list text-2xl text-green-600"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Mis intentos</h3>
+          <p class="text-sm text-gray-400 mb-4">Revisa el historial de tus intentos anteriores.</p>
+          <a href="/mis-intentos" class="text-sm font-semibold text-green-600 hover:underline">Ver historial →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
+            <span class="ti ti-user text-2xl text-blue-600"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Mi perfil</h3>
+          <p class="text-sm text-gray-400 mb-4">Consulta y actualiza tu información personal.</p>
+          <a href="/perfil" class="text-sm font-semibold text-blue-600 hover:underline">Ver perfil →</a>
+        </div>
+
+      </div>
+
+      <!-- Cards admin -->
+      <div id="admin-cards" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+            <span class="ti ti-users text-2xl text-ufpso"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Estudiantes</h3>
+          <p class="text-sm text-gray-400 mb-4">Gestiona los estudiantes registrados.</p>
+          <a href="/admin/estudiantes" class="text-sm font-semibold text-ufpso hover:underline">Gestionar →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
+            <span class="ti ti-file-description text-2xl text-blue-600"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Tests</h3>
+          <p class="text-sm text-gray-400 mb-4">Crea y administra tests por competencia.</p>
+          <a href="/admin/tests" class="text-sm font-semibold text-blue-600 hover:underline">Gestionar →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-green-50 flex items-center justify-center mb-4">
+            <span class="ti ti-list-check text-2xl text-green-600"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Preguntas</h3>
+          <p class="text-sm text-gray-400 mb-4">Administra el banco de preguntas.</p>
+          <a href="/admin/preguntas" class="text-sm font-semibold text-green-600 hover:underline">Gestionar →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center mb-4">
+            <span class="ti ti-award text-2xl text-amber-500"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Rankings</h3>
+          <p class="text-sm text-gray-400 mb-4">Administra y consulta los rankings.</p>
+          <a href="/admin/rankings" class="text-sm font-semibold text-amber-600 hover:underline">Gestionar →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center mb-4">
+            <span class="ti ti-school text-2xl text-purple-600"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Programas</h3>
+          <p class="text-sm text-gray-400 mb-4">Gestiona los programas académicos.</p>
+          <a href="/admin/programas" class="text-sm font-semibold text-purple-600 hover:underline">Gestionar →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+          <div class="w-11 h-11 rounded-xl bg-gray-50 flex items-center justify-center mb-4">
+            <span class="ti ti-shield-lock text-2xl text-gray-600"></span>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-1">Administradores</h3>
+          <p class="text-sm text-gray-400 mb-4">Gestiona el acceso de otros administradores.</p>
+          <a href="/admin/admins" class="text-sm font-semibold text-gray-600 hover:underline">Gestionar →</a>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<script>
+  import { requireAuth, isAdmin, logout } from '../lib/auth';
+
+  // Guard — redirige a /login si no hay sesión
+  let user: ReturnType<typeof requireAuth>;
+  try {
+    user = requireAuth();
+  } catch {
+    // requireAuth ya redirige
+    throw new Error('Redirigiendo...');
+  }
+
+  // Bienvenida personalizada
+  const title = document.getElementById('welcome-title')!;
+  const sub   = document.getElementById('welcome-sub')!;
+
+  title.textContent = `¡Hola, ${user.firstName} ${user.firstSurname}! 👋`;
+  sub.textContent   = user.userType === 'ADMIN'
+    ? 'Panel de administración · RazonaPro'
+    : `Estudiante · ${user.programId ?? 'UFPSO'}`;
+
+  // Mostrar tarjetas según rol
+  const studentCards = document.getElementById('student-cards')!;
+  const adminCards   = document.getElementById('admin-cards')!;
+
+  if (isAdmin()) {
+    adminCards.classList.remove('hidden');
+    adminCards.classList.add('grid');
+  } else {
+    studentCards.classList.remove('hidden');
+    studentCards.classList.add('grid');
+  }
+</script>

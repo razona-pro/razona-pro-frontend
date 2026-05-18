@@ -15,7 +15,7 @@ const path = Astro.url.pathname;
     <a href={routes.home} class="font-bold text-xl text-ufpso">RazonaPro</a>
 
     <!-- Links escritorio -->
-    <ul class="hidden md:flex gap-6 text-sm">
+    <ul class="hidden md:flex gap-6 text-sm items-center">
       {links.map(l => (
         <li>
           <a href={l.href} class={path === l.href ? 'text-ufpso font-medium' : 'text-gray-600 hover:text-ufpso transition-colors'}>
@@ -23,6 +23,8 @@ const path = Astro.url.pathname;
           </a>
         </li>
       ))}
+      <!-- Auth button (se rellena por JS) -->
+      <li id="auth-btn-desktop"></li>
     </ul>
 
     <!-- Botón hamburguesa móvil -->
@@ -39,11 +41,40 @@ const path = Astro.url.pathname;
         {l.label}
       </a>
     ))}
+    <div id="auth-btn-mobile" class="pt-2 border-t border-gray-100 mt-1"></div>
   </div>
 </header>
 
 <script>
+  // Toggle menú móvil
   const toggle = document.getElementById('nav-toggle');
-  const menu = document.getElementById('nav-mobile');
+  const menu   = document.getElementById('nav-mobile');
   toggle?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+
+  // Auth-aware buttons
+  import { isAuthenticated, logout } from '../lib/auth';
+
+  const desktopSlot = document.getElementById('auth-btn-desktop')!;
+  const mobileSlot  = document.getElementById('auth-btn-mobile')!;
+
+  if (isAuthenticated()) {
+    const dashLink = `<a href="/dashboard" class="text-sm font-semibold text-ufpso hover:underline">Mi dashboard</a>`;
+    const logoutBtn = `<button id="logout-btn" class="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors ml-4">
+      Cerrar sesión
+    </button>`;
+
+    desktopSlot.innerHTML = dashLink + logoutBtn;
+    mobileSlot.innerHTML  = `<a href="/dashboard" class="py-2 text-sm text-ufpso font-medium block">Mi dashboard</a>
+      <button id="logout-btn-mobile" class="py-2 text-sm text-gray-500 hover:text-red-600 text-left">Cerrar sesión</button>`;
+
+    document.getElementById('logout-btn')?.addEventListener('click', logout);
+    document.getElementById('logout-btn-mobile')?.addEventListener('click', logout);
+  } else {
+    desktopSlot.innerHTML = `<a href="/login"
+      class="px-4 py-2 rounded-lg bg-ufpso text-white text-sm font-semibold hover:bg-ufpso-dark transition-colors">
+      Iniciar sesión
+    </a>`;
+    mobileSlot.innerHTML = `<a href="/login" class="py-2 text-sm text-ufpso font-medium block">Iniciar sesión</a>
+      <a href="/registro" class="py-2 text-sm text-gray-600 block">Registrarse</a>`;
+  }
 </script>

@@ -1,0 +1,308 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Mi perfil · RazonaPro">
+  <Navbar />
+
+  <main class="flex-1 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-gray-400 mb-8">
+        <a href="/dashboard" class="hover:text-ufpso transition-colors">Dashboard</a>
+        <span class="ti ti-chevron-right text-xs"></span>
+        <span class="text-gray-600 font-medium">Mi perfil</span>
+      </nav>
+
+      <!-- Loading skeleton -->
+      <div id="skeleton" class="space-y-5">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse">
+          <div class="flex items-center gap-5">
+            <div class="w-20 h-20 rounded-2xl bg-gray-200"></div>
+            <div class="space-y-2">
+              <div class="h-5 w-48 bg-gray-200 rounded"></div>
+              <div class="h-3 w-32 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse space-y-4">
+          <div class="h-3 w-24 bg-gray-200 rounded"></div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="h-10 bg-gray-100 rounded-xl"></div>
+            <div class="h-10 bg-gray-100 rounded-xl"></div>
+            <div class="h-10 bg-gray-100 rounded-xl"></div>
+            <div class="h-10 bg-gray-100 rounded-xl"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenido real (oculto hasta que carga JS) -->
+      <div id="profile-content" class="hidden space-y-5">
+
+        <!-- Header card -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+
+            <!-- Avatar generado con iniciales -->
+            <div id="avatar"
+              class="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-black text-white flex-shrink-0"
+              style="background: linear-gradient(135deg, #D41224 0%, #9B1F24 100%)">
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <h1 id="full-name" class="text-2xl font-bold text-gray-900 truncate"></h1>
+              <div class="flex flex-wrap items-center gap-3 mt-2">
+                <span id="role-badge"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold">
+                </span>
+                <span id="user-id" class="text-xs text-gray-400 font-mono"></span>
+              </div>
+            </div>
+
+            <!-- Acción logout -->
+            <button
+              id="logout-btn"
+              class="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm
+                     text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
+            >
+              <span class="ti ti-logout"></span>
+              Cerrar sesión
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Info de cuenta -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-5">
+            Información de cuenta
+          </h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            <div class="space-y-1">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Primer nombre</p>
+              <p id="info-firstName" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
+            </div>
+
+            <div class="space-y-1">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Primer apellido</p>
+              <p id="info-firstSurname" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
+            </div>
+
+            <div class="space-y-1 sm:col-span-2">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Correo electrónico</p>
+              <p id="info-email" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl font-mono"></p>
+            </div>
+
+            <div id="program-row" class="space-y-1 hidden">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Programa académico</p>
+              <p id="info-program" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
+            </div>
+
+            <div class="space-y-1">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Tipo de usuario</p>
+              <p id="info-userType" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Info del token JWT -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-5">
+            Sesión activa
+          </h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            <div class="space-y-1">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Sesión iniciada</p>
+              <p id="info-iat" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
+            </div>
+
+            <div class="space-y-1">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Expira</p>
+              <div class="flex items-center gap-2">
+                <p id="info-exp" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl flex-1"></p>
+                <span id="exp-badge" class="text-xs px-2 py-1 rounded-full font-semibold"></span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Barra de tiempo restante -->
+          <div class="mt-5">
+            <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+              <span>Tiempo de sesión restante</span>
+              <span id="time-remaining"></span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div id="session-bar"
+                class="h-full rounded-full transition-all duration-1000"
+                style="width: 0%">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-5">
+            Acciones rápidas
+          </h2>
+          <div class="flex flex-wrap gap-3">
+            <a href="/dashboard"
+              class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100
+                     text-sm text-gray-600 font-medium transition-all">
+              <span class="ti ti-layout-dashboard text-base"></span>
+              Ir al dashboard
+            </a>
+            <a id="link-intentos" href="#"
+              class="hidden items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100
+                     text-sm text-gray-600 font-medium transition-all">
+              <span class="ti ti-clipboard-list text-base"></span>
+              Mis intentos
+            </a>
+            <button
+              id="logout-btn-2"
+              class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100
+                     text-sm text-red-600 font-medium transition-all">
+              <span class="ti ti-logout text-base"></span>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+  }
+  .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+</style>
+
+<script>
+  import { requireAuth, logout, getToken } from '../lib/auth';
+
+  // Guard
+  let user: ReturnType<typeof requireAuth>;
+  try {
+    user = requireAuth();
+  } catch {
+    throw new Error('Redirigiendo...');
+  }
+
+  // ── Ocultar skeleton, mostrar contenido ─────────────────────
+  document.getElementById('skeleton')!.classList.add('hidden');
+  const content = document.getElementById('profile-content')!;
+  content.classList.remove('hidden');
+
+  // ── Avatar con iniciales ─────────────────────────────────────
+  const avatar = document.getElementById('avatar')!;
+  avatar.textContent = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
+
+  // ── Nombre completo ──────────────────────────────────────────
+  document.getElementById('full-name')!.textContent =
+    `${user.firstName} ${user.firstSurname}`;
+
+  // ── ID ───────────────────────────────────────────────────────
+  document.getElementById('user-id')!.textContent = `ID: ${user.id}`;
+
+  // ── Rol badge ────────────────────────────────────────────────
+  const roleBadge = document.getElementById('role-badge')!;
+  if (user.userType === 'ADMIN') {
+    roleBadge.textContent  = '⚙ Administrador';
+    roleBadge.className   += ' bg-gray-100 text-gray-600';
+  } else {
+    roleBadge.textContent  = '🎓 Estudiante';
+    roleBadge.className   += ' bg-red-50 text-ufpso';
+  }
+
+  // ── Info campos ──────────────────────────────────────────────
+  document.getElementById('info-firstName')!.textContent    = user.firstName;
+  document.getElementById('info-firstSurname')!.textContent = user.firstSurname;
+  document.getElementById('info-email')!.textContent        = user.email;
+  document.getElementById('info-userType')!.textContent     =
+    user.userType === 'ADMIN' ? 'Administrador' : 'Estudiante';
+
+  if (user.programId) {
+    const programRow = document.getElementById('program-row')!;
+    programRow.classList.remove('hidden');
+    document.getElementById('info-program')!.textContent = user.programId;
+  }
+
+  // Mostrar link de intentos solo a estudiantes
+  if (user.userType === 'STUDENT') {
+    const linkIntentos = document.getElementById('link-intentos')!;
+    linkIntentos.classList.remove('hidden');
+    linkIntentos.classList.add('flex');
+    (linkIntentos as HTMLAnchorElement).href = '/mis-intentos';
+  }
+
+  // ── Datos del JWT ────────────────────────────────────────────
+  const token = getToken();
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+
+      const fmt = (ts: number) =>
+        new Date(ts * 1000).toLocaleString('es-CO', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        });
+
+      document.getElementById('info-iat')!.textContent = fmt(payload.iat);
+      document.getElementById('info-exp')!.textContent = fmt(payload.exp);
+
+      const now        = Date.now();
+      const expMs      = payload.exp * 1000;
+      const iatMs      = payload.iat * 1000;
+      const totalMs    = expMs - iatMs;
+      const remainMs   = expMs - now;
+      const pct        = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
+
+      const bar        = document.getElementById('session-bar')!;
+      const expBadge   = document.getElementById('exp-badge')!;
+      const timeRemain = document.getElementById('time-remaining')!;
+
+      bar.style.width = `${pct}%`;
+
+      if (pct > 50) {
+        bar.style.background = '#22c55e';
+        expBadge.textContent = 'Activa';
+        expBadge.className  += ' bg-green-100 text-green-700';
+      } else if (pct > 20) {
+        bar.style.background = '#f59e0b';
+        expBadge.textContent = 'Pronto vence';
+        expBadge.className  += ' bg-amber-100 text-amber-700';
+      } else {
+        bar.style.background = '#ef4444';
+        expBadge.textContent = 'Por vencer';
+        expBadge.className  += ' bg-red-100 text-red-700';
+      }
+
+      // Formato tiempo restante legible
+      const hrs  = Math.floor(remainMs / 3_600_000);
+      const mins = Math.floor((remainMs % 3_600_000) / 60_000);
+      timeRemain.textContent = hrs > 0 ? `${hrs}h ${mins}m restantes` : `${mins}m restantes`;
+
+    } catch {
+      // Token malformado — no es crítico
+    }
+  }
+
+  // ── Logout buttons ───────────────────────────────────────────
+  document.getElementById('logout-btn')!.addEventListener('click', logout);
+  document.getElementById('logout-btn-2')!.addEventListener('click', logout);
+</script>

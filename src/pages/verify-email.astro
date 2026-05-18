@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Verificar correo · RazonaPro">
+  <main class="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
+    <div class="w-full max-w-md text-center">
+
+      <!-- Logo -->
+      <a href="/" class="inline-block mb-8">
+        <span class="text-3xl font-black tracking-tight text-ufpso">Razona<span class="text-gray-800">Pro</span></span>
+      </a>
+
+      <!-- Card estado -->
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-10">
+
+        <!-- Cargando -->
+        <div id="state-loading" class="flex flex-col items-center gap-4">
+          <div class="w-16 h-16 rounded-full border-4 border-ufpso/20 border-t-ufpso animate-spin-slow"></div>
+          <p class="text-gray-600 font-medium">Verificando tu correo...</p>
+        </div>
+
+        <!-- Éxito -->
+        <div id="state-success" class="hidden flex-col items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+            <span class="ti ti-circle-check text-4xl text-green-500"></span>
+          </div>
+          <h1 class="text-xl font-bold text-gray-900">¡Correo verificado!</h1>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Tu cuenta ha sido activada. Ya puedes iniciar sesión en RazonaPro.
+          </p>
+          <a
+            href="/login"
+            class="mt-2 inline-block px-8 py-3 rounded-xl bg-ufpso text-white font-semibold text-sm
+                   hover:bg-ufpso-dark transition-all"
+          >
+            Ir a iniciar sesión
+          </a>
+        </div>
+
+        <!-- Error -->
+        <div id="state-error" class="hidden flex-col items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+            <span class="ti ti-circle-x text-4xl text-red-500"></span>
+          </div>
+          <h1 class="text-xl font-bold text-gray-900">Enlace inválido</h1>
+          <p id="error-msg" class="text-gray-500 text-sm leading-relaxed">
+            El enlace de verificación es inválido o ha expirado.
+          </p>
+          <div class="flex flex-col gap-2 w-full mt-2">
+            <a
+              href="/registro"
+              class="inline-block px-8 py-3 rounded-xl bg-ufpso text-white font-semibold text-sm
+                     hover:bg-ufpso-dark transition-all text-center"
+            >
+              Volver al registro
+            </a>
+            <a
+              href="/login"
+              class="inline-block px-8 py-3 rounded-xl border border-gray-200 text-gray-600
+                     font-semibold text-sm hover:bg-gray-50 transition-all text-center"
+            >
+              Iniciar sesión
+            </a>
+          </div>
+        </div>
+
+        <!-- Sin token -->
+        <div id="state-notoken" class="hidden flex-col items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
+            <span class="ti ti-alert-triangle text-4xl text-yellow-500"></span>
+          </div>
+          <h1 class="text-xl font-bold text-gray-900">Enlace incompleto</h1>
+          <p class="text-gray-500 text-sm">
+            No se encontró el token de verificación en la URL.
+          </p>
+          <a href="/registro" class="mt-2 inline-block px-8 py-3 rounded-xl bg-ufpso text-white
+                                    font-semibold text-sm hover:bg-ufpso-dark transition-all">
+            Ir al registro
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .animate-spin-slow { animation: spin 1.2s linear infinite; }
+
+  #state-success.flex, #state-error.flex,
+  #state-loading.flex, #state-notoken.flex {
+    display: flex;
+  }
+</style>
+
+<script>
+  import { authApi } from '../lib/api';
+
+  type State = 'loading' | 'success' | 'error' | 'notoken';
+
+  function show(state: State, errorMsg?: string) {
+    const ids: State[] = ['loading', 'success', 'error', 'notoken'];
+    ids.forEach(id => {
+      const el = document.getElementById(`state-${id}`)!;
+      if (id === state) {
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+      } else {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }
+    });
+
+    if (state === 'error' && errorMsg) {
+      const msgEl = document.getElementById('error-msg');
+      if (msgEl) msgEl.textContent = errorMsg;
+    }
+  }
+
+  async function verify() {
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('token');
+
+    if (!token) {
+      show('notoken');
+      return;
+    }
+
+    show('loading');
+
+    try {
+      const res = await authApi.verifyEmail(token);
+      if (res.success) {
+        show('success');
+      } else {
+        show('error', res.message);
+      }
+    } catch (err: any) {
+      show('error', err?.message ?? 'El enlace es inválido o ya fue utilizado.');
+    }
+  }
+
+  verify();
+</script>
