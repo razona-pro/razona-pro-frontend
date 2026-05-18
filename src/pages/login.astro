@@ -1,253 +1,851 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+// RazonaPro — Login / Registro combinado
+// src/pages/login.astro
+import '../styles/global.css';
 ---
 
-<BaseLayout title="Iniciar sesión · RazonaPro">
-  <main class="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50 relative overflow-hidden">
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Accede a tu portal RazonaPro · UFPSO" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet" />
+    <title>RazonaPro | Acceso al portal</title>
 
-    <!-- Fondo decorativo -->
-    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-      <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-10"
-           style="background: radial-gradient(circle, #D41224 0%, transparent 70%)"></div>
-      <div class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full opacity-10"
-           style="background: radial-gradient(circle, #9B1F24 0%, transparent 70%)"></div>
-    </div>
+<style is:global>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <!-- Card -->
-    <div class="relative z-10 w-full max-w-md">
+    :root {
+        --red:        #D41224;
+        --red-dark:   #A50D1B;
+        --red-deep:   #7C0913;
+        --red-light:  #F8D0D4;
+        --text-main:  #1a1a1a;
+        --text-muted: #6b6b6b;
+        --bg-input:   #f5f5f5;
+        --white:      #ffffff;
+        --panel-pct:  58%;
+        --overlay-pct: 42%;
+        --dur: 0.6s;
+        --ease: cubic-bezier(0.65, 0, 0.35, 1);
+    }
 
-      <!-- Logo / Header -->
-      <div class="text-center mb-8">
-        <a href="/" class="inline-block">
-          <span class="text-3xl font-black tracking-tight text-ufpso">Razona<span class="text-gray-800">Pro</span></span>
-        </a>
-        <p class="mt-2 text-sm text-gray-500">Plataforma de razonamiento lógico · UFPSO</p>
-      </div>
+    body {
+        font-family: 'Raleway', sans-serif;
+        min-height: 100dvh;
+        display: flex; align-items: center; justify-content: center;
+        background: #f5eeee;
+        padding: 1rem;
+    }
 
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    .page-bg { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .bg-circle { position: absolute; border-radius: 50%; opacity: 0.07; background: var(--red); }
+    .bg-circle-1 { width: 600px; height: 600px; top: -160px; left: -180px; }
+    .bg-circle-2 { width: 450px; height: 450px; bottom: -130px; right: -130px; }
 
-        <!-- Tabs -->
-        <div class="flex border-b border-gray-100">
-          <button
-            id="tab-student"
-            class="flex-1 py-4 text-sm font-semibold transition-all tab-btn tab-active"
-            data-tab="student"
-          >
-            Estudiante
-          </button>
-          <button
-            id="tab-admin"
-            class="flex-1 py-4 text-sm font-semibold transition-all tab-btn"
-            data-tab="admin"
-          >
-            Administrador
-          </button>
-        </div>
+    .main-wrapper { position: relative; z-index: 1; width: 100%; display: flex; justify-content: center; padding: 0 1.1rem; box-sizing: border-box; }
 
-        <!-- Formulario -->
-        <div class="p-8">
+    /* ── Card ── */
+    .card {
+        position: relative;
+        width: min(1000px, 100%);
+        min-height: 640px;
+        background: var(--white);
+        border-radius: 22px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.13), 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
 
-          <!-- Error global -->
-          <div id="error-box" class="hidden mb-5 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"></div>
+    /* ── Cajas de formulario (desktop) ── */
+    .form-box {
+        position: absolute;
+        top: 0;
+        width: var(--panel-pct);
+        height: 100%;
+        overflow-y: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        background: var(--white);
+        transition: left var(--dur) var(--ease),
+                    opacity var(--dur) var(--ease);
+        will-change: left, opacity;
+    }
 
-          <form id="login-form" novalidate>
+    .form-signin { left: 0;     opacity: 1; }
+    .form-signup { left: -100%; opacity: 0; }
 
-            <!-- Email -->
-            <div class="mb-5">
-              <label for="email" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
-                Correo electrónico
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="tu@correo.com"
-                autocomplete="email"
-                required
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800
-                       placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ufpso/40
-                       focus:border-ufpso transition-all"
-              />
-            </div>
+    .card.toggle .form-signin { left: 100%;               opacity: 0; }
+    .card.toggle .form-signup { left: var(--overlay-pct); opacity: 1; }
 
-            <!-- Password -->
-            <div class="mb-6">
-              <label for="password" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
-                Contraseña
-              </label>
-              <div class="relative">
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="••••••••"
-                  autocomplete="current-password"
-                  required
-                  class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800
-                         placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ufpso/40
-                         focus:border-ufpso transition-all pr-11"
-                />
-                <button
-                  type="button"
-                  id="toggle-password"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="Ver contraseña"
-                >
-                  <span class="ti ti-eye text-lg"></span>
-                </button>
-              </div>
-            </div>
+    /* ── Panel decorativo (overlay) ── */
+    .overlay-panel {
+        position: absolute;
+        top: 0; right: 0;
+        width: var(--overlay-pct);
+        height: 100%;
+        background: linear-gradient(150deg, var(--red) 0%, var(--red-deep) 100%);
+        border-radius: 0 22px 22px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        overflow: hidden;
+        transition: right var(--dur) var(--ease),
+                    border-radius var(--dur) var(--ease);
+        will-change: right;
+    }
 
-            <!-- Submit -->
-            <button
-              type="submit"
-              id="submit-btn"
-              class="w-full py-3.5 rounded-xl bg-ufpso text-white font-semibold text-sm
-                     hover:bg-ufpso-dark active:scale-[.98] transition-all
-                     disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <span id="btn-label">Iniciar sesión</span>
-              <span id="btn-spinner" class="hidden ti ti-loader-2 animate-spin text-base"></span>
-            </button>
+    .card.toggle .overlay-panel {
+        right: var(--panel-pct);
+        border-radius: 22px 0 0 22px;
+    }
 
-          </form>
+    /* ── Mensajes del overlay ── */
+    .overlay-msg {
+        position: absolute;
+        display: flex; flex-direction: column;
+        align-items: center; text-align: center;
+        gap: 1rem; padding: 2.5rem;
+        color: var(--white);
+        transition: transform var(--dur) var(--ease),
+                    opacity  var(--dur) var(--ease);
+    }
 
-          <!-- Footer del card -->
-          <div id="student-footer" class="mt-6 text-center text-sm text-gray-500">
-            ¿No tienes cuenta?
-            <a href="/registro" class="text-ufpso font-semibold hover:underline ml-1">Regístrate</a>
-          </div>
-          <div id="admin-footer" class="hidden mt-6 text-center text-sm text-gray-400">
-            Acceso restringido al personal autorizado de la UFPSO.
-          </div>
+    .overlay-msg--hidden { transform: translateX(110%); opacity: 0; pointer-events: none; }
+    .card.toggle #overlay-signin-msg { transform: translateX(-110%); opacity: 0; pointer-events: none; }
+    .card.toggle #overlay-signup-msg { transform: translateX(0); opacity: 1; pointer-events: auto; }
 
-        </div>
-      </div>
+    .overlay-icon { width: 52px; height: 52px; margin-bottom: 0.4rem; opacity: 0.9; }
+    .overlay-msg h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.85rem; font-weight: 600; line-height: 1.2;
+    }
+    .overlay-msg p { font-size: 0.84rem; line-height: 1.65; opacity: 0.87; max-width: 210px; }
 
-      <p class="text-center mt-6 text-xs text-gray-400">
-        <a href="/" class="hover:text-ufpso transition-colors">← Volver al inicio</a>
-      </p>
+    /* ── Formularios internos ── */
+    .form-box form    { width: 300px; }
+    .form-signup form { width: 490px; }
 
-    </div>
-  </main>
-</BaseLayout>
+    .form-header { text-align: center; margin-bottom: 1.6rem; }
+    .logo-mark   { display: inline-flex; margin-bottom: 0.7rem; }
+    .form-title  {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem; color: var(--text-main); line-height: 1.2;
+    }
+    .form-subtitle { font-size: 0.79rem; color: var(--text-muted); margin-top: 0.3rem; letter-spacing: 0.02em; }
 
-<style>
-  .tab-btn {
-    color: #6b7280;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-  }
-  .tab-active {
-    color: #D41224;
-    border-bottom-color: #D41224;
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  .animate-spin { animation: spin 0.8s linear infinite; }
+    /* ── Campos ── */
+    .fields-col  { display: flex; flex-direction: column; gap: 0.8rem; }
+    .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+    .field-full  { grid-column: 1 / -1; }
+
+    .field-group { display: flex; flex-direction: column; gap: 0.28rem; }
+    .field-group label {
+        font-size: 0.67rem; font-weight: 700;
+        letter-spacing: 0.07em; text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .input-wrap {
+        position: relative; display: flex; align-items: center;
+        background: var(--bg-input);
+        border: 1.5px solid transparent;
+        border-radius: 9px;
+        transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .input-wrap:focus-within {
+        background: var(--white);
+        border-color: var(--red);
+        box-shadow: 0 0 0 3px rgba(212,18,36,0.1);
+    }
+
+    .input-icon {
+        width: 15px; height: 15px; flex-shrink: 0;
+        margin-left: 11px; color: var(--text-muted); pointer-events: none;
+    }
+
+    .input-wrap input,
+    .input-wrap select {
+        flex: 1; border: none; background: transparent;
+        padding: 0.56rem 0.7rem;
+        font-family: inherit; font-size: 0.84rem;
+        color: var(--text-main); outline: none; min-width: 0;
+        appearance: none;
+    }
+    .input-wrap input::placeholder { color: #c0c0c0; }
+    .input-wrap select { cursor: pointer; }
+    .input-wrap select option { color: var(--text-main); background: white; }
+
+    .toggle-pw {
+        background: none; border: none; cursor: pointer;
+        padding: 0 10px; color: var(--text-muted);
+        display: flex; align-items: center;
+        transition: color 0.2s; flex-shrink: 0;
+    }
+    .toggle-pw:hover { color: var(--red); }
+
+    .forgot-link {
+        display: block; text-align: right;
+        font-size: 0.77rem; color: var(--red); text-decoration: none;
+        margin-top: 0.45rem; margin-bottom: 0.75rem;
+        font-weight: 500; transition: opacity 0.2s;
+    }
+    .forgot-link:hover { opacity: 0.7; }
+
+    /* ── Admin toggle ── */
+    .admin-toggle {
+        display: flex; align-items: center; gap: 0.5rem;
+        margin-bottom: 0.2rem;
+    }
+    .admin-toggle input[type="checkbox"] { accent-color: var(--red); cursor: pointer; }
+    .admin-toggle label {
+        font-size: 0.75rem; color: var(--text-muted); cursor: pointer;
+        text-transform: none; letter-spacing: 0; font-weight: 500;
+    }
+
+    /* ── Error / Success boxes ── */
+    .msg-box {
+        display: none; padding: 0.6rem 0.9rem;
+        border-radius: 8px; font-size: 0.8rem;
+        margin-bottom: 0.75rem; line-height: 1.45;
+    }
+    .msg-box.visible { display: block; }
+    .msg-box.error   { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+    .msg-box.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+
+    /* ── Botones ── */
+    .btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        gap: 0.5rem; font-family: inherit; font-size: 0.79rem;
+        font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+        border-radius: 10px; padding: 0.74rem 1.5rem;
+        cursor: pointer; text-decoration: none; width: 100%;
+        border: 2px solid transparent;
+        transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .btn-primary {
+        background: var(--red); color: var(--white);
+        box-shadow: 0 4px 18px rgba(212,18,36,0.32);
+        margin-top: 0.85rem;
+    }
+    .btn-primary:hover:not(:disabled) {
+        background: var(--red-dark);
+        box-shadow: 0 6px 24px rgba(212,18,36,0.42);
+        transform: translateY(-1px);
+    }
+
+    .btn-outline {
+        background: transparent; color: var(--white);
+        border-color: rgba(255,255,255,0.65);
+        margin-top: 0.5rem; padding: 0.65rem 1.5rem;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.14); }
+
+    /* ── Scrollbar ── */
+    .form-box::-webkit-scrollbar { width: 3px; }
+    .form-box::-webkit-scrollbar-track { background: transparent; }
+    .form-box::-webkit-scrollbar-thumb { background: var(--red-light); border-radius: 3px; }
+
+    /* ── Switch hint (solo mobile) ── */
+    .switch-hint {
+        display: none; text-align: center;
+        font-size: 0.8rem; color: var(--text-muted); margin-top: 1.1rem;
+    }
+    .switch-link {
+        background: none; border: none; cursor: pointer;
+        color: var(--red); font-weight: 600;
+        font-family: inherit; font-size: inherit; text-decoration: underline;
+    }
+
+    /* ═══════════════════════════════════════════
+       MOBILE ≤ 900px
+    ═══════════════════════════════════════════ */
+    @media (max-width: 900px) {
+        body { padding: 1.25rem; }
+
+        .card { min-height: unset; border-radius: 18px; overflow: hidden; }
+
+        .overlay-panel { display: none !important; }
+
+        .form-box {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: auto;
+            min-height: 100%;
+            padding: 2rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            transition:
+                transform 0.55s cubic-bezier(0.65, 0, 0.35, 1),
+                opacity   0.45s cubic-bezier(0.65, 0, 0.35, 1);
+            will-change: transform, opacity;
+        }
+
+        .form-signin {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+            left: 0 !important;
+        }
+        .form-signup {
+            transform: translateX(105%);
+            opacity: 0;
+            pointer-events: none;
+            left: 0 !important;
+        }
+
+        .card.toggle .form-signin {
+            transform: translateX(-105%);
+            opacity: 0;
+            pointer-events: none;
+            left: 0 !important;
+        }
+        .card.toggle .form-signup {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+            left: 0 !important;
+        }
+
+        .form-box.is-active { position: relative; }
+
+        .switch-hint { display: block; }
+    }
+
+    @media (max-width: 600px) {
+        body { padding: 1rem; }
+        .form-box { padding: 1.75rem 1.25rem; }
+        .form-title { font-size: 1.5rem; }
+        .fields-grid { grid-template-columns: 1fr; }
+        .field-full  { grid-column: 1; }
+    }
+
+    @media (min-width: 901px) {
+        .main-wrapper { padding: 0; }
+        .form-signup {
+            align-items: center;
+            justify-content: center;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+    }
 </style>
+</head>
+<body>
+
+    <div class="page-bg" aria-hidden="true">
+        <div class="bg-circle bg-circle-1"></div>
+        <div class="bg-circle bg-circle-2"></div>
+    </div>
+
+    <main class="main-wrapper">
+        <div id="container" class="card">
+
+            <!-- ══════════════════════════════════════
+                 FORMULARIO: INICIAR SESIÓN
+            ══════════════════════════════════════ -->
+            <div class="form-box form-signin">
+                <form id="sign-in" novalidate>
+
+                    <div class="form-header">
+                        <div class="logo-mark" aria-hidden="true">
+                            <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+                                <circle cx="19" cy="19" r="19" fill="#D41224"/>
+                                <path d="M12 26 L19 12 L26 26" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                <line x1="14.5" y1="22" x2="23.5" y2="22" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h1 class="form-title">Iniciar sesión</h1>
+                        <p class="form-subtitle">Bienvenido de nuevo</p>
+                    </div>
+
+                    <!-- Error box -->
+                    <div id="si-error" class="msg-box error"></div>
+
+                    <div class="fields-col">
+                        <div class="field-group">
+                            <label for="si-email">Correo electrónico</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M3 5l7 6 7-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                </svg>
+                                <input id="si-email" type="email" placeholder="tu@correo.edu.co" autocomplete="email" required />
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="si-password">Contraseña</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="5" y="9" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <input id="si-password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+                                <button type="button" class="toggle-pw" aria-label="Mostrar contraseña" data-target="si-password">
+                                    <svg viewBox="0 0 20 20" fill="none" width="16" height="16" aria-hidden="true">
+                                        <ellipse cx="10" cy="10" rx="7" ry="4.5" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin toggle -->
+                    <div class="admin-toggle" style="margin-top: 0.65rem;">
+                        <input type="checkbox" id="si-admin" />
+                        <label for="si-admin">Acceso de administrador</label>
+                    </div>
+
+                    <a class="forgot-link" href="#">¿Olvidaste tu contraseña?</a>
+
+                    <button type="submit" id="si-submit" class="btn btn-primary">
+                        <span id="si-label">Ingresar</span>
+                        <svg viewBox="0 0 16 16" fill="none" width="16" height="16" aria-hidden="true">
+                            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+
+                    <p class="switch-hint">
+                        ¿No tienes cuenta?
+                        <button type="button" id="go-register" class="switch-link">Regístrate aquí</button>
+                    </p>
+                </form>
+            </div>
+
+            <!-- ══════════════════════════════════════
+                 FORMULARIO: REGISTRO
+            ══════════════════════════════════════ -->
+            <div class="form-box form-signup">
+                <form id="sign-up" novalidate>
+
+                    <div class="form-header">
+                        <div class="logo-mark" aria-hidden="true">
+                            <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+                                <circle cx="19" cy="19" r="19" fill="#D41224"/>
+                                <path d="M12 26 L19 12 L26 26" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                <line x1="14.5" y1="22" x2="23.5" y2="22" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h1 class="form-title">Crear cuenta</h1>
+                        <p class="form-subtitle">Completa tu información</p>
+                    </div>
+
+                    <!-- Error / Success boxes -->
+                    <div id="su-error"   class="msg-box error"></div>
+                    <div id="su-success" class="msg-box success"></div>
+
+                    <div class="fields-grid">
+                        <div class="field-group">
+                            <label for="su-fname">Primer nombre</label>
+                            <div class="input-wrap">
+                                <input id="su-fname" type="text" placeholder="Ej. Juan" autocomplete="given-name" required />
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="su-mname">Segundo nombre</label>
+                            <div class="input-wrap">
+                                <input id="su-mname" type="text" placeholder="Ej. Carlos" autocomplete="additional-name" />
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="su-lname1">Primer apellido</label>
+                            <div class="input-wrap">
+                                <input id="su-lname1" type="text" placeholder="Ej. Pérez" autocomplete="family-name" required />
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="su-lname2">Segundo apellido</label>
+                            <div class="input-wrap">
+                                <input id="su-lname2" type="text" placeholder="Ej. López" />
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="su-program">Programa académico</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <select id="su-program" required>
+                                    <option value="">Cargando...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="su-phone">Celular</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="6" y="2" width="8" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                    <circle cx="10" cy="15" r="0.8" fill="currentColor"/>
+                                </svg>
+                                <input id="su-phone" type="tel" placeholder="Ej. 3001234567" autocomplete="tel" required />
+                            </div>
+                        </div>
+                        <div class="field-group field-full">
+                            <label for="su-email">Correo electrónico</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M3 5l7 6 7-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                </svg>
+                                <input id="su-email" type="email" placeholder="tu@correo.edu.co" autocomplete="email" required />
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="su-password">Contraseña</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="5" y="9" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <input id="su-password" type="password" placeholder="Mín. 8 caracteres" autocomplete="new-password" required />
+                                <button type="button" class="toggle-pw" aria-label="Mostrar contraseña" data-target="su-password">
+                                    <svg viewBox="0 0 20 20" fill="none" width="16" height="16" aria-hidden="true">
+                                        <ellipse cx="10" cy="10" rx="7" ry="4.5" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="su-confirm">Validar contraseña</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="5" y="9" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <input id="su-confirm" type="password" placeholder="Repite tu contraseña" autocomplete="new-password" required />
+                                <button type="button" class="toggle-pw" aria-label="Mostrar contraseña" data-target="su-confirm">
+                                    <svg viewBox="0 0 20 20" fill="none" width="16" height="16" aria-hidden="true">
+                                        <ellipse cx="10" cy="10" rx="7" ry="4.5" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="su-submit" class="btn btn-primary">
+                        <span id="su-label">Crear cuenta</span>
+                        <svg viewBox="0 0 16 16" fill="none" width="16" height="16" aria-hidden="true">
+                            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+
+                    <p class="switch-hint">
+                        ¿Ya tienes cuenta?
+                        <button type="button" id="go-login" class="switch-link">Inicia sesión</button>
+                    </p>
+                </form>
+            </div>
+
+            <!-- ══════════════════════════════════════
+                 PANEL DECORATIVO DESLIZANTE
+            ══════════════════════════════════════ -->
+            <div id="overlay-panel" class="overlay-panel" aria-hidden="true">
+                <div id="overlay-signin-msg" class="overlay-msg">
+                    <svg class="overlay-icon" viewBox="0 0 60 60" fill="none">
+                        <circle cx="30" cy="20" r="10" stroke="rgba(255,255,255,0.9)" stroke-width="2"/>
+                        <path d="M12 52c0-9.9 8.1-18 18-18s18 8.1 18 18" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <h2>¡Hola de nuevo!</h2>
+                    <p>Ingresa tus credenciales para acceder a tu portal estudiantil.</p>
+                    <button id="btn-go-register" class="btn btn-outline">Crear cuenta</button>
+                </div>
+                <div id="overlay-signup-msg" class="overlay-msg overlay-msg--hidden">
+                    <svg class="overlay-icon" viewBox="0 0 60 60" fill="none">
+                        <circle cx="30" cy="30" r="28" stroke="rgba(255,255,255,0.9)" stroke-width="2"/>
+                        <path d="M20 30h20M30 20v20" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <h2>¡Bienvenido!</h2>
+                    <p>Regístrate con tus datos para comenzar a disfrutar de todas las funciones del portal.</p>
+                    <button id="btn-go-login" class="btn btn-outline">Iniciar sesión</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
 
 <script>
-  import { authApi } from '../lib/api';
-  import { saveSession, redirectIfAuthenticated } from '../lib/auth';
+// @ts-nocheck
 
-  // Redirigir si ya está autenticado
-  redirectIfAuthenticated('/dashboard');
+/* ════════════════════════════════════════════════════
+   API — misma lógica que src/lib/api.ts
+════════════════════════════════════════════════════ */
+const BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_API_URL)
+    ? import.meta.env.PUBLIC_API_URL
+    : 'http://localhost:8080';
 
-  // ── Estado ──────────────────────────────────────────────────
-  let currentTab: 'student' | 'admin' = 'student';
+async function apiRequest(path, options = {}) {
+    const url = `${BASE_URL}${path}`;
+    const token = localStorage.getItem('rp_token');
+    const headers = { 'Content-Type': 'application/json', ...(options.headers ?? {}) };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(url, { ...options, headers });
+    const json = await res.json();
+    if (!res.ok && !json.success) throw json;
+    return json;
+}
 
-  // ── Tabs ────────────────────────────────────────────────────
-  const tabBtns = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
-  const studentFooter = document.getElementById('student-footer')!;
-  const adminFooter   = document.getElementById('admin-footer')!;
+function saveSession(auth) {
+    localStorage.setItem('rp_token', auth.token);
+    localStorage.setItem('rp_user', JSON.stringify({
+        id: auth.id, programId: auth.programId, email: auth.email,
+        firstName: auth.firstName, firstSurname: auth.firstSurname,
+        userType: auth.userType,
+    }));
+}
 
-  tabBtns.forEach(btn => {
+function isAuthenticated() {
+    const token = localStorage.getItem('rp_token');
+    if (!token) return false;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp * 1000 > Date.now();
+    } catch { return false; }
+}
+
+/* ════════════════════════════════════════════════════
+   REDIRIGIR SI YA ESTÁ AUTENTICADO
+════════════════════════════════════════════════════ */
+if (isAuthenticated()) { window.location.href = '/dashboard'; }
+
+/* ════════════════════════════════════════════════════
+   TOGGLE PANEL (script-login.js adaptado)
+════════════════════════════════════════════════════ */
+const container   = document.getElementById('container');
+const btnGoRegister = document.getElementById('btn-go-register');
+const btnGoLogin    = document.getElementById('btn-go-login');
+const goRegister    = document.getElementById('go-register');
+const goLogin       = document.getElementById('go-login');
+const formSignin    = document.querySelector('.form-signin');
+const formSignup    = document.querySelector('.form-signup');
+
+const MOBILE_BP = 900;
+const isMobile = () => window.innerWidth <= MOBILE_BP;
+
+function setActiveForm(showSignup) {
+    if (isMobile()) {
+        if (showSignup) {
+            formSignin.classList.remove('is-active');
+            requestAnimationFrame(() => formSignup.classList.add('is-active'));
+        } else {
+            formSignup.classList.remove('is-active');
+            requestAnimationFrame(() => formSignin.classList.add('is-active'));
+        }
+    } else {
+        formSignin.classList.remove('is-active');
+        formSignup.classList.remove('is-active');
+    }
+}
+
+function initActiveForm() {
+    if (isMobile()) {
+        const isToggled = container.classList.contains('toggle');
+        formSignin.classList.toggle('is-active', !isToggled);
+        formSignup.classList.toggle('is-active',  isToggled);
+    } else {
+        formSignin.classList.remove('is-active');
+        formSignup.classList.remove('is-active');
+    }
+}
+
+function switchToRegister() {
+    container.classList.add('toggle');
+    setActiveForm(true);
+    if (isMobile()) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchToLogin() {
+    container.classList.remove('toggle');
+    setActiveForm(false);
+    if (isMobile()) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+initActiveForm();
+window.addEventListener('resize', initActiveForm);
+
+if (btnGoRegister) btnGoRegister.addEventListener('click', switchToRegister);
+if (btnGoLogin)    btnGoLogin.addEventListener('click', switchToLogin);
+if (goRegister)    goRegister.addEventListener('click', switchToRegister);
+if (goLogin)       goLogin.addEventListener('click', switchToLogin);
+
+/* ════════════════════════════════════════════════════
+   DETECCIÓN DE URL PARAM → abrir formulario correcto
+   /login             → muestra login (defecto)
+   /login?mode=register → muestra registro
+════════════════════════════════════════════════════ */
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('mode') === 'register') {
+    switchToRegister();
+}
+
+/* ════════════════════════════════════════════════════
+   MOSTRAR / OCULTAR CONTRASEÑA
+════════════════════════════════════════════════════ */
+document.querySelectorAll('.toggle-pw').forEach(btn => {
     btn.addEventListener('click', () => {
-      currentTab = btn.dataset.tab as 'student' | 'admin';
-      tabBtns.forEach(b => b.classList.remove('tab-active'));
-      btn.classList.add('tab-active');
-
-      if (currentTab === 'student') {
-        studentFooter.classList.remove('hidden');
-        adminFooter.classList.add('hidden');
-      } else {
-        studentFooter.classList.add('hidden');
-        adminFooter.classList.remove('hidden');
-      }
-
-      clearError();
+        const input = document.getElementById(btn.dataset.target);
+        if (!input) return;
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        btn.setAttribute('aria-label', isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña');
     });
-  });
+});
 
-  // ── Toggle password ─────────────────────────────────────────
-  const toggleBtn = document.getElementById('toggle-password')!;
-  const passwordInput = document.getElementById('password') as HTMLInputElement;
+/* ════════════════════════════════════════════════════
+   CARGAR PROGRAMAS ACADÉMICOS
+════════════════════════════════════════════════════ */
+async function loadPrograms() {
+    const select = document.getElementById('su-program');
+    try {
+        const res = await apiRequest('/api/programs/active');
+        select.innerHTML = '<option value="">— Selecciona tu programa —</option>';
+        if (res.data) {
+            res.data.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.programId;
+                opt.textContent = p.programName;
+                select.appendChild(opt);
+            });
+        }
+    } catch {
+        select.innerHTML = '<option value="">Error cargando programas</option>';
+    }
+}
+loadPrograms();
 
-  toggleBtn.addEventListener('click', () => {
-    const isHidden = passwordInput.type === 'password';
-    passwordInput.type = isHidden ? 'text' : 'password';
-    toggleBtn.querySelector('span')!.className = isHidden
-      ? 'ti ti-eye-off text-lg'
-      : 'ti ti-eye text-lg';
-  });
+/* ════════════════════════════════════════════════════
+   HELPERS — errores y loading
+════════════════════════════════════════════════════ */
+function showMsg(boxId, text, type = 'error') {
+    const el = document.getElementById(boxId);
+    if (!el) return;
+    el.textContent = text;
+    el.className = `msg-box ${type} visible`;
+}
+function hideMsg(boxId) {
+    const el = document.getElementById(boxId);
+    if (el) el.classList.remove('visible');
+}
+function setLoading(submitId, labelId, loading, defaultText) {
+    const btn = document.getElementById(submitId);
+    const lbl = document.getElementById(labelId);
+    if (btn) btn.disabled = loading;
+    if (lbl) lbl.textContent = loading ? 'Un momento...' : defaultText;
+}
 
-  // ── Form submit ─────────────────────────────────────────────
-  const form       = document.getElementById('login-form') as HTMLFormElement;
-  const submitBtn  = document.getElementById('submit-btn') as HTMLButtonElement;
-  const btnLabel   = document.getElementById('btn-label')!;
-  const btnSpinner = document.getElementById('btn-spinner')!;
-  const errorBox   = document.getElementById('error-box')!;
-
-  function setLoading(loading: boolean) {
-    submitBtn.disabled = loading;
-    btnLabel.textContent = loading ? 'Ingresando...' : 'Iniciar sesión';
-    btnSpinner.classList.toggle('hidden', !loading);
-  }
-
-  function showError(msg: string) {
-    errorBox.textContent = msg;
-    errorBox.classList.remove('hidden');
-  }
-
-  function clearError() {
-    errorBox.classList.add('hidden');
-    errorBox.textContent = '';
-  }
-
-  form.addEventListener('submit', async (e) => {
+/* ════════════════════════════════════════════════════
+   FORMULARIO LOGIN
+════════════════════════════════════════════════════ */
+document.getElementById('sign-in').addEventListener('submit', async (e) => {
     e.preventDefault();
-    clearError();
+    hideMsg('si-error');
 
-    const email    = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
-    const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+    const email    = document.getElementById('si-email').value.trim();
+    const password = document.getElementById('si-password').value;
+    const isAdmin  = document.getElementById('si-admin').checked;
 
     if (!email || !password) {
-      showError('Por favor completa todos los campos.');
-      return;
+        showMsg('si-error', 'Por favor completa todos los campos.');
+        return;
     }
 
-    setLoading(true);
+    setLoading('si-submit', 'si-label', true, 'Ingresar');
 
     try {
-      const fn = currentTab === 'admin'
-        ? authApi.adminLogin(email, password)
-        : authApi.studentLogin(email, password);
+        const endpoint = isAdmin ? '/api/auth/admin/login' : '/api/auth/student/login';
+        const res = await apiRequest(endpoint, {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+        });
 
-      const res = await fn;
-
-      if (res.success && res.data) {
-        saveSession(res.data);
-        window.location.href = '/dashboard';
-      } else {
-        showError(res.message ?? 'Error al iniciar sesión.');
-      }
-    } catch (err: any) {
-      const msg = err?.message ?? 'No se pudo conectar con el servidor. Verifica tu conexión.';
-      showError(msg);
+        if (res.success && res.data) {
+            saveSession(res.data);
+            window.location.href = '/dashboard';
+        } else {
+            showMsg('si-error', res.message ?? 'Credenciales incorrectas. Inténtalo de nuevo.');
+        }
+    } catch (err) {
+        showMsg('si-error', err?.message ?? 'No se pudo conectar con el servidor.');
     } finally {
-      setLoading(false);
+        setLoading('si-submit', 'si-label', false, 'Ingresar');
     }
-  });
+});
+
+/* ════════════════════════════════════════════════════
+   FORMULARIO REGISTRO
+════════════════════════════════════════════════════ */
+document.getElementById('sign-up').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideMsg('su-error');
+    hideMsg('su-success');
+
+    const pw  = document.getElementById('su-password').value;
+    const cpw = document.getElementById('su-confirm').value;
+
+    if (pw !== cpw) {
+        showMsg('su-error', 'Las contraseñas no coinciden.');
+        return;
+    }
+
+    const payload = {
+        firstName:     document.getElementById('su-fname').value.trim(),
+        secondName:    document.getElementById('su-mname').value.trim() || undefined,
+        firstSurname:  document.getElementById('su-lname1').value.trim(),
+        secondSurname: document.getElementById('su-lname2').value.trim() || undefined,
+        email:         document.getElementById('su-email').value.trim(),
+        phone:         document.getElementById('su-phone').value.trim(),
+        password:      pw,
+        programId:     document.getElementById('su-program').value,
+    };
+
+    if (!payload.firstName || !payload.firstSurname || !payload.email
+        || !payload.phone || !payload.password || !payload.programId) {
+        showMsg('su-error', 'Por favor completa todos los campos obligatorios.');
+        return;
+    }
+
+    setLoading('su-submit', 'su-label', true, 'Crear cuenta');
+
+    try {
+        const res = await apiRequest('/api/auth/student/register', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+
+        if (res.success) {
+            showMsg('su-success',
+                '¡Cuenta creada! Revisa tu correo para verificar tu cuenta antes de iniciar sesión.',
+                'success'
+            );
+            document.getElementById('sign-up').reset();
+            loadPrograms();
+        } else {
+            showMsg('su-error', res.message ?? 'Error al crear la cuenta.');
+        }
+    } catch (err) {
+        if (err?.errors) {
+            showMsg('su-error', Object.values(err.errors).join(' '));
+        } else {
+            showMsg('su-error', err?.message ?? 'No se pudo conectar con el servidor.');
+        }
+    } finally {
+        setLoading('su-submit', 'su-label', false, 'Crear cuenta');
+    }
+});
 </script>
+</body>
+</html>
