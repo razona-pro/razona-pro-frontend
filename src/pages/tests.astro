@@ -1,0 +1,662 @@
+---
+// RazonaPro — Tests Disponibles
+// Competencias inicializadas en DataInitializer:
+//   COM001 Razonamiento Lógico | COM002 Comunicación Escrita
+//   COM003 Razonamiento Cuantitativo | COM004 Inglés
+// + Lectura Crítica (nomenclatura Saber Pro)
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Tests Disponibles · RazonaPro">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style is:global>
+  body {
+    height: 100vh; overflow: hidden;
+    background: #F2F0EC;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  .db-root { flex: 1; display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 242px; min-width: 242px;
+    background: #111111;
+    display: flex; flex-direction: column;
+    overflow-y: auto; overflow-x: hidden;
+    border-right: 1px solid rgba(255,255,255,0.055);
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 100;
+  }
+
+  #overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 99;
+    backdrop-filter: blur(2px);
+  }
+  #overlay.open { display: block; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px; color: rgba(255,255,255,0.45);
+    font-size: 13.5px; font-weight: 500; border-radius: 9px;
+    text-decoration: none; transition: all 0.15s; cursor: pointer;
+    margin-bottom: 1px; border: none; background: none; width: 100%;
+    text-align: left; font-family: inherit;
+  }
+  .nav-item:hover  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88); }
+  .nav-item.active { background: rgba(212,18,36,0.18); color: #F87171; }
+  .nav-item .ti    { font-size: 16px; flex-shrink: 0; }
+  .nav-section {
+    color: rgba(255,255,255,0.22); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.9px; text-transform: uppercase;
+    padding: 0 10px; margin: 14px 0 5px; display: block;
+  }
+
+  /* ── FILTER PILLS ── */
+  .filter-pill {
+    padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    border: 1.5px solid #E8E5E0; background: white; color: #6B7280;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+    white-space: nowrap;
+  }
+  .filter-pill:hover { border-color: #D41224; color: #D41224; }
+  .filter-pill.active { background: #D41224; color: white; border-color: #D41224; }
+
+  /* ── TEST CARDS ── */
+  .test-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #E8E5E0;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+  .test-card:hover {
+    border-color: #D0CCC6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+  }
+  .test-card-body  { padding: 18px 20px; }
+  .test-card-footer{
+    padding: 12px 20px;
+    border-top: 1px solid #F3F1EE;
+    background: #FAFAF8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* ── MODE BADGE ── */
+  .mode-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  }
+  .mode-PRACTICE { background: #D1FAE5; color: #059669; }
+  .mode-EXAM     { background: #DBEAFE; color: #2563EB; }
+  .mode-TIMED    { background: #FEF3C7; color: #D97706; }
+
+  /* ── DIFF BADGE ── */
+  .diff-B { background: #D1FAE5; color: #059669; }
+  .diff-M { background: #FEF3C7; color: #D97706; }
+  .diff-A { background: #FEE2E2; color: #D41224; }
+
+  /* ── START BUTTON ── */
+  .btn-start {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 10px;
+    background: linear-gradient(135deg,#D41224,#9B1F24);
+    color: white; font-size: 13px; font-weight: 700;
+    border: none; cursor: pointer; text-decoration: none;
+    font-family: inherit;
+    transition: all 0.15s; box-shadow: 0 3px 12px rgba(212,18,36,0.28);
+  }
+  .btn-start:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(212,18,36,0.38); }
+
+  /* ── EMPTY ── */
+  .empty-state { text-align:center; padding:50px 20px; color:#A09990; }
+  .empty-state .ti { font-size:48px; display:block; margin-bottom:12px; }
+
+  /* ── LOADING ── */
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  .skeleton {
+    border-radius: 12px; height: 18px; margin-bottom: 8px;
+    background: linear-gradient(90deg,#F3F1EE 25%,#E8E5E0 50%,#F3F1EE 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .anim    { animation: fadeUp 0.45s ease both; }
+  .anim-d1 { animation-delay:.05s; }
+  .anim-d2 { animation-delay:.12s; }
+  .anim-d3 { animation-delay:.18s; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#D1CFC8; border-radius:10px; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 1023px) {
+    body { overflow: auto; }
+    .db-root { overflow: visible; height: auto; min-height: 100vh; }
+    #sidebar {
+      position: fixed; top:0; left:0; bottom:0;
+      transform: translateX(-260px);
+    }
+    #sidebar.open { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,0.28); }
+    #hamburger { display: flex !important; }
+    #main-area { width: 100%; }
+    #tests-grid { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 639px) {
+    #main-scroll  { padding: 14px 14px 0 !important; }
+    #search-wrap  { display: none !important; }
+    #mobile-logo  { display: flex !important; }
+    #tb-name      { display: none; }
+    .filter-pill  { font-size: 11px; padding: 6px 12px; }
+    #tests-grid   { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<div class="db-root">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside id="sidebar">
+    <div style="padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:35px;height:35px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(212,18,36,0.35);">
+          <span class="ti ti-brain" style="color:white;font-size:18px;"></span>
+        </div>
+        <div>
+          <p style="color:white;font-weight:900;font-size:16px;letter-spacing:-0.4px;margin:0;line-height:1.1;">Razona<span style="color:#D41224;">Pro</span></p>
+          <p style="color:rgba(255,255,255,0.28);font-size:9px;margin:0;letter-spacing:0.9px;text-transform:uppercase;">Plataforma Saber Pro · UFPSO</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="sb-avatar" style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:14px;flex-shrink:0;"></div>
+        <div style="min-width:0;flex:1;">
+          <p id="sb-name" style="color:white;font-weight:700;font-size:13px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
+          <p id="sb-sub"  style="color:rgba(255,255,255,0.32);font-size:11px;margin:0;"></p>
+        </div>
+        <a href="/perfil" style="color:rgba(255,255,255,0.22);text-decoration:none;padding:4px;flex-shrink:0;transition:color 0.15s;" onmouseover="this.style.color='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.22)'">
+          <span class="ti ti-settings" style="font-size:15px;"></span>
+        </a>
+      </div>
+    </div>
+
+    <nav style="padding:10px 10px;flex:1;">
+      <span class="nav-section">Principal</span>
+      <a href="/dashboard"   class="nav-item" onclick="closeSidebar()"><span class="ti ti-home"></span> Inicio</a>
+      <a href="/tests"       class="nav-item active" onclick="closeSidebar()"><span class="ti ti-clipboard-list"></span> Tests disponibles</a>
+      <a href="/ai-practice" class="nav-item" onclick="closeSidebar()"><span class="ti ti-robot"></span> Práctica con IA</a>
+
+      <span class="nav-section">Competencias Saber Pro</span>
+      <a href="/tests?c=lc" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#D41224;flex-shrink:0;"></span> Lectura Crítica</a>
+      <a href="/tests?c=rq" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#2563EB;flex-shrink:0;"></span> Razonamiento Cuantit.</a>
+      <a href="/tests?c=cc" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#059669;flex-shrink:0;"></span> Comp. Ciudadanas</a>
+      <a href="/tests?c=ce" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#7C3AED;flex-shrink:0;"></span> Comunicación Escrita</a>
+      <a href="/tests?c=en" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span> Inglés</a>
+
+      <span class="nav-section">Mi cuenta</span>
+      <a href="/rankings"     class="nav-item" onclick="closeSidebar()"><span class="ti ti-trophy"></span> Rankings</a>
+      <a href="/mis-intentos" class="nav-item" onclick="closeSidebar()"><span class="ti ti-history"></span> Mi historial</a>
+      <a href="/perfil"       class="nav-item" onclick="closeSidebar()"><span class="ti ti-user-circle"></span> Mi perfil</a>
+
+      <div id="admin-nav" style="display:none;">
+        <span class="nav-section" style="color:rgba(212,18,36,0.55);">Administración</span>
+        <a href="/admin/estudiantes" class="nav-item" onclick="closeSidebar()"><span class="ti ti-users"></span> Estudiantes</a>
+        <a href="/admin/tests"       class="nav-item" onclick="closeSidebar()"><span class="ti ti-file-description"></span> Gestión Tests</a>
+        <a href="/admin/preguntas"   class="nav-item" onclick="closeSidebar()"><span class="ti ti-list-check"></span> Banco Preguntas</a>
+        <a href="/admin/programas"   class="nav-item" onclick="closeSidebar()"><span class="ti ti-school"></span> Programas</a>
+      </div>
+    </nav>
+
+    <div style="padding:10px 10px;border-top:1px solid rgba(255,255,255,0.06);">
+      <button id="logout-btn" class="nav-item" style="color:rgba(255,100,100,0.55);"
+        onmouseover="this.style.background='rgba(212,18,36,0.09)';this.style.color='rgba(255,100,100,0.85)';"
+        onmouseout="this.style.background='';this.style.color='rgba(255,100,100,0.55)';">
+        <span class="ti ti-logout"></span> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <div id="main-area" style="flex:1;display:flex;overflow:hidden;background:#F2F0EC;">
+    <main id="main-scroll" style="flex:1;overflow-y:auto;padding:22px 24px 0;">
+
+      <!-- TOPBAR -->
+      <div class="anim" style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+        <button id="hamburger" onclick="openSidebar()"
+          style="display:none;width:38px;height:38px;background:white;border:1.5px solid #E8E5E0;
+                 border-radius:10px;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;"
+          onmouseover="this.style.borderColor='#D41224'" onmouseout="this.style.borderColor='#E8E5E0'">
+          <span class="ti ti-menu-2" style="font-size:18px;color:#374151;"></span>
+        </button>
+
+        <div id="mobile-logo" style="display:none;align-items:center;gap:8px;flex-shrink:0;">
+          <div style="width:30px;height:30px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <span class="ti ti-brain" style="color:white;font-size:16px;"></span>
+          </div>
+          <span style="font-weight:900;font-size:15px;letter-spacing:-0.3px;color:#111;">Razona<span style="color:#D41224;">Pro</span></span>
+        </div>
+
+        <div id="search-wrap" style="flex:1;max-width:450px;position:relative;">
+          <span class="ti ti-search" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#B0ADA6;font-size:15px;pointer-events:none;"></span>
+          <input id="search-input" type="text" placeholder="Buscar tests, competencias..."
+            style="width:100%;padding:10px 16px 10px 38px;background:white;border:1.5px solid #E8E5E0;border-radius:12px;font-size:13.5px;color:#374151;font-family:inherit;box-sizing:border-box;transition:border-color 0.2s;outline:none;"
+            onfocus="this.style.borderColor='#D41224'" onblur="this.style.borderColor='#E8E5E0'">
+        </div>
+
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <div id="tb-user" onclick="window.location='/perfil'"
+            style="display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:white;border:1.5px solid #E8E5E0;border-radius:10px;cursor:pointer;transition:border-color 0.2s;"
+            onmouseover="this.style.borderColor='#D41224'" onmouseout="this.style.borderColor='#E8E5E0'">
+            <div id="tb-avatar" style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:11px;"></div>
+            <span id="tb-name"  style="font-size:13px;font-weight:700;color:#374151;"></span>
+            <span id="tb-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TITLE + STATS BAR -->
+      <div class="anim anim-d1" style="margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#A09990;margin-bottom:6px;">
+          <a href="/dashboard" style="color:#A09990;text-decoration:none;" onmouseover="this.style.color='#D41224'" onmouseout="this.style.color='#A09990'">Dashboard</a>
+          <span class="ti ti-chevron-right" style="font-size:11px;"></span>
+          <span style="color:#374151;font-weight:600;">Tests disponibles</span>
+        </div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <h1 style="font-size:26px;font-weight:900;color:#111111;margin:0 0 3px;letter-spacing:-0.6px;">Tests disponibles</h1>
+            <p style="color:#857F77;font-size:14px;margin:0;">Selecciona un simulacro y comienza a practicar para el Saber Pro.</p>
+          </div>
+          <!-- Mini stats -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="text-align:center;padding:8px 16px;background:white;border-radius:11px;border:1px solid #E8E5E0;">
+              <p id="count-total" style="font-size:20px;font-weight:900;color:#D41224;margin:0;line-height:1;">0</p>
+              <p style="font-size:10px;color:#A09990;margin:2px 0 0;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Tests</p>
+            </div>
+            <div style="text-align:center;padding:8px 16px;background:white;border-radius:11px;border:1px solid #E8E5E0;">
+              <p style="font-size:20px;font-weight:900;color:#2563EB;margin:0;line-height:1;">5</p>
+              <p style="font-size:10px;color:#A09990;margin:2px 0 0;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Competencias</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPETENCY FILTERS -->
+      <div class="anim anim-d2" style="margin-bottom:16px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:11px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;margin-right:4px;">Filtrar:</span>
+          <button class="filter-pill active" onclick="filterComp('ALL',this)">Todos</button>
+          <button class="filter-pill" onclick="filterComp('lc',this)" style="border-color:#FCA5A5;color:#D41224;">
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#D41224;margin-right:4px;"></span>Lectura Crítica
+          </button>
+          <button class="filter-pill" onclick="filterComp('rq',this)" style="border-color:#BFDBFE;color:#2563EB;">
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#2563EB;margin-right:4px;"></span>Razon. Cuantitativo
+          </button>
+          <button class="filter-pill" onclick="filterComp('cc',this)" style="border-color:#A7F3D0;color:#059669;">
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#059669;margin-right:4px;"></span>Comp. Ciudadanas
+          </button>
+          <button class="filter-pill" onclick="filterComp('ce',this)" style="border-color:#DDD6FE;color:#7C3AED;">
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#7C3AED;margin-right:4px;"></span>Comun. Escrita
+          </button>
+          <button class="filter-pill" onclick="filterComp('en',this)" style="border-color:#FDE68A;color:#D97706;">
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#D97706;margin-right:4px;"></span>Inglés
+          </button>
+
+          <!-- Mode filter -->
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button class="filter-pill active" id="mode-all" onclick="filterMode('ALL',this)">Todos los modos</button>
+            <button class="filter-pill" id="mode-PRACTICE" onclick="filterMode('PRACTICE',this)">Práctica</button>
+            <button class="filter-pill" id="mode-EXAM"     onclick="filterMode('EXAM',this)">Examen</button>
+            <button class="filter-pill" id="mode-TIMED"    onclick="filterMode('TIMED',this)">Cronometrado</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TESTS GRID -->
+      <div class="anim anim-d3" id="tests-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;"></div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <span class="ti ti-search-off"></span>
+        <p style="font-size:16px;font-weight:700;color:#374151;margin:0 0 4px;">Sin resultados</p>
+        <p style="font-size:14px;">No hay tests que coincidan con tu búsqueda.</p>
+      </div>
+
+      <div style="height:28px;"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+  import { requireAuth, isAdmin, logout } from '../lib/auth';
+
+  let user;
+  try { user = requireAuth(); } catch { throw new Error('redir'); }
+  const admin = isAdmin();
+
+  window.openSidebar = () => {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeSidebar = () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  document.addEventListener('keydown', e => { if (e.key==='Escape') window.closeSidebar(); });
+
+  const initials = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-name').textContent   = `${user.firstName} ${user.firstSurname}`;
+  document.getElementById('sb-sub').textContent    = admin ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
+  document.getElementById('tb-avatar').textContent = initials;
+  document.getElementById('tb-name').textContent   = user.firstName;
+
+  const badge = document.getElementById('tb-badge');
+  if (admin) { badge.textContent='Admin'; badge.style.background='#111111'; badge.style.color='#F87171'; }
+  else        { badge.textContent='Estudiante'; badge.style.background='#FEE2E2'; badge.style.color='#D41224'; }
+
+  if (admin) document.getElementById('admin-nav').style.display = 'block';
+  document.getElementById('logout-btn').addEventListener('click', logout);
+
+  // ── MOCK TESTS DATA ──────────────────────────────────────────────────────
+  // Basado en DataInitializer: COM001-COM004 + Lectura Crítica (Saber Pro)
+  // Tests que el admin crearía en un entorno real
+  const TESTS = [
+    {
+      id:'TST00001', competenceId:'COM001', competenceKey:'lc',
+      competenceName:'Lectura Crítica',
+      color:'#D41224', bg:'#FEE2E2', short:'LC',
+      testName:'Simulacro Lectura Crítica — Nivel I',
+      description:'Analiza textos argumentativos, expositivos y narrativos. Evalúa comprensión lectora e inferencia.',
+      durationSeconds:2700, questionsToPresent:30, testMode:'EXAM',
+      difficulty:'M', attempts:142, avgScore:72.4, myBest:78,
+    },
+    {
+      id:'TST00002', competenceId:'COM001', competenceKey:'lc',
+      competenceName:'Lectura Crítica',
+      color:'#D41224', bg:'#FEE2E2', short:'LC',
+      testName:'Práctica Rápida — Textos Argumentativos',
+      description:'Enfocado en estructura argumental, conectores lógicos y tesis principales.',
+      durationSeconds:1200, questionsToPresent:15, testMode:'PRACTICE',
+      difficulty:'B', attempts:98, avgScore:80.1, myBest:85,
+    },
+    {
+      id:'TST00003', competenceId:'COM003', competenceKey:'rq',
+      competenceName:'Razonamiento Cuantitativo',
+      color:'#2563EB', bg:'#DBEAFE', short:'RC',
+      testName:'Simulacro Razonamiento Cuantitativo — Completo',
+      description:'Cubre álgebra, estadística, probabilidad y resolución de problemas matemáticos de nivel universitario.',
+      durationSeconds:3600, questionsToPresent:40, testMode:'EXAM',
+      difficulty:'A', attempts:87, avgScore:65.3, myBest:62,
+    },
+    {
+      id:'TST00004', competenceId:'COM003', competenceKey:'rq',
+      competenceName:'Razonamiento Cuantitativo',
+      color:'#2563EB', bg:'#DBEAFE', short:'RC',
+      testName:'Cronometrado — Cálculo e Interpretación',
+      description:'Simulacro con tiempo reducido. Pon a prueba tu velocidad y precisión en análisis numérico.',
+      durationSeconds:1800, questionsToPresent:20, testMode:'TIMED',
+      difficulty:'M', attempts:54, avgScore:68.7, myBest:65,
+    },
+    {
+      id:'TST00005', competenceId:'COM001', competenceKey:'cc',
+      competenceName:'Competencias Ciudadanas',
+      color:'#059669', bg:'#D1FAE5', short:'CC',
+      testName:'Simulacro Comp. Ciudadanas — Módulo I',
+      description:'Evalúa conocimiento en convivencia, participación ciudadana, pluralidad y derechos constitucionales.',
+      durationSeconds:2400, questionsToPresent:25, testMode:'EXAM',
+      difficulty:'M', attempts:116, avgScore:78.2, myBest:82,
+    },
+    {
+      id:'TST00006', competenceId:'COM001', competenceKey:'cc',
+      competenceName:'Competencias Ciudadanas',
+      color:'#059669', bg:'#D1FAE5', short:'CC',
+      testName:'Práctica — Derechos y Constitución',
+      description:'Ejercicios de comprensión constitucional y análisis de casos ciudadanos reales.',
+      durationSeconds:900, questionsToPresent:10, testMode:'PRACTICE',
+      difficulty:'B', attempts:73, avgScore:84.5, myBest:90,
+    },
+    {
+      id:'TST00007', competenceId:'COM002', competenceKey:'ce',
+      competenceName:'Comunicación Escrita',
+      color:'#7C3AED', bg:'#EDE9FE', short:'CE',
+      testName:'Simulacro Comunicación Escrita — Completo',
+      description:'Producción textual, coherencia discursiva, uso del idioma y organización de ideas.',
+      durationSeconds:3000, questionsToPresent:35, testMode:'EXAM',
+      difficulty:'A', attempts:63, avgScore:70.8, myBest:74,
+    },
+    {
+      id:'TST00008', competenceId:'COM002', competenceKey:'ce',
+      competenceName:'Comunicación Escrita',
+      color:'#7C3AED', bg:'#EDE9FE', short:'CE',
+      testName:'Práctica — Redacción y Cohesión Textual',
+      description:'Enfocado en conectores, estructura de párrafos y estrategias discursivas.',
+      durationSeconds:1500, questionsToPresent:18, testMode:'PRACTICE',
+      difficulty:'M', attempts:45, avgScore:73.2, myBest:70,
+    },
+    {
+      id:'TST00009', competenceId:'COM004', competenceKey:'en',
+      competenceName:'Inglés',
+      color:'#D97706', bg:'#FEF3C7', short:'IN',
+      testName:'Simulacro Inglés — Comprensión Lectora B1',
+      description:'Reading comprehension con textos de nivel B1. Vocabulario, gramática y comprensión global.',
+      durationSeconds:2700, questionsToPresent:30, testMode:'EXAM',
+      difficulty:'M', attempts:59, avgScore:61.4, myBest:58,
+    },
+    {
+      id:'TST00010', competenceId:'COM004', competenceKey:'en',
+      competenceName:'Inglés',
+      color:'#D97706', bg:'#FEF3C7', short:'IN',
+      testName:'Práctica Inglés — Vocabulario y Estructuras',
+      description:'Ejercicios de gramática funcional, conectores en inglés y uso del vocabulario académico.',
+      durationSeconds:1200, questionsToPresent:15, testMode:'PRACTICE',
+      difficulty:'B', attempts:81, avgScore:65.9, myBest:62,
+    },
+    {
+      id:'TST00011', competenceId:'COM001', competenceKey:'lc',
+      competenceName:'Lectura Crítica',
+      color:'#D41224', bg:'#FEE2E2', short:'LC',
+      testName:'Cronometrado — Lectura Crítica Intensiva',
+      description:'Formato exigente con tiempo reducido por pregunta. Ideal para preparación final.',
+      durationSeconds:1500, questionsToPresent:20, testMode:'TIMED',
+      difficulty:'A', attempts:31, avgScore:69.3, myBest:null,
+    },
+    {
+      id:'TST00012', competenceId:'COM003', competenceKey:'rq',
+      competenceName:'Razonamiento Cuantitativo',
+      color:'#2563EB', bg:'#DBEAFE', short:'RC',
+      testName:'Práctica — Estadística y Probabilidad',
+      description:'Ejercicios focalizados en estadística descriptiva, probabilidad y análisis de datos.',
+      durationSeconds:1800, questionsToPresent:20, testMode:'PRACTICE',
+      difficulty:'M', attempts:48, avgScore:67.1, myBest:null,
+    },
+  ];
+
+  let currentComp = 'ALL';
+  let currentMode = 'ALL';
+  let searchTerm  = '';
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function renderTests() {
+    const grid  = document.getElementById('tests-grid');
+    const empty = document.getElementById('empty-state');
+
+    const filtered = TESTS.filter(t => {
+      const matchComp = currentComp === 'ALL' || t.competenceKey === currentComp;
+      const matchMode = currentMode === 'ALL' || t.testMode === currentMode;
+      const matchSearch = searchTerm === '' ||
+        t.testName.toLowerCase().includes(searchTerm) ||
+        t.competenceName.toLowerCase().includes(searchTerm) ||
+        t.description.toLowerCase().includes(searchTerm);
+      return matchComp && matchMode && matchSearch;
+    });
+
+    document.getElementById('count-total').textContent = filtered.length;
+
+    grid.innerHTML = '';
+    if (filtered.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    filtered.forEach(t => {
+      const durMin  = Math.floor(t.durationSeconds / 60);
+      const diffLabels = { B:'Básico', M:'Medio', A:'Alto' };
+      const modeLabels = { PRACTICE:'Práctica', EXAM:'Examen', TIMED:'Cronometrado' };
+      const modeIcons  = { PRACTICE:'ti-leaf', EXAM:'ti-school', TIMED:'ti-clock' };
+
+      const card = document.createElement('div');
+      card.className = 'test-card';
+      card.innerHTML = `
+        <!-- Card accent bar -->
+        <div style="height:4px;background:linear-gradient(to right,${t.color},${t.color}99);"></div>
+
+        <div class="test-card-body">
+          <!-- Header -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+              <div style="width:40px;height:40px;border-radius:11px;background:${t.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:13px;font-weight:900;color:${t.color};">${t.short}</span>
+              </div>
+              <div style="min-width:0;">
+                <p style="font-size:10px;font-weight:700;color:${t.color};text-transform:uppercase;letter-spacing:0.5px;margin:0 0 2px;">${t.competenceName}</p>
+                <h3 style="font-size:14px;font-weight:800;color:#111111;margin:0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" title="${t.testName}">${t.testName}</h3>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+              <span class="mode-badge mode-${t.testMode}">
+                <span class="ti ${modeIcons[t.testMode]}" style="font-size:10px;"></span>
+                ${modeLabels[t.testMode]}
+              </span>
+              <span class="mode-badge diff-${t.difficulty}" style="padding:3px 8px;">
+                ${diffLabels[t.difficulty]}
+              </span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <p style="font-size:12.5px;color:#6B7280;line-height:1.65;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${t.description}</p>
+
+          <!-- Meta row -->
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
+              <span class="ti ti-clock" style="font-size:13px;color:#C0BDB5;"></span>
+              <span style="font-weight:600;">${durMin} min</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
+              <span class="ti ti-help-circle" style="font-size:13px;color:#C0BDB5;"></span>
+              <span style="font-weight:600;">${t.questionsToPresent} preguntas</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
+              <span class="ti ti-users" style="font-size:13px;color:#C0BDB5;"></span>
+              <span style="font-weight:600;">${t.attempts} intentos</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
+              <span class="ti ti-chart-bar" style="font-size:13px;color:#C0BDB5;"></span>
+              <span style="font-weight:600;">Prom: ${t.avgScore}</span>
+            </div>
+          </div>
+
+          ${t.myBest !== null ? `
+          <!-- My best score -->
+          <div style="margin-top:12px;padding:8px 12px;background:${t.bg};border-radius:9px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:11px;font-weight:600;color:${t.color};display:flex;align-items:center;gap:5px;">
+              <span class="ti ti-star" style="font-size:12px;"></span> Mi mejor puntaje
+            </span>
+            <span style="font-size:16px;font-weight:900;color:${t.color};">${t.myBest}<span style="font-size:11px;font-weight:600;color:${t.color}aa;">/100</span></span>
+          </div>` : `
+          <!-- No attempts yet -->
+          <div style="margin-top:12px;padding:8px 12px;background:#F9F8F5;border-radius:9px;border:1px dashed #E8E5E0;display:flex;align-items:center;gap:6px;">
+            <span class="ti ti-flag" style="color:#C0BDB5;font-size:13px;"></span>
+            <span style="font-size:11px;font-weight:600;color:#A09990;">Sin intentos aún — ¡sé el primero!</span>
+          </div>`}
+        </div>
+
+        <div class="test-card-footer">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:11px;color:#A09990;">Puntaje promedio global:</span>
+            <span style="font-size:13px;font-weight:800;color:${t.color};">${t.avgScore}/100</span>
+          </div>
+          <button class="btn-start" onclick="startTest('${t.id}','${t.competenceId}')">
+            <span class="ti ti-player-play" style="font-size:13px;"></span>
+            ${t.myBest !== null ? 'Reintentar' : 'Iniciar test'}
+          </button>
+        </div>`;
+
+      grid.appendChild(card);
+    });
+  }
+
+  // ── Start test ────────────────────────────────────────────────────────────
+  window.startTest = (testId, competenceId) => {
+    // En producción esto llama a POST /api/trieds/start y redirige al test
+    const proceed = confirm(`¿Iniciar este test?\n\nSe registrará un nuevo intento en tu historial.`);
+    if (proceed) {
+      alert('🚧 Módulo de examen en construcción.\nConéctate al backend con POST /api/trieds/start');
+    }
+  };
+
+  // ── Filters ───────────────────────────────────────────────────────────────
+  window.filterComp = (key, btn) => {
+    currentComp = key;
+    document.querySelectorAll('.filter-pill').forEach(p => {
+      if (!p.id.startsWith('mode-')) p.classList.remove('active');
+    });
+    btn.classList.add('active');
+    renderTests();
+  };
+
+  window.filterMode = (mode, btn) => {
+    currentMode = mode;
+    ['mode-all','mode-PRACTICE','mode-EXAM','mode-TIMED'].forEach(id => {
+      document.getElementById(id)?.classList.remove('active');
+    });
+    btn.classList.add('active');
+    renderTests();
+  };
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', (e) => {
+    searchTerm = e.target.value.toLowerCase().trim();
+    renderTests();
+  });
+
+  // ── Read URL param ────────────────────────────────────────────────────────
+  const urlParams = new URLSearchParams(window.location.search);
+  const cParam    = urlParams.get('c');
+  if (cParam) {
+    currentComp = cParam;
+    // Mark correct pill active
+    document.querySelectorAll('.filter-pill').forEach(p => {
+      p.classList.remove('active');
+      if (p.getAttribute('onclick')?.includes(`'${cParam}'`)) p.classList.add('active');
+    });
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  renderTests();
+</script>
+
+</BaseLayout>

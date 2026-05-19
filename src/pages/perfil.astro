@@ -1,308 +1,675 @@
 ---
+// RazonaPro — Perfil de usuario (estilo dashboard)
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
 ---
 
-<BaseLayout title="Mi perfil · RazonaPro">
-  <Navbar />
+<BaseLayout title="Mi Perfil · RazonaPro">
 
-  <main class="flex-1 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm text-gray-400 mb-8">
-        <a href="/dashboard" class="hover:text-ufpso transition-colors">Dashboard</a>
-        <span class="ti ti-chevron-right text-xs"></span>
-        <span class="text-gray-600 font-medium">Mi perfil</span>
-      </nav>
-
-      <!-- Loading skeleton -->
-      <div id="skeleton" class="space-y-5">
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse">
-          <div class="flex items-center gap-5">
-            <div class="w-20 h-20 rounded-2xl bg-gray-200"></div>
-            <div class="space-y-2">
-              <div class="h-5 w-48 bg-gray-200 rounded"></div>
-              <div class="h-3 w-32 bg-gray-100 rounded"></div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse space-y-4">
-          <div class="h-3 w-24 bg-gray-200 rounded"></div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="h-10 bg-gray-100 rounded-xl"></div>
-            <div class="h-10 bg-gray-100 rounded-xl"></div>
-            <div class="h-10 bg-gray-100 rounded-xl"></div>
-            <div class="h-10 bg-gray-100 rounded-xl"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contenido real (oculto hasta que carga JS) -->
-      <div id="profile-content" class="hidden space-y-5">
-
-        <!-- Header card -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-
-            <!-- Avatar generado con iniciales -->
-            <div id="avatar"
-              class="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-black text-white flex-shrink-0"
-              style="background: linear-gradient(135deg, #D41224 0%, #9B1F24 100%)">
-            </div>
-
-            <div class="flex-1 min-w-0">
-              <h1 id="full-name" class="text-2xl font-bold text-gray-900 truncate"></h1>
-              <div class="flex flex-wrap items-center gap-3 mt-2">
-                <span id="role-badge"
-                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold">
-                </span>
-                <span id="user-id" class="text-xs text-gray-400 font-mono"></span>
-              </div>
-            </div>
-
-            <!-- Acción logout -->
-            <button
-              id="logout-btn"
-              class="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm
-                     text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
-            >
-              <span class="ti ti-logout"></span>
-              Cerrar sesión
-            </button>
-
-          </div>
-        </div>
-
-        <!-- Info de cuenta -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-5">
-            Información de cuenta
-          </h2>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-            <div class="space-y-1">
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Primer nombre</p>
-              <p id="info-firstName" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
-            </div>
-
-            <div class="space-y-1">
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Primer apellido</p>
-              <p id="info-firstSurname" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
-            </div>
-
-            <div class="space-y-1 sm:col-span-2">
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Correo electrónico</p>
-              <p id="info-email" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl font-mono"></p>
-            </div>
-
-            <div id="program-row" class="space-y-1 hidden">
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Programa académico</p>
-              <p id="info-program" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
-            </div>
-
-            <div class="space-y-1">
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Tipo de usuario</p>
-              <p id="info-userType" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Info del token JWT -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-5">
-            Sesión activa
-          </h2>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-            <div class="space-y-1">
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Sesión iniciada</p>
-              <p id="info-iat" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl"></p>
-            </div>
-
-            <div class="space-y-1">
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Expira</p>
-              <div class="flex items-center gap-2">
-                <p id="info-exp" class="text-sm text-gray-800 font-medium py-2.5 px-4 bg-gray-50 rounded-xl flex-1"></p>
-                <span id="exp-badge" class="text-xs px-2 py-1 rounded-full font-semibold"></span>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Barra de tiempo restante -->
-          <div class="mt-5">
-            <div class="flex justify-between text-xs text-gray-400 mb-1.5">
-              <span>Tiempo de sesión restante</span>
-              <span id="time-remaining"></span>
-            </div>
-            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div id="session-bar"
-                class="h-full rounded-full transition-all duration-1000"
-                style="width: 0%">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Acciones rápidas -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-5">
-            Acciones rápidas
-          </h2>
-          <div class="flex flex-wrap gap-3">
-            <a href="/dashboard"
-              class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100
-                     text-sm text-gray-600 font-medium transition-all">
-              <span class="ti ti-layout-dashboard text-base"></span>
-              Ir al dashboard
-            </a>
-            <a id="link-intentos" href="#"
-              class="hidden items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100
-                     text-sm text-gray-600 font-medium transition-all">
-              <span class="ti ti-clipboard-list text-base"></span>
-              Mis intentos
-            </a>
-            <button
-              id="logout-btn-2"
-              class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100
-                     text-sm text-red-600 font-medium transition-all">
-              <span class="ti ti-logout text-base"></span>
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <Footer />
-</BaseLayout>
-
-<style>
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .5; }
+<style is:global>
+  body {
+    height: 100vh; overflow: hidden;
+    background: #F2F0EC;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
-  .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+  .db-root { flex: 1; display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 242px; min-width: 242px;
+    background: #111111;
+    display: flex; flex-direction: column;
+    overflow-y: auto; overflow-x: hidden;
+    border-right: 1px solid rgba(255,255,255,0.055);
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 100;
+  }
+
+  #overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 99;
+    backdrop-filter: blur(2px);
+  }
+  #overlay.open { display: block; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px; color: rgba(255,255,255,0.45);
+    font-size: 13.5px; font-weight: 500; border-radius: 9px;
+    text-decoration: none; transition: all 0.15s; cursor: pointer;
+    margin-bottom: 1px; border: none; background: none; width: 100%;
+    text-align: left; font-family: inherit;
+  }
+  .nav-item:hover  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88); }
+  .nav-item.active { background: rgba(212,18,36,0.18); color: #F87171; }
+  .nav-item .ti    { font-size: 16px; flex-shrink: 0; }
+  .nav-section {
+    color: rgba(255,255,255,0.22); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.9px; text-transform: uppercase;
+    padding: 0 10px; margin: 14px 0 5px; display: block;
+  }
+
+  /* ── CARDS ── */
+  .card     { background: white; border-radius: 16px; padding: 20px 22px; border: 1px solid #E8E5E0; }
+  .info-row { display: flex; flex-direction: column; gap: 3px; }
+  .info-label { font-size: 10px; font-weight: 700; color: #A09990; text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-value { font-size: 13.5px; font-weight: 600; color: #374151; padding: 8px 12px; background: #F9F8F5; border-radius: 9px; border: 1px solid #F3F1EE; }
+
+  /* ── STAT CARDS ── */
+  .stat-card { background: white; border-radius: 14px; padding: 16px 18px; border: 1px solid #E8E5E0; }
+  .stat-num  { font-size: 26px; font-weight: 900; letter-spacing: -0.8px; margin: 0; line-height: 1; }
+
+  /* ── BAR ── */
+  .bar-wrap { height: 6px; background: #F3F1EE; border-radius: 3px; overflow: hidden; margin: 6px 0 3px; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 1.3s cubic-bezier(0.4,0,0.2,1); width: 0%; }
+
+  /* ── SESSION BAR ── */
+  .session-bar-track { height: 8px; background: #F3F1EE; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+  .session-bar-fill  { height: 100%; border-radius: 4px; transition: width 1s ease; }
+
+  /* ── ACTIVITY ── */
+  .activity-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F3F1EE; }
+  .activity-row:last-child { border-bottom: none; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .anim    { animation: fadeUp 0.45s ease both; }
+  .anim-d1 { animation-delay:.05s; }
+  .anim-d2 { animation-delay:.12s; }
+  .anim-d3 { animation-delay:.18s; }
+  .anim-d4 { animation-delay:.24s; }
+  .anim-d5 { animation-delay:.30s; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#D1CFC8; border-radius:10px; }
+
+  /* ── EDIT FIELD ── */
+  .edit-input {
+    width: 100%; padding: 8px 12px; border: 1.5px solid #E8E5E0;
+    border-radius: 9px; font-family: inherit; font-size: 13.5px;
+    color: #374151; background: white; outline: none;
+    transition: border-color 0.2s;
+  }
+  .edit-input:focus { border-color: #D41224; }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .badge-student { background: #FEE2E2; color: #D41224; }
+  .badge-admin   { background: #1F1F1F; color: #F87171; }
+  .badge-verified{ background: #D1FAE5; color: #059669; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 1023px) {
+    body { overflow: auto; }
+    .db-root { overflow: visible; height: auto; min-height: 100vh; }
+    #sidebar {
+      position: fixed; top:0; left:0; bottom:0;
+      transform: translateX(-260px);
+    }
+    #sidebar.open { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,0.28); }
+    #hamburger     { display: flex !important; }
+    #main-area     { width: 100%; }
+    #stats-grid    { grid-template-columns: repeat(2,1fr) !important; }
+    #content-grid  { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 639px) {
+    #main-scroll  { padding: 14px 14px 0 !important; }
+    #search-wrap  { display: none !important; }
+    #mobile-logo  { display: flex !important; }
+    #tb-name      { display: none; }
+    #stats-grid   { grid-template-columns: repeat(2,1fr) !important; gap:10px !important; }
+    .stat-num     { font-size: 22px !important; }
+  }
 </style>
 
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<div class="db-root">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside id="sidebar">
+    <div style="padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
+        <div style="width:35px;height:35px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(212,18,36,0.35);">
+          <span class="ti ti-brain" style="color:white;font-size:18px;"></span>
+        </div>
+        <div>
+          <p style="color:white;font-weight:900;font-size:16px;letter-spacing:-0.4px;margin:0;line-height:1.1;">Razona<span style="color:#D41224;">Pro</span></p>
+          <p style="color:rgba(255,255,255,0.28);font-size:9px;margin:0;letter-spacing:0.9px;text-transform:uppercase;">Plataforma Saber Pro · UFPSO</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="sb-avatar" style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:14px;flex-shrink:0;"></div>
+        <div style="min-width:0;flex:1;">
+          <p id="sb-name" style="color:white;font-weight:700;font-size:13px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
+          <p id="sb-sub"  style="color:rgba(255,255,255,0.32);font-size:11px;margin:0;"></p>
+        </div>
+        <a href="/perfil" style="color:#F87171;text-decoration:none;padding:4px;flex-shrink:0;">
+          <span class="ti ti-settings" style="font-size:15px;"></span>
+        </a>
+      </div>
+    </div>
+
+    <nav style="padding:10px 10px;flex:1;">
+      <span class="nav-section">Principal</span>
+      <a href="/dashboard"        class="nav-item" onclick="closeSidebar()"><span class="ti ti-home"></span> Inicio</a>
+      <a href="/tests"            class="nav-item" onclick="closeSidebar()"><span class="ti ti-clipboard-list"></span> Tests disponibles</a>
+      <a href="/ai-practice"      class="nav-item" onclick="closeSidebar()"><span class="ti ti-robot"></span> Práctica con IA</a>
+
+      <span class="nav-section">Competencias Saber Pro</span>
+      <a href="/tests?c=lc" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#D41224;flex-shrink:0;"></span> Lectura Crítica</a>
+      <a href="/tests?c=rq" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#2563EB;flex-shrink:0;"></span> Razonamiento Cuantit.</a>
+      <a href="/tests?c=cc" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#059669;flex-shrink:0;"></span> Comp. Ciudadanas</a>
+      <a href="/tests?c=ce" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#7C3AED;flex-shrink:0;"></span> Comunicación Escrita</a>
+      <a href="/tests?c=en" class="nav-item" style="padding-left:10px;" onclick="closeSidebar()"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span> Inglés</a>
+
+      <span class="nav-section">Mi cuenta</span>
+      <a href="/rankings"     class="nav-item" onclick="closeSidebar()"><span class="ti ti-trophy"></span> Rankings</a>
+      <a href="/mis-intentos" class="nav-item" onclick="closeSidebar()"><span class="ti ti-history"></span> Mi historial</a>
+      <a href="/perfil"       class="nav-item active" onclick="closeSidebar()"><span class="ti ti-user-circle"></span> Mi perfil</a>
+
+      <div id="admin-nav" style="display:none;">
+        <span class="nav-section" style="color:rgba(212,18,36,0.55);">Administración</span>
+        <a href="/admin/estudiantes" class="nav-item" onclick="closeSidebar()"><span class="ti ti-users"></span> Estudiantes</a>
+        <a href="/admin/tests"       class="nav-item" onclick="closeSidebar()"><span class="ti ti-file-description"></span> Gestión Tests</a>
+        <a href="/admin/preguntas"   class="nav-item" onclick="closeSidebar()"><span class="ti ti-list-check"></span> Banco Preguntas</a>
+        <a href="/admin/programas"   class="nav-item" onclick="closeSidebar()"><span class="ti ti-school"></span> Programas</a>
+      </div>
+    </nav>
+
+    <div style="padding:10px 10px;border-top:1px solid rgba(255,255,255,0.06);">
+      <button id="logout-btn" class="nav-item" style="color:rgba(255,100,100,0.55);"
+        onmouseover="this.style.background='rgba(212,18,36,0.09)';this.style.color='rgba(255,100,100,0.85)';"
+        onmouseout="this.style.background='';this.style.color='rgba(255,100,100,0.55)';">
+        <span class="ti ti-logout"></span> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <div id="main-area" style="flex:1;display:flex;overflow:hidden;background:#F2F0EC;">
+    <main id="main-scroll" style="flex:1;overflow-y:auto;padding:22px 24px 0;">
+
+      <!-- TOPBAR -->
+      <div class="anim" style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+        <button id="hamburger" onclick="openSidebar()"
+          style="display:none;width:38px;height:38px;background:white;border:1.5px solid #E8E5E0;
+                 border-radius:10px;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;"
+          onmouseover="this.style.borderColor='#D41224'" onmouseout="this.style.borderColor='#E8E5E0'">
+          <span class="ti ti-menu-2" style="font-size:18px;color:#374151;"></span>
+        </button>
+
+        <div id="mobile-logo" style="display:none;align-items:center;gap:8px;flex-shrink:0;">
+          <div style="width:30px;height:30px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <span class="ti ti-brain" style="color:white;font-size:16px;"></span>
+          </div>
+          <span style="font-weight:900;font-size:15px;letter-spacing:-0.3px;color:#111;">Razona<span style="color:#D41224;">Pro</span></span>
+        </div>
+
+        <div id="search-wrap" style="flex:1;max-width:450px;position:relative;">
+          <span class="ti ti-search" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#B0ADA6;font-size:15px;pointer-events:none;"></span>
+          <input type="text" placeholder="Buscar..." style="width:100%;padding:10px 16px 10px 38px;background:white;border:1.5px solid #E8E5E0;border-radius:12px;font-size:13.5px;color:#374151;font-family:inherit;box-sizing:border-box;" onfocus="this.style.borderColor='#D41224'" onblur="this.style.borderColor='#E8E5E0'">
+        </div>
+
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <div id="tb-user" onclick="window.location='/perfil'"
+            style="display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:white;border:1.5px solid #D41224;border-radius:10px;cursor:pointer;">
+            <div id="tb-avatar" style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:11px;"></div>
+            <span id="tb-name" style="font-size:13px;font-weight:700;color:#374151;"></span>
+            <span id="tb-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BREADCRUMB + TITLE -->
+      <div class="anim anim-d1" style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#A09990;margin-bottom:6px;">
+          <a href="/dashboard" style="color:#A09990;text-decoration:none;" onmouseover="this.style.color='#D41224'" onmouseout="this.style.color='#A09990'">Dashboard</a>
+          <span class="ti ti-chevron-right" style="font-size:11px;"></span>
+          <span style="color:#374151;font-weight:600;">Mi perfil</span>
+        </div>
+        <h1 style="font-size:26px;font-weight:900;color:#111111;margin:0 0 3px;letter-spacing:-0.6px;">Mi Perfil</h1>
+        <p id="welcome-sub" style="color:#857F77;font-size:14px;margin:0;"></p>
+      </div>
+
+      <!-- PROFILE HERO CARD -->
+      <div class="card anim anim-d2" style="margin-bottom:16px;background:linear-gradient(135deg,#111111 0%,#1E1E1E 100%);border:1px solid rgba(255,255,255,0.06);padding:0;overflow:hidden;position:relative;">
+        <!-- Decorative orb -->
+        <div style="position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(212,18,36,0.12);pointer-events:none;"></div>
+        <div style="position:absolute;right:80px;bottom:-40px;width:120px;height:120px;border-radius:50%;background:rgba(212,18,36,0.07);pointer-events:none;"></div>
+
+        <div style="padding:24px 26px;position:relative;display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+          <!-- Avatar grande -->
+          <div style="position:relative;flex-shrink:0;">
+            <div id="hero-avatar" style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:26px;box-shadow:0 8px 24px rgba(212,18,36,0.4);"></div>
+            <div id="hero-status-dot" style="position:absolute;bottom:-3px;right:-3px;width:16px;height:16px;border-radius:50%;background:#22c55e;border:3px solid #111111;"></div>
+          </div>
+
+          <!-- Info -->
+          <div style="flex:1;min-width:180px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+              <h2 id="hero-name" style="color:white;font-weight:900;font-size:20px;margin:0;letter-spacing:-0.4px;"></h2>
+              <span id="hero-badge" class="badge"></span>
+              <span class="badge badge-verified"><span class="ti ti-shield-check" style="font-size:10px;"></span> Verificado</span>
+            </div>
+            <p id="hero-email" style="color:rgba(255,255,255,0.4);font-size:13px;margin:0 0 4px;font-family:monospace;"></p>
+            <p id="hero-program" style="color:rgba(255,255,255,0.28);font-size:12px;margin:0;text-transform:uppercase;letter-spacing:0.5px;"></p>
+          </div>
+
+          <!-- Acciones hero -->
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <a href="/mis-intentos" style="display:flex;align-items:center;gap:6px;padding:9px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.14)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+              <span class="ti ti-history" style="font-size:14px;"></span> Mis intentos
+            </a>
+            <button id="logout-hero" style="display:flex;align-items:center;gap:6px;padding:9px 16px;background:rgba(212,18,36,0.18);border:1px solid rgba(212,18,36,0.35);border-radius:10px;color:#F87171;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(212,18,36,0.28)'" onmouseout="this.style.background='rgba(212,18,36,0.18)'">
+              <span class="ti ti-logout" style="font-size:14px;"></span> Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+        <!-- Meta bar inferior -->
+        <div style="border-top:1px solid rgba(255,255,255,0.06);padding:12px 26px;display:flex;gap:24px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="ti ti-id-badge" style="color:rgba(255,255,255,0.3);font-size:13px;"></span>
+            <span id="hero-id" style="color:rgba(255,255,255,0.35);font-size:12px;font-family:monospace;"></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="ti ti-calendar" style="color:rgba(255,255,255,0.3);font-size:13px;"></span>
+            <span style="color:rgba(255,255,255,0.35);font-size:12px;">Miembro desde hoy</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="ti ti-circle-check" style="color:#22c55e;font-size:13px;"></span>
+            <span style="color:rgba(255,255,255,0.35);font-size:12px;">Sesión activa</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS GRID -->
+      <div id="stats-grid" class="anim anim-d3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:16px;">
+        <div class="stat-card" style="border-left:3px solid #D41224;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+            <span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Tests realizados</span>
+            <div style="width:29px;height:29px;background:#FEE2E2;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+              <span class="ti ti-clipboard-check" style="color:#D41224;font-size:14px;"></span>
+            </div>
+          </div>
+          <p class="stat-num" style="color:#D41224;">23</p>
+          <p style="font-size:11px;color:#A09990;margin:4px 0 0;">simulacros</p>
+        </div>
+        <div class="stat-card" style="border-left:3px solid #2563EB;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+            <span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Promedio global</span>
+            <div style="width:29px;height:29px;background:#DBEAFE;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+              <span class="ti ti-chart-line" style="color:#2563EB;font-size:14px;"></span>
+            </div>
+          </div>
+          <p class="stat-num" style="color:#2563EB;">74.5</p>
+          <p style="font-size:11px;color:#A09990;margin:4px 0 0;">puntos / 100</p>
+        </div>
+        <div class="stat-card" style="border-left:3px solid #D97706;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+            <span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Posición</span>
+            <div style="width:29px;height:29px;background:#FEF3C7;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+              <span class="ti ti-trophy" style="color:#D97706;font-size:14px;"></span>
+            </div>
+          </div>
+          <p class="stat-num" style="color:#D97706;">#15</p>
+          <p style="font-size:11px;color:#A09990;margin:4px 0 0;">de 142</p>
+        </div>
+        <div class="stat-card" style="border-left:3px solid #059669;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+            <span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Racha activa</span>
+            <div style="width:29px;height:29px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+              <span class="ti ti-flame" style="color:#059669;font-size:14px;"></span>
+            </div>
+          </div>
+          <p class="stat-num" style="color:#059669;">7</p>
+          <p style="font-size:11px;color:#A09990;margin:4px 0 0;">días consecutivos</p>
+        </div>
+      </div>
+
+      <!-- CONTENT GRID -->
+      <div id="content-grid" class="anim anim-d4" style="display:grid;grid-template-columns:1fr 300px;gap:16px;">
+
+        <!-- LEFT COL -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Información de cuenta -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+              <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0;">Información de cuenta</h2>
+              <button id="edit-toggle" onclick="toggleEdit()" style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:#F9F8F5;border:1.5px solid #E8E5E0;border-radius:9px;font-size:12px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#D41224';this.style.color='#D41224'" onmouseout="this.style.borderColor='#E8E5E0';this.style.color='#374151'">
+                <span class="ti ti-edit" style="font-size:13px;"></span> Editar
+              </button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div class="info-row">
+                <span class="info-label">Primer nombre</span>
+                <div id="field-firstName" class="info-value"></div>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Primer apellido</span>
+                <div id="field-firstSurname" class="info-value"></div>
+              </div>
+              <div class="info-row" style="grid-column:1/-1;">
+                <span class="info-label">Correo electrónico</span>
+                <div id="field-email" class="info-value" style="font-family:monospace;font-size:13px;"></div>
+              </div>
+              <div class="info-row" id="program-row" style="display:none;">
+                <span class="info-label">Programa académico</span>
+                <div id="field-program" class="info-value"></div>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Tipo de usuario</span>
+                <div id="field-userType" class="info-value"></div>
+              </div>
+              <div class="info-row">
+                <span class="info-label">ID de cuenta</span>
+                <div id="field-id" class="info-value" style="font-family:monospace;font-size:12px;color:#A09990;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Competencias -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+              <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0;">Progreso por competencia</h2>
+              <a href="/tests" style="font-size:13px;color:#D41224;font-weight:700;text-decoration:none;">Practicar →</a>
+            </div>
+            <div id="comp-bars" style="display:flex;flex-direction:column;gap:16px;"></div>
+          </div>
+
+          <!-- Actividad reciente -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0;">Actividad reciente</h2>
+              <a href="/mis-intentos" style="font-size:13px;color:#D41224;font-weight:700;text-decoration:none;">Ver todo →</a>
+            </div>
+            <div id="activity-list"></div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COL -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Sesión activa -->
+          <div class="card">
+            <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0 0 14px;">Sesión activa</h2>
+
+            <div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F9F8F5;border-radius:11px;border:1px solid #F3F1EE;margin-bottom:14px;">
+              <div style="width:36px;height:36px;background:#D1FAE5;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span class="ti ti-lock-open" style="color:#059669;font-size:16px;"></span>
+              </div>
+              <div>
+                <p style="font-size:12px;font-weight:700;color:#374151;margin:0 0 1px;">Token JWT activo</p>
+                <p style="font-size:11px;color:#A09990;margin:0;">Autenticación verificada</p>
+              </div>
+              <span id="session-status" style="margin-left:auto;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:700;"></span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div class="info-row">
+                <span class="info-label">Sesión iniciada</span>
+                <p id="jwt-iat" class="info-value" style="margin:0;"></p>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Expira</span>
+                <p id="jwt-exp" class="info-value" style="margin:0;"></p>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#A09990;margin-bottom:6px;">
+                <span>Tiempo restante de sesión</span>
+                <span id="jwt-remain"></span>
+              </div>
+              <div class="session-bar-track">
+                <div id="session-fill" class="session-bar-fill" style="width:0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div style="background:#111111;border-radius:16px;padding:18px 20px;">
+            <p style="font-size:13px;font-weight:800;color:white;margin:0 0 12px;display:flex;align-items:center;gap:7px;">
+              <span class="ti ti-grid-dots" style="color:#D41224;font-size:16px;"></span> Acciones rápidas
+            </p>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <a href="/dashboard" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                <span class="ti ti-home" style="font-size:14px;"></span> Ir al dashboard
+              </a>
+              <a href="/tests" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(212,18,36,0.15);border:1px solid rgba(212,18,36,0.25);border-radius:10px;color:#F87171;font-size:13px;font-weight:600;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='rgba(212,18,36,0.22)'" onmouseout="this.style.background='rgba(212,18,36,0.15)'">
+                <span class="ti ti-clipboard-list" style="font-size:14px;"></span> Tests disponibles
+              </a>
+              <a href="/mis-intentos" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                <span class="ti ti-history" style="font-size:14px;"></span> Mi historial
+              </a>
+              <a href="/rankings" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                <span class="ti ti-trophy" style="font-size:14px;"></span> Rankings
+              </a>
+            </div>
+          </div>
+
+          <!-- Logros -->
+          <div class="card">
+            <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0 0 14px;">Logros</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="text-align:center;padding:12px 8px;background:#FEF3C7;border-radius:11px;border:1px solid #FDE68A;">
+                <div style="font-size:22px;margin-bottom:4px;">🥇</div>
+                <p style="font-size:11px;font-weight:700;color:#92400E;margin:0;line-height:1.3;">Primer simulacro</p>
+              </div>
+              <div style="text-align:center;padding:12px 8px;background:#D1FAE5;border-radius:11px;border:1px solid #A7F3D0;">
+                <div style="font-size:22px;margin-bottom:4px;">🔥</div>
+                <p style="font-size:11px;font-weight:700;color:#065F46;margin:0;line-height:1.3;">Racha de 7 días</p>
+              </div>
+              <div style="text-align:center;padding:12px 8px;background:#EDE9FE;border-radius:11px;border:1px solid #DDD6FE;">
+                <div style="font-size:22px;margin-bottom:4px;">🎯</div>
+                <p style="font-size:11px;font-weight:700;color:#4C1D95;margin:0;line-height:1.3;">Puntaje perfecto</p>
+              </div>
+              <div style="text-align:center;padding:12px 8px;background:#F9F8F5;border-radius:11px;border:1px solid #E8E5E0;">
+                <div style="font-size:22px;margin-bottom:4px;filter:grayscale(1);opacity:0.4;">🏆</div>
+                <p style="font-size:11px;font-weight:700;color:#A09990;margin:0;line-height:1.3;">Top 10 global</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div style="height:28px;"></div>
+    </main>
+  </div>
+</div>
+
 <script>
-  import { requireAuth, logout, getToken } from '../lib/auth';
+  import { requireAuth, isAdmin, logout, getToken } from '../lib/auth';
 
-  // Guard
-  let user: ReturnType<typeof requireAuth>;
-  try {
-    user = requireAuth();
-  } catch {
-    throw new Error('Redirigiendo...');
-  }
+  let user;
+  try { user = requireAuth(); } catch { throw new Error('redir'); }
+  const admin = isAdmin();
 
-  // ── Ocultar skeleton, mostrar contenido ─────────────────────
-  document.getElementById('skeleton')!.classList.add('hidden');
-  const content = document.getElementById('profile-content')!;
-  content.classList.remove('hidden');
+  window.openSidebar = () => {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeSidebar = () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  document.addEventListener('keydown', e => { if (e.key==='Escape') window.closeSidebar(); });
 
-  // ── Avatar con iniciales ─────────────────────────────────────
-  const avatar = document.getElementById('avatar')!;
-  avatar.textContent = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
+  const initials = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
+  const fullName  = `${user.firstName} ${user.firstSurname}`;
 
-  // ── Nombre completo ──────────────────────────────────────────
-  document.getElementById('full-name')!.textContent =
-    `${user.firstName} ${user.firstSurname}`;
+  // Sidebar & topbar
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-name').textContent   = fullName;
+  document.getElementById('sb-sub').textContent    = admin ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
+  document.getElementById('tb-avatar').textContent = initials;
+  document.getElementById('tb-name').textContent   = user.firstName;
 
-  // ── ID ───────────────────────────────────────────────────────
-  document.getElementById('user-id')!.textContent = `ID: ${user.id}`;
+  const badge = document.getElementById('tb-badge');
+  if (admin) { badge.textContent='Admin'; badge.style.background='#111111'; badge.style.color='#F87171'; }
+  else        { badge.textContent='Estudiante'; badge.style.background='#FEE2E2'; badge.style.color='#D41224'; }
 
-  // ── Rol badge ────────────────────────────────────────────────
-  const roleBadge = document.getElementById('role-badge')!;
-  if (user.userType === 'ADMIN') {
-    roleBadge.textContent  = '⚙ Administrador';
-    roleBadge.className   += ' bg-gray-100 text-gray-600';
+  // Hero
+  document.getElementById('hero-avatar').textContent  = initials;
+  document.getElementById('hero-name').textContent    = fullName;
+  document.getElementById('hero-email').textContent   = user.email;
+  document.getElementById('hero-id').textContent      = `ID: ${user.id}`;
+  document.getElementById('welcome-sub').textContent  = `Gestiona tu cuenta y visualiza tu progreso en la plataforma.`;
+
+  const heroBadge = document.getElementById('hero-badge');
+  if (admin) {
+    heroBadge.textContent = '⚙ Administrador';
+    heroBadge.classList.add('badge-admin');
+    document.getElementById('hero-program').textContent = 'UFPSO · Administración';
+    document.getElementById('admin-nav').style.display = 'block';
   } else {
-    roleBadge.textContent  = '🎓 Estudiante';
-    roleBadge.className   += ' bg-red-50 text-ufpso';
+    heroBadge.textContent = '🎓 Estudiante';
+    heroBadge.classList.add('badge-student');
+    document.getElementById('hero-program').textContent = user.programId ? `Programa: ${user.programId}` : 'UFPSO';
   }
 
-  // ── Info campos ──────────────────────────────────────────────
-  document.getElementById('info-firstName')!.textContent    = user.firstName;
-  document.getElementById('info-firstSurname')!.textContent = user.firstSurname;
-  document.getElementById('info-email')!.textContent        = user.email;
-  document.getElementById('info-userType')!.textContent     =
-    user.userType === 'ADMIN' ? 'Administrador' : 'Estudiante';
-
+  // Info fields
+  document.getElementById('field-firstName').textContent    = user.firstName;
+  document.getElementById('field-firstSurname').textContent = user.firstSurname;
+  document.getElementById('field-email').textContent        = user.email;
+  document.getElementById('field-userType').textContent     = admin ? 'Administrador' : 'Estudiante';
+  document.getElementById('field-id').textContent           = user.id;
   if (user.programId) {
-    const programRow = document.getElementById('program-row')!;
-    programRow.classList.remove('hidden');
-    document.getElementById('info-program')!.textContent = user.programId;
+    document.getElementById('program-row').style.display = 'flex';
+    document.getElementById('program-row').style.flexDirection = 'column';
+    document.getElementById('field-program').textContent = user.programId;
   }
 
-  // Mostrar link de intentos solo a estudiantes
-  if (user.userType === 'STUDENT') {
-    const linkIntentos = document.getElementById('link-intentos')!;
-    linkIntentos.classList.remove('hidden');
-    linkIntentos.classList.add('flex');
-    (linkIntentos as HTMLAnchorElement).href = '/mis-intentos';
-  }
+  // Edit toggle (visual only)
+  let editing = false;
+  window.toggleEdit = () => {
+    editing = !editing;
+    document.getElementById('edit-toggle').innerHTML = editing
+      ? '<span class="ti ti-check" style="font-size:13px;"></span> Guardar'
+      : '<span class="ti ti-edit" style="font-size:13px;"></span> Editar';
+    document.getElementById('edit-toggle').style.background    = editing ? '#FEE2E2' : '#F9F8F5';
+    document.getElementById('edit-toggle').style.borderColor   = editing ? '#D41224' : '#E8E5E0';
+    document.getElementById('edit-toggle').style.color         = editing ? '#D41224' : '#374151';
+  };
 
-  // ── Datos del JWT ────────────────────────────────────────────
+  // Competency bars mock
+  const COMPS = [
+    { name:'Lectura Crítica',           short:'LC', score:78, color:'#D41224', bg:'#FEE2E2', trend:+3 },
+    { name:'Razonamiento Cuantitativo', short:'RC', score:65, color:'#2563EB', bg:'#DBEAFE', trend:+1 },
+    { name:'Competencias Ciudadanas',   short:'CC', score:82, color:'#059669', bg:'#D1FAE5', trend:+5 },
+    { name:'Comunicación Escrita',      short:'CE', score:70, color:'#7C3AED', bg:'#EDE9FE', trend:-2 },
+    { name:'Inglés',                    short:'IN', score:58, color:'#D97706', bg:'#FEF3C7', trend:+4 },
+  ];
+
+  const compBars = document.getElementById('comp-bars');
+  COMPS.forEach((c, i) => {
+    const sign = c.trend > 0 ? '+' : '';
+    const tcol = c.trend > 0 ? '#059669' : '#ef4444';
+    const div  = document.createElement('div');
+    div.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          <div style="width:27px;height:27px;border-radius:7px;background:${c.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="font-size:9px;font-weight:900;color:${c.color};">${c.short}</span>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:#374151;">${c.name}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <span style="font-size:11px;font-weight:700;color:${tcol};">${sign}${c.trend} pts</span>
+          <span style="font-size:16px;font-weight:900;color:${c.color};">${c.score}</span>
+          <span style="font-size:11px;color:#A09990;">/100</span>
+        </div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" id="cpbar-${i}" style="background:${c.color};"></div></div>`;
+    compBars.appendChild(div);
+    setTimeout(() => {
+      const bar = document.getElementById(`cpbar-${i}`);
+      if (bar) bar.style.width = `${c.score}%`;
+    }, 400 + i * 80);
+  });
+
+  // Activity mock
+  const ACTIVITIES = [
+    { icon:'ti-clipboard-check', bg:'#FEE2E2', col:'#D41224', text:'Completó simulacro · Lectura Crítica', sub:'Puntaje: 78/100', time:'Hace 2 días' },
+    { icon:'ti-clipboard-check', bg:'#D1FAE5', col:'#059669', text:'Completó simulacro · Comp. Ciudadanas', sub:'Puntaje: 85/100', time:'Hace 4 días' },
+    { icon:'ti-robot',           bg:'#EDE9FE', col:'#7C3AED', text:'Sesión IA · Razonamiento Cuantitativo', sub:'18 preguntas respondidas', time:'Hace 5 días' },
+    { icon:'ti-clipboard-check', bg:'#DBEAFE', col:'#2563EB', text:'Completó simulacro · Comunicación Escrita', sub:'Puntaje: 74/100', time:'Hace 7 días' },
+  ];
+
+  const actList = document.getElementById('activity-list');
+  ACTIVITIES.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'activity-row';
+    div.innerHTML = `
+      <div style="width:36px;height:36px;border-radius:9px;background:${a.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span class="ti ${a.icon}" style="color:${a.col};font-size:16px;"></span>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.text}</p>
+        <p style="font-size:11px;color:#A09990;margin:0;">${a.sub}</p>
+      </div>
+      <span style="font-size:11px;color:#C0BDB5;flex-shrink:0;">${a.time}</span>`;
+    actList.appendChild(div);
+  });
+
+  // JWT info
   const token = getToken();
   if (token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
+      const fmt = (ts) => new Date(ts*1000).toLocaleString('es-CO', { dateStyle:'medium', timeStyle:'short' });
+      document.getElementById('jwt-iat').textContent = fmt(payload.iat);
+      document.getElementById('jwt-exp').textContent = fmt(payload.exp);
 
-      const fmt = (ts: number) =>
-        new Date(ts * 1000).toLocaleString('es-CO', {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-        });
+      const now     = Date.now();
+      const expMs   = payload.exp * 1000;
+      const iatMs   = payload.iat * 1000;
+      const totalMs = expMs - iatMs;
+      const remainMs = expMs - now;
+      const pct = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
 
-      document.getElementById('info-iat')!.textContent = fmt(payload.iat);
-      document.getElementById('info-exp')!.textContent = fmt(payload.exp);
+      const fill = document.getElementById('session-fill');
+      fill.style.width = `${pct}%`;
 
-      const now        = Date.now();
-      const expMs      = payload.exp * 1000;
-      const iatMs      = payload.iat * 1000;
-      const totalMs    = expMs - iatMs;
-      const remainMs   = expMs - now;
-      const pct        = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
-
-      const bar        = document.getElementById('session-bar')!;
-      const expBadge   = document.getElementById('exp-badge')!;
-      const timeRemain = document.getElementById('time-remaining')!;
-
-      bar.style.width = `${pct}%`;
-
+      const statusEl = document.getElementById('session-status');
       if (pct > 50) {
-        bar.style.background = '#22c55e';
-        expBadge.textContent = 'Activa';
-        expBadge.className  += ' bg-green-100 text-green-700';
+        fill.style.background = '#22c55e';
+        statusEl.textContent  = 'Activa'; statusEl.style.background='#D1FAE5'; statusEl.style.color='#059669';
       } else if (pct > 20) {
-        bar.style.background = '#f59e0b';
-        expBadge.textContent = 'Pronto vence';
-        expBadge.className  += ' bg-amber-100 text-amber-700';
+        fill.style.background = '#f59e0b';
+        statusEl.textContent  = 'Pronto vence'; statusEl.style.background='#FEF3C7'; statusEl.style.color='#D97706';
       } else {
-        bar.style.background = '#ef4444';
-        expBadge.textContent = 'Por vencer';
-        expBadge.className  += ' bg-red-100 text-red-700';
+        fill.style.background = '#ef4444';
+        statusEl.textContent  = 'Por vencer'; statusEl.style.background='#FEE2E2'; statusEl.style.color='#D41224';
       }
 
-      // Formato tiempo restante legible
       const hrs  = Math.floor(remainMs / 3_600_000);
       const mins = Math.floor((remainMs % 3_600_000) / 60_000);
-      timeRemain.textContent = hrs > 0 ? `${hrs}h ${mins}m restantes` : `${mins}m restantes`;
-
-    } catch {
-      // Token malformado — no es crítico
-    }
+      document.getElementById('jwt-remain').textContent = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+    } catch {}
   }
 
-  // ── Logout buttons ───────────────────────────────────────────
-  document.getElementById('logout-btn')!.addEventListener('click', logout);
-  document.getElementById('logout-btn-2')!.addEventListener('click', logout);
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', logout);
+  document.getElementById('logout-hero').addEventListener('click', logout);
 </script>
+
+</BaseLayout>

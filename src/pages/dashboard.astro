@@ -1,4 +1,5 @@
 ---
+// RazonaPro — Dashboard (actualizado con conexiones a /tests y /perfil)
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
@@ -95,8 +96,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .cl-dot.now { background: #D41224; }
 
   /* ════ TEST/TREND ROWS ════ */
-  .test-row  { display:flex; align-items:center; padding:10px 12px; border-radius:10px; margin-bottom:6px; border:1px solid #F3F1EE; background:#FAFAF8; transition:all 0.15s; }
-  .test-row:hover { border-color:#E8E5E0; background:white; }
+  .test-row  { display:flex; align-items:center; padding:10px 12px; border-radius:10px; margin-bottom:6px; border:1px solid #F3F1EE; background:#FAFAF8; transition:all 0.15s; cursor:pointer; }
+  .test-row:hover { border-color:#E8E5E0; background:white; transform:translateX(2px); }
   .trend-item { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; border:1px solid #F3F1EE; margin-bottom:8px; cursor:pointer; transition:all 0.15s; }
   .trend-item:hover { border-color:#E8E5E0; background:#FAFAF8; }
 
@@ -117,7 +118,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   #notif-btn:hover { border-color:#D41224 !important; }
 
   /* ══════════════════════════════════════════════════════
-     TABLET  ≤ 1023 px  — sidebar becomes overlay
+     TABLET  ≤ 1023 px
   ══════════════════════════════════════════════════════ */
   @media (max-width: 1023px) {
     body { overflow: auto; }
@@ -144,7 +145,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   /* ══════════════════════════════════════════════════════
-     MOBILE  ≤ 639 px  — compact everything
+     MOBILE  ≤ 639 px
   ══════════════════════════════════════════════════════ */
   @media (max-width: 639px) {
     #main-scroll  { padding: 14px 14px 0 !important; }
@@ -152,38 +153,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     #mobile-logo  { display: flex !important; }
     #tb-name      { display: none; }
 
-    /* Quick actions: horizontal scroll strip */
     .qa-row {
       flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px;
       -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
     .qa-row::-webkit-scrollbar { display: none; }
 
-    /* Stats: 2-col */
     #stats-student,
     #stats-admin { grid-template-columns: repeat(2,1fr) !important; gap:10px !important; }
     .stat-num    { font-size: 24px !important; }
     .stat-card   { padding: 13px 14px !important; }
-
-    /* Cards less padded */
     .card        { padding: 16px 16px !important; border-radius: 14px !important; }
-
-    /* Welcome smaller */
     #welcome-h1  { font-size: 22px !important; }
-
-    /* Topbar */
     #topbar { gap: 8px !important; margin-bottom: 16px !important; }
-
-    /* Last test score */
     #lt-score { font-size: 22px !important; }
-
-    /* Admin grids also single col */
     #admin-content { grid-template-columns: 1fr !important; }
   }
 </style>
 
 
-<!-- Overlay — closes sidebar when tapping outside -->
 <div id="overlay" onclick="closeSidebar()"></div>
 
 <div class="db-root">
@@ -265,7 +253,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <!-- ── TOPBAR ── -->
       <div id="topbar" class="anim" style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
 
-        <!-- Hamburger (shown via CSS on ≤1023px) -->
         <button id="hamburger" onclick="openSidebar()"
           style="display:none;width:38px;height:38px;background:white;border:1.5px solid #E8E5E0;
                  border-radius:10px;align-items:center;justify-content:center;cursor:pointer;
@@ -274,7 +261,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <span class="ti ti-menu-2" style="font-size:18px;color:#374151;"></span>
         </button>
 
-        <!-- Mobile logo (hidden on desktop) -->
         <div id="mobile-logo" style="display:none;align-items:center;gap:8px;flex-shrink:0;">
           <div style="width:30px;height:30px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:8px;display:flex;align-items:center;justify-content:center;">
             <span class="ti ti-brain" style="color:white;font-size:16px;"></span>
@@ -282,7 +268,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <span style="font-weight:900;font-size:15px;letter-spacing:-0.3px;color:#111;">Razona<span style="color:#D41224;">Pro</span></span>
         </div>
 
-        <!-- Search bar (hidden on mobile via CSS) -->
         <div id="search-wrap" style="flex:1;max-width:450px;position:relative;">
           <span class="ti ti-search" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#B0ADA6;font-size:15px;pointer-events:none;"></span>
           <input id="search-input" type="text" placeholder="Buscar competencias, tests..."
@@ -300,6 +285,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <span style="position:absolute;top:7px;right:7px;width:7px;height:7px;background:#D41224;border-radius:50%;border:1.5px solid white;"></span>
           </button>
 
+          <!-- Topbar user — clic va a /perfil -->
           <div id="tb-user" onclick="window.location='/perfil'"
             style="display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:white;
                    border:1.5px solid #E8E5E0;border-radius:10px;cursor:pointer;transition:border-color 0.2s;">
@@ -318,11 +304,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <!-- ── QUICK ACTIONS (student) ── -->
       <div id="qa-student" class="qa-row anim anim-d2">
+        <!-- Todos los botones redirigen a /tests -->
         <a href="/tests"             class="qa-btn" style="background:#D41224;color:white;box-shadow:0 4px 14px rgba(212,18,36,0.28);"><span class="ti ti-clipboard-list"></span> Tests disponibles</a>
         <a href="/ai-practice"       class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-robot"            style="color:#7C3AED;"></span> Práctica con IA</a>
         <a href="/rankings"          class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-trophy"           style="color:#D97706;"></span> Rankings</a>
         <a href="/mis-intentos"      class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-history"          style="color:#059669;"></span> Mi historial</a>
-        <a href="/tests?mode=simul." class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-git-pull-request" style="color:#2563EB;"></span> Simulacros</a>
+        <a href="/tests?mode=TIMED"  class="qa-btn" style="background:white;color:#374151;border:1.5px solid #E8E5E0;"><span class="ti ti-clock"            style="color:#2563EB;"></span> Simulacros</a>
       </div>
 
       <!-- ── QUICK ACTIONS (admin) ── -->
@@ -389,7 +376,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
         <div class="stat-card" style="border-left:3px solid #2563EB;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Tests publicados</span><div style="width:29px;height:29px;background:#DBEAFE;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ti ti-file-description" style="color:#2563EB;font-size:14px;"></span></div></div>
-          <p class="stat-num" style="color:#2563EB;">18</p><p style="font-size:11px;color:#A09990;margin:4px 0 0;">disponibles</p>
+          <p class="stat-num" style="color:#2563EB;">12</p><p style="font-size:11px;color:#A09990;margin:4px 0 0;">disponibles</p>
         </div>
         <div class="stat-card" style="border-left:3px solid #D97706;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><span style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;">Esta semana</span><div style="width:29px;height:29px;background:#FEF3C7;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ti ti-activity" style="color:#D97706;font-size:14px;"></span></div></div>
@@ -411,6 +398,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
               <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0;">Competencias Saber Pro</h2>
+              <!-- CONECTADO a /tests -->
               <a href="/tests" style="font-size:13px;color:#D41224;font-weight:700;text-decoration:none;">Practicar →</a>
             </div>
             <div id="comp-list" style="display:flex;flex-direction:column;gap:16px;"></div>
@@ -446,7 +434,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               <h2 style="font-size:15px;font-weight:800;color:#111111;margin:0;display:flex;align-items:center;gap:7px;">
                 <span class="ti ti-trending-up" style="font-size:17px;color:#D41224;"></span> Actividad en tendencia
               </h2>
-              <button style="font-size:13px;color:#D41224;font-weight:700;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;">Ver más</button>
+              <!-- CONECTADO a /tests -->
+              <a href="/tests" style="font-size:13px;color:#D41224;font-weight:700;text-decoration:none;">Ver tests →</a>
             </div>
             <div id="trend-list"></div>
           </div>
@@ -477,8 +466,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
           </div>
 
-          <!-- Profile card -->
-          <div style="background:linear-gradient(145deg,#D41224 0%,#9B1F24 100%);border-radius:16px;padding:20px;overflow:hidden;position:relative;">
+          <!-- Profile card — CONECTADO a /perfil -->
+          <div style="background:linear-gradient(145deg,#D41224 0%,#9B1F24 100%);border-radius:16px;padding:20px;overflow:hidden;position:relative;cursor:pointer;" onclick="window.location='/perfil'">
             <div style="position:absolute;right:-18px;top:-18px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.08);"></div>
             <div style="position:absolute;right:18px;bottom:-28px;width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
             <div style="position:relative;">
@@ -498,7 +487,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
           </div>
 
-          <!-- CTA -->
+          <!-- CTA — CONECTADO a /tests -->
           <div style="background:#111111;border-radius:16px;padding:18px 20px;">
             <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
               <span class="ti ti-bolt" style="color:#D41224;font-size:19px;"></span>
@@ -506,7 +495,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
             <p style="font-size:12px;color:rgba(255,255,255,0.42);margin:0 0 14px;line-height:1.55;">Toma un simulacro y mejora tu posición en el ranking.</p>
             <a href="/tests" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;background:#D41224;color:white;border-radius:10px;font-size:13px;font-weight:800;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='#9B1F24'" onmouseout="this.style.background='#D41224'">
-              <span class="ti ti-clipboard-list" style="font-size:15px;"></span> Iniciar simulacro
+              <span class="ti ti-clipboard-list" style="font-size:15px;"></span> Ver tests disponibles
             </a>
           </div>
 
@@ -572,11 +561,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     student: {
       stats: { tests: 23, avg: 74.5, rank: 15, total: 142, streak: 7 },
       competencies: [
-        { name: 'Lectura Crítica',           short: 'LC', score: 78, tests: 8, lastDate: '12 may', trend: +3,  color: '#D41224', bg: '#FEE2E2' },
-        { name: 'Razonamiento Cuantitativo', short: 'RC', score: 65, tests: 5, lastDate: '08 may', trend: +1,  color: '#2563EB', bg: '#DBEAFE' },
-        { name: 'Competencias Ciudadanas',   short: 'CC', score: 82, tests: 4, lastDate: '10 may', trend: +5,  color: '#059669', bg: '#D1FAE5' },
-        { name: 'Comunicación Escrita',      short: 'CE', score: 70, tests: 4, lastDate: '06 may', trend: -2,  color: '#7C3AED', bg: '#EDE9FE' },
-        { name: 'Inglés',                    short: 'IN', score: 58, tests: 2, lastDate: '01 may', trend: +4,  color: '#D97706', bg: '#FEF3C7' },
+        { name: 'Lectura Crítica',           short: 'LC', score: 78, tests: 8, lastDate: '12 may', trend: +3,  color: '#D41224', bg: '#FEE2E2', key: 'lc' },
+        { name: 'Razonamiento Cuantitativo', short: 'RC', score: 65, tests: 5, lastDate: '08 may', trend: +1,  color: '#2563EB', bg: '#DBEAFE', key: 'rq' },
+        { name: 'Competencias Ciudadanas',   short: 'CC', score: 82, tests: 4, lastDate: '10 may', trend: +5,  color: '#059669', bg: '#D1FAE5', key: 'cc' },
+        { name: 'Comunicación Escrita',      short: 'CE', score: 70, tests: 4, lastDate: '06 may', trend: -2,  color: '#7C3AED', bg: '#EDE9FE', key: 'ce' },
+        { name: 'Inglés',                    short: 'IN', score: 58, tests: 2, lastDate: '01 may', trend: +4,  color: '#D97706', bg: '#FEF3C7', key: 'en' },
       ],
       recentTests: [
         { comp: 'Lectura Crítica',           date: '12 may 2026', score: 78, dur: '42 min', type: 'Simulacro completo', color: '#D41224', bg: '#FEE2E2' },
@@ -592,16 +581,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         { pos: 5, name: 'Valentina Rojas', score: 83, prog: 'Ing. Civil'       },
       ],
       trending: [
-        { title: 'saber-pro/lectura-critica-2025', sub: 'Banco actualizado · 180 preguntas',            lang: 'PDF',  stars: '4.8k', color: '#D41224', bg: '#FEE2E2' },
-        { title: 'ufpso/simulacro-matematicas',    sub: 'Nuevo simulacro de Razonamiento Cuantitativo', lang: 'Test', stars: '2.3k', color: '#2563EB', bg: '#DBEAFE' },
-        { title: 'ai-tutor/comprension-textos',    sub: 'Práctica IA de comprensión lectora',           lang: 'IA',   stars: '1.9k', color: '#7C3AED', bg: '#EDE9FE' },
+        { title: 'Lectura Crítica — Nivel I',              sub: 'Simulacro completo · 30 preguntas',   lang: 'EXAM',     stars: '142', color: '#D41224', bg: '#FEE2E2', href: '/tests?c=lc' },
+        { title: 'Razonamiento Cuantitativo — Completo',   sub: 'Simulacro completo · 40 preguntas',   lang: 'EXAM',     stars: '87',  color: '#2563EB', bg: '#DBEAFE', href: '/tests?c=rq' },
+        { title: 'Práctica IA — Comprensión lectora',      sub: 'Sesión adaptativa con IA generativa', lang: 'IA',       stars: '64',  color: '#7C3AED', bg: '#EDE9FE', href: '/ai-practice' },
       ],
     },
     changelog: [
       { time: 'Hace 3 horas', title: 'GPT-5 Reasoning en Práctica IA',    desc: 'Personalización avanzada de preguntas según tu nivel.',      now: true  },
-      { time: 'Ayer',         title: 'Banco de Inglés ampliado',           desc: 'Se añadieron 120 nuevas preguntas B1/B2 con audio.',         now: false },
+      { time: 'Ayer',         title: 'Banco de Inglés ampliado',           desc: 'Se añadieron 60 nuevas preguntas B1/B2.',                    now: false },
       { time: 'Hace 3 días',  title: 'Rankings en tiempo real',            desc: 'El ranking se actualiza al completar cada simulacro.',       now: false },
-      { time: 'Hace 1 semana','title':'Nueva competencia: Análisis datos', desc: 'Disponible en beta para programas de Ingeniería.',           now: false },
+      { time: 'Hace 1 semana','title':'12 tests disponibles ya publicados','desc':'5 competencias, 3 modos de práctica.',                      now: false },
     ],
     admin: {
       activity: [
@@ -652,7 +641,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const greet = h < 12 ? '¡Buenos días' : h < 18 ? '¡Buenas tardes' : '¡Buenas noches';
   document.getElementById('welcome-msg').textContent = admin
     ? `${greet}, ${user.firstName}! Panel de administración activo.`
-    : `${greet}, ${user.firstName}! Tienes 3 tests pendientes para hoy.`;
+    : `${greet}, ${user.firstName}! Tienes ${12} tests disponibles para hoy.`;
 
   // ── Role visibility ─────────────────────────────────────────
   if (admin) {
@@ -678,12 +667,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     document.getElementById('pc-program').textContent = user.programId ?? 'UFPSO';
     document.getElementById('pc-badge').innerHTML     = '<span class="ti ti-school" style="font-size:13px;"></span> Estudiante';
 
-    // Competencias
+    // Competencias — cada barra clickea a /tests?c=KEY
     const compList = document.getElementById('comp-list');
     d.competencies.forEach((c, i) => {
       const sign = c.trend > 0 ? '+' : '';
       const tcol = c.trend > 0 ? '#059669' : c.trend < 0 ? '#D41224' : '#A09990';
       const div  = document.createElement('div');
+      div.style.cursor = 'pointer';
+      div.onclick = () => window.location.href = `/tests?c=${c.key}`;
       div.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:8px;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:8px;min-width:0;">
@@ -701,7 +692,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="bar-wrap"><div class="bar-fill" id="bar-${i}" style="background:${c.color};"></div></div>
         <div style="display:flex;justify-content:space-between;margin-top:3px;gap:4px;flex-wrap:wrap;">
           <span style="font-size:11px;color:#A09990;">${c.tests} tests realizados</span>
-          <span style="font-size:11px;color:#A09990;">Último: ${c.lastDate}</span>
+          <span style="font-size:11px;color:${c.color};font-weight:600;">Practicar →</span>
         </div>`;
       compList.appendChild(div);
       setTimeout(() => { document.getElementById(`bar-${i}`).style.width=`${c.score}%`; }, 280+i*90);
@@ -713,11 +704,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     document.getElementById('lt-info').textContent  = `${lt.date} · ${lt.type} · ${lt.dur}`;
     document.getElementById('lt-score').textContent = lt.score;
 
-    // Recent list
+    // Recent list — clic va a /mis-intentos
     const recentList = document.getElementById('recent-list');
     d.recentTests.slice(1).forEach(t => {
       const div = document.createElement('div');
       div.className = 'test-row';
+      div.onclick = () => window.location.href = '/mis-intentos';
       div.innerHTML = `
         <div style="width:34px;height:34px;border-radius:8px;background:${t.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;">
           <span class="ti ti-clipboard" style="color:${t.color};font-size:16px;"></span>
@@ -752,11 +744,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     document.getElementById('my-rank-name').textContent  = fullName;
     document.getElementById('my-rank-score').textContent = d.stats.avg;
 
-    // Trending
+    // Trending — clic va a /tests correspondiente
     const trendList = document.getElementById('trend-list');
     d.trending.forEach(t => {
       const div = document.createElement('div');
       div.className = 'trend-item';
+      div.onclick = () => window.location.href = t.href;
       div.innerHTML = `
         <div style="width:36px;height:36px;background:${t.bg};border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <span class="ti ti-file-text" style="color:${t.color};font-size:18px;"></span>
@@ -767,7 +760,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
         <div style="text-align:right;flex-shrink:0;margin-left:8px;">
           <span style="font-size:10px;padding:3px 8px;border-radius:12px;font-weight:800;background:${t.bg};color:${t.color};">${t.lang}</span>
-          <p style="font-size:11px;color:#A09990;margin:4px 0 0;display:flex;align-items:center;gap:3px;justify-content:flex-end;"><span class="ti ti-star" style="font-size:11px;"></span>${t.stars}</p>
+          <p style="font-size:11px;color:#A09990;margin:4px 0 0;display:flex;align-items:center;gap:3px;justify-content:flex-end;"><span class="ti ti-users" style="font-size:11px;"></span>${t.stars}</p>
         </div>`;
       trendList.appendChild(div);
     });

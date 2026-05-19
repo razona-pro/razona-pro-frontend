@@ -1,5 +1,5 @@
 ---
-// RazonaPro — Login / Registro combinado
+// RazonaPro — Login / Registro combinado (actualizado)
 // src/pages/login.astro
 import '../styles/global.css';
 ---
@@ -198,16 +198,46 @@ import '../styles/global.css';
     }
     .forgot-link:hover { opacity: 0.7; }
 
-    /* ── Admin toggle ── */
-    .admin-toggle {
-        display: flex; align-items: center; gap: 0.5rem;
-        margin-bottom: 0.2rem;
+    /* ── Volver al inicio (login form) ── */
+    .back-home-link {
+        display: block; text-align: center;
+        font-size: 0.77rem; color: var(--text-muted); text-decoration: none;
+        margin-top: 0.9rem;
+        font-weight: 500; transition: color 0.2s;
+        letter-spacing: 0.02em;
     }
-    .admin-toggle input[type="checkbox"] { accent-color: var(--red); cursor: pointer; }
+    .back-home-link:hover { color: var(--red); }
+    .back-home-link::before { content: '← '; }
+
+    /* ── Admin toggle / Terms toggle compartido ── */
+    .admin-toggle,
+    .terms-toggle {
+        display: flex; align-items: flex-start; gap: 0.5rem;
+    }
+    .admin-toggle  { margin-bottom: 0.2rem; }
+    .terms-toggle  { margin-top: 0.75rem; margin-bottom: 0.2rem; }
+
+    .admin-toggle input[type="checkbox"],
+    .terms-toggle input[type="checkbox"] { accent-color: var(--red); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+
     .admin-toggle label {
         font-size: 0.75rem; color: var(--text-muted); cursor: pointer;
         text-transform: none; letter-spacing: 0; font-weight: 500;
     }
+    .terms-toggle label {
+        font-size: 0.75rem; color: var(--text-muted); cursor: pointer;
+        text-transform: none; letter-spacing: 0; font-weight: 500;
+        line-height: 1.5;
+    }
+    .terms-toggle label a {
+        color: var(--red); text-decoration: none; font-weight: 600;
+        transition: opacity 0.2s;
+    }
+    .terms-toggle label a:hover { opacity: 0.7; text-decoration: underline; }
+
+    /* ── Términos error state ── */
+    .terms-toggle.terms-error label { color: #b91c1c; }
+    .terms-toggle.terms-error input[type="checkbox"] { outline: 2px solid #ef4444; outline-offset: 1px; border-radius: 2px; }
 
     /* ── Error / Success boxes ── */
     .msg-box {
@@ -408,7 +438,7 @@ import '../styles/global.css';
                         <label for="si-admin">Acceso de administrador</label>
                     </div>
 
-                    <a class="forgot-link" href="#">¿Olvidaste tu contraseña?</a>
+                    <a class="forgot-link" href="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
 
                     <button type="submit" id="si-submit" class="btn btn-primary">
                         <span id="si-label">Ingresar</span>
@@ -417,7 +447,10 @@ import '../styles/global.css';
                         </svg>
                     </button>
 
-                    <p class="switch-hint">
+                    <!-- ── NUEVO: Volver al inicio ── -->
+                    <a href="/" class="back-home-link">Volver al inicio</a>
+
+                    <p class="switch-hint" style="margin-top: 0.6rem;">
                         ¿No tienes cuenta?
                         <button type="button" id="go-register" class="switch-link">Regístrate aquí</button>
                     </p>
@@ -537,6 +570,16 @@ import '../styles/global.css';
                         </div>
                     </div>
 
+                    <!-- ── NUEVO: Términos y condiciones ── -->
+                    <div class="terms-toggle" id="terms-wrap">
+                        <input type="checkbox" id="su-terms" />
+                        <label for="su-terms">
+                            Acepto los <a href="/terminos" target="_blank">términos y condiciones</a>
+                            y la <a href="/privacidad" target="_blank">política de privacidad</a>
+                            de RazonaPro · UFPSO
+                        </label>
+                    </div>
+
                     <button type="submit" id="su-submit" class="btn btn-primary">
                         <span id="su-label">Crear cuenta</span>
                         <svg viewBox="0 0 16 16" fill="none" width="16" height="16" aria-hidden="true">
@@ -623,9 +666,9 @@ function isAuthenticated() {
 if (isAuthenticated()) { window.location.href = '/dashboard'; }
 
 /* ════════════════════════════════════════════════════
-   TOGGLE PANEL (script-login.js adaptado)
+   TOGGLE PANEL
 ════════════════════════════════════════════════════ */
-const container   = document.getElementById('container');
+const container     = document.getElementById('container');
 const btnGoRegister = document.getElementById('btn-go-register');
 const btnGoLogin    = document.getElementById('btn-go-login');
 const goRegister    = document.getElementById('go-register');
@@ -683,9 +726,7 @@ if (goRegister)    goRegister.addEventListener('click', switchToRegister);
 if (goLogin)       goLogin.addEventListener('click', switchToLogin);
 
 /* ════════════════════════════════════════════════════
-   DETECCIÓN DE URL PARAM → abrir formulario correcto
-   /login             → muestra login (defecto)
-   /login?mode=register → muestra registro
+   DETECCIÓN DE URL PARAM
 ════════════════════════════════════════════════════ */
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('mode') === 'register') {
@@ -748,6 +789,18 @@ function setLoading(submitId, labelId, loading, defaultText) {
 }
 
 /* ════════════════════════════════════════════════════
+   TÉRMINOS — limpiar estado de error al marcar
+════════════════════════════════════════════════════ */
+const termsCheckbox = document.getElementById('su-terms');
+const termsWrap     = document.getElementById('terms-wrap');
+
+termsCheckbox.addEventListener('change', () => {
+    if (termsCheckbox.checked) {
+        termsWrap.classList.remove('terms-error');
+    }
+});
+
+/* ════════════════════════════════════════════════════
    FORMULARIO LOGIN
 ════════════════════════════════════════════════════ */
 document.getElementById('sign-in').addEventListener('submit', async (e) => {
@@ -793,6 +846,15 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
     hideMsg('su-error');
     hideMsg('su-success');
 
+    /* ── Validar términos y condiciones ── */
+    if (!termsCheckbox.checked) {
+        termsWrap.classList.add('terms-error');
+        showMsg('su-error', 'Debes aceptar los términos y condiciones para registrarte.');
+        termsWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+    termsWrap.classList.remove('terms-error');
+
     const pw  = document.getElementById('su-password').value;
     const cpw = document.getElementById('su-confirm').value;
 
@@ -832,6 +894,7 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
                 'success'
             );
             document.getElementById('sign-up').reset();
+            termsWrap.classList.remove('terms-error');
             loadPrograms();
         } else {
             showMsg('su-error', res.message ?? 'Error al crear la cuenta.');
