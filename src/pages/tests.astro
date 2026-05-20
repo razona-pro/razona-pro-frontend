@@ -9,14 +9,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="Tests Disponibles · RazonaPro">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
 <style is:global>
   body {
     height: 100vh; overflow: hidden;
-    background: #F2F0EC;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: var(--ui-bg-alt);
   }
 
   .db-root { flex: 1; display: flex; height: 100vh; overflow: hidden; }
@@ -24,10 +20,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /* ── SIDEBAR ── */
   #sidebar {
     width: 242px; min-width: 242px;
-    background: #111111;
+    background: var(--sidebar-bg);
     display: flex; flex-direction: column;
     overflow-y: auto; overflow-x: hidden;
-    border-right: 1px solid rgba(255,255,255,0.055);
+    border-right: 1px solid var(--sidebar-border);
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
     z-index: 100;
@@ -42,50 +38,50 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   .nav-item {
     display: flex; align-items: center; gap: 9px;
-    padding: 9px 10px; color: rgba(255,255,255,0.45);
-    font-size: 13.5px; font-weight: 500; border-radius: 9px;
+    padding: 9px 10px; color: var(--sidebar-text);
+    font-size: 0.964rem; font-weight: 500; border-radius: 9px;
     text-decoration: none; transition: all 0.15s; cursor: pointer;
     margin-bottom: 1px; border: none; background: none; width: 100%;
     text-align: left; font-family: inherit;
   }
-  .nav-item:hover  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88); }
-  .nav-item.active { background: rgba(212,18,36,0.18); color: #F87171; }
+  .nav-item:hover  { background: var(--sidebar-hover-bg); color: var(--sidebar-hover-txt); }
+  .nav-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-txt); }
   .nav-item .ti    { font-size: 16px; flex-shrink: 0; }
   .nav-section {
-    color: rgba(255,255,255,0.22); font-size: 10px; font-weight: 700;
+    color: rgba(255,255,255,0.22); font-size: 0.714rem; font-weight: 700;
     letter-spacing: 0.9px; text-transform: uppercase;
     padding: 0 10px; margin: 14px 0 5px; display: block;
   }
 
   /* ── FILTER PILLS ── */
   .filter-pill {
-    padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
-    border: 1.5px solid #E8E5E0; background: white; color: #6B7280;
+    padding: 7px 16px; border-radius: 20px; font-size: 0.857rem; font-weight: 700;
+    border: 1.5px solid var(--ui-border); background: var(--ui-card); color: var(--ui-text-2);
     cursor: pointer; transition: all 0.15s; font-family: inherit;
     white-space: nowrap;
   }
-  .filter-pill:hover { border-color: #D41224; color: #D41224; }
-  .filter-pill.active { background: #D41224; color: white; border-color: #D41224; }
+  .filter-pill:hover { border-color: var(--brand); color: var(--brand); }
+  .filter-pill.active { background: var(--brand); color: white; border-color: var(--brand); }
 
   /* ── TEST CARDS ── */
   .test-card {
-    background: white;
+    background: var(--ui-card);
     border-radius: 16px;
-    border: 1px solid #E8E5E0;
+    border: 1px solid var(--ui-border);
     overflow: hidden;
     transition: all 0.2s ease;
     cursor: default;
   }
   .test-card:hover {
-    border-color: #D0CCC6;
+    border-color: var(--ui-border-2);
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 28px var(--ui-shadow-md);
   }
   .test-card-body  { padding: 18px 20px; }
   .test-card-footer{
     padding: 12px 20px;
-    border-top: 1px solid #F3F1EE;
-    background: #FAFAF8;
+    border-top: 1px solid var(--ui-border);
+    background: var(--ui-surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -95,7 +91,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /* ── MODE BADGE ── */
   .mode-badge {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+    padding: 4px 10px; border-radius: 20px; font-size: 0.714rem; font-weight: 700;
   }
   .mode-PRACTICE { background: #D1FAE5; color: #059669; }
   .mode-EXAM     { background: #DBEAFE; color: #2563EB; }
@@ -104,14 +100,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /* ── DIFF BADGE ── */
   .diff-B { background: #D1FAE5; color: #059669; }
   .diff-M { background: #FEF3C7; color: #D97706; }
-  .diff-A { background: #FEE2E2; color: #D41224; }
+  .diff-A { background: var(--brand-pale); color: var(--brand); }
 
   /* ── START BUTTON ── */
   .btn-start {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 9px 18px; border-radius: 10px;
-    background: linear-gradient(135deg,#D41224,#9B1F24);
-    color: white; font-size: 13px; font-weight: 700;
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: white; font-size: 0.929rem; font-weight: 700;
     border: none; cursor: pointer; text-decoration: none;
     font-family: inherit;
     transition: all 0.15s; box-shadow: 0 3px 12px rgba(212,18,36,0.28);
@@ -119,7 +115,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .btn-start:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(212,18,36,0.38); }
 
   /* ── EMPTY ── */
-  .empty-state { text-align:center; padding:50px 20px; color:#A09990; }
+  .empty-state { text-align:center; padding:50px 20px; color: var(--ui-text-3); }
   .empty-state .ti { font-size:48px; display:block; margin-bottom:12px; }
 
   /* ── LOADING ── */
@@ -129,7 +125,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
   .skeleton {
     border-radius: 12px; height: 18px; margin-bottom: 8px;
-    background: linear-gradient(90deg,#F3F1EE 25%,#E8E5E0 50%,#F3F1EE 75%);
+    background: linear-gradient(90deg, var(--ui-surface) 25%, var(--ui-border) 50%, var(--ui-surface) 75%);
     background-size: 800px 100%;
     animation: shimmer 1.5s infinite;
   }
@@ -141,11 +137,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .anim-d2 { animation-delay:.12s; }
   .anim-d3 { animation-delay:.18s; }
 
-  /* ── SCROLLBAR ── */
-  ::-webkit-scrollbar { width:5px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:#D1CFC8; border-radius:10px; }
-
   /* ── MOBILE ── */
   @media (max-width: 1023px) {
     body { overflow: auto; }
@@ -156,16 +147,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     #sidebar.open { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,0.28); }
     #hamburger { display: flex !important; }
-    #main-area { width: 100%; }
+    #main-area   { width: 100%; overflow: visible !important; height: auto !important; }
+    #main-scroll { overflow: visible !important; height: auto !important; padding-bottom: 2rem !important; }
     #tests-grid { grid-template-columns: 1fr !important; }
   }
   @media (max-width: 639px) {
-    #main-scroll  { padding: 14px 14px 0 !important; }
+    #main-scroll  { padding: 12px 12px 2rem !important; }
     #search-wrap  { display: none !important; }
     #mobile-logo  { display: flex !important; }
     #tb-name      { display: none; }
-    .filter-pill  { font-size: 11px; padding: 6px 12px; }
+    .filter-pill  { font-size: 0.75rem; padding: 6px 12px; }
     #tests-grid   { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 360px) {
+    #main-scroll  { padding: 8px 8px 2rem !important; }
+    .test-card-body   { padding: 12px 14px; }
+    .test-card-footer { padding: 10px 14px; flex-wrap: wrap; gap: 6px; }
+    .btn-start    { padding: 8px 14px; font-size: 0.8rem; }
+    .filter-pill  { font-size: 0.7rem; padding: 5px 10px; }
   }
 </style>
 
@@ -237,7 +236,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </aside>
 
   <!-- ══════════ MAIN ══════════ -->
-  <div id="main-area" style="flex:1;display:flex;overflow:hidden;background:#F2F0EC;">
+  <div id="main-area" style="flex:1;display:flex;overflow:hidden;background:var(--ui-bg-alt);">
     <main id="main-scroll" style="flex:1;overflow-y:auto;padding:22px 24px 0;">
 
       <!-- TOPBAR -->
@@ -349,35 +348,48 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <script>
   import { requireAuth, isAdmin, logout } from '../lib/auth';
 
+  // Declarar funciones globales en window para uso desde onclick HTML
+  declare global {
+    interface Window {
+      openSidebar:  () => void;
+      closeSidebar: () => void;
+      startTest:    (testId: string, competenceId: string) => void;
+      filterComp:   (key: string, btn: HTMLElement) => void;
+      filterMode:   (mode: string, btn: HTMLElement) => void;
+    }
+  }
+
   let user;
   try { user = requireAuth(); } catch { throw new Error('redir'); }
   const admin = isAdmin();
 
   window.openSidebar = () => {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('overlay').classList.add('open');
+    document.getElementById('sidebar')!.classList.add('open');
+    document.getElementById('overlay')!.classList.add('open');
     document.body.style.overflow = 'hidden';
   };
   window.closeSidebar = () => {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('sidebar')!.classList.remove('open');
+    document.getElementById('overlay')!.classList.remove('open');
     document.body.style.overflow = '';
   };
-  document.addEventListener('keydown', e => { if (e.key==='Escape') window.closeSidebar(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeSidebar(); });
 
   const initials = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
-  document.getElementById('sb-avatar').textContent = initials;
-  document.getElementById('sb-name').textContent   = `${user.firstName} ${user.firstSurname}`;
-  document.getElementById('sb-sub').textContent    = admin ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
-  document.getElementById('tb-avatar').textContent = initials;
-  document.getElementById('tb-name').textContent   = user.firstName;
+  document.getElementById('sb-avatar')!.textContent = initials;
+  document.getElementById('sb-name')!.textContent   = `${user.firstName} ${user.firstSurname}`;
+  document.getElementById('sb-sub')!.textContent    = admin ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
+  document.getElementById('tb-avatar')!.textContent = initials;
+  document.getElementById('tb-name')!.textContent   = user.firstName;
 
-  const badge = document.getElementById('tb-badge');
-  if (admin) { badge.textContent='Admin'; badge.style.background='#111111'; badge.style.color='#F87171'; }
-  else        { badge.textContent='Estudiante'; badge.style.background='#FEE2E2'; badge.style.color='#D41224'; }
+  const badge = document.getElementById('tb-badge') as HTMLElement | null;
+  if (badge) {
+    if (admin) { badge.textContent = 'Admin'; badge.style.background = '#1C1917'; badge.style.color = '#F87171'; }
+    else       { badge.textContent = 'Estudiante'; badge.style.background = '#FEE2E2'; badge.style.color = '#D41224'; }
+  }
 
-  if (admin) document.getElementById('admin-nav').style.display = 'block';
-  document.getElementById('logout-btn').addEventListener('click', logout);
+  if (admin) (document.getElementById('admin-nav') as HTMLElement | null)?.style && (document.getElementById('admin-nav')!.style.display = 'block');
+  document.getElementById('logout-btn')!.addEventListener('click', logout);
 
   // ── MOCK TESTS DATA ──────────────────────────────────────────────────────
   // Basado en DataInitializer: COM001-COM004 + Lectura Crítica (Saber Pro)
@@ -499,12 +511,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   // ── Render ────────────────────────────────────────────────────────────────
   function renderTests() {
-    const grid  = document.getElementById('tests-grid');
-    const empty = document.getElementById('empty-state');
+    const grid  = document.getElementById('tests-grid') as HTMLElement | null;
+    const empty = document.getElementById('empty-state') as HTMLElement | null;
 
     const filtered = TESTS.filter(t => {
-      const matchComp = currentComp === 'ALL' || t.competenceKey === currentComp;
-      const matchMode = currentMode === 'ALL' || t.testMode === currentMode;
+      const matchComp   = currentComp === 'ALL' || t.competenceKey === currentComp;
+      const matchMode   = currentMode === 'ALL' || t.testMode === currentMode;
       const matchSearch = searchTerm === '' ||
         t.testName.toLowerCase().includes(searchTerm) ||
         t.competenceName.toLowerCase().includes(searchTerm) ||
@@ -512,20 +524,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       return matchComp && matchMode && matchSearch;
     });
 
-    document.getElementById('count-total').textContent = filtered.length;
+    const countEl = document.getElementById('count-total');
+    if (countEl) countEl.textContent = String(filtered.length);
 
+    if (!grid) return;
     grid.innerHTML = '';
+
     if (filtered.length === 0) {
-      empty.style.display = 'block';
+      if (empty) empty.style.display = 'block';
       return;
     }
-    empty.style.display = 'none';
+    if (empty) empty.style.display = 'none';
 
     filtered.forEach(t => {
-      const durMin  = Math.floor(t.durationSeconds / 60);
-      const diffLabels = { B:'Básico', M:'Medio', A:'Alto' };
-      const modeLabels = { PRACTICE:'Práctica', EXAM:'Examen', TIMED:'Cronometrado' };
-      const modeIcons  = { PRACTICE:'ti-leaf', EXAM:'ti-school', TIMED:'ti-clock' };
+      const durMin     = Math.floor(t.durationSeconds / 60);
+      const diffLabels: Record<string, string> = { B: 'Básico', M: 'Medio', A: 'Alto' };
+      const modeLabels: Record<string, string> = { PRACTICE: 'Práctica', EXAM: 'Examen', TIMED: 'Cronometrado' };
+      const modeIcons:  Record<string, string> = { PRACTICE: 'ti-leaf', EXAM: 'ti-school', TIMED: 'ti-clock' };
 
       const card = document.createElement('div');
       card.className = 'test-card';
@@ -542,16 +557,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               </div>
               <div style="min-width:0;">
                 <p style="font-size:10px;font-weight:700;color:${t.color};text-transform:uppercase;letter-spacing:0.5px;margin:0 0 2px;">${t.competenceName}</p>
-                <h3 style="font-size:14px;font-weight:800;color:#111111;margin:0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" title="${t.testName}">${t.testName}</h3>
+                <h3 style="font-size:14px;font-weight:800;color:#1A1A1A;margin:0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" title="${t.testName}">${t.testName}</h3>
               </div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
               <span class="mode-badge mode-${t.testMode}">
-                <span class="ti ${modeIcons[t.testMode]}" style="font-size:10px;"></span>
-                ${modeLabels[t.testMode]}
+                <span class="ti ${modeIcons[t.testMode] ?? ''}" style="font-size:10px;"></span>
+                ${modeLabels[t.testMode] ?? t.testMode}
               </span>
               <span class="mode-badge diff-${t.difficulty}" style="padding:3px 8px;">
-                ${diffLabels[t.difficulty]}
+                ${diffLabels[t.difficulty] ?? t.difficulty}
               </span>
             </div>
           </div>
@@ -610,8 +625,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   // ── Start test ────────────────────────────────────────────────────────────
-  window.startTest = (testId, competenceId) => {
-    // En producción esto llama a POST /api/trieds/start y redirige al test
+  window.startTest = (_testId: string, _competenceId: string) => {
     const proceed = confirm(`¿Iniciar este test?\n\nSe registrará un nuevo intento en tu historial.`);
     if (proceed) {
       alert('🚧 Módulo de examen en construcción.\nConéctate al backend con POST /api/trieds/start');
@@ -619,7 +633,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   };
 
   // ── Filters ───────────────────────────────────────────────────────────────
-  window.filterComp = (key, btn) => {
+  window.filterComp = (key: string, btn: HTMLElement) => {
     currentComp = key;
     document.querySelectorAll('.filter-pill').forEach(p => {
       if (!p.id.startsWith('mode-')) p.classList.remove('active');
@@ -628,9 +642,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     renderTests();
   };
 
-  window.filterMode = (mode, btn) => {
+  window.filterMode = (mode: string, btn: HTMLElement) => {
     currentMode = mode;
-    ['mode-all','mode-PRACTICE','mode-EXAM','mode-TIMED'].forEach(id => {
+    ['mode-all', 'mode-PRACTICE', 'mode-EXAM', 'mode-TIMED'].forEach(id => {
       document.getElementById(id)?.classList.remove('active');
     });
     btn.classList.add('active');
@@ -638,8 +652,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   };
 
   // Search
-  document.getElementById('search-input').addEventListener('input', (e) => {
-    searchTerm = e.target.value.toLowerCase().trim();
+  document.getElementById('search-input')!.addEventListener('input', (e) => {
+    searchTerm = (e.target as HTMLInputElement).value.toLowerCase().trim();
     renderTests();
   });
 

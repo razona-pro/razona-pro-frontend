@@ -3,6 +3,7 @@
 // Universidad Francisco de Paula Santander Ocaña
 // Trabajo de Grado · Ingeniería de Sistemas · 2026
 import '../styles/global.css';
+import AccessibilityWidget from '../components/AccessibilityWidget.astro';
 ---
 
 <!DOCTYPE html>
@@ -12,9 +13,27 @@ import '../styles/global.css';
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="RazonaPro — Sistema inteligente con Transfer Learning para la gestión de simulacros Saber Pro. UFPSO." />
   <title>RazonaPro | Domina el Saber Pro con IA Adaptativa</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+  <script is:inline>
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('rp-a11y') || '{}');
+        var h = document.documentElement;
+        if (p.fs) h.setAttribute('data-fs', p.fs);
+        if (p.mode === 'dark')           h.classList.add('dark');
+        if (p.mode === 'high-contrast')  h.classList.add('high-contrast');
+        if (p.mode === 'inverted')       h.classList.add('contrast-inverted');
+        if (p.mode === 'contrast-light') h.classList.add('contrast-light');
+        if (p.mode === 'contrast-dark')  h.classList.add('contrast-dark');
+        if (p.ls && p.ls !== 'normal')  h.setAttribute('data-ls', p.ls);
+        if (p.lh)  h.setAttribute('data-lh', p.lh);
+        if (p.font && p.font !== 'default') h.setAttribute('data-font', p.font);
+        if (p.align && p.align !== 'left') h.setAttribute('data-align', p.align);
+        if (p.cursor === 'large') h.classList.add('cursor-large');
+        if (p.links) h.classList.add('highlight-links');
+      } catch (e) {}
+    })();
+  </script>
 
 
 <!-- ─── STYLES ─────────────────────────────────────────────────────── -->
@@ -39,9 +58,9 @@ import '../styles/global.css';
   }
 
   /* ── Typography ─────────────────────────────────────── */
-  .font-display { font-family: 'Syne', sans-serif; }
-  .font-body    { font-family: 'DM Sans', sans-serif; }
-  body          { font-family: 'DM Sans', sans-serif; }
+  .font-display { font-family: 'Poppins', sans-serif; }
+  .font-body    { font-family: 'Poppins', sans-serif; }
+  body          { font-family: 'Poppins', sans-serif; }
 
   /* ── Color Utilities ────────────────────────────────── */
   .bg-rp-bg       { background-color: var(--bg-primary); }
@@ -259,7 +278,7 @@ import '../styles/global.css';
     font-size: 10px;
     font-weight: 800;
     color: white;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 
   /* ── Card Glass ──────────────────────────────────── */
@@ -323,7 +342,7 @@ import '../styles/global.css';
     border: 1px solid rgba(212,18,36,0.1);
     display: flex; flex-direction: column; gap: 2px;
   }
-  .mini-stat-val   { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; color: var(--rp-text); }
+  .mini-stat-val   { font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 800; color: var(--rp-text); }
   .mini-stat-label { font-size: 10px; color: var(--rp-text-muted); }
 
   /* ── Stats Section ───────────────────────────────── */
@@ -368,7 +387,7 @@ import '../styles/global.css';
     display: flex; align-items: center; justify-content: center;
   }
   .how-step {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 52px;
     font-weight: 900;
     color: rgba(212,18,36,0.06);
@@ -490,7 +509,7 @@ import '../styles/global.css';
     border-radius: 8px;
     border: 1px solid rgba(18,3,10,0.15);
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 12px;
     font-weight: 700;
     color: rgba(18,3,10,0.45);
@@ -1395,5 +1414,6 @@ if (document.readyState === 'loading') {
   initAll();
 }
 </script>
+<AccessibilityWidget />
 </body>
 </html>

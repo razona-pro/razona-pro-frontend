@@ -5,14 +5,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="Mi Perfil · RazonaPro">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
 <style is:global>
   body {
     height: 100vh; overflow: hidden;
-    background: #F2F0EC;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: var(--ui-bg-alt);
   }
 
   .db-root { flex: 1; display: flex; height: 100vh; overflow: hidden; }
@@ -20,10 +16,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /* ── SIDEBAR ── */
   #sidebar {
     width: 242px; min-width: 242px;
-    background: #111111;
+    background: var(--sidebar-bg);
     display: flex; flex-direction: column;
     overflow-y: auto; overflow-x: hidden;
-    border-right: 1px solid rgba(255,255,255,0.055);
+    border-right: 1px solid var(--sidebar-border);
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
     z-index: 100;
@@ -38,41 +34,41 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   .nav-item {
     display: flex; align-items: center; gap: 9px;
-    padding: 9px 10px; color: rgba(255,255,255,0.45);
-    font-size: 13.5px; font-weight: 500; border-radius: 9px;
+    padding: 9px 10px; color: var(--sidebar-text);
+    font-size: 0.964rem; font-weight: 500; border-radius: 9px;
     text-decoration: none; transition: all 0.15s; cursor: pointer;
     margin-bottom: 1px; border: none; background: none; width: 100%;
     text-align: left; font-family: inherit;
   }
-  .nav-item:hover  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88); }
-  .nav-item.active { background: rgba(212,18,36,0.18); color: #F87171; }
+  .nav-item:hover  { background: var(--sidebar-hover-bg); color: var(--sidebar-hover-txt); }
+  .nav-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-txt); }
   .nav-item .ti    { font-size: 16px; flex-shrink: 0; }
   .nav-section {
-    color: rgba(255,255,255,0.22); font-size: 10px; font-weight: 700;
+    color: rgba(255,255,255,0.22); font-size: 0.714rem; font-weight: 700;
     letter-spacing: 0.9px; text-transform: uppercase;
     padding: 0 10px; margin: 14px 0 5px; display: block;
   }
 
   /* ── CARDS ── */
-  .card     { background: white; border-radius: 16px; padding: 20px 22px; border: 1px solid #E8E5E0; }
+  .card     { background: var(--ui-card); border-radius: 16px; padding: 20px 22px; border: 1px solid var(--ui-border); }
   .info-row { display: flex; flex-direction: column; gap: 3px; }
-  .info-label { font-size: 10px; font-weight: 700; color: #A09990; text-transform: uppercase; letter-spacing: 0.5px; }
-  .info-value { font-size: 13.5px; font-weight: 600; color: #374151; padding: 8px 12px; background: #F9F8F5; border-radius: 9px; border: 1px solid #F3F1EE; }
+  .info-label { font-size: 0.714rem; font-weight: 700; color: var(--ui-text-3); text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-value { font-size: 0.964rem; font-weight: 600; color: var(--ui-text-1); padding: 8px 12px; background: var(--ui-surface); border-radius: 9px; border: 1px solid var(--ui-border); }
 
   /* ── STAT CARDS ── */
-  .stat-card { background: white; border-radius: 14px; padding: 16px 18px; border: 1px solid #E8E5E0; }
-  .stat-num  { font-size: 26px; font-weight: 900; letter-spacing: -0.8px; margin: 0; line-height: 1; }
+  .stat-card { background: var(--ui-card); border-radius: 14px; padding: 16px 18px; border: 1px solid var(--ui-border); }
+  .stat-num  { font-size: 1.857rem; font-weight: 900; letter-spacing: -0.8px; margin: 0; line-height: 1; }
 
   /* ── BAR ── */
-  .bar-wrap { height: 6px; background: #F3F1EE; border-radius: 3px; overflow: hidden; margin: 6px 0 3px; }
+  .bar-wrap { height: 6px; background: var(--ui-surface); border-radius: 3px; overflow: hidden; margin: 6px 0 3px; }
   .bar-fill { height: 100%; border-radius: 3px; transition: width 1.3s cubic-bezier(0.4,0,0.2,1); width: 0%; }
 
   /* ── SESSION BAR ── */
-  .session-bar-track { height: 8px; background: #F3F1EE; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+  .session-bar-track { height: 8px; background: var(--ui-surface); border-radius: 4px; overflow: hidden; margin-top: 10px; }
   .session-bar-fill  { height: 100%; border-radius: 4px; transition: width 1s ease; }
 
   /* ── ACTIVITY ── */
-  .activity-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F3F1EE; }
+  .activity-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--ui-border); }
   .activity-row:last-child { border-bottom: none; }
 
   /* ── ANIMATIONS ── */
@@ -84,27 +80,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .anim-d4 { animation-delay:.24s; }
   .anim-d5 { animation-delay:.30s; }
 
-  /* ── SCROLLBAR ── */
-  ::-webkit-scrollbar { width:5px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:#D1CFC8; border-radius:10px; }
-
   /* ── EDIT FIELD ── */
   .edit-input {
-    width: 100%; padding: 8px 12px; border: 1.5px solid #E8E5E0;
-    border-radius: 9px; font-family: inherit; font-size: 13.5px;
-    color: #374151; background: white; outline: none;
+    width: 100%; padding: 8px 12px; border: 1.5px solid var(--ui-border);
+    border-radius: 9px; font-family: inherit; font-size: 0.964rem;
+    color: var(--ui-text-1); background: var(--ui-card); outline: none;
     transition: border-color 0.2s;
   }
-  .edit-input:focus { border-color: #D41224; }
+  .edit-input:focus { border-color: var(--brand); }
 
   /* ── BADGE ── */
   .badge {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 20px; font-size: 0.786rem; font-weight: 700;
   }
-  .badge-student { background: #FEE2E2; color: #D41224; }
-  .badge-admin   { background: #1F1F1F; color: #F87171; }
+  .badge-student { background: var(--brand-pale); color: var(--brand); }
+  .badge-admin   { background: var(--sidebar-bg); color: var(--sidebar-active-txt); }
   .badge-verified{ background: #D1FAE5; color: #059669; }
 
   /* ── MOBILE ── */
@@ -117,17 +108,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     #sidebar.open { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,0.28); }
     #hamburger     { display: flex !important; }
-    #main-area     { width: 100%; }
+    #main-area     { width: 100%; overflow: visible !important; height: auto !important; }
+    #main-scroll   { overflow: visible !important; height: auto !important; padding-bottom: 2rem !important; }
     #stats-grid    { grid-template-columns: repeat(2,1fr) !important; }
     #content-grid  { grid-template-columns: 1fr !important; }
   }
   @media (max-width: 639px) {
-    #main-scroll  { padding: 14px 14px 0 !important; }
+    #main-scroll  { padding: 12px 12px 2rem !important; }
     #search-wrap  { display: none !important; }
     #mobile-logo  { display: flex !important; }
     #tb-name      { display: none; }
     #stats-grid   { grid-template-columns: repeat(2,1fr) !important; gap:10px !important; }
-    .stat-num     { font-size: 22px !important; }
+    .stat-num     { font-size: 1.375rem !important; }
+  }
+  @media (max-width: 360px) {
+    #main-scroll  { padding: 8px 8px 2rem !important; }
+    #stats-grid   { grid-template-columns: 1fr !important; gap: 8px !important; }
+    .stat-card    { padding: 12px 13px !important; }
+    .card         { padding: 14px 14px !important; border-radius: 12px !important; }
+    .stat-num     { font-size: 1.25rem !important; }
+    .info-value   { font-size: 0.857rem !important; padding: 6px 10px !important; }
   }
 </style>
 
@@ -199,7 +199,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </aside>
 
   <!-- ══════════ MAIN ══════════ -->
-  <div id="main-area" style="flex:1;display:flex;overflow:hidden;background:#F2F0EC;">
+  <div id="main-area" style="flex:1;display:flex;overflow:hidden;background:var(--ui-bg-alt);">
     <main id="main-scroll" style="flex:1;overflow-y:auto;padding:22px 24px 0;">
 
       <!-- TOPBAR -->
@@ -524,7 +524,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   document.getElementById('tb-name').textContent   = user.firstName;
 
   const badge = document.getElementById('tb-badge');
-  if (admin) { badge.textContent='Admin'; badge.style.background='#111111'; badge.style.color='#F87171'; }
+  if (admin) { badge.textContent='Admin'; badge.style.background='#1C1917'; badge.style.color='#F87171'; }
   else        { badge.textContent='Estudiante'; badge.style.background='#FEE2E2'; badge.style.color='#D41224'; }
 
   // Hero

@@ -2,54 +2,277 @@
 import { routes } from '../routes/index.ts';
 
 const links = [
-  { label: 'Inicio',    href: routes.home },
+  { label: 'Inicio',     href: routes.home },
   { label: 'Acerca de', href: routes.about },
 ];
 
 const path = Astro.url.pathname;
 ---
 
-<header class="border-b border-gray-200 bg-white">
-  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<header class="rp-nav-header">
+  <nav class="rp-nav-inner">
 
-    <a href={routes.home} class="font-bold text-xl text-ufpso">RazonaPro</a>
+    <!-- Logo -->
+    <a href={routes.home} class="rp-logo" aria-label="RazonaPro — Inicio">
+      <span class="rp-logo-icon" aria-hidden="true">
+        <span class="ti ti-hexagon-filled"></span>
+      </span>
+      <span class="rp-logo-text">
+        Razona<span class="rp-logo-accent">Pro</span>
+      </span>
+    </a>
 
     <!-- Links escritorio -->
-    <ul class="hidden md:flex gap-6 text-sm items-center">
+    <ul class="rp-nav-links" role="list">
       {links.map(l => (
         <li>
-          <a href={l.href} class={path === l.href ? 'text-ufpso font-medium' : 'text-gray-600 hover:text-ufpso transition-colors'}>
+          <a
+            href={l.href}
+            class={`rp-nav-link ${path === l.href ? 'rp-nav-link--active' : ''}`}
+            aria-current={path === l.href ? 'page' : undefined}
+          >
             {l.label}
           </a>
         </li>
       ))}
-      <!-- Auth button (se rellena por JS) -->
       <li id="auth-btn-desktop"></li>
     </ul>
 
     <!-- Botón hamburguesa móvil -->
-    <button id="nav-toggle" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100" aria-label="Abrir menú">
-      <span class="ti ti-menu-2 text-xl" aria-hidden="true"></span>
+    <button
+      id="nav-toggle"
+      class="rp-hamburger"
+      aria-label="Abrir menú de navegación"
+      aria-expanded="false"
+      aria-controls="nav-mobile"
+    >
+      <span class="ti ti-menu-2" aria-hidden="true"></span>
     </button>
 
   </nav>
 
   <!-- Menú móvil -->
-  <div id="nav-mobile" class="hidden md:hidden border-t border-gray-100 px-4 sm:px-6 py-3 flex flex-col gap-1 bg-white">
+  <div id="nav-mobile" class="rp-mobile-menu" hidden>
     {links.map(l => (
-      <a href={l.href} class={`py-2 text-sm transition-colors ${path === l.href ? 'text-ufpso font-medium' : 'text-gray-600 hover:text-ufpso'}`}>
+      <a
+        href={l.href}
+        class={`rp-mobile-link ${path === l.href ? 'rp-mobile-link--active' : ''}`}
+        aria-current={path === l.href ? 'page' : undefined}
+      >
         {l.label}
       </a>
     ))}
-    <div id="auth-btn-mobile" class="pt-2 border-t border-gray-100 mt-1"></div>
+    <div id="auth-btn-mobile" class="rp-mobile-auth"></div>
   </div>
 </header>
 
+<style>
+  /* ── Navbar ─────────────────────────────────────── */
+  .rp-nav-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-card, #FFFFFF);
+    border-bottom: 1px solid var(--border-color, #E8E8E8);
+    box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .rp-nav-inner {
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  /* ── Logo ────────────────────────────────────────── */
+  .rp-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .rp-logo-icon {
+    width: 34px;
+    height: 34px;
+    background: var(--clr-brand, #D41224);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 10px rgba(212,18,36,0.35);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .rp-logo:hover .rp-logo-icon {
+    box-shadow: 0 4px 18px rgba(212,18,36,0.45);
+    transform: scale(1.05);
+  }
+  .rp-logo-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main, #1A1A1A);
+    letter-spacing: -0.01em;
+  }
+  .rp-logo-accent {
+    color: var(--clr-brand, #D41224);
+  }
+
+  /* ── Links escritorio ───────────────────────────── */
+  .rp-nav-links {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  @media (min-width: 768px) {
+    .rp-nav-links { display: flex; }
+  }
+
+  .rp-nav-link {
+    display: block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted, #787878);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+  }
+  .rp-nav-link:hover {
+    color: var(--text-main, #1A1A1A);
+    background: var(--bg-surface, #F9F9F9);
+  }
+  .rp-nav-link--active {
+    color: var(--clr-brand, #D41224);
+    font-weight: 600;
+  }
+  .rp-nav-link--active:hover { background: transparent; }
+
+  /* ── Hamburguesa ────────────────────────────────── */
+  .rp-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--border-color, #E8E8E8);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--text-muted, #787878);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+  }
+  .rp-hamburger:hover {
+    background: var(--bg-surface, #F9F9F9);
+    color: var(--text-main, #1A1A1A);
+    border-color: var(--clr-gray-300, #D4D4D4);
+  }
+  @media (min-width: 768px) { .rp-hamburger { display: none; } }
+
+  /* ── Menú móvil ─────────────────────────────────── */
+  .rp-mobile-menu {
+    background: var(--bg-card, #FFFFFF);
+    border-top: 1px solid var(--border-color, #E8E8E8);
+    padding: 0.75rem 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+  .rp-mobile-menu[hidden] { display: none; }
+
+  .rp-mobile-link {
+    display: block;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted, #787878);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+  }
+  .rp-mobile-link:hover {
+    color: var(--clr-brand, #D41224);
+    background: rgba(212,18,36,0.05);
+  }
+  .rp-mobile-link--active {
+    color: var(--clr-brand, #D41224);
+    font-weight: 600;
+    background: rgba(212,18,36,0.06);
+  }
+
+  .rp-mobile-auth {
+    margin-top: 0.5rem;
+    padding-top: 0.625rem;
+    border-top: 1px solid var(--border-color, #E8E8E8);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+</style>
+
+<style is:global>
+  /* Estilos de los botones auth inyectados por JS */
+  #auth-btn-desktop {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-left: 0.5rem;
+  }
+  #auth-btn-desktop a,
+  #auth-btn-desktop button {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: all 0.15s;
+  }
+  #auth-btn-desktop .nav-auth-link {
+    color: var(--text-muted, #787878);
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.5rem;
+  }
+  #auth-btn-desktop .nav-auth-link:hover {
+    color: var(--text-main, #1A1A1A);
+    background: var(--bg-surface, #F9F9F9);
+  }
+  #auth-btn-desktop .nav-auth-btn {
+    padding: 0.4rem 1rem;
+    background: var(--clr-brand, #D41224);
+    color: #FFFFFF !important;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(212,18,36,0.3);
+  }
+  #auth-btn-desktop .nav-auth-btn:hover {
+    background: var(--clr-brand-dark, #9B1F24) !important;
+  }
+</style>
+
 <script>
   // Toggle menú móvil
-  const toggle = document.getElementById('nav-toggle');
-  const menu   = document.getElementById('nav-mobile');
-  toggle?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+  const toggle = document.getElementById('nav-toggle') as HTMLButtonElement;
+  const menu   = document.getElementById('nav-mobile') as HTMLElement;
+
+  toggle?.addEventListener('click', () => {
+    const isOpen = !menu.hidden;
+    menu.hidden = isOpen;
+    toggle.setAttribute('aria-expanded', String(!isOpen));
+  });
 
   // Auth-aware buttons
   import { isAuthenticated, logout } from '../lib/auth';
@@ -58,23 +281,23 @@ const path = Astro.url.pathname;
   const mobileSlot  = document.getElementById('auth-btn-mobile')!;
 
   if (isAuthenticated()) {
-    const dashLink = `<a href="/dashboard" class="text-sm font-semibold text-ufpso hover:underline">Mi dashboard</a>`;
-    const logoutBtn = `<button id="logout-btn" class="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors ml-4">
-      Cerrar sesión
-    </button>`;
-
-    desktopSlot.innerHTML = dashLink + logoutBtn;
-    mobileSlot.innerHTML  = `<a href="/dashboard" class="py-2 text-sm text-ufpso font-medium block">Mi dashboard</a>
-      <button id="logout-btn-mobile" class="py-2 text-sm text-gray-500 hover:text-red-600 text-left">Cerrar sesión</button>`;
-
+    desktopSlot.innerHTML = `
+      <a href="/dashboard" class="nav-auth-link">Mi dashboard</a>
+      <button id="logout-btn" class="nav-auth-link" style="color:var(--text-muted)">Cerrar sesión</button>
+    `;
+    mobileSlot.innerHTML = `
+      <a href="/dashboard" class="rp-mobile-link rp-mobile-link--active">Mi dashboard</a>
+      <button id="logout-btn-mobile" class="rp-mobile-link" style="text-align:left;cursor:pointer;border:none;background:none;width:100%">Cerrar sesión</button>
+    `;
     document.getElementById('logout-btn')?.addEventListener('click', logout);
     document.getElementById('logout-btn-mobile')?.addEventListener('click', logout);
   } else {
-    desktopSlot.innerHTML = `<a href="/login"
-      class="px-4 py-2 rounded-lg bg-ufpso text-white text-sm font-semibold hover:bg-ufpso-dark transition-colors">
-      Iniciar sesión
-    </a>`;
-    mobileSlot.innerHTML = `<a href="/login" class="py-2 text-sm text-ufpso font-medium block">Iniciar sesión</a>
-      <a href="/registro" class="py-2 text-sm text-gray-600 block">Registrarse</a>`;
+    desktopSlot.innerHTML = `
+      <a href="/login" class="nav-auth-btn">Iniciar sesión</a>
+    `;
+    mobileSlot.innerHTML = `
+      <a href="/login"    class="rp-mobile-link">Iniciar sesión</a>
+      <a href="/registro" class="rp-mobile-link">Registrarse</a>
+    `;
   }
 </script>

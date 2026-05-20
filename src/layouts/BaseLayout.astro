@@ -1,5 +1,15 @@
 ---
+/*
+ * BaseLayout.astro — Layout base del proyecto
+ *
+ * Poppins se carga UNA VEZ desde global.css (via @import url).
+ * NO debe haber imports de Google Fonts aquí ni en ninguna página.
+ *
+ * El script is:inline aplica las preferencias de accesibilidad
+ * guardadas ANTES del primer paint para evitar el FOUC (flash).
+ */
 import '../styles/global.css';
+import AccessibilityWidget from '../components/AccessibilityWidget.astro';
 
 interface Props {
   title?: string;
@@ -11,10 +21,56 @@ const { title = 'RazonaPro' } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+
+    <!-- Tabler Icons (CDN único para íconos) -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
+    />
+
     <title>{title}</title>
+
+    <!--
+      Anti-flash: aplica preferencias de accesibilidad guardadas
+      ANTES del primer paint. Debe ser síncrono (is:inline).
+      Clave de localStorage: 'rp-a11y' (mismo que en AccessibilityWidget).
+    -->
+    <script is:inline>
+      (function () {
+        try {
+          var p = JSON.parse(localStorage.getItem('rp-a11y') || '{}');
+          var h = document.documentElement;
+          /* Tamaño de texto */
+          if (p.fs) h.setAttribute('data-fs', p.fs);
+          /* Contraste / tema */
+          if (p.mode === 'dark')           h.classList.add('dark');
+          if (p.mode === 'high-contrast')  h.classList.add('high-contrast');
+          if (p.mode === 'inverted')       h.classList.add('contrast-inverted');
+          if (p.mode === 'contrast-light') h.classList.add('contrast-light');
+          if (p.mode === 'contrast-dark')  h.classList.add('contrast-dark');
+          /* Espaciado */
+          if (p.ls && p.ls !== 'normal') h.setAttribute('data-ls', p.ls);
+          /* Altura de línea */
+          if (p.lh) h.setAttribute('data-lh', p.lh);
+          /* Fuente */
+          if (p.font && p.font !== 'default') {
+            h.setAttribute('data-font', p.font);
+            var fu = { dyslexia: 'https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap', legible: 'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,700;1,400&display=swap' };
+            var fl = document.createElement('link'); fl.rel = 'stylesheet'; fl.href = fu[p.font] || ''; if (fl.href) document.head.appendChild(fl);
+          }
+          /* Alineación */
+          if (p.align && p.align !== 'left') h.setAttribute('data-align', p.align);
+          /* Cursor */
+          if (p.cursor === 'large') h.classList.add('cursor-large');
+          /* Links */
+          if (p.links) h.classList.add('highlight-links');
+        } catch (e) { /* sin preferencias */ }
+      })();
+    </script>
   </head>
+
   <body class="min-h-screen flex flex-col antialiased">
     <slot />
+    <AccessibilityWidget />
   </body>
 </html>

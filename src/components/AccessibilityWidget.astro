@@ -1,0 +1,915 @@
+---
+/*
+ * AccessibilityWidget.astro
+ * Widget flotante de accesibilidad — esquina inferior izquierda.
+ * Gestiona: tamaño de texto, contraste, espaciado, altura de línea,
+ * fuente, alineación, saturación, visión, cursor, resaltado de
+ * enlaces, máscara de lectura, guía de lectura.
+ * Preferencias en localStorage → 'rp-a11y'.
+ */
+---
+
+<!-- SVG filtros de daltonismo (invisible, solo definiciones) -->
+<svg aria-hidden="true" focusable="false"
+  style="display:none;position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <filter id="rp-filter-deuteranopia" color-interpolation-filters="linearRGB">
+      <feColorMatrix type="matrix" values="
+        0.625 0.375 0     0 0
+        0.700 0.300 0     0 0
+        0     0.300 0.700 0 0
+        0     0     0     1 0"/>
+    </filter>
+    <filter id="rp-filter-protanopia" color-interpolation-filters="linearRGB">
+      <feColorMatrix type="matrix" values="
+        0.567 0.433 0     0 0
+        0.558 0.442 0     0 0
+        0     0.242 0.758 0 0
+        0     0     0     1 0"/>
+    </filter>
+    <filter id="rp-filter-tritanopia" color-interpolation-filters="linearRGB">
+      <feColorMatrix type="matrix" values="
+        0.950 0.050 0     0 0
+        0     0.433 0.567 0 0
+        0     0.475 0.525 0 0
+        0     0     0     1 0"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- Elementos de lectura (añadidos al DOM vía JS) -->
+<div id="rp-reading-mask" aria-hidden="true"></div>
+<div id="rp-reading-guide" aria-hidden="true"></div>
+
+<!-- Widget raíz -->
+<div id="rp-a11y-root" role="region" aria-label="Panel de accesibilidad">
+
+  <!-- Panel -->
+  <div id="rp-a11y-panel" class="rp-panel" role="dialog"
+    aria-modal="false" aria-label="Opciones de accesibilidad" hidden>
+
+    <div class="rp-panel-header">
+      <div class="rp-header-icon-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="5" r="2.5"/>
+          <path d="M5.5 11.5 L12 9 L18.5 11.5"/>
+          <path d="M12 9 L12 21"/>
+          <path d="M8.5 21 L12 17 L15.5 21"/>
+          <path d="M5.5 11.5 L7.5 17"/>
+          <path d="M18.5 11.5 L16.5 17"/>
+        </svg>
+      </div>
+      <span class="rp-panel-title">Accesibilidad</span>
+      <button id="rp-a11y-close" class="rp-close-btn" aria-label="Cerrar" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 L6 18 M6 6 L18 18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="rp-scroll">
+
+      <!-- ── Tamaño de texto ── -->
+      <section class="rp-section">
+        <p class="rp-label">Tamaño de texto</p>
+        <div class="rp-row5" role="group">
+          <button class="rp-scale-btn" data-fs="pequeno"     type="button">Pequeño</button>
+          <button class="rp-scale-btn rp-default" data-fs="normal" type="button">Normal</button>
+          <button class="rp-scale-btn" data-fs="grande"      type="button">Grande</button>
+          <button class="rp-scale-btn" data-fs="muy-grande"  type="button">Muy grande</button>
+          <button class="rp-scale-btn" data-fs="extra-grande" type="button">Extra grande</button>
+        </div>
+      </section>
+
+      <!-- ── Contraste ── -->
+      <section class="rp-section">
+        <p class="rp-label">Contraste</p>
+        <div class="rp-grid3" role="group">
+          <button class="rp-opt" data-mode="light"          type="button"><span class="ti ti-sun" aria-hidden="true"></span> Claro</button>
+          <button class="rp-opt" data-mode="dark"           type="button"><span class="ti ti-moon" aria-hidden="true"></span> Oscuro</button>
+          <button class="rp-opt" data-mode="high-contrast"  type="button"><span class="ti ti-contrast" aria-hidden="true"></span> Alto</button>
+          <button class="rp-opt" data-mode="inverted"       type="button"><span class="ti ti-exchange" aria-hidden="true"></span> Invertido</button>
+          <button class="rp-opt" data-mode="contrast-light" type="button"><span class="ti ti-brightness-up" aria-hidden="true"></span> Luz</button>
+          <button class="rp-opt" data-mode="contrast-dark"  type="button"><span class="ti ti-brightness-down" aria-hidden="true"></span> Oscuro+</button>
+        </div>
+      </section>
+
+      <!-- ── Espaciado de letras ── -->
+      <section class="rp-section">
+        <p class="rp-label">Espaciado de letras</p>
+        <div class="rp-row5" role="group">
+          <button class="rp-scale-btn rp-default" data-ls="normal"       type="button">Normal</button>
+          <button class="rp-scale-btn" data-ls="amplio"       type="button">Amplio</button>
+          <button class="rp-scale-btn" data-ls="mas-amplio"   type="button">Más</button>
+          <button class="rp-scale-btn" data-ls="muy-amplio"   type="button">Mucho</button>
+          <button class="rp-scale-btn" data-ls="extra-amplio" type="button">Máximo</button>
+        </div>
+      </section>
+
+      <!-- ── Altura de línea ── -->
+      <section class="rp-section">
+        <p class="rp-label">Altura de línea</p>
+        <div class="rp-row4" role="group">
+          <button class="rp-opt rp-opt-sm" data-lh="1"    type="button">1.0</button>
+          <button class="rp-opt rp-opt-sm rp-default" data-lh="1.6"  type="button">1.6</button>
+          <button class="rp-opt rp-opt-sm" data-lh="1.75" type="button">1.75</button>
+          <button class="rp-opt rp-opt-sm" data-lh="2"    type="button">2.0</button>
+        </div>
+      </section>
+
+      <!-- ── Fuente ── -->
+      <section class="rp-section">
+        <p class="rp-label">Fuente</p>
+        <div class="rp-col" role="group">
+          <button class="rp-opt rp-opt-full rp-default" data-font="default" type="button">
+            <span class="rp-font-preview" style="font-family:'Poppins',sans-serif">Aa</span>
+            Poppins (predeterminada)
+          </button>
+          <button class="rp-opt rp-opt-full" data-font="dyslexia" type="button">
+            <span class="rp-font-preview" style="font-family:'Lexend Deca',sans-serif">Aa</span>
+            Lexend Deca — apta para dislexia
+          </button>
+          <button class="rp-opt rp-opt-full" data-font="legible" type="button">
+            <span class="rp-font-preview" style="font-family:'Lora',serif">Aa</span>
+            Lora — legible y elegante
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Alineación ── -->
+      <section class="rp-section">
+        <p class="rp-label">Alineación de texto</p>
+        <div class="rp-row4" role="group">
+          <button class="rp-opt rp-opt-sm rp-default" data-align="left"    type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+          </button>
+          <button class="rp-opt rp-opt-sm" data-align="center" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          </button>
+          <button class="rp-opt rp-opt-sm" data-align="right" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <button class="rp-opt rp-opt-sm" data-align="justify" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Saturación ── -->
+      <section class="rp-section">
+        <p class="rp-label">Saturación de color</p>
+        <div class="rp-row4" role="group">
+          <button class="rp-opt rp-opt-sm rp-default" data-sat="normal"     type="button">Normal</button>
+          <button class="rp-opt rp-opt-sm" data-sat="low"        type="button">Baja</button>
+          <button class="rp-opt rp-opt-sm" data-sat="high"       type="button">Alta</button>
+          <button class="rp-opt rp-opt-sm" data-sat="desaturate" type="button">Sin</button>
+        </div>
+      </section>
+
+      <!-- ── Visión del color ── -->
+      <section class="rp-section">
+        <p class="rp-label">Visión del color</p>
+        <div class="rp-col" role="group">
+          <button class="rp-opt rp-opt-full rp-default" data-vision="none" type="button">
+            Normal
+          </button>
+          <button class="rp-opt rp-opt-full" data-vision="deuteranopia" type="button">
+            Deuteranopia <span class="rp-tag">Rojo-verde</span>
+          </button>
+          <button class="rp-opt rp-opt-full" data-vision="protanopia" type="button">
+            Protanopia <span class="rp-tag">Rojo débil</span>
+          </button>
+          <button class="rp-opt rp-opt-full" data-vision="tritanopia" type="button">
+            Tritanopia <span class="rp-tag">Azul-amarillo</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Extras ── -->
+      <section class="rp-section">
+        <p class="rp-label">Extras</p>
+        <div class="rp-toggles">
+          <button class="rp-toggle" id="rp-toggle-cursor" data-toggle="cursor" type="button">
+            <span class="rp-toggle-icon"><span class="ti ti-pointer" aria-hidden="true"></span></span>
+            <span class="rp-toggle-label">Cursor grande</span>
+            <span class="rp-toggle-check" aria-hidden="true"></span>
+          </button>
+          <button class="rp-toggle" id="rp-toggle-links" data-toggle="links" type="button">
+            <span class="rp-toggle-icon"><span class="ti ti-link" aria-hidden="true"></span></span>
+            <span class="rp-toggle-label">Resaltar enlaces</span>
+            <span class="rp-toggle-check" aria-hidden="true"></span>
+          </button>
+          <button class="rp-toggle" id="rp-toggle-mask" data-toggle="mask" type="button">
+            <span class="rp-toggle-icon"><span class="ti ti-eye-off" aria-hidden="true"></span></span>
+            <span class="rp-toggle-label">Máscara de lectura</span>
+            <span class="rp-toggle-check" aria-hidden="true"></span>
+          </button>
+          <button class="rp-toggle" id="rp-toggle-guide" data-toggle="guide" type="button">
+            <span class="rp-toggle-icon"><span class="ti ti-ruler" aria-hidden="true"></span></span>
+            <span class="rp-toggle-label">Guía de lectura</span>
+            <span class="rp-toggle-check" aria-hidden="true"></span>
+          </button>
+        </div>
+      </section>
+
+    </div><!-- /scroll -->
+
+    <div class="rp-panel-footer">
+      <button id="rp-a11y-reset" class="rp-reset-btn" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Restablecer todo
+      </button>
+    </div>
+
+  </div><!-- /panel -->
+
+  <!-- Botón FAB -->
+  <button id="rp-a11y-fab" class="rp-fab" type="button"
+    aria-label="Abrir opciones de accesibilidad"
+    aria-expanded="false" aria-controls="rp-a11y-panel" title="Accesibilidad">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="5" r="2.4" fill="currentColor" stroke="none"/>
+      <path d="M5 11.5 L12 9 L19 11.5"/>
+      <path d="M12 9 L12 21"/>
+      <path d="M8 21 L12 16.5 L16 21"/>
+      <path d="M5 11.5 L7 17.5"/>
+      <path d="M19 11.5 L17 17.5"/>
+    </svg>
+  </button>
+
+</div><!-- /root -->
+
+
+<style>
+  /* ══════════════════════════════════════════════════════
+     WIDGET ROOT — Contenedor fijo del tamaño exacto del FAB.
+     El panel es position:absolute; no empuja al FAB.
+  ══════════════════════════════════════════════════════ */
+  #rp-a11y-root {
+    position: fixed;
+    bottom:   1.5rem;
+    left:     1.5rem;
+    z-index:  9990;
+    width:    52px;
+    height:   52px;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     FAB
+  ══════════════════════════════════════════════════════ */
+  .rp-fab {
+    width:           52px;
+    height:          52px;
+    border-radius:   50%;
+    background:      var(--brand, #D41224);
+    color:           #FFFFFF;
+    border:          2px solid rgba(255, 255, 255, 0.2);
+    cursor:          pointer;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    box-shadow:      0 4px 20px rgba(212, 18, 36, 0.45), 0 2px 8px rgba(0,0,0,0.18);
+    transition:      transform 0.25s cubic-bezier(0.4,0,0.2,1),
+                     box-shadow 0.2s cubic-bezier(0.4,0,0.2,1),
+                     border-radius 0.3s cubic-bezier(0.4,0,0.2,1),
+                     background 0.2s;
+    outline:         none;
+    position:        relative;
+    z-index:         1;
+  }
+  .rp-fab:hover {
+    transform:  scale(1.08);
+    box-shadow: 0 8px 28px rgba(212, 18, 36, 0.55), 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .rp-fab:focus-visible {
+    box-shadow: 0 0 0 3px rgba(212, 18, 36, 0.4), 0 4px 20px rgba(212, 18, 36, 0.45);
+  }
+  .rp-fab[aria-expanded="true"] {
+    background: var(--brand-dark, #9B1F24);
+    transform:  rotate(15deg) scale(1.02);
+  }
+
+  /* ══════════════════════════════════════════════════════
+     PANEL — absoluto, flota encima del FAB sin empujarlo
+  ══════════════════════════════════════════════════════ */
+  .rp-panel {
+    position:       absolute;
+    bottom:         calc(100% + 0.75rem);
+    left:           0;
+    width:          280px;
+    background:     var(--ui-card, #FFFFFF);
+    border:         1px solid var(--ui-border, #E5E5E5);
+    border-radius:  1rem;
+    box-shadow:     0 20px 56px rgba(0,0,0,0.16), 0 4px 16px rgba(0,0,0,0.08);
+    display:        flex;
+    flex-direction: column;
+    max-height:     calc(100vh - 7rem);
+    animation:      rp-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    transform-origin: bottom left;
+    overflow:       hidden;
+    z-index:        2;
+  }
+  .rp-panel[hidden] { display: none !important; }
+
+  @keyframes rp-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.93); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+  }
+
+  /* Encabezado */
+  .rp-panel-header {
+    display:       flex;
+    align-items:   center;
+    gap:           0.5rem;
+    padding:       0.875rem 1rem;
+    border-bottom: 1px solid var(--ui-border, #E5E5E5);
+    flex-shrink:   0;
+  }
+  .rp-header-icon-wrap {
+    width:           28px;
+    height:          28px;
+    border-radius:   50%;
+    background:      var(--brand, #D41224);
+    color:           #FFFFFF;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    flex-shrink:     0;
+  }
+  .rp-panel-title {
+    font-size:   0.8125rem;
+    font-weight: 700;
+    color:       var(--ui-text-1, #1A1A1A);
+    flex:        1;
+  }
+  .rp-close-btn {
+    background:    none;
+    border:        none;
+    cursor:        pointer;
+    color:         var(--ui-text-3, #A3A3A3);
+    width:         28px;
+    height:        28px;
+    border-radius: 0.375rem;
+    display:       flex;
+    align-items:   center;
+    justify-content: center;
+    transition:    color 0.15s, background 0.15s;
+    flex-shrink:   0;
+  }
+  .rp-close-btn:hover { color: var(--ui-text-1); background: var(--ui-hover); }
+
+  /* Área scrollable */
+  .rp-scroll {
+    overflow-y:  auto;
+    flex:        1;
+    padding:     0.75rem 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ui-border-2) transparent;
+  }
+  .rp-scroll::-webkit-scrollbar { width: 4px; }
+  .rp-scroll::-webkit-scrollbar-thumb { background: var(--ui-border-2); border-radius: 4px; }
+
+  /* Secciones */
+  .rp-section { margin-bottom: 1rem; }
+  .rp-label {
+    font-size:      0.625rem;
+    font-weight:    700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color:          var(--ui-text-3, #A3A3A3);
+    margin:         0 0 0.4rem;
+  }
+
+  /* ── Botones de escala (5 columnas) ── */
+  .rp-row5 {
+    display:               grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap:                   0.25rem;
+  }
+  /* 4 columnas */
+  .rp-row4 {
+    display:               grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:                   0.25rem;
+  }
+  /* 3 columnas */
+  .rp-grid3 {
+    display:               grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:                   0.25rem;
+  }
+  /* Columna full-width */
+  .rp-col {
+    display:        flex;
+    flex-direction: column;
+    gap:            0.25rem;
+  }
+
+  /* Botón escala */
+  .rp-scale-btn {
+    padding:      0.375rem 0.2rem;
+    border:       1px solid var(--ui-border, #E5E5E5);
+    border-radius: 0.4rem;
+    background:   var(--ui-surface, #F8F8F8);
+    color:        var(--ui-text-2, #6B6B6B);
+    font-size:    0.625rem;
+    font-weight:  500;
+    cursor:       pointer;
+    text-align:   center;
+    white-space:  nowrap;
+    overflow:     hidden;
+    text-overflow: ellipsis;
+    transition:   all 0.15s;
+    font-family:  var(--font-sans, sans-serif);
+    line-height:  1.2;
+  }
+  .rp-scale-btn:hover,
+  .rp-scale-btn[aria-pressed="true"],
+  .rp-scale-btn.active {
+    border-color: var(--brand, #D41224);
+    background:   var(--brand, #D41224);
+    color:        #FFFFFF;
+    font-weight:  600;
+  }
+
+  /* Botón opción genérico */
+  .rp-opt {
+    display:         inline-flex;
+    align-items:     center;
+    justify-content: center;
+    gap:             0.3rem;
+    padding:         0.4rem 0.5rem;
+    border:          1px solid var(--ui-border, #E5E5E5);
+    border-radius:   0.4rem;
+    background:      var(--ui-surface, #F8F8F8);
+    color:           var(--ui-text-2, #6B6B6B);
+    font-size:       0.6875rem;
+    font-weight:     500;
+    cursor:          pointer;
+    white-space:     nowrap;
+    transition:      all 0.15s;
+    font-family:     var(--font-sans, sans-serif);
+  }
+  .rp-opt-sm   { font-size: 0.6875rem; }
+  .rp-opt-full { width: 100%; justify-content: flex-start; font-size: 0.75rem; padding: 0.45rem 0.65rem; }
+  .rp-opt:hover,
+  .rp-opt[aria-pressed="true"],
+  .rp-opt.active {
+    border-color: var(--brand, #D41224);
+    background:   var(--brand, #D41224);
+    color:        #FFFFFF;
+    font-weight:  600;
+  }
+  .rp-opt.active .rp-tag { background: rgba(255,255,255,0.25); color: #FFF; }
+
+  /* Vista previa de fuente */
+  .rp-font-preview {
+    font-size:   1.1rem;
+    font-weight: 700;
+    width:       26px;
+    text-align:  center;
+    flex-shrink: 0;
+  }
+
+  /* Tag descripción */
+  .rp-tag {
+    margin-left:   auto;
+    font-size:     0.5625rem;
+    font-weight:   600;
+    padding:       1px 5px;
+    border-radius: 99px;
+    background:    rgba(212, 18, 36, 0.1);
+    color:         var(--brand, #D41224);
+    flex-shrink:   0;
+  }
+
+  /* Toggles (extras) */
+  .rp-toggles {
+    display:        flex;
+    flex-direction: column;
+    gap:            0.25rem;
+  }
+  .rp-toggle {
+    display:         flex;
+    align-items:     center;
+    gap:             0.5rem;
+    padding:         0.45rem 0.65rem;
+    border:          1px solid var(--ui-border, #E5E5E5);
+    border-radius:   0.4rem;
+    background:      var(--ui-surface, #F8F8F8);
+    color:           var(--ui-text-2, #6B6B6B);
+    font-size:       0.75rem;
+    font-weight:     500;
+    cursor:          pointer;
+    transition:      all 0.15s;
+    font-family:     var(--font-sans, sans-serif);
+    width:           100%;
+    text-align:      left;
+  }
+  .rp-toggle-icon {
+    font-size:       0.9rem;
+    flex-shrink:     0;
+    display:         flex;
+    align-items:     center;
+    width:           16px;
+    justify-content: center;
+  }
+  .rp-toggle-label { flex: 1; }
+  .rp-toggle-check {
+    width:         16px;
+    height:        16px;
+    border-radius: 4px;
+    border:        1.5px solid var(--ui-border-2, #D4D4D4);
+    flex-shrink:   0;
+    transition:    all 0.15s;
+    position:      relative;
+  }
+  .rp-toggle[aria-pressed="true"] .rp-toggle-check,
+  .rp-toggle.active .rp-toggle-check {
+    background:   var(--brand, #D41224);
+    border-color: var(--brand, #D41224);
+  }
+  .rp-toggle[aria-pressed="true"] .rp-toggle-check::after,
+  .rp-toggle.active .rp-toggle-check::after {
+    content:  '';
+    position: absolute;
+    left:     3px; top: 1px;
+    width:    5px; height: 8px;
+    border:   2px solid #FFF;
+    border-top: none; border-left: none;
+    transform: rotate(45deg);
+  }
+  .rp-toggle:hover {
+    border-color: var(--brand, #D41224);
+    color:        var(--ui-text-1);
+    background:   rgba(212, 18, 36, 0.04);
+  }
+  .rp-toggle[aria-pressed="true"],
+  .rp-toggle.active {
+    border-color: rgba(212, 18, 36, 0.35);
+    background:   rgba(212, 18, 36, 0.06);
+    color:        var(--brand);
+    font-weight:  600;
+  }
+
+  /* Footer */
+  .rp-panel-footer {
+    padding:       0.75rem 1rem;
+    border-top:    1px solid var(--ui-border, #E5E5E5);
+    flex-shrink:   0;
+  }
+  .rp-reset-btn {
+    width:           100%;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    gap:             0.4rem;
+    padding:         0.45rem;
+    background:      transparent;
+    border:          1px solid var(--ui-border, #E5E5E5);
+    border-radius:   0.4rem;
+    color:           var(--ui-text-2, #6B6B6B);
+    font-size:       0.75rem;
+    font-weight:     500;
+    cursor:          pointer;
+    transition:      all 0.15s;
+    font-family:     var(--font-sans, sans-serif);
+  }
+  .rp-reset-btn:hover { background: var(--ui-hover); color: var(--ui-text-1); border-color: var(--ui-border-2); }
+
+  /* ══════════════════════════════════════════════════════
+     DESKTOP (mouse): FAB asoma desde la esquina izquierda
+     y se desliza al hacer hover.
+  ══════════════════════════════════════════════════════ */
+  @media (hover: hover) and (pointer: fine) {
+    #rp-a11y-root {
+      left:       0;
+      bottom:     2rem;
+      transform:  translateX(-38px);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #rp-a11y-root:hover,
+    #rp-a11y-root:focus-within {
+      transform: translateX(16px);
+    }
+    .rp-fab { border-radius: 0 50% 50% 0; }
+    #rp-a11y-root:hover .rp-fab,
+    #rp-a11y-root:focus-within .rp-fab { border-radius: 50%; }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     TOUCH (móvil / tablet): posición normal, sin cursor
+  ══════════════════════════════════════════════════════ */
+  @media (hover: none), (pointer: coarse) {
+    #rp-a11y-root    { left: 1rem; bottom: 1rem; }
+    #rp-toggle-cursor { display: none !important; }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     MOBILE ≤ 520 px
+  ══════════════════════════════════════════════════════ */
+  @media (max-width: 520px) {
+    .rp-panel {
+      width:      calc(100vw - 2rem);
+      max-width:  340px;
+      max-height: calc(100vh - 5rem);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     MUY PEQUEÑO ≤ 360 px
+  ══════════════════════════════════════════════════════ */
+  @media (max-width: 360px) {
+    .rp-panel  { width: calc(100vw - 1.5rem); max-width: none; }
+    .rp-row5   { grid-template-columns: repeat(3, 1fr); }
+    .rp-grid3  { grid-template-columns: repeat(2, 1fr); }
+    .rp-scroll { padding: 0.5rem 0.75rem; }
+  }
+</style>
+
+
+<script>
+  /* ══════════════════════════════════════════════════════════
+     GESTOR DE PREFERENCIAS DE ACCESIBILIDAD
+  ══════════════════════════════════════════════════════════ */
+  const KEY = 'rp-a11y';
+
+  type FontMode   = 'default' | 'dyslexia' | 'legible';
+  type SatMode    = 'normal' | 'low' | 'high' | 'desaturate';
+  type VisionMode = 'none' | 'deuteranopia' | 'protanopia' | 'tritanopia';
+  type ContrastMode = 'light' | 'dark' | 'high-contrast' | 'inverted' | 'contrast-light' | 'contrast-dark';
+  type LsMode     = 'normal' | 'amplio' | 'mas-amplio' | 'muy-amplio' | 'extra-amplio';
+  type FsMode     = 'pequeno' | 'normal' | 'grande' | 'muy-grande' | 'extra-grande';
+  type LhMode     = '1' | '1.6' | '1.75' | '2';
+  type AlignMode  = 'left' | 'center' | 'right' | 'justify';
+  type CursorMode = 'normal' | 'large';
+
+  interface Prefs {
+    fs:     FsMode;
+    mode:   ContrastMode;
+    vision: VisionMode;
+    ls:     LsMode;
+    lh:     LhMode;
+    font:   FontMode;
+    align:  AlignMode;
+    sat:    SatMode;
+    cursor: CursorMode;
+    links:  boolean;
+    mask:   boolean;
+    guide:  boolean;
+  }
+
+  const DEFAULTS: Prefs = {
+    fs: 'normal', mode: 'light', vision: 'none',
+    ls: 'normal', lh: '1.6', font: 'default',
+    align: 'left', sat: 'normal', cursor: 'normal',
+    links: false, mask: false, guide: false,
+  };
+
+  const FONT_URLS: Record<string, string> = {
+    dyslexia: 'https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap',
+    legible:  'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,700;1,400&display=swap',
+  };
+
+  /* ─ Carga / guarda ─────────────────────────────────────── */
+  function load(): Prefs {
+    try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }; }
+    catch { return { ...DEFAULTS }; }
+  }
+  function save(p: Prefs) { localStorage.setItem(KEY, JSON.stringify(p)); }
+
+  /* ─ Aplica filtro de cuerpo (daltonismo + saturación) ──── */
+  function buildBodyFilter(p: Prefs): string {
+    const parts: string[] = [];
+    if (p.vision !== 'none') parts.push(`url('#rp-filter-${p.vision}')`);
+    if (p.sat === 'low')        parts.push('saturate(0.4)');
+    else if (p.sat === 'high')  parts.push('saturate(1.8)');
+    else if (p.sat === 'desaturate') parts.push('grayscale(1)');
+    return parts.join(' ');
+  }
+
+  /* ─ Carga fuente externa si no está ya ─────────────────── */
+  function ensureFont(font: FontMode) {
+    if (font === 'default' || document.getElementById(`rp-f-${font}`)) return;
+    const l = document.createElement('link');
+    l.id = `rp-f-${font}`; l.rel = 'stylesheet'; l.href = FONT_URLS[font];
+    document.head.appendChild(l);
+  }
+
+  /* ─ Aplica todas las preferencias al DOM ───────────────── */
+  const MODE_CLASSES: ContrastMode[] = ['dark', 'high-contrast', 'contrast-inverted', 'contrast-light', 'contrast-dark'];
+  const VISION_CLASSES: VisionMode[] = ['deuteranopia', 'protanopia', 'tritanopia'];
+  const LS_ATTRS = ['normal','amplio','mas-amplio','muy-amplio','extra-amplio'];
+
+  function apply(p: Prefs) {
+    const h = document.documentElement;
+
+    /* Font size */
+    h.setAttribute('data-fs', p.fs);
+
+    /* Contrast / mode */
+    h.classList.remove('dark', 'high-contrast', 'contrast-inverted', 'contrast-light', 'contrast-dark');
+    if (p.mode === 'dark')           h.classList.add('dark');
+    if (p.mode === 'high-contrast')  h.classList.add('high-contrast');
+    if (p.mode === 'inverted')       h.classList.add('contrast-inverted');
+    if (p.mode === 'contrast-light') h.classList.add('contrast-light');
+    if (p.mode === 'contrast-dark')  h.classList.add('contrast-dark');
+
+    /* Letter spacing */
+    if (p.ls === 'normal') h.removeAttribute('data-ls');
+    else h.setAttribute('data-ls', p.ls);
+
+    /* Line height */
+    h.setAttribute('data-lh', p.lh);
+
+    /* Font */
+    ensureFont(p.font);
+    if (p.font === 'default') h.removeAttribute('data-font');
+    else h.setAttribute('data-font', p.font);
+
+    /* Alignment */
+    if (p.align === 'left') h.removeAttribute('data-align');
+    else h.setAttribute('data-align', p.align);
+
+    /* Body filter: daltonism + saturation */
+    document.body.style.filter = buildBodyFilter(p);
+
+    /* Cursor */
+    h.classList.toggle('cursor-large', p.cursor === 'large');
+
+    /* Links */
+    h.classList.toggle('highlight-links', p.links);
+
+    /* Mask / guide */
+    h.classList.toggle('reading-mask', p.mask);
+    h.classList.toggle('reading-guide', p.guide);
+
+    syncButtons(p);
+  }
+
+  /* ─ Sincroniza estado visual de botones ─────────────────── */
+  function syncButtons(p: Prefs) {
+    // fs
+    doc('[data-fs]').forEach(b => setActive(b, (b as HTMLElement).dataset.fs === p.fs));
+    // mode
+    doc('[data-mode]').forEach(b => setActive(b, (b as HTMLElement).dataset.mode === p.mode));
+    // ls
+    doc('[data-ls]').forEach(b => setActive(b, (b as HTMLElement).dataset.ls === (p.ls || 'normal')));
+    // lh
+    doc('[data-lh]').forEach(b => setActive(b, (b as HTMLElement).dataset.lh === p.lh));
+    // font
+    doc('[data-font]').forEach(b => setActive(b, (b as HTMLElement).dataset.font === p.font));
+    // align
+    doc('[data-align]').forEach(b => setActive(b, (b as HTMLElement).dataset.align === (p.align || 'left')));
+    // sat
+    doc('[data-sat]').forEach(b => setActive(b, (b as HTMLElement).dataset.sat === (p.sat || 'normal')));
+    // vision
+    doc('[data-vision]').forEach(b => setActive(b, (b as HTMLElement).dataset.vision === p.vision));
+    // toggles
+    setToggle('cursor', p.cursor === 'large');
+    setToggle('links',  p.links);
+    setToggle('mask',   p.mask);
+    setToggle('guide',  p.guide);
+  }
+
+  function doc(sel: string) { return document.querySelectorAll<HTMLElement>(sel); }
+  function setActive(el: Element, on: boolean) {
+    el.classList.toggle('active', on);
+    el.setAttribute('aria-pressed', String(on));
+  }
+  function setToggle(id: string, on: boolean) {
+    const el = document.getElementById(`rp-toggle-${id}`);
+    if (el) { el.classList.toggle('active', on); el.setAttribute('aria-pressed', String(on)); }
+  }
+
+  /* ─ Máscara de lectura: sigue el cursor ─────────────────── */
+  let rafId = 0;
+  document.addEventListener('mousemove', (e) => {
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      document.documentElement.style.setProperty('--rp-mask-y', e.clientY + 'px');
+      const guide = document.getElementById('rp-reading-guide');
+      if (guide) guide.style.top = e.clientY + 'px';
+    });
+  });
+
+  /* ─ Init ────────────────────────────────────────────────── */
+  const prefs = load();
+  apply(prefs);
+
+  /* ─ DOM refs ────────────────────────────────────────────── */
+  const fab   = document.getElementById('rp-a11y-fab')!   as HTMLButtonElement;
+  const panel = document.getElementById('rp-a11y-panel')! as HTMLElement;
+  const closeBtn = document.getElementById('rp-a11y-close')! as HTMLButtonElement;
+  const reset = document.getElementById('rp-a11y-reset')! as HTMLButtonElement;
+
+  function openPanel()  { panel.removeAttribute('hidden'); fab.setAttribute('aria-expanded','true');  closeBtn.focus(); }
+  function closePanel() { panel.setAttribute('hidden','');  fab.setAttribute('aria-expanded','false'); fab.focus(); }
+
+  fab.addEventListener('click', () => panel.hasAttribute('hidden') ? openPanel() : closePanel());
+  closeBtn.addEventListener('click', closePanel);
+
+  /* ─ fs buttons ──────────────────────────────────────────── */
+  doc('[data-fs]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prefs.fs = (btn.dataset.fs ?? 'normal') as FsMode;
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ mode buttons ────────────────────────────────────────── */
+  doc('[data-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prefs.mode = (btn.dataset.mode ?? 'light') as ContrastMode;
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ ls buttons ──────────────────────────────────────────── */
+  doc('[data-ls]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prefs.ls = (btn.dataset.ls ?? 'normal') as LsMode;
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ lh buttons ──────────────────────────────────────────── */
+  doc('[data-lh]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prefs.lh = (btn.dataset.lh ?? '1.6') as LhMode;
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ font buttons ────────────────────────────────────────── */
+  doc('[data-font]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prefs.font = (btn.dataset.font ?? 'default') as FontMode;
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ align buttons ───────────────────────────────────────── */
+  doc('[data-align]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prefs.align = (btn.dataset.align ?? 'left') as AlignMode;
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ sat buttons ─────────────────────────────────────────── */
+  doc('[data-sat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prefs.sat = (btn.dataset.sat ?? 'normal') as SatMode;
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ vision buttons ──────────────────────────────────────── */
+  doc('[data-vision]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prefs.vision = (btn.dataset.vision ?? 'none') as VisionMode;
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ toggle extras ───────────────────────────────────────── */
+  const toggleMap: Record<string, keyof Pick<Prefs,'cursor'|'links'|'mask'|'guide'>> = {
+    cursor: 'cursor', links: 'links', mask: 'mask', guide: 'guide',
+  };
+  doc('[data-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = (btn as HTMLElement).dataset.toggle!;
+      if (key === 'cursor') {
+        prefs.cursor = prefs.cursor === 'large' ? 'normal' : 'large';
+      } else {
+        (prefs as Record<string, unknown>)[key] = !(prefs as Record<string, unknown>)[key];
+      }
+      save(prefs); apply(prefs);
+    });
+  });
+
+  /* ─ Reset ───────────────────────────────────────────────── */
+  reset.addEventListener('click', () => {
+    Object.assign(prefs, DEFAULTS);
+    save(prefs); apply(prefs);
+  });
+
+  /* ─ Cerrar al clic fuera ────────────────────────────────── */
+  document.addEventListener('click', (e) => {
+    const root = document.getElementById('rp-a11y-root');
+    if (root && !root.contains(e.target as Node) && !panel.hasAttribute('hidden')) closePanel();
+  });
+
+  /* ─ Cerrar con Escape ───────────────────────────────────── */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.hasAttribute('hidden')) closePanel();
+  });
+</script>

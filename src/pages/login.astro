@@ -2,6 +2,7 @@
 // RazonaPro — Login / Registro combinado (actualizado)
 // src/pages/login.astro
 import '../styles/global.css';
+import AccessibilityWidget from '../components/AccessibilityWidget.astro';
 ---
 
 <!doctype html>
@@ -11,9 +12,27 @@ import '../styles/global.css';
     <meta name="description" content="Accede a tu portal RazonaPro · UFPSO" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <script is:inline>
+      (function () {
+        try {
+          var p = JSON.parse(localStorage.getItem('rp-a11y') || '{}');
+          var h = document.documentElement;
+          if (p.fs) h.setAttribute('data-fs', p.fs);
+          if (p.mode === 'dark')           h.classList.add('dark');
+          if (p.mode === 'high-contrast')  h.classList.add('high-contrast');
+          if (p.mode === 'inverted')       h.classList.add('contrast-inverted');
+          if (p.mode === 'contrast-light') h.classList.add('contrast-light');
+          if (p.mode === 'contrast-dark')  h.classList.add('contrast-dark');
+          if (p.ls && p.ls !== 'normal')  h.setAttribute('data-ls', p.ls);
+          if (p.lh)  h.setAttribute('data-lh', p.lh);
+          if (p.font && p.font !== 'default') h.setAttribute('data-font', p.font);
+          if (p.align && p.align !== 'left') h.setAttribute('data-align', p.align);
+          if (p.cursor === 'large') h.classList.add('cursor-large');
+          if (p.links) h.classList.add('highlight-links');
+        } catch (e) {}
+      })();
+    </script>
     <title>RazonaPro | Acceso al portal</title>
 
 <style is:global>
@@ -35,7 +54,7 @@ import '../styles/global.css';
     }
 
     body {
-        font-family: 'Raleway', sans-serif;
+        font-family: 'Poppins', sans-serif;
         min-height: 100dvh;
         display: flex; align-items: center; justify-content: center;
         background: #f5eeee;
@@ -123,7 +142,7 @@ import '../styles/global.css';
 
     .overlay-icon { width: 52px; height: 52px; margin-bottom: 0.4rem; opacity: 0.9; }
     .overlay-msg h2 {
-        font-family: 'Playfair Display', serif;
+        font-family: 'Poppins', sans-serif;
         font-size: 1.85rem; font-weight: 600; line-height: 1.2;
     }
     .overlay-msg p { font-size: 0.84rem; line-height: 1.65; opacity: 0.87; max-width: 210px; }
@@ -135,7 +154,7 @@ import '../styles/global.css';
     .form-header { text-align: center; margin-bottom: 1.6rem; }
     .logo-mark   { display: inline-flex; margin-bottom: 0.7rem; }
     .form-title  {
-        font-family: 'Playfair Display', serif;
+        font-family: 'Poppins', sans-serif;
         font-size: 1.75rem; color: var(--text-main); line-height: 1.2;
     }
     .form-subtitle { font-size: 0.79rem; color: var(--text-muted); margin-top: 0.3rem; letter-spacing: 0.02em; }
@@ -910,5 +929,6 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
     }
 });
 </script>
+<AccessibilityWidget />
 </body>
 </html>
