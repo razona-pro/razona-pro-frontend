@@ -228,21 +228,31 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
     .back-home-link:hover { color: var(--red); }
     .back-home-link::before { content: '← '; }
 
-    /* ── Admin toggle / Terms toggle compartido ── */
-    .admin-toggle,
+    /* ── Hint de código ── */
+    .code-hint {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+        line-height: 1.4;
+    }
+    .code-hint span {
+        display: inline-block;
+        background: rgba(212,18,36,0.08);
+        color: var(--red);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-family: monospace;
+        font-weight: 600;
+    }
+
+    /* ── Terms toggle ── */
     .terms-toggle {
         display: flex; align-items: flex-start; gap: 0.5rem;
+        margin-top: 0.75rem; margin-bottom: 0.2rem;
     }
-    .admin-toggle  { margin-bottom: 0.2rem; }
-    .terms-toggle  { margin-top: 0.75rem; margin-bottom: 0.2rem; }
 
-    .admin-toggle input[type="checkbox"],
     .terms-toggle input[type="checkbox"] { accent-color: var(--red); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
 
-    .admin-toggle label {
-        font-size: 0.75rem; color: var(--text-muted); cursor: pointer;
-        text-transform: none; letter-spacing: 0; font-weight: 500;
-    }
     .terms-toggle label {
         font-size: 0.75rem; color: var(--text-muted); cursor: pointer;
         text-transform: none; letter-spacing: 0; font-weight: 500;
@@ -424,13 +434,23 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
 
                     <div class="fields-col">
                         <div class="field-group">
+                            <label for="si-code">Código</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <input id="si-code" type="text" placeholder="Ej: 0190000" autocomplete="username" required />
+                            </div>
+                        </div>
+                        <div class="field-group">
                             <label for="si-email">Correo electrónico</label>
                             <div class="input-wrap">
                                 <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                     <rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
                                     <path d="M3 5l7 6 7-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
                                 </svg>
-                                <input id="si-email" type="email" placeholder="tu@correo.edu.co" autocomplete="email" required />
+                                <input id="si-email" type="email" placeholder="tu@upsfo.edu.co" autocomplete="email" required />
                             </div>
                         </div>
                         <div class="field-group">
@@ -451,12 +471,6 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         </div>
                     </div>
 
-                    <!-- Admin toggle -->
-                    <div class="admin-toggle" style="margin-top: 0.65rem;">
-                        <input type="checkbox" id="si-admin" />
-                        <label for="si-admin">Acceso de administrador</label>
-                    </div>
-
                     <a class="forgot-link" href="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
 
                     <button type="submit" id="si-submit" class="btn btn-primary">
@@ -466,7 +480,6 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         </svg>
                     </button>
 
-                    <!-- ── NUEVO: Volver al inicio ── -->
                     <a href="/" class="back-home-link">Volver al inicio</a>
 
                     <p class="switch-hint" style="margin-top: 0.6rem;">
@@ -523,16 +536,24 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                                 <input id="su-lname2" type="text" placeholder="Ej. López" />
                             </div>
                         </div>
-                        <div class="field-group">
-                            <label for="su-program">Programa académico</label>
+                        <div class="field-group field-full">
+                            <label for="su-studentid">Código de estudiante</label>
                             <div class="input-wrap">
                                 <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                     <rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
                                     <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                                 </svg>
-                                <select id="su-program" required>
-                                    <option value="">Cargando...</option>
-                                </select>
+                                <input id="su-studentid" type="text" placeholder="Ej. 0192270" autocomplete="off" required maxlength="7" pattern="[0-9]{7}" />
+                            </div>
+                        </div>
+                        <div class="field-group field-full">
+                            <label for="su-email">Correo electrónico</label>
+                            <div class="input-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M3 5l7 6 7-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                </svg>
+                                <input id="su-email" type="email" placeholder="tu@ufpso.edu.co" autocomplete="email" required />
                             </div>
                         </div>
                         <div class="field-group">
@@ -543,16 +564,6 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                                     <circle cx="10" cy="15" r="0.8" fill="currentColor"/>
                                 </svg>
                                 <input id="su-phone" type="tel" placeholder="Ej. 3001234567" autocomplete="tel" required />
-                            </div>
-                        </div>
-                        <div class="field-group field-full">
-                            <label for="su-email">Correo electrónico</label>
-                            <div class="input-wrap">
-                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                    <rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                                    <path d="M3 5l7 6 7-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                                </svg>
-                                <input id="su-email" type="email" placeholder="tu@correo.edu.co" autocomplete="email" required />
                             </div>
                         </div>
                         <div class="field-group">
@@ -571,25 +582,9 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                                 </button>
                             </div>
                         </div>
-                        <div class="field-group">
-                            <label for="su-confirm">Validar contraseña</label>
-                            <div class="input-wrap">
-                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                    <rect x="5" y="9" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                                    <path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                </svg>
-                                <input id="su-confirm" type="password" placeholder="Repite tu contraseña" autocomplete="new-password" required />
-                                <button type="button" class="toggle-pw" aria-label="Mostrar contraseña" data-target="su-confirm">
-                                    <svg viewBox="0 0 20 20" fill="none" width="16" height="16" aria-hidden="true">
-                                        <ellipse cx="10" cy="10" rx="7" ry="4.5" stroke="currentColor" stroke-width="1.5"/>
-                                        <circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- ── NUEVO: Términos y condiciones ── -->
+                    <!-- Términos y condiciones -->
                     <div class="terms-toggle" id="terms-wrap">
                         <input type="checkbox" id="su-terms" />
                         <label for="su-terms">
@@ -623,7 +618,7 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         <path d="M12 52c0-9.9 8.1-18 18-18s18 8.1 18 18" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                     <h2>¡Hola de nuevo!</h2>
-                    <p>Ingresa tus credenciales para acceder a tu portal estudiantil.</p>
+                    <p>Ingresa tu código, correo y contraseña para acceder a tu portal estudiantil.</p>
                     <button id="btn-go-register" class="btn btn-outline">Crear cuenta</button>
                 </div>
                 <div id="overlay-signup-msg" class="overlay-msg overlay-msg--hidden">
@@ -632,7 +627,7 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         <path d="M20 30h20M30 20v20" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round"/>
                     </svg>
                     <h2>¡Bienvenido!</h2>
-                    <p>Regístrate con tus datos para comenzar a disfrutar de todas las funciones del portal.</p>
+                    <p>Regístrate con tu código de estudiante y comienza a prepararte para el Saber Pro.</p>
                     <button id="btn-go-login" class="btn btn-outline">Iniciar sesión</button>
                 </div>
             </div>
@@ -644,7 +639,7 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
 // @ts-nocheck
 
 /* ════════════════════════════════════════════════════
-   API — misma lógica que src/lib/api.ts
+   API
 ════════════════════════════════════════════════════ */
 const BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_API_URL)
     ? import.meta.env.PUBLIC_API_URL
@@ -664,8 +659,11 @@ async function apiRequest(path, options = {}) {
 function saveSession(auth) {
     localStorage.setItem('rp_token', auth.token);
     localStorage.setItem('rp_user', JSON.stringify({
-        id: auth.id, programId: auth.programId, email: auth.email,
-        firstName: auth.firstName, firstSurname: auth.firstSurname,
+        id: auth.id,
+        programId: auth.programId,
+        email: auth.email,
+        firstName: auth.firstName,
+        firstSurname: auth.firstSurname,
         userType: auth.userType,
     }));
 }
@@ -766,28 +764,6 @@ document.querySelectorAll('.toggle-pw').forEach(btn => {
 });
 
 /* ════════════════════════════════════════════════════
-   CARGAR PROGRAMAS ACADÉMICOS
-════════════════════════════════════════════════════ */
-async function loadPrograms() {
-    const select = document.getElementById('su-program');
-    try {
-        const res = await apiRequest('/api/programs/active');
-        select.innerHTML = '<option value="">— Selecciona tu programa —</option>';
-        if (res.data) {
-            res.data.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.programId;
-                opt.textContent = p.programName;
-                select.appendChild(opt);
-            });
-        }
-    } catch {
-        select.innerHTML = '<option value="">Error cargando programas</option>';
-    }
-}
-loadPrograms();
-
-/* ════════════════════════════════════════════════════
    HELPERS — errores y loading
 ════════════════════════════════════════════════════ */
 function showMsg(boxId, text, type = 'error') {
@@ -820,17 +796,18 @@ termsCheckbox.addEventListener('change', () => {
 });
 
 /* ════════════════════════════════════════════════════
-   FORMULARIO LOGIN
+   FORMULARIO LOGIN — usa POST /api/auth/login
+   con { email, password, code }
 ════════════════════════════════════════════════════ */
 document.getElementById('sign-in').addEventListener('submit', async (e) => {
     e.preventDefault();
     hideMsg('si-error');
 
+    const code     = document.getElementById('si-code').value.trim();
     const email    = document.getElementById('si-email').value.trim();
     const password = document.getElementById('si-password').value;
-    const isAdmin  = document.getElementById('si-admin').checked;
 
-    if (!email || !password) {
+    if (!code || !email || !password) {
         showMsg('si-error', 'Por favor completa todos los campos.');
         return;
     }
@@ -838,10 +815,9 @@ document.getElementById('sign-in').addEventListener('submit', async (e) => {
     setLoading('si-submit', 'si-label', true, 'Ingresar');
 
     try {
-        const endpoint = isAdmin ? '/api/auth/admin/login' : '/api/auth/student/login';
-        const res = await apiRequest(endpoint, {
+        const res = await apiRequest('/api/auth/login', {
             method: 'POST',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ email, password, code }),
         });
 
         if (res.success && res.data) {
@@ -858,14 +834,16 @@ document.getElementById('sign-in').addEventListener('submit', async (e) => {
 });
 
 /* ════════════════════════════════════════════════════
-   FORMULARIO REGISTRO
+   FORMULARIO REGISTRO — usa POST /api/auth/student/register
+   con { studentId, firstName, ..., email, phone, password }
+   El programId se extrae del código en el backend
 ════════════════════════════════════════════════════ */
 document.getElementById('sign-up').addEventListener('submit', async (e) => {
     e.preventDefault();
     hideMsg('su-error');
     hideMsg('su-success');
 
-    /* ── Validar términos y condiciones ── */
+    /* Validar términos */
     if (!termsCheckbox.checked) {
         termsWrap.classList.add('terms-error');
         showMsg('su-error', 'Debes aceptar los términos y condiciones para registrarte.');
@@ -874,27 +852,27 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
     }
     termsWrap.classList.remove('terms-error');
 
-    const pw  = document.getElementById('su-password').value;
-    const cpw = document.getElementById('su-confirm').value;
+    const studentId = document.getElementById('su-studentid').value.trim();
 
-    if (pw !== cpw) {
-        showMsg('su-error', 'Las contraseñas no coinciden.');
+    /* Validar formato del código de estudiante */
+    if (!/^[0-9]{7}$/.test(studentId)) {
+        showMsg('su-error', 'El código de estudiante debe tener exactamente 7 dígitos numéricos.');
         return;
     }
 
     const payload = {
+        studentId,
         firstName:     document.getElementById('su-fname').value.trim(),
         secondName:    document.getElementById('su-mname').value.trim() || undefined,
         firstSurname:  document.getElementById('su-lname1').value.trim(),
         secondSurname: document.getElementById('su-lname2').value.trim() || undefined,
         email:         document.getElementById('su-email').value.trim(),
         phone:         document.getElementById('su-phone').value.trim(),
-        password:      pw,
-        programId:     document.getElementById('su-program').value,
+        password:      document.getElementById('su-password').value,
     };
 
     if (!payload.firstName || !payload.firstSurname || !payload.email
-        || !payload.phone || !payload.password || !payload.programId) {
+        || !payload.phone || !payload.password) {
         showMsg('su-error', 'Por favor completa todos los campos obligatorios.');
         return;
     }
@@ -914,7 +892,6 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
             );
             document.getElementById('sign-up').reset();
             termsWrap.classList.remove('terms-error');
-            loadPrograms();
         } else {
             showMsg('su-error', res.message ?? 'Error al crear la cuenta.');
         }
