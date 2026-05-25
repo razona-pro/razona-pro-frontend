@@ -183,6 +183,10 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
         border-color: var(--red);
         box-shadow: 0 0 0 3px rgba(212,18,36,0.1);
     }
+    .input-wrap.field-error {
+        border-color: #ef4444 !important;
+        background: #fff5f5 !important;
+    }
 
     .input-icon {
         width: 15px; height: 15px; flex-shrink: 0;
@@ -209,6 +213,15 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
     }
     .toggle-pw:hover { color: var(--red); }
 
+    /* ── Inline field error message ── */
+    .field-msg {
+        font-size: 0.67rem;
+        color: #dc2626;
+        margin-top: 0.2rem;
+        display: none;
+    }
+    .field-msg.visible { display: block; }
+
     .forgot-link {
         display: block; text-align: right;
         font-size: 0.77rem; color: var(--red); text-decoration: none;
@@ -217,54 +230,28 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
     }
     .forgot-link:hover { opacity: 0.7; }
 
-    /* ── Volver al inicio (login form) ── */
+    /* ── Volver al inicio ── */
     .back-home-link {
         display: block; text-align: center;
         font-size: 0.77rem; color: var(--text-muted); text-decoration: none;
-        margin-top: 0.9rem;
-        font-weight: 500; transition: color 0.2s;
+        margin-top: 0.9rem; font-weight: 500; transition: color 0.2s;
         letter-spacing: 0.02em;
     }
     .back-home-link:hover { color: var(--red); }
     .back-home-link::before { content: '← '; }
-
-    /* ── Hint de código ── */
-    .code-hint {
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        margin-top: 0.25rem;
-        line-height: 1.4;
-    }
-    .code-hint span {
-        display: inline-block;
-        background: rgba(212,18,36,0.08);
-        color: var(--red);
-        border-radius: 4px;
-        padding: 1px 5px;
-        font-family: monospace;
-        font-weight: 600;
-    }
 
     /* ── Terms toggle ── */
     .terms-toggle {
         display: flex; align-items: flex-start; gap: 0.5rem;
         margin-top: 0.75rem; margin-bottom: 0.2rem;
     }
-
     .terms-toggle input[type="checkbox"] { accent-color: var(--red); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
-
     .terms-toggle label {
         font-size: 0.75rem; color: var(--text-muted); cursor: pointer;
-        text-transform: none; letter-spacing: 0; font-weight: 500;
-        line-height: 1.5;
+        text-transform: none; letter-spacing: 0; font-weight: 500; line-height: 1.5;
     }
-    .terms-toggle label a {
-        color: var(--red); text-decoration: none; font-weight: 600;
-        transition: opacity 0.2s;
-    }
+    .terms-toggle label a { color: var(--red); text-decoration: none; font-weight: 600; transition: opacity 0.2s; }
     .terms-toggle label a:hover { opacity: 0.7; text-decoration: underline; }
-
-    /* ── Términos error state ── */
     .terms-toggle.terms-error label { color: #b91c1c; }
     .terms-toggle.terms-error input[type="checkbox"] { outline: 2px solid #ef4444; outline-offset: 1px; border-radius: 2px; }
 
@@ -330,55 +317,23 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
     ═══════════════════════════════════════════ */
     @media (max-width: 900px) {
         body { padding: 1.25rem; }
-
         .card { min-height: unset; border-radius: 18px; overflow: hidden; }
-
         .overlay-panel { display: none !important; }
-
         .form-box {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: auto;
-            min-height: 100%;
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: auto; min-height: 100%;
             padding: 2rem 1.5rem;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
+            display: flex; align-items: flex-start; justify-content: center;
             transition:
                 transform 0.55s cubic-bezier(0.65, 0, 0.35, 1),
                 opacity   0.45s cubic-bezier(0.65, 0, 0.35, 1);
             will-change: transform, opacity;
         }
-
-        .form-signin {
-            transform: translateX(0);
-            opacity: 1;
-            pointer-events: auto;
-            left: 0 !important;
-        }
-        .form-signup {
-            transform: translateX(105%);
-            opacity: 0;
-            pointer-events: none;
-            left: 0 !important;
-        }
-
-        .card.toggle .form-signin {
-            transform: translateX(-105%);
-            opacity: 0;
-            pointer-events: none;
-            left: 0 !important;
-        }
-        .card.toggle .form-signup {
-            transform: translateX(0);
-            opacity: 1;
-            pointer-events: auto;
-            left: 0 !important;
-        }
-
+        .form-signin { transform: translateX(0); opacity: 1; pointer-events: auto; left: 0 !important; }
+        .form-signup { transform: translateX(105%); opacity: 0; pointer-events: none; left: 0 !important; }
+        .card.toggle .form-signin { transform: translateX(-105%); opacity: 0; pointer-events: none; left: 0 !important; }
+        .card.toggle .form-signup { transform: translateX(0); opacity: 1; pointer-events: auto; left: 0 !important; }
         .form-box.is-active { position: relative; }
-
         .switch-hint { display: block; }
     }
 
@@ -392,12 +347,7 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
 
     @media (min-width: 901px) {
         .main-wrapper { padding: 0; }
-        .form-signup {
-            align-items: center;
-            justify-content: center;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
+        .form-signup { align-items: center; justify-content: center; padding-top: 2rem; padding-bottom: 2rem; }
     }
 </style>
 </head>
@@ -429,7 +379,6 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         <p class="form-subtitle">Bienvenido de nuevo</p>
                     </div>
 
-                    <!-- Error box -->
                     <div id="si-error" class="msg-box error"></div>
 
                     <div class="fields-col">
@@ -445,13 +394,14 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         </div>
                         <div class="field-group">
                             <label for="si-email">Correo electrónico</label>
-                            <div class="input-wrap">
+                            <div class="input-wrap" id="si-email-wrap">
                                 <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                     <rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
                                     <path d="M3 5l7 6 7-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
                                 </svg>
-                                <input id="si-email" type="email" placeholder="tu@upsfo.edu.co" autocomplete="email" required />
+                                <input id="si-email" type="email" placeholder="tu@ufpso.edu.co" autocomplete="email" required />
                             </div>
+                            <span id="si-email-msg" class="field-msg">Solo se permiten correos institucionales @ufpso.edu.co</span>
                         </div>
                         <div class="field-group">
                             <label for="si-password">Contraseña</label>
@@ -491,6 +441,12 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
 
             <!-- ══════════════════════════════════════
                  FORMULARIO: REGISTRO
+                 Grilla 2 columnas:
+                 Fila 1: Primer nombre | Segundo nombre
+                 Fila 2: Primer apellido | Segundo apellido
+                 Fila 3: Código estudiante | Celular
+                 Fila 4: Correo electrónico (full)
+                 Fila 5: Contraseña | Confirmar contraseña
             ══════════════════════════════════════ -->
             <div class="form-box form-signup">
                 <form id="sign-up" novalidate>
@@ -507,11 +463,12 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         <p class="form-subtitle">Completa tu información</p>
                     </div>
 
-                    <!-- Error / Success boxes -->
                     <div id="su-error"   class="msg-box error"></div>
                     <div id="su-success" class="msg-box success"></div>
 
                     <div class="fields-grid">
+
+                        <!-- Fila 1: nombres -->
                         <div class="field-group">
                             <label for="su-fname">Primer nombre</label>
                             <div class="input-wrap">
@@ -524,6 +481,8 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                                 <input id="su-mname" type="text" placeholder="Ej. Carlos" autocomplete="additional-name" />
                             </div>
                         </div>
+
+                        <!-- Fila 2: apellidos -->
                         <div class="field-group">
                             <label for="su-lname1">Primer apellido</label>
                             <div class="input-wrap">
@@ -536,7 +495,9 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                                 <input id="su-lname2" type="text" placeholder="Ej. López" />
                             </div>
                         </div>
-                        <div class="field-group field-full">
+
+                        <!-- Fila 3: código estudiante | celular -->
+                        <div class="field-group">
                             <label for="su-studentid">Código de estudiante</label>
                             <div class="input-wrap">
                                 <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -545,16 +506,7 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                                 </svg>
                                 <input id="su-studentid" type="text" placeholder="Ej. 0192270" autocomplete="off" required maxlength="7" pattern="[0-9]{7}" />
                             </div>
-                        </div>
-                        <div class="field-group field-full">
-                            <label for="su-email">Correo electrónico</label>
-                            <div class="input-wrap">
-                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                    <rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                                    <path d="M3 5l7 6 7-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                                </svg>
-                                <input id="su-email" type="email" placeholder="tu@ufpso.edu.co" autocomplete="email" required />
-                            </div>
+                            <span id="su-studentid-msg" class="field-msg">Debe tener exactamente 7 dígitos numéricos.</span>
                         </div>
                         <div class="field-group">
                             <label for="su-phone">Celular</label>
@@ -566,6 +518,21 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                                 <input id="su-phone" type="tel" placeholder="Ej. 3001234567" autocomplete="tel" required />
                             </div>
                         </div>
+
+                        <!-- Fila 4: correo (full width) -->
+                        <div class="field-group field-full">
+                            <label for="su-email">Correo institucional</label>
+                            <div class="input-wrap" id="su-email-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M3 5l7 6 7-6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                </svg>
+                                <input id="su-email" type="email" placeholder="tu@ufpso.edu.co" autocomplete="email" required />
+                            </div>
+                            <span id="su-email-msg" class="field-msg">Solo se aceptan correos @ufpso.edu.co</span>
+                        </div>
+
+                        <!-- Fila 5: contraseña | confirmar contraseña -->
                         <div class="field-group">
                             <label for="su-password">Contraseña</label>
                             <div class="input-wrap">
@@ -582,6 +549,24 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                                 </button>
                             </div>
                         </div>
+                        <div class="field-group">
+                            <label for="su-confirm">Confirmar contraseña</label>
+                            <div class="input-wrap" id="su-confirm-wrap">
+                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <rect x="5" y="9" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <input id="su-confirm" type="password" placeholder="Repite tu contraseña" autocomplete="new-password" required />
+                                <button type="button" class="toggle-pw" aria-label="Mostrar contraseña" data-target="su-confirm">
+                                    <svg viewBox="0 0 20 20" fill="none" width="16" height="16" aria-hidden="true">
+                                        <ellipse cx="10" cy="10" rx="7" ry="4.5" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <span id="su-confirm-msg" class="field-msg">Las contraseñas no coinciden.</span>
+                        </div>
+
                     </div>
 
                     <!-- Términos y condiciones -->
@@ -618,7 +603,7 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         <path d="M12 52c0-9.9 8.1-18 18-18s18 8.1 18 18" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                     <h2>¡Hola de nuevo!</h2>
-                    <p>Ingresa tu código, correo y contraseña para acceder a tu portal estudiantil.</p>
+                    <p>Ingresa tu código, correo institucional y contraseña para acceder.</p>
                     <button id="btn-go-register" class="btn btn-outline">Crear cuenta</button>
                 </div>
                 <div id="overlay-signup-msg" class="overlay-msg overlay-msg--hidden">
@@ -764,7 +749,7 @@ document.querySelectorAll('.toggle-pw').forEach(btn => {
 });
 
 /* ════════════════════════════════════════════════════
-   HELPERS — errores y loading
+   HELPERS
 ════════════════════════════════════════════════════ */
 function showMsg(boxId, text, type = 'error') {
     const el = document.getElementById(boxId);
@@ -783,21 +768,111 @@ function setLoading(submitId, labelId, loading, defaultText) {
     if (lbl) lbl.textContent = loading ? 'Un momento...' : defaultText;
 }
 
+/* Muestra/oculta error inline de campo */
+function setFieldError(wrapId, msgId, hasError) {
+    const wrap = document.getElementById(wrapId);
+    const msg  = document.getElementById(msgId);
+    if (wrap) wrap.classList.toggle('field-error', hasError);
+    if (msg)  msg.classList.toggle('visible', hasError);
+}
+
 /* ════════════════════════════════════════════════════
-   TÉRMINOS — limpiar estado de error al marcar
+   VALIDACIÓN DE DOMINIO @ufpso.edu.co
+════════════════════════════════════════════════════ */
+const UFPSO_DOMAIN = '@ufpso.edu.co';
+
+function isUfpsoEmail(email) {
+    return email.toLowerCase().endsWith(UFPSO_DOMAIN);
+}
+
+/* Login: validar correo en tiempo real */
+const siEmailInput = document.getElementById('si-email');
+siEmailInput.addEventListener('blur', () => {
+    const val = siEmailInput.value.trim();
+    if (val && !isUfpsoEmail(val)) {
+        setFieldError('si-email-wrap', 'si-email-msg', true);
+    } else {
+        setFieldError('si-email-wrap', 'si-email-msg', false);
+    }
+});
+siEmailInput.addEventListener('input', () => {
+    if (isUfpsoEmail(siEmailInput.value.trim())) {
+        setFieldError('si-email-wrap', 'si-email-msg', false);
+    }
+});
+
+/* Registro: validar correo en tiempo real */
+const suEmailInput = document.getElementById('su-email');
+suEmailInput.addEventListener('blur', () => {
+    const val = suEmailInput.value.trim();
+    if (val && !isUfpsoEmail(val)) {
+        setFieldError('su-email-wrap', 'su-email-msg', true);
+    } else {
+        setFieldError('su-email-wrap', 'su-email-msg', false);
+    }
+});
+suEmailInput.addEventListener('input', () => {
+    if (isUfpsoEmail(suEmailInput.value.trim())) {
+        setFieldError('su-email-wrap', 'su-email-msg', false);
+    }
+});
+
+/* ════════════════════════════════════════════════════
+   VALIDACIÓN CONFIRMAR CONTRASEÑA EN TIEMPO REAL
+════════════════════════════════════════════════════ */
+const suConfirmInput = document.getElementById('su-confirm');
+const suPasswordInput = document.getElementById('su-password');
+
+function checkPasswordMatch() {
+    const pw  = suPasswordInput.value;
+    const cpw = suConfirmInput.value;
+    if (cpw && pw !== cpw) {
+        setFieldError('su-confirm-wrap', 'su-confirm-msg', true);
+    } else {
+        setFieldError('su-confirm-wrap', 'su-confirm-msg', false);
+    }
+}
+
+suConfirmInput.addEventListener('input', checkPasswordMatch);
+suPasswordInput.addEventListener('input', () => {
+    if (suConfirmInput.value) checkPasswordMatch();
+});
+
+/* ════════════════════════════════════════════════════
+   VALIDACIÓN CÓDIGO ESTUDIANTE EN TIEMPO REAL
+════════════════════════════════════════════════════ */
+const suStudentIdInput = document.getElementById('su-studentid');
+suStudentIdInput.addEventListener('input', () => {
+    const val = suStudentIdInput.value.trim();
+    if (val && !/^[0-9]{0,7}$/.test(val)) {
+        suStudentIdInput.value = val.replace(/\D/g, '').slice(0, 7);
+    }
+    if (val.length === 7) {
+        setFieldError(null, 'su-studentid-msg', false);
+    }
+});
+suStudentIdInput.addEventListener('blur', () => {
+    const val = suStudentIdInput.value.trim();
+    if (val && !/^[0-9]{7}$/.test(val)) {
+        document.getElementById('su-studentid-msg').classList.add('visible');
+    } else {
+        document.getElementById('su-studentid-msg').classList.remove('visible');
+    }
+});
+
+/* ════════════════════════════════════════════════════
+   TÉRMINOS
 ════════════════════════════════════════════════════ */
 const termsCheckbox = document.getElementById('su-terms');
 const termsWrap     = document.getElementById('terms-wrap');
 
 termsCheckbox.addEventListener('change', () => {
-    if (termsCheckbox.checked) {
-        termsWrap.classList.remove('terms-error');
-    }
+    if (termsCheckbox.checked) termsWrap.classList.remove('terms-error');
 });
 
 /* ════════════════════════════════════════════════════
-   FORMULARIO LOGIN — usa POST /api/auth/login
-   con { email, password, code }
+   FORMULARIO LOGIN — POST /api/auth/login
+   Body: { email, password, code }
 ════════════════════════════════════════════════════ */
 document.getElementById('sign-in').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -809,6 +884,12 @@ document.getElementById('sign-in').addEventListener('submit', async (e) => {
 
     if (!code || !email || !password) {
         showMsg('si-error', 'Por favor completa todos los campos.');
+        return;
+    }
+
+    if (!isUfpsoEmail(email)) {
+        setFieldError('si-email-wrap', 'si-email-msg', true);
+        showMsg('si-error', 'Solo se permiten correos institucionales @ufpso.edu.co');
         return;
     }
 
@@ -834,9 +915,9 @@ document.getElementById('sign-in').addEventListener('submit', async (e) => {
 });
 
 /* ════════════════════════════════════════════════════
-   FORMULARIO REGISTRO — usa POST /api/auth/student/register
-   con { studentId, firstName, ..., email, phone, password }
-   El programId se extrae del código en el backend
+   FORMULARIO REGISTRO — POST /api/auth/student/register
+   Body: { studentId, firstName, secondName?, firstSurname,
+           secondSurname?, email, phone, password }
 ════════════════════════════════════════════════════ */
 document.getElementById('sign-up').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -852,11 +933,28 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
     }
     termsWrap.classList.remove('terms-error');
 
-    const studentId = document.getElementById('su-studentid').value.trim();
-
-    /* Validar formato del código de estudiante */
+    /* Validar código estudiante */
+    const studentId = suStudentIdInput.value.trim();
     if (!/^[0-9]{7}$/.test(studentId)) {
+        document.getElementById('su-studentid-msg').classList.add('visible');
         showMsg('su-error', 'El código de estudiante debe tener exactamente 7 dígitos numéricos.');
+        return;
+    }
+
+    /* Validar correo institucional */
+    const email = suEmailInput.value.trim();
+    if (!isUfpsoEmail(email)) {
+        setFieldError('su-email-wrap', 'su-email-msg', true);
+        showMsg('su-error', 'Solo se aceptan correos institucionales @ufpso.edu.co');
+        return;
+    }
+
+    /* Validar contraseñas coinciden */
+    const pw  = suPasswordInput.value;
+    const cpw = suConfirmInput.value;
+    if (pw !== cpw) {
+        setFieldError('su-confirm-wrap', 'su-confirm-msg', true);
+        showMsg('su-error', 'Las contraseñas no coinciden.');
         return;
     }
 
@@ -866,13 +964,12 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
         secondName:    document.getElementById('su-mname').value.trim() || undefined,
         firstSurname:  document.getElementById('su-lname1').value.trim(),
         secondSurname: document.getElementById('su-lname2').value.trim() || undefined,
-        email:         document.getElementById('su-email').value.trim(),
+        email,
         phone:         document.getElementById('su-phone').value.trim(),
-        password:      document.getElementById('su-password').value,
+        password:      pw,
     };
 
-    if (!payload.firstName || !payload.firstSurname || !payload.email
-        || !payload.phone || !payload.password) {
+    if (!payload.firstName || !payload.firstSurname || !payload.phone || !payload.password) {
         showMsg('su-error', 'Por favor completa todos los campos obligatorios.');
         return;
     }
@@ -892,6 +989,15 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
             );
             document.getElementById('sign-up').reset();
             termsWrap.classList.remove('terms-error');
+            /* Limpiar estados de error */
+            ['su-email-wrap','su-confirm-wrap'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('field-error');
+            });
+            ['su-email-msg','su-confirm-msg','su-studentid-msg'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('visible');
+            });
         } else {
             showMsg('su-error', res.message ?? 'Error al crear la cuenta.');
         }
