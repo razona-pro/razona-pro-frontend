@@ -180,17 +180,22 @@ const { currentPage = '' } = Astro.props;
   const user = getUser();
   if (user) {
     const initials = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase();
+    // Nombre completo: "Juan Pérez"
+    const fullName = user.firstSurname
+      ? `${user.firstName} ${user.firstSurname}`
+      : user.firstName;
+
     const avatarEl = document.getElementById('tb-avatar');
     const nameEl   = document.getElementById('tb-name');
     const badgeEl  = document.getElementById('tb-badge') as HTMLElement;
 
     if (avatarEl) avatarEl.textContent = initials;
-    if (nameEl)   nameEl.textContent = user.firstName;
+    if (nameEl)   nameEl.textContent = fullName;   // <-- nombre completo
     if (badgeEl) {
       if (isAdmin()) {
         badgeEl.textContent = 'Admin';
-        badgeEl.style.background = '#1C1917';
-        badgeEl.style.color = '#F87171';
+        badgeEl.style.background = '#FEE2E2';
+        badgeEl.style.color = '#D41224';
       } else {
         badgeEl.textContent = 'Estudiante';
         badgeEl.style.background = 'var(--brand-pale)';

@@ -1,11 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
 ---
 
 <BaseLayout title="Inicio" description="Plataforma inteligente de preparación Saber Pro — UFPSO">
 
 <style>
-  /* Reutiliza el diseño actual del landing. Solo se cambian los stats a dinámicos */
   :root {
     --rp-primary: #D41224;
     --rp-dark:    #9B1F24;
@@ -42,7 +42,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     box-shadow: 0 3px 12px rgba(212,18,36,0.35);
   }
   .nav-logo span { color: var(--rp-primary); }
-
   .nav-links { display: none; list-style: none; margin:0; padding:0; align-items:center; gap:0.25rem; }
   @media (min-width: 768px) { .nav-links { display: flex; } }
   .nav-link {
@@ -51,7 +50,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     text-decoration: none; transition: color 0.15s, background 0.15s;
   }
   .nav-link:hover { color: var(--rp-text); background: #F9F9F9; }
-
   .btn-primary-nav {
     background: linear-gradient(135deg, var(--rp-primary), var(--rp-dark));
     color: white; padding: 0.4rem 1.125rem; border-radius: 10px;
@@ -59,7 +57,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     box-shadow: 0 3px 14px rgba(212,18,36,0.3); transition: all 0.2s;
   }
   .btn-primary-nav:hover { box-shadow: 0 6px 22px rgba(212,18,36,0.45); transform: translateY(-1px); }
-
   .nav-ctas { display: flex; align-items: center; gap: 0.75rem; }
   .nav-signin-link {
     font-size: 0.875rem; color: rgba(18,3,10,0.6);
@@ -70,20 +67,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /* Hero */
   .hero {
     min-height: 100vh; display: flex; align-items: center;
-    padding: 7rem 1.5rem 4rem;
-    position: relative;
+    padding: 7rem 1.5rem 4rem; position: relative;
   }
-  .hero-bg {
-    position: absolute; inset: 0; overflow: hidden; pointer-events: none;
-  }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
   .orb {
     position: absolute; border-radius: 50%; filter: blur(90px);
     animation: orbFloat 14s ease-in-out infinite;
   }
   @keyframes orbFloat {
     0%,100% { transform: translate(0,0); }
-    33% { transform: translate(20px,-15px); }
-    66% { transform: translate(-10px,18px); }
+    33%      { transform: translate(20px,-15px); }
+    66%      { transform: translate(-10px,18px); }
   }
   .orb-1 { width: 480px; height: 480px; top:-80px; left:8%; background:rgba(212,18,36,0.07); }
   .orb-2 { width: 340px; height: 340px; top:40%; right:4%; background:rgba(160,13,27,0.05); animation-delay:-5s; }
@@ -105,8 +99,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   @keyframes ping { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(1.6); } }
   .hero-headline {
     font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; line-height: 1.08;
-    margin: 0 0 1.25rem; letter-spacing: -1px;
-    animation: fadeUp 0.6s 0.1s ease both;
+    margin: 0 0 1.25rem; letter-spacing: -1px; animation: fadeUp 0.6s 0.1s ease both;
   }
   .text-gradient {
     background: linear-gradient(135deg, var(--rp-primary) 0%, var(--rp-light) 60%, var(--rp-muted) 100%);
@@ -132,12 +125,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     font-weight: 600; font-size: 0.9375rem; text-decoration: none; transition: all 0.25s;
   }
   .btn-hero-ghost:hover { border-color: rgba(212,18,36,0.5); color: var(--rp-primary); background: rgba(212,18,36,0.04); }
+
   /* Stats bar */
   .stats-bar {
     border-top: 1px solid var(--rp-border); border-bottom: 1px solid var(--rp-border);
-    padding: 3rem 1.5rem; background: linear-gradient(to right, #FBF0F1 0%, #FDF5F5 50%, #FBF0F1 100%);
+    padding: 3rem 1.5rem;
+    background: linear-gradient(to right, #FBF0F1 0%, #FDF5F5 50%, #FBF0F1 100%);
   }
-  .stats-inner { max-width: 75rem; margin: 0 auto; display: grid; grid-template-columns: repeat(2,1fr); gap: 2rem; text-align: center; }
+  .stats-inner {
+    max-width: 75rem; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(2,1fr); gap: 2rem; text-align: center;
+  }
   @media (min-width: 768px) { .stats-inner { grid-template-columns: repeat(4,1fr); } }
   .stat-item { transition: transform 0.3s; }
   .stat-item:hover { transform: scale(1.04); }
@@ -147,6 +145,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
   .stat-label { font-size: 0.6875rem; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.2em; }
+
   /* How it works */
   .section { padding: 6rem 1.5rem; }
   .section-inner { max-width: 75rem; margin: 0 auto; }
@@ -163,8 +162,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   @media (min-width: 768px) { .cards-grid { grid-template-columns: repeat(3,1fr); } }
   .how-card {
     background: white; border: 1px solid rgba(212,18,36,0.12); border-radius: 18px;
-    padding: 1.75rem; transition: all 0.35s;
-    box-shadow: 0 2px 8px rgba(212,18,36,0.04);
+    padding: 1.75rem; transition: all 0.35s; box-shadow: 0 2px 8px rgba(212,18,36,0.04);
   }
   .how-card:hover { border-color: rgba(212,18,36,0.4); transform: translateY(-4px); box-shadow: 0 12px 36px rgba(212,18,36,0.12); }
   .how-icon { width: 48px; height: 48px; border-radius: 13px; background: rgba(212,18,36,0.08); border: 1px solid rgba(212,18,36,0.25); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
@@ -172,23 +170,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .how-card:hover .how-num { color: rgba(212,18,36,0.12); }
   .how-title { font-size: 1.125rem; font-weight: 800; color: #1A1A1A; margin: 0 0 0.625rem; }
   .how-text { font-size: 0.875rem; color: #6B7280; line-height: 1.75; }
+
   /* CTA */
   .cta-section { padding: 5rem 1.5rem; }
   .cta-card {
     max-width: 52rem; margin: 0 auto; text-align: center;
     background: linear-gradient(135deg, #FDF5F5 0%, #FBF0F1 100%);
-    border: 1px solid rgba(212,18,36,0.2); border-radius: 24px;
-    padding: 4rem 2rem;
-    box-shadow: 0 0 60px rgba(212,18,36,0.07);
-    position: relative; overflow: hidden;
+    border: 1px solid rgba(212,18,36,0.2); border-radius: 24px; padding: 4rem 2rem;
+    box-shadow: 0 0 60px rgba(212,18,36,0.07); position: relative; overflow: hidden;
   }
   .cta-title { font-size: clamp(1.75rem,4vw,3rem); font-weight: 900; margin: 0 0 1rem; letter-spacing: -0.5px; }
   .cta-sub { font-size: 1.0625rem; color: #6B7280; margin: 0 0 2.5rem; line-height: 1.7; }
+
   /* Footer */
   .footer { border-top: 1px solid var(--rp-border); padding: 3rem 1.5rem 2rem; }
   .footer-inner { max-width: 75rem; margin: 0 auto; }
   .footer-copy { font-size: 0.75rem; color: #9CA3AF; margin: 0; }
-  /* Animations */
+
   @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
   .reveal { opacity:0; transform:translateY(18px); transition: opacity 0.5s ease, transform 0.5s ease; }
   .reveal.visible { opacity:1; transform:translateY(0); }
@@ -236,7 +234,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         impulsado por IA.
       </h1>
       <p class="hero-sub">
-        RazonaPro calibra tu aprendizaje en tiempo real y te prepara con simulacros adaptativos. Supera las pruebas de Estado con un plan que evoluciona contigo.
+        RazonaPro calibra tu aprendizaje en tiempo real y te prepara con simulacros adaptativos.
+        Supera las pruebas de Estado con un plan que evoluciona contigo.
       </p>
       <div class="hero-ctas">
         <a href="/auth?tab=register" class="btn-hero-primary">
@@ -249,6 +248,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </a>
       </div>
     </div>
+
     <!-- Decorative card -->
     <div style="position:relative">
       <div style="background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);border:1px solid rgba(212,18,36,0.18);border-radius:20px;padding:1.75rem;box-shadow:0 12px 48px rgba(212,18,36,0.1);">
@@ -259,13 +259,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
           <span style="padding:4px 10px;font-size:0.6875rem;font-weight:700;background:rgba(16,185,129,0.12);color:#34D399;border-radius:20px;border:1px solid rgba(16,185,129,0.3);">● Activo</span>
         </div>
-        <!-- Competence bars -->
         <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:1.25rem;">
           {[
-            { name: 'Lectura Crítica',         pct: 87, color: '#D41224' },
-            { name: 'Razon. Cuantitativo',      pct: 74, color: '#2563EB' },
-            { name: 'Comp. Ciudadanas',          pct: 91, color: '#059669' },
-            { name: 'Comunicación Escrita',      pct: 83, color: '#7C3AED' },
+            { name: 'Lectura Crítica',        pct: 87, color: '#D41224' },
+            { name: 'Razon. Cuantitativo',     pct: 74, color: '#2563EB' },
+            { name: 'Comp. Ciudadanas',         pct: 91, color: '#059669' },
+            { name: 'Comunicación Escrita',     pct: 83, color: '#7C3AED' },
           ].map(s => (
             <div>
               <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:5px;">
@@ -273,16 +272,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 <span style={{ color: s.color, fontWeight: 600 }}>{s.pct}%</span>
               </div>
               <div style="height:6px;background:rgba(212,18,36,0.08);border-radius:3px;overflow:hidden;">
-                <div class="hero-bar" style={{ height: '100%', borderRadius: '3px', background: `linear-gradient(to right, ${s.color}aa, ${s.color})`, width: '0%' }} data-pct={s.pct}></div>
+                <div class="hero-bar"
+                  style={{ height: '100%', borderRadius: '3px', background: `linear-gradient(to right, ${s.color}aa, ${s.color})`, width: '0%' }}
+                  data-pct={s.pct}>
+                </div>
               </div>
             </div>
           ))}
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
           {[
-            { val: '—', label: 'Simulacros', id: 'hero-stat-tests' },
-            { val: '—', label: 'Promedio',   id: 'hero-stat-avg' },
-            { val: '—', label: 'Estudiantes',id: 'hero-stat-students' },
+            { val: '—', label: 'Simulacros',  id: 'hero-stat-tests'    },
+            { val: '—', label: 'Satisfacción',id: 'hero-stat-avg'      },
+            { val: '—', label: 'Estudiantes', id: 'hero-stat-students' },
           ].map(s => (
             <div style="background:rgba(212,18,36,0.04);border-radius:10px;padding:10px 8px;text-align:center;border:1px solid rgba(212,18,36,0.1);">
               <p id={s.id} style="font-size:1.0625rem;font-weight:900;color:#1A1A1A;margin:0;">{s.val}</p>
@@ -323,7 +325,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div style="text-align:center;margin-bottom:1rem">
       <span class="section-label reveal">Proceso</span>
       <h2 class="section-title reveal">¿Cómo funciona <span class="text-gradient">RazonaPro</span>?</h2>
-      <p class="section-sub reveal" style="margin:0 auto 0">
+      <p class="section-sub reveal" style="margin:0 auto">
         Un ecosistema de aprendizaje adaptativo diseñado para maximizar tu desempeño.
       </p>
     </div>
@@ -383,52 +385,41 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </div>
 </footer>
 
-<script is:inline>
+<!-- ─── Scripts ──────────────────────────────────────────────────────────── -->
+
+<!-- 1. Animaciones de UI (no necesita la URL del API) -->
+<script>
   // Navbar scroll
   window.addEventListener('scroll', () => {
-    const navbar = document.getElementById('navbar');
-    if (navbar) {
-      navbar.classList.toggle('scrolled', window.scrollY > 40);
-    }
+    document.getElementById('navbar')?.classList.toggle('scrolled', window.scrollY > 40);
   }, { passive: true });
 
   // Smooth scroll
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const href = a.getAttribute('href');
-      const target = href && document.querySelector(href);
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
+      const target = document.querySelector(a.getAttribute('href') ?? '');
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
     });
   });
 
-  // Hero bars animate on load
+  // Hero bars
   setTimeout(() => {
-    document.querySelectorAll('.hero-bar').forEach(bar => {
-      const pct = bar.dataset.pct || '0';
+    document.querySelectorAll<HTMLElement>('.hero-bar').forEach(bar => {
       bar.style.transition = 'width 1.2s cubic-bezier(0.4,0,0.2,1)';
-      bar.style.width = `${pct}%`;
+      bar.style.width = `${bar.dataset.pct ?? 0}%`;
     });
   }, 500);
 
-  // Reveal observer
+  // Reveal on scroll
   const revealObs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        revealObs.unobserve(e.target);
-      }
-    });
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
   }, { threshold: 0.18 });
   document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
-  // Counter animation
-  function animCounter(el, target) {
-    const dur = 1600;
-    const start = performance.now();
-    function step(now) {
+  // Counter animation helper (exportada en window para reutilizar)
+  function animCounter(el: HTMLElement, target: number) {
+    const dur = 1600; const start = performance.now();
+    function step(now: number) {
       const p = Math.min((now - start) / dur, 1);
       const ease = 1 - Math.pow(1 - p, 3);
       el.textContent = Math.floor(ease * target).toLocaleString('es-CO');
@@ -437,76 +428,71 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     requestAnimationFrame(step);
   }
+  (window as any).__animCounter = animCounter;
 
+  // Trigger counters when visible
   const counterObs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
-      const el = e.target;
-      const target = Number(el.dataset.target || 0);
-      animCounter(el, target);
+      const el = e.target as HTMLElement;
+      animCounter(el, Number(el.dataset.target ?? 0));
       counterObs.unobserve(el);
     });
   }, { threshold: 0.5 });
   document.querySelectorAll('.counter').forEach(el => counterObs.observe(el));
+</script>
 
-  // Carga de estadísticas reales (ajusta la URL según tu backend)
-  fetch('/api/stats/home')
-    .then(res => res.json())
-    .then(data => {
-      if (!data) return;
-      const d = data;
-      const setTarget = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.dataset.target = String(val);
-      };
-      setTarget('stat-students', d.activeStudents);
-      setTarget('stat-trieds', d.completedTrieds);
-      setTarget('stat-questions', d.totalQuestions);
-      setTarget('stat-competences', d.activeCompetences);
+<!-- 2. Fetch de stats — usa apiBase del servidor de Astro -->
+<script define:vars={{ apiBase }}>
+  const MOCK = {
+    activeStudents: 2847, completedTrieds: 12530,
+    totalQuestions: 2150, activeCompetences: 6,
+    totalTests: 42,       satisfactionRate: 94,
+  };
 
-      const heroTests = document.getElementById('hero-stat-tests');
-      const heroAvg = document.getElementById('hero-stat-avg');
-      const heroStudents = document.getElementById('hero-stat-students');
-      if (heroTests) heroTests.textContent = String(d.totalTests);
-      if (heroAvg) heroAvg.textContent = d.satisfactionRate.toFixed(0) + '%';
-      if (heroStudents) heroStudents.textContent = String(d.activeStudents);
+  function applyStats(d) {
+    // d es el objeto HomeStatsDto ya desenvuelto
+    const setTarget = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.dataset.target = String(val);
+    };
+    setTarget('stat-students',    d.activeStudents);
+    setTarget('stat-trieds',      d.completedTrieds);
+    setTarget('stat-questions',   d.totalQuestions);
+    setTarget('stat-competences', d.activeCompetences);
 
-      // Forzar animación si ya son visibles
+    const heroTests    = document.getElementById('hero-stat-tests');
+    const heroAvg      = document.getElementById('hero-stat-avg');
+    const heroStudents = document.getElementById('hero-stat-students');
+    if (heroTests)    heroTests.textContent    = String(d.totalTests);
+    if (heroAvg)      heroAvg.textContent      = Number(d.satisfactionRate).toFixed(0) + '%';
+    if (heroStudents) heroStudents.textContent = String(d.activeStudents);
+
+    // Re-dispara contadores (ya pueden estar visibles en pantalla)
+    const animFn = window.__animCounter;
+    if (animFn) {
       document.querySelectorAll('.counter').forEach(el => {
-        const t = Number(el.dataset.target || 0);
-        if (t > 0) animCounter(el, t);
+        const t = Number(el.dataset.target ?? 0);
+        if (t > 0) animFn(el, t);
       });
+    }
+  }
+
+  fetch(apiBase + '/api/stats/home')
+    .then(res => {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
     })
-    .catch(() => {
-      // Fallback: valores de ejemplo (puedes cambiarlos o dejarlos en 0)
-      const mock = {
-        activeStudents: 2847,
-        completedTrieds: 12530,
-        totalQuestions: 2150,
-        activeCompetences: 6,
-        totalTests: 42,
-        satisfactionRate: 94
-      };
-      const setTarget = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.dataset.target = String(val);
-      };
-      setTarget('stat-students', mock.activeStudents);
-      setTarget('stat-trieds', mock.completedTrieds);
-      setTarget('stat-questions', mock.totalQuestions);
-      setTarget('stat-competences', mock.activeCompetences);
-
-      const heroTests = document.getElementById('hero-stat-tests');
-      const heroAvg = document.getElementById('hero-stat-avg');
-      const heroStudents = document.getElementById('hero-stat-students');
-      if (heroTests) heroTests.textContent = String(mock.totalTests);
-      if (heroAvg) heroAvg.textContent = mock.satisfactionRate + '%';
-      if (heroStudents) heroStudents.textContent = String(mock.activeStudents);
-
-      document.querySelectorAll('.counter').forEach(el => {
-        const t = Number(el.dataset.target || 0);
-        if (t > 0) animCounter(el, t);
-      });
+    .then(json => {
+      // El backend envuelve en ApiResponse<T> → { success, data: { ... } }
+      // Si la respuesta ya es el DTO directamente (sin wrapper) también funciona
+      const d = json.data ?? json;
+      if (!d || typeof d.activeStudents === 'undefined') throw new Error('formato inesperado');
+      applyStats(d);
+    })
+    .catch(err => {
+      console.warn('Stats API no disponible, usando valores de ejemplo.', err.message);
+      applyStats(MOCK);
     });
 </script>
 
