@@ -815,7 +815,7 @@ btnSetPw.addEventListener('click', async () => {
         /* Ajusta el endpoint según tu backend */
         await apiRequest('/api/auth/reset-password', {
             method: 'POST',
-            body: JSON.stringify({ token: resetToken, password: newPw }),
+            body: JSON.stringify({ token: resetToken, newPassword: newPw }),
         });
 
         /* Éxito */

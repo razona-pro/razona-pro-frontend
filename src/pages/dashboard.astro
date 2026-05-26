@@ -593,290 +593,268 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 
 <script>
-  import { requireAuth, isAdmin, logout } from '../lib/auth';
+  import { requireAuth, isAdmin, logout, getUser, updateStoredUser } from '../lib/auth';
+import { studentsApi, triedsApi, testsApi, competencesApi, rankingsApi } from '../lib/api';
+import { getCompStyle, animCount, fmtDate, fmtDur } from '../lib/utils';
 
-  let user;
-  try { user = requireAuth(); } catch { throw new Error('redir'); }
-  const admin = isAdmin();
+let user;
+try { user = requireAuth(); } catch { throw new Error('redir'); }
+const admin = isAdmin();
 
-  // ── Sidebar toggle ──────────────────────────────────────────
-  window.openSidebar = () => {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  };
-  window.closeSidebar = () => {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  };
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeSidebar(); });
+// ── Sidebar ────────────────────────────────────────────────────
+(window as any).openSidebar = () => {
+  document.getElementById('sidebar')!.classList.add('open');
+  document.getElementById('overlay')!.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+(window as any).closeSidebar = () => {
+  document.getElementById('sidebar')!.classList.remove('open');
+  document.getElementById('overlay')!.classList.remove('open');
+  document.body.style.overflow = '';
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape') (window as any).closeSidebar(); });
 
-  // ── MOCK DATA ──────────────────────────────────────────────
-  const MOCK = {
-    student: {
-      stats: { tests: 23, avg: 74.5, rank: 15, total: 142, streak: 7 },
-      competencies: [
-        { name: 'Lectura Crítica',           short: 'LC', score: 78, tests: 8, lastDate: '12 may', trend: +3,  color: '#D41224', bg: '#FEE2E2', key: 'lc' },
-        { name: 'Razonamiento Cuantitativo', short: 'RC', score: 65, tests: 5, lastDate: '08 may', trend: +1,  color: '#2563EB', bg: '#DBEAFE', key: 'rq' },
-        { name: 'Competencias Ciudadanas',   short: 'CC', score: 82, tests: 4, lastDate: '10 may', trend: +5,  color: '#059669', bg: '#D1FAE5', key: 'cc' },
-        { name: 'Comunicación Escrita',      short: 'CE', score: 70, tests: 4, lastDate: '06 may', trend: -2,  color: '#7C3AED', bg: '#EDE9FE', key: 'ce' },
-        { name: 'Inglés',                    short: 'IN', score: 58, tests: 2, lastDate: '01 may', trend: +4,  color: '#D97706', bg: '#FEF3C7', key: 'en' },
-      ],
-      recentTests: [
-        { comp: 'Lectura Crítica',           date: '12 may 2026', score: 78, dur: '42 min', type: 'Simulacro completo', color: '#D41224', bg: '#FEE2E2' },
-        { comp: 'Competencias Ciudadanas',   date: '10 may 2026', score: 85, dur: '35 min', type: 'Práctica rápida',    color: '#059669', bg: '#D1FAE5' },
-        { comp: 'Razonamiento Cuantitativo', date: '08 may 2026', score: 62, dur: '58 min', type: 'Simulacro completo', color: '#2563EB', bg: '#DBEAFE' },
-        { comp: 'Comunicación Escrita',      date: '06 may 2026', score: 74, dur: '28 min', type: 'Práctica rápida',    color: '#7C3AED', bg: '#EDE9FE' },
-      ],
-      rankings: [
-        { pos: 1, name: 'María Ordóñez',   score: 92, prog: 'Ing. Sistemas'    },
-        { pos: 2, name: 'Carlos Álvarez',  score: 89, prog: 'Ing. Industrial'  },
-        { pos: 3, name: 'Laura Martínez',  score: 87, prog: 'Ing. Sistemas'    },
-        { pos: 4, name: 'Andrés Gómez',    score: 85, prog: 'Lic. Matemáticas' },
-        { pos: 5, name: 'Valentina Rojas', score: 83, prog: 'Ing. Civil'       },
-      ],
-      trending: [
-        { title: 'Lectura Crítica — Nivel I',              sub: 'Simulacro completo · 30 preguntas',   lang: 'EXAM',     stars: '142', color: '#D41224', bg: '#FEE2E2', href: '/tests?c=lc' },
-        { title: 'Razonamiento Cuantitativo — Completo',   sub: 'Simulacro completo · 40 preguntas',   lang: 'EXAM',     stars: '87',  color: '#2563EB', bg: '#DBEAFE', href: '/tests?c=rq' },
-        { title: 'Práctica IA — Comprensión lectora',      sub: 'Sesión adaptativa con IA generativa', lang: 'IA',       stars: '64',  color: '#7C3AED', bg: '#EDE9FE', href: '/ai-practice' },
-      ],
-    },
-    changelog: [
-      { time: 'Hace 3 horas', title: 'GPT-5 Reasoning en Práctica IA',    desc: 'Personalización avanzada de preguntas según tu nivel.',      now: true  },
-      { time: 'Ayer',         title: 'Banco de Inglés ampliado',           desc: 'Se añadieron 60 nuevas preguntas B1/B2.',                    now: false },
-      { time: 'Hace 3 días',  title: 'Rankings en tiempo real',            desc: 'El ranking se actualiza al completar cada simulacro.',       now: false },
-      { time: 'Hace 1 semana','title':'12 tests disponibles ya publicados','desc':'5 competencias, 3 modos de práctica.',                      now: false },
-    ],
-    admin: {
-      activity: [
-        { name: 'María Ordóñez',  action: 'Completó simulacro · Lectura Crítica', score: 92,   time: 'Hace 5 min',  av: 'MO' },
-        { name: 'Carlos Álvarez', action: 'Completó simulacro · Razon. Cuant.',   score: 78,   time: 'Hace 12 min', av: 'CA' },
-        { name: 'Laura Martínez', action: 'Inició práctica IA · Inglés',          score: null, time: 'Hace 18 min', av: 'LM' },
-        { name: 'Andrés Gómez',   action: 'Completó simulacro · Comp. Ciudadanas',score: 85,   time: 'Hace 25 min', av: 'AG' },
-        { name: 'Valentina R.',   action: 'Nueva cuenta registrada',              score: null, time: 'Hace 1 hora', av: 'VR' },
-      ],
-      programs: [
-        { name: 'Ing. de Sistemas',   students: 68, pct: 28, color: '#D41224' },
-        { name: 'Ing. Industrial',    students: 55, pct: 22, color: '#2563EB' },
-        { name: 'Ing. Civil',         students: 47, pct: 19, color: '#059669' },
-        { name: 'Lic. Matemáticas',   students: 38, pct: 15, color: '#7C3AED' },
-        { name: 'Contaduría Pública', students: 39, pct: 16, color: '#D97706' },
-      ],
-    },
-  };
+// ── Render inicial con datos del token ────────────────────────
+function paintUser(firstName: string, firstSurname: string, programId?: string) {
+  const full     = firstSurname ? `${firstName} ${firstSurname}` : firstName;
+  const initials = (firstName[0] + (firstSurname?.[0] ?? firstName[1] ?? '')).toUpperCase();
 
-  // ── Helpers ─────────────────────────────────────────────────
-  const initials = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
-  const fullName  = `${user.firstName} ${user.firstSurname}`;
+  document.getElementById('sb-avatar')!.textContent = initials;
+  document.getElementById('sb-name')!.textContent   = full;
+  document.getElementById('sb-sub')!.textContent    = admin ? 'Administrador · UFPSO' : (programId ?? 'Estudiante · UFPSO');
+  document.getElementById('tb-avatar')!.textContent = initials;
+  document.getElementById('tb-name')!.textContent   = firstName;
 
-  function animCount(el, target, dec = 0) {
-    let start; const dur = 900;
-    const run = ts => {
-      if (!start) start = ts;
-      const p = Math.min((ts - start) / dur, 1);
-      const e = 1 - Math.pow(1 - p, 3);
-      el.textContent = dec ? (e * target).toFixed(dec) : Math.floor(e * target);
-      if (p < 1) requestAnimationFrame(run);
-    };
-    requestAnimationFrame(run);
-  }
+  const badge = document.getElementById('tb-badge') as HTMLElement;
+  if (admin) { badge.textContent = 'Admin'; badge.style.background = '#1C1917'; badge.style.color = '#F87171'; }
+  else       { badge.textContent = 'Estudiante'; badge.style.background = '#FEE2E2'; badge.style.color = '#D41224'; }
+}
 
-  // ── Populate shared UI ──────────────────────────────────────
-  document.getElementById('sb-avatar').textContent = initials;
-  document.getElementById('sb-name').textContent   = fullName;
-  document.getElementById('sb-sub').textContent    = admin ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
-  document.getElementById('tb-avatar').textContent = initials;
-  document.getElementById('tb-name').textContent   = user.firstName;
+const stored = getUser()!;
+paintUser(stored.firstName || stored.id, stored.firstSurname, stored.programId);
 
-  const badge = document.getElementById('tb-badge');
-  if (admin) { badge.textContent='Admin';      badge.style.background='#1C1917'; badge.style.color='#F87171'; }
-  else        { badge.textContent='Estudiante'; badge.style.background='#FEE2E2'; badge.style.color='#D41224'; }
+const h = new Date().getHours();
+const greet = h < 12 ? '¡Buenos días' : h < 18 ? '¡Buenas tardes' : '¡Buenas noches';
+document.getElementById('welcome-msg')!.textContent = `${greet}, ${stored.firstName || stored.id}!`;
 
-  const h = new Date().getHours();
-  const greet = h < 12 ? '¡Buenos días' : h < 18 ? '¡Buenas tardes' : '¡Buenas noches';
-  document.getElementById('welcome-msg').textContent = admin
-    ? `${greet}, ${user.firstName}! Panel de administración activo.`
-    : `${greet}, ${user.firstName}! Tienes ${12} tests disponibles para hoy.`;
+// ── Visibilidad por rol ────────────────────────────────────────
+if (admin) {
+  ['qa-student','stats-student','student-content'].forEach(id => (document.getElementById(id) as HTMLElement).style.display = 'none');
+  (document.getElementById('qa-admin') as HTMLElement).style.display = 'flex';
+  (document.getElementById('stats-admin') as HTMLElement).style.display = 'grid';
+  (document.getElementById('admin-content') as HTMLElement).style.display = 'grid';
+  (document.getElementById('admin-nav') as HTMLElement).style.display = 'block';
+}
 
-  // ── Role visibility ─────────────────────────────────────────
-  if (admin) {
-    ['qa-student','stats-student','student-content'].forEach(id => document.getElementById(id).style.display='none');
-    document.getElementById('qa-admin').style.display      = 'flex';
-    document.getElementById('stats-admin').style.display   = 'grid';
-    document.getElementById('admin-content').style.display = 'grid';
-    document.getElementById('admin-nav').style.display     = 'block';
-  }
+// ── Datos de estudiante ────────────────────────────────────────
+if (!admin) {
+  Promise.allSettled([
+    studentsApi.me(),
+    triedsApi.findMy(0, 200),
+    testsApi.findAll(0, 20),
+    competencesApi.findAll(true),
+    rankingsApi.findAll(true),
+  ]).then(([profileR, triedsR, testsR, compsR, rankingsR]) => {
 
-  // ── STUDENT content ─────────────────────────────────────────
-  if (!admin) {
-    const d = MOCK.student;
+    // Perfil
+    if (profileR.status === 'fulfilled' && profileR.value.data) {
+      const p = profileR.value.data;
+      updateStoredUser({ firstName: p.firstName, firstSurname: p.firstSurname, email: p.email });
+      paintUser(p.firstName, p.firstSurname, p.programId);
 
-    animCount(document.getElementById('st-tests'),  d.stats.tests);
-    animCount(document.getElementById('st-avg'),    d.stats.avg, 1);
-    document.getElementById('st-rank').textContent    = `#${d.stats.rank}`;
-    document.getElementById('st-rank-of').textContent = `de ${d.stats.total}`;
-    animCount(document.getElementById('st-streak'), d.stats.streak);
+      document.getElementById('welcome-msg')!.textContent =
+        `${greet}, ${p.firstName}! Continúa preparándote para el Saber Pro.`;
 
-    document.getElementById('pc-avatar').textContent  = initials;
-    document.getElementById('pc-name').textContent    = fullName;
-    document.getElementById('pc-program').textContent = user.programId ?? 'UFPSO';
-    document.getElementById('pc-badge').innerHTML     = '<span class="ti ti-school" style="font-size:13px;"></span> Estudiante';
+      const initials = (p.firstName[0] + p.firstSurname[0]).toUpperCase();
+      const full     = `${p.firstName} ${p.firstSurname}`;
+      document.getElementById('pc-avatar')!.textContent  = initials;
+      document.getElementById('pc-name')!.textContent    = full;
+      document.getElementById('pc-program')!.textContent = p.programId ?? 'UFPSO';
+      document.getElementById('pc-badge')!.innerHTML     = '<span class="ti ti-school" style="font-size:13px;"></span> Estudiante';
+    }
 
-    // Competencias — cada barra clickea a /tests?c=KEY
-    const compList = document.getElementById('comp-list');
-    d.competencies.forEach((c, i) => {
-      const sign = c.trend > 0 ? '+' : '';
-      const tcol = c.trend > 0 ? '#059669' : c.trend < 0 ? '#D41224' : '#A09990';
-      const div  = document.createElement('div');
-      div.style.cursor = 'pointer';
-      div.onclick = () => window.location.href = `/tests?c=${c.key}`;
-      div.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:8px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-            <div style="width:27px;height:27px;border-radius:7px;background:${c.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <span style="font-size:9px;font-weight:900;color:${c.color};">${c.short}</span>
+    // Intentos
+    if (triedsR.status === 'fulfilled' && triedsR.value.data) {
+      const trieds   = triedsR.value.data.content;
+      const finished = trieds.filter(t => t.status === 'FINISHED' && t.score != null);
+      const avgScore = finished.length
+        ? finished.reduce((s, t) => s + (t.score ?? 0), 0) / finished.length
+        : 0;
+
+      animCount(document.getElementById('st-tests'), finished.length);
+      animCount(document.getElementById('st-avg'),   avgScore, 1);
+      animCount(document.getElementById('st-streak'), 0);
+
+      // Último test
+      const sorted = [...finished].sort((a, b) =>
+        new Date(b.finishedAt ?? b.attemptTimestamp).getTime() -
+        new Date(a.finishedAt ?? a.attemptTimestamp).getTime()
+      );
+
+      if (sorted.length > 0) {
+        const lt = sorted[0];
+        document.getElementById('lt-comp')!.textContent  = lt.testName ?? lt.competenceId;
+        document.getElementById('lt-info')!.textContent  = `${fmtDate(lt.finishedAt ?? lt.attemptTimestamp)} · ${lt.totalQuestions} preguntas`;
+        document.getElementById('lt-score')!.textContent = lt.score?.toFixed(0) ?? '—';
+      } else {
+        document.getElementById('lt-comp')!.textContent  = 'Sin intentos aún';
+        document.getElementById('lt-info')!.textContent  = 'Realiza tu primer simulacro';
+        document.getElementById('lt-score')!.textContent = '—';
+      }
+
+      // Lista reciente
+      const recentList = document.getElementById('recent-list')!;
+      const recent = sorted.slice(1, 5);
+      if (recent.length > 0) {
+        recent.forEach(t => {
+          const s   = getCompStyle(t.competenceId, t.testName ?? '');
+          const div = document.createElement('div');
+          div.className = 'test-row';
+          div.onclick   = () => window.location.href = '/mis-intentos';
+          div.innerHTML = `
+            <div style="width:34px;height:34px;border-radius:8px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;">
+              <span class="ti ti-clipboard" style="color:${s.color};font-size:16px;"></span>
             </div>
-            <span style="font-size:13px;font-weight:600;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-            <span style="font-size:11px;font-weight:700;color:${tcol};">${sign}${c.trend} pts</span>
-            <span style="font-size:16px;font-weight:900;color:${c.color};">${c.score}</span>
-            <span style="font-size:11px;color:#A09990;">/100</span>
-          </div>
-        </div>
-        <div class="bar-wrap"><div class="bar-fill" id="bar-${i}" style="background:${c.color};"></div></div>
-        <div style="display:flex;justify-content:space-between;margin-top:3px;gap:4px;flex-wrap:wrap;">
-          <span style="font-size:11px;color:#A09990;">${c.tests} tests realizados</span>
-          <span style="font-size:11px;color:${c.color};font-weight:600;">Practicar →</span>
-        </div>`;
-      compList.appendChild(div);
-      setTimeout(() => { document.getElementById(`bar-${i}`).style.width=`${c.score}%`; }, 280+i*90);
-    });
+            <div style="flex:1;min-width:0;">
+              <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.testName ?? t.competenceId}</p>
+              <p style="font-size:11px;color:#A09990;margin:0;">${fmtDate(t.finishedAt ?? t.attemptTimestamp)} · ${t.totalQuestions} preguntas</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0;margin-left:10px;">
+              <p style="font-size:16px;font-weight:900;color:${s.color};margin:0;">${t.score?.toFixed(0) ?? '—'}</p>
+              <p style="font-size:10px;color:#A09990;margin:0;">${fmtDur(t.timeSpentSeconds)}</p>
+            </div>`;
+          recentList.appendChild(div);
+        });
+      } else {
+        recentList.innerHTML = '<p style="font-size:13px;color:#A09990;text-align:center;padding:12px 0;">Sin intentos aún.</p>';
+      }
 
-    // Last test
-    const lt = d.recentTests[0];
-    document.getElementById('lt-comp').textContent  = lt.comp;
-    document.getElementById('lt-info').textContent  = `${lt.date} · ${lt.type} · ${lt.dur}`;
-    document.getElementById('lt-score').textContent = lt.score;
+      // Barras por competencia (se rellenan cuando lleguen las competencias)
+      if (compsR.status === 'fulfilled' && compsR.value.data) {
+        const byComp: Record<string, number[]> = {};
+        finished.forEach(t => {
+          if (!byComp[t.competenceId]) byComp[t.competenceId] = [];
+          if (t.score != null) byComp[t.competenceId].push(t.score);
+        });
 
-    // Recent list — clic va a /mis-intentos
-    const recentList = document.getElementById('recent-list');
-    d.recentTests.slice(1).forEach(t => {
-      const div = document.createElement('div');
-      div.className = 'test-row';
-      div.onclick = () => window.location.href = '/mis-intentos';
-      div.innerHTML = `
-        <div style="width:34px;height:34px;border-radius:8px;background:${t.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;">
-          <span class="ti ti-clipboard" style="color:${t.color};font-size:16px;"></span>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.comp}</p>
-          <p style="font-size:11px;color:#A09990;margin:0;">${t.date} · ${t.type}</p>
-        </div>
-        <div style="text-align:right;flex-shrink:0;margin-left:10px;">
-          <p style="font-size:16px;font-weight:900;color:${t.color};margin:0;">${t.score}</p>
-          <p style="font-size:10px;color:#A09990;margin:0;">${t.dur}</p>
-        </div>`;
-      recentList.appendChild(div);
-    });
+        const compList = document.getElementById('comp-list')!;
+        compsR.value.data.forEach((c, i) => {
+          const s      = getCompStyle(c.competenceId, c.competenceName);
+          const scores = byComp[c.competenceId] ?? [];
+          const score  = scores.length
+            ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+            : 0;
+
+          const div = document.createElement('div');
+          div.style.cursor = 'pointer';
+          div.onclick      = () => window.location.href = `/tests?c=${s.key}`;
+          div.innerHTML    = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:8px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                <div style="width:27px;height:27px;border-radius:7px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span style="font-size:9px;font-weight:900;color:${s.color};">${s.short}</span>
+                </div>
+                <span style="font-size:13px;font-weight:600;color:#374151;">${c.competenceName}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                <span style="font-size:16px;font-weight:900;color:${s.color};">${score > 0 ? score : '—'}</span>
+                <span style="font-size:11px;color:#A09990;">/100</span>
+              </div>
+            </div>
+            <div class="bar-wrap"><div class="bar-fill" id="cbar-${i}" style="background:${s.color};"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;gap:4px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:#A09990;">${scores.length} tests realizados</span>
+              <span style="font-size:11px;color:${s.color};font-weight:600;">Practicar →</span>
+            </div>`;
+          compList.appendChild(div);
+          setTimeout(() => {
+            const bar = document.getElementById(`cbar-${i}`);
+            if (bar) bar.style.width = `${score}%`;
+          }, 300 + i * 80);
+        });
+      }
+    }
+
+    // Tests trending
+    if (testsR.status === 'fulfilled' && testsR.value.data) {
+      const tests     = testsR.value.data.content.slice(0, 3);
+      const trendList = document.getElementById('trend-list')!;
+      const modeLabel: Record<string, string> = { PRACTICE: 'PRÁCTICA', EXAM: 'EXAMEN', TIMED: 'TIMED' };
+
+      if (tests.length === 0) {
+        trendList.innerHTML = '<p style="font-size:13px;color:#A09990;text-align:center;padding:12px 0;">Sin tests disponibles.</p>';
+      } else {
+        tests.forEach(t => {
+          const s   = getCompStyle(t.competenceId, t.competenceName ?? '');
+          const div = document.createElement('div');
+          div.className = 'trend-item';
+          div.onclick   = () => window.location.href = `/tests?c=${s.key}`;
+          div.innerHTML = `
+            <div style="width:36px;height:36px;background:${s.bg};border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span class="ti ti-file-text" style="color:${s.color};font-size:18px;"></span>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.testName}</p>
+              <p style="font-size:11px;color:#A09990;margin:0;">${t.competenceName ?? ''} · ${t.questionsToPresent ?? '?'} preguntas · ${Math.floor(t.durationSeconds / 60)} min</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0;margin-left:8px;">
+              <span style="font-size:10px;padding:3px 8px;border-radius:12px;font-weight:800;background:${s.bg};color:${s.color};">${modeLabel[t.testMode] ?? t.testMode}</span>
+            </div>`;
+          trendList.appendChild(div);
+        });
+      }
+    }
 
     // Rankings
-    const rankList = document.getElementById('rank-list');
-    const medals   = ['🥇','🥈','🥉'];
-    d.rankings.forEach(r => {
-      const div = document.createElement('div');
-      div.className = 'rank-row';
-      div.innerHTML = `
-        <span style="font-size:15px;min-width:26px;text-align:center;">${medals[r.pos-1]||r.pos}</span>
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</p>
-          <p style="font-size:11px;color:#A09990;margin:0;">${r.prog}</p>
-        </div>
-        <span style="font-size:15px;font-weight:900;color:#D41224;flex-shrink:0;">${r.score}</span>`;
-      rankList.appendChild(div);
-    });
-    document.getElementById('my-rank-num').textContent   = d.stats.rank;
-    document.getElementById('my-rank-name').textContent  = fullName;
-    document.getElementById('my-rank-score').textContent = d.stats.avg;
+    if (rankingsR.status === 'fulfilled' && rankingsR.value.data && rankingsR.value.data.length > 0) {
+      const generalRanking = rankingsR.value.data.find(r => r.periodType === 'GENERAL') ?? rankingsR.value.data[0];
 
-    // Trending — clic va a /tests correspondiente
-    const trendList = document.getElementById('trend-list');
-    d.trending.forEach(t => {
-      const div = document.createElement('div');
-      div.className = 'trend-item';
-      div.onclick = () => window.location.href = t.href;
-      div.innerHTML = `
-        <div style="width:36px;height:36px;background:${t.bg};border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span class="ti ti-file-text" style="color:${t.color};font-size:18px;"></span>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</p>
-          <p style="font-size:11px;color:#A09990;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.sub}</p>
-        </div>
-        <div style="text-align:right;flex-shrink:0;margin-left:8px;">
-          <span style="font-size:10px;padding:3px 8px;border-radius:12px;font-weight:800;background:${t.bg};color:${t.color};">${t.lang}</span>
-          <p style="font-size:11px;color:#A09990;margin:4px 0 0;display:flex;align-items:center;gap:3px;justify-content:flex-end;"><span class="ti ti-users" style="font-size:11px;"></span>${t.stars}</p>
-        </div>`;
-      trendList.appendChild(div);
-    });
-  }
+      rankingsApi.getLeaderboard(generalRanking.rankingId, 0, 10).then(lbRes => {
+        if (!lbRes.data) return;
+        const items    = lbRes.data.content;
+        const rankList = document.getElementById('rank-list')!;
+        const medals   = ['🥇','🥈','🥉'];
+        const su       = getUser();
 
-  // ── ADMIN content ───────────────────────────────────────────
-  if (admin) {
-    const actList = document.getElementById('admin-activity');
-    MOCK.admin.activity.forEach(a => {
-      const div = document.createElement('div');
-      div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F3F1EE;';
-      div.innerHTML = `
-        <div style="width:36px;height:36px;border-radius:9px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;color:#D41224;font-weight:900;font-size:12px;flex-shrink:0;">${a.av}</div>
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:13px;font-weight:700;color:#374151;margin:0;">${a.name}</p>
-          <p style="font-size:11px;color:#A09990;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.action}</p>
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          ${a.score!==null?`<p style="font-size:16px;font-weight:900;color:#D41224;margin:0;">${a.score}</p>`:''}
-          <p style="font-size:11px;color:#A09990;margin:0;">${a.time}</p>
-        </div>`;
-      actList.appendChild(div);
-    });
+        items.slice(0, 5).forEach((r, i) => {
+          const div = document.createElement('div');
+          div.className = 'rank-row';
+          div.innerHTML = `
+            <span style="font-size:15px;min-width:26px;text-align:center;">${medals[i] ?? (i + 1)}</span>
+            <div style="flex:1;min-width:0;">
+              <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.studentName ?? r.studentId}</p>
+              <p style="font-size:11px;color:#A09990;margin:0;">Programa ${r.programId}</p>
+            </div>
+            <span style="font-size:15px;font-weight:900;color:#D41224;flex-shrink:0;">${Number(r.totalScore).toFixed(1)}</span>`;
+          rankList.appendChild(div);
+        });
 
-    const progList = document.getElementById('admin-programs');
-    MOCK.admin.programs.forEach(p => {
-      const div = document.createElement('div');
-      div.style.marginBottom = '14px';
-      div.innerHTML = `
-        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-          <span style="font-size:13px;font-weight:600;color:#374151;">${p.name}</span>
-          <span style="font-size:13px;font-weight:800;color:${p.color};">${p.students}</span>
-        </div>
-        <div style="height:6px;background:#F3F1EE;border-radius:3px;overflow:hidden;">
-          <div style="height:100%;background:${p.color};border-radius:3px;width:0%;transition:width 1.2s ease;" data-pct="${p.pct}"></div>
-        </div>`;
-      progList.appendChild(div);
-    });
-    setTimeout(() => { progList.querySelectorAll('[data-pct]').forEach(el => el.style.width=el.dataset.pct+'%'); }, 300);
-  }
-
-  // ── Changelog ───────────────────────────────────────────────
-  const clList = document.getElementById('changelog-list');
-  MOCK.changelog.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'cl-item';
-    div.innerHTML = `
-      <div class="cl-dot${item.now?' now':''}"></div>
-      <p style="font-size:10px;font-weight:700;color:#A09990;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 3px;">${item.time}</p>
-      <p style="font-size:13px;font-weight:700;color:#111111;margin:0 0 4px;line-height:1.35;">${item.title}</p>
-      <p style="font-size:12px;color:#A09990;margin:0;line-height:1.55;">${item.desc}</p>`;
-    clList.appendChild(div);
+        // Mi posición
+        const myIdx = su ? items.findIndex(r => r.studentId === su.id) : -1;
+        if (myIdx >= 0) {
+          const me = items[myIdx];
+          document.getElementById('my-rank-num')!.textContent   = String(myIdx + 1);
+          document.getElementById('my-rank-name')!.textContent  = me.studentName ?? su!.id;
+          document.getElementById('my-rank-score')!.textContent = Number(me.totalScore).toFixed(1);
+          (document.getElementById('st-rank') as HTMLElement).textContent    = `#${myIdx + 1}`;
+          (document.getElementById('st-rank-of') as HTMLElement).textContent = `de ${lbRes.data.totalElements}`;
+        } else {
+          document.getElementById('my-rank-num')!.textContent   = '—';
+          document.getElementById('my-rank-name')!.textContent  = 'Sin posición aún';
+          document.getElementById('my-rank-score')!.textContent = '0';
+          (document.getElementById('st-rank') as HTMLElement).textContent    = '—';
+          (document.getElementById('st-rank-of') as HTMLElement).textContent = `de ${lbRes.data.totalElements}`;
+        }
+      }).catch(() => {});
+    }
   });
+}
 
-  // ── Events ──────────────────────────────────────────────────
-  document.getElementById('logout-btn').addEventListener('click', logout);
-  window.switchRank = btn => {
-    document.querySelectorAll('.r-pill').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-  };
+document.getElementById('logout-btn')!.addEventListener('click', logout);
+(window as any).switchRank = (btn: HTMLElement) => {
+  document.querySelectorAll('.r-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+};
 </script>
 
 </BaseLayout>

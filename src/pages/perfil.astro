@@ -495,181 +495,252 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </div>
 
 <script>
-  import { requireAuth, isAdmin, logout, getToken } from '../lib/auth';
+  import { requireAuth, isAdmin, logout, getUser, updateStoredUser, getToken } from '../lib/auth';
+import { studentsApi, triedsApi, competencesApi } from '../lib/api';
+import { getCompStyle, animCount, fmtDate } from '../lib/utils';
 
-  let user;
-  try { user = requireAuth(); } catch { throw new Error('redir'); }
-  const admin = isAdmin();
+let user;
+try { user = requireAuth(); } catch { throw new Error('redir'); }
+const admin = isAdmin();
 
-  window.openSidebar = () => {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  };
-  window.closeSidebar = () => {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  };
-  document.addEventListener('keydown', e => { if (e.key==='Escape') window.closeSidebar(); });
+(window as any).openSidebar = () => {
+  document.getElementById('sidebar')!.classList.add('open');
+  document.getElementById('overlay')!.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+(window as any).closeSidebar = () => {
+  document.getElementById('sidebar')!.classList.remove('open');
+  document.getElementById('overlay')!.classList.remove('open');
+  document.body.style.overflow = '';
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape') (window as any).closeSidebar(); });
 
-  const initials = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
-  const fullName  = `${user.firstName} ${user.firstSurname}`;
+// Render inicial con datos del token
+const su       = getUser()!;
+const firstName    = su.firstName || su.id;
+const firstSurname = su.firstSurname || '';
+const fullName     = firstSurname ? `${firstName} ${firstSurname}` : firstName;
+const initials     = (firstName[0] + (firstSurname[0] ?? firstName[1] ?? '')).toUpperCase();
 
-  // Sidebar & topbar
-  document.getElementById('sb-avatar').textContent = initials;
-  document.getElementById('sb-name').textContent   = fullName;
-  document.getElementById('sb-sub').textContent    = admin ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
-  document.getElementById('tb-avatar').textContent = initials;
-  document.getElementById('tb-name').textContent   = user.firstName;
+document.getElementById('sb-avatar')!.textContent = initials;
+document.getElementById('sb-name')!.textContent   = fullName;
+document.getElementById('sb-sub')!.textContent    = admin ? 'Administrador · UFPSO' : (su.programId ?? 'Estudiante · UFPSO');
+document.getElementById('tb-avatar')!.textContent = initials;
+document.getElementById('tb-name')!.textContent   = firstName;
+document.getElementById('welcome-sub')!.textContent = 'Gestiona tu cuenta y visualiza tu progreso.';
 
-  const badge = document.getElementById('tb-badge');
-  if (admin) { badge.textContent='Admin'; badge.style.background='#1C1917'; badge.style.color='#F87171'; }
-  else        { badge.textContent='Estudiante'; badge.style.background='#FEE2E2'; badge.style.color='#D41224'; }
+const badge = document.getElementById('tb-badge') as HTMLElement;
+if (admin) { badge.textContent = 'Admin'; badge.style.background = '#1C1917'; badge.style.color = '#F87171'; }
+else       { badge.textContent = 'Estudiante'; badge.style.background = '#FEE2E2'; badge.style.color = '#D41224'; }
 
-  // Hero
-  document.getElementById('hero-avatar').textContent  = initials;
-  document.getElementById('hero-name').textContent    = fullName;
-  document.getElementById('hero-email').textContent   = user.email;
-  document.getElementById('hero-id').textContent      = `ID: ${user.id}`;
-  document.getElementById('welcome-sub').textContent  = `Gestiona tu cuenta y visualiza tu progreso en la plataforma.`;
+// Hero inicial
+document.getElementById('hero-avatar')!.textContent = initials;
+document.getElementById('hero-name')!.textContent   = fullName;
+document.getElementById('hero-email')!.textContent  = su.email;
+document.getElementById('hero-id')!.textContent     = `ID: ${su.id}`;
 
-  const heroBadge = document.getElementById('hero-badge');
-  if (admin) {
-    heroBadge.textContent = '⚙ Administrador';
-    heroBadge.classList.add('badge-admin');
-    document.getElementById('hero-program').textContent = 'UFPSO · Administración';
-    document.getElementById('admin-nav').style.display = 'block';
-  } else {
-    heroBadge.textContent = '🎓 Estudiante';
-    heroBadge.classList.add('badge-student');
-    document.getElementById('hero-program').textContent = user.programId ? `Programa: ${user.programId}` : 'UFPSO';
+const heroBadge = document.getElementById('hero-badge')!;
+if (admin) {
+  heroBadge.textContent = '⚙ Administrador';
+  heroBadge.classList.add('badge-admin');
+  document.getElementById('hero-program')!.textContent = 'UFPSO · Administración';
+  document.getElementById('admin-nav')!.style.display  = 'block';
+} else {
+  heroBadge.textContent = '🎓 Estudiante';
+  heroBadge.classList.add('badge-student');
+  document.getElementById('hero-program')!.textContent = su.programId ? `Programa: ${su.programId}` : 'UFPSO';
+}
+
+// Info fields
+document.getElementById('field-firstName')!.textContent    = firstName;
+document.getElementById('field-firstSurname')!.textContent = firstSurname;
+document.getElementById('field-email')!.textContent        = su.email;
+document.getElementById('field-userType')!.textContent     = admin ? 'Administrador' : 'Estudiante';
+document.getElementById('field-id')!.textContent           = su.id;
+
+// Edit toggle (visual only)
+let editing = false;
+(window as any).toggleEdit = () => {
+  editing = !editing;
+  const btn = document.getElementById('edit-toggle')!;
+  btn.innerHTML = editing
+    ? '<span class="ti ti-check" style="font-size:13px;"></span> Guardar'
+    : '<span class="ti ti-edit" style="font-size:13px;"></span> Editar';
+  btn.style.background  = editing ? '#FEE2E2' : '#F9F8F5';
+  btn.style.borderColor = editing ? '#D41224' : '#E8E5E0';
+  btn.style.color       = editing ? '#D41224' : '#374151';
+};
+
+// JWT info
+const token = getToken();
+if (token) {
+  try {
+    const payload   = JSON.parse(atob(token.split('.')[1]));
+    const fmt = (ts: number) =>
+      new Date(ts * 1000).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+
+    document.getElementById('jwt-iat')!.textContent = fmt(payload.iat);
+    document.getElementById('jwt-exp')!.textContent = fmt(payload.exp);
+
+    const now       = Date.now();
+    const totalMs   = (payload.exp - payload.iat) * 1000;
+    const remainMs  = payload.exp * 1000 - now;
+    const pct       = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
+    const fill      = document.getElementById('session-fill') as HTMLElement;
+    const statusEl  = document.getElementById('session-status')!;
+    fill.style.width = `${pct}%`;
+
+    if (pct > 50) {
+      fill.style.background   = '#22c55e';
+      statusEl.textContent    = 'Activa';
+      statusEl.style.background = '#D1FAE5'; statusEl.style.color = '#059669';
+    } else if (pct > 20) {
+      fill.style.background   = '#f59e0b';
+      statusEl.textContent    = 'Pronto vence';
+      statusEl.style.background = '#FEF3C7'; statusEl.style.color = '#D97706';
+    } else {
+      fill.style.background   = '#ef4444';
+      statusEl.textContent    = 'Por vencer';
+      statusEl.style.background = '#FEE2E2'; statusEl.style.color = '#D41224';
+    }
+
+    const hrs  = Math.floor(remainMs / 3_600_000);
+    const mins = Math.floor((remainMs % 3_600_000) / 60_000);
+    document.getElementById('jwt-remain')!.textContent = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+  } catch { /* ignorar */ }
+}
+
+// ── Cargar datos reales ───────────────────────────────────────
+Promise.allSettled([
+  studentsApi.me(),
+  triedsApi.findMy(0, 200),
+  competencesApi.findAll(true),
+]).then(([profileR, triedsR, compsR]) => {
+
+  // Perfil real
+  if (profileR.status === 'fulfilled' && profileR.value.data) {
+    const p = profileR.value.data;
+    updateStoredUser({ firstName: p.firstName, firstSurname: p.firstSurname, email: p.email });
+
+    const full  = `${p.firstName} ${p.firstSurname}`;
+    const inits = (p.firstName[0] + p.firstSurname[0]).toUpperCase();
+
+    document.getElementById('sb-avatar')!.textContent      = inits;
+    document.getElementById('sb-name')!.textContent        = full;
+    document.getElementById('tb-avatar')!.textContent      = inits;
+    document.getElementById('tb-name')!.textContent        = p.firstName;
+    document.getElementById('hero-avatar')!.textContent    = inits;
+    document.getElementById('hero-name')!.textContent      = full;
+    document.getElementById('hero-email')!.textContent     = p.email;
+    document.getElementById('hero-program')!.textContent   = p.programId ? `Programa: ${p.programId}` : 'UFPSO';
+    document.getElementById('field-firstName')!.textContent    = p.firstName;
+    document.getElementById('field-firstSurname')!.textContent = p.firstSurname;
+    document.getElementById('field-email')!.textContent        = p.email;
+
+    if (p.programId) {
+      const row = document.getElementById('program-row')!;
+      row.style.display     = 'flex';
+      row.style.flexDirection = 'column';
+      document.getElementById('field-program')!.textContent = p.programId;
+    }
   }
 
-  // Info fields
-  document.getElementById('field-firstName').textContent    = user.firstName;
-  document.getElementById('field-firstSurname').textContent = user.firstSurname;
-  document.getElementById('field-email').textContent        = user.email;
-  document.getElementById('field-userType').textContent     = admin ? 'Administrador' : 'Estudiante';
-  document.getElementById('field-id').textContent           = user.id;
-  if (user.programId) {
-    document.getElementById('program-row').style.display = 'flex';
-    document.getElementById('program-row').style.flexDirection = 'column';
-    document.getElementById('field-program').textContent = user.programId;
-  }
+  // Stats desde intentos
+  if (triedsR.status === 'fulfilled' && triedsR.value.data) {
+    const trieds   = triedsR.value.data.content;
+    const finished = trieds.filter(t => t.status === 'FINISHED' && t.score != null);
+    const avgScore = finished.length
+      ? finished.reduce((s, t) => s + (t.score ?? 0), 0) / finished.length
+      : 0;
 
-  // Edit toggle (visual only)
-  let editing = false;
-  window.toggleEdit = () => {
-    editing = !editing;
-    document.getElementById('edit-toggle').innerHTML = editing
-      ? '<span class="ti ti-check" style="font-size:13px;"></span> Guardar'
-      : '<span class="ti ti-edit" style="font-size:13px;"></span> Editar';
-    document.getElementById('edit-toggle').style.background    = editing ? '#FEE2E2' : '#F9F8F5';
-    document.getElementById('edit-toggle').style.borderColor   = editing ? '#D41224' : '#E8E5E0';
-    document.getElementById('edit-toggle').style.color         = editing ? '#D41224' : '#374151';
-  };
+    animCount(document.getElementById('stats-grid')!
+      .querySelector<HTMLElement>('[style*="color:#D41224"]'), finished.length);
 
-  // Competency bars mock
-  const COMPS = [
-    { name:'Lectura Crítica',           short:'LC', score:78, color:'#D41224', bg:'#FEE2E2', trend:+3 },
-    { name:'Razonamiento Cuantitativo', short:'RC', score:65, color:'#2563EB', bg:'#DBEAFE', trend:+1 },
-    { name:'Competencias Ciudadanas',   short:'CC', score:82, color:'#059669', bg:'#D1FAE5', trend:+5 },
-    { name:'Comunicación Escrita',      short:'CE', score:70, color:'#7C3AED', bg:'#EDE9FE', trend:-2 },
-    { name:'Inglés',                    short:'IN', score:58, color:'#D97706', bg:'#FEF3C7', trend:+4 },
-  ];
+    // Sobreescribir stat cards con datos reales
+    const statNums = document.querySelectorAll<HTMLElement>('.stat-num');
+    if (statNums[0]) animCount(statNums[0], finished.length);
+    if (statNums[1]) { statNums[1].textContent = avgScore.toFixed(1); }
+    if (statNums[3]) animCount(statNums[3], 0); // streak — no disponible en API
 
-  const compBars = document.getElementById('comp-bars');
-  COMPS.forEach((c, i) => {
-    const sign = c.trend > 0 ? '+' : '';
-    const tcol = c.trend > 0 ? '#059669' : '#ef4444';
-    const div  = document.createElement('div');
-    div.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:8px;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-          <div style="width:27px;height:27px;border-radius:7px;background:${c.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <span style="font-size:9px;font-weight:900;color:${c.color};">${c.short}</span>
+    // Barras de competencias
+    const byComp: Record<string, number[]> = {};
+    finished.forEach(t => {
+      if (!byComp[t.competenceId]) byComp[t.competenceId] = [];
+      if (t.score != null) byComp[t.competenceId].push(t.score);
+    });
+
+    if (compsR.status === 'fulfilled' && compsR.value.data) {
+      const compBars = document.getElementById('comp-bars')!;
+      compBars.innerHTML = '';
+
+      compsR.value.data.forEach((c, i) => {
+        const s      = getCompStyle(c.competenceId, c.competenceName);
+        const scores = byComp[c.competenceId] ?? [];
+        const score  = scores.length
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+          : 0;
+
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+              <div style="width:27px;height:27px;border-radius:7px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:9px;font-weight:900;color:${s.color};">${s.short}</span>
+              </div>
+              <span style="font-size:13px;font-weight:600;color:#374151;">${c.competenceName}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+              <span style="font-size:16px;font-weight:900;color:${s.color};">${score > 0 ? score : '—'}</span>
+              <span style="font-size:11px;color:#A09990;">/100</span>
+            </div>
           </div>
-          <span style="font-size:13px;font-weight:600;color:#374151;">${c.name}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-          <span style="font-size:11px;font-weight:700;color:${tcol};">${sign}${c.trend} pts</span>
-          <span style="font-size:16px;font-weight:900;color:${c.color};">${c.score}</span>
-          <span style="font-size:11px;color:#A09990;">/100</span>
-        </div>
-      </div>
-      <div class="bar-wrap"><div class="bar-fill" id="cpbar-${i}" style="background:${c.color};"></div></div>`;
-    compBars.appendChild(div);
-    setTimeout(() => {
-      const bar = document.getElementById(`cpbar-${i}`);
-      if (bar) bar.style.width = `${c.score}%`;
-    }, 400 + i * 80);
-  });
+          <div class="bar-wrap"><div class="bar-fill" id="pbar-${i}" style="background:${s.color};"></div></div>`;
+        compBars.appendChild(div);
+        setTimeout(() => {
+          const bar = document.getElementById(`pbar-${i}`);
+          if (bar) bar.style.width = `${score}%`;
+        }, 300 + i * 80);
+      });
+    }
 
-  // Activity mock
-  const ACTIVITIES = [
-    { icon:'ti-clipboard-check', bg:'#FEE2E2', col:'#D41224', text:'Completó simulacro · Lectura Crítica', sub:'Puntaje: 78/100', time:'Hace 2 días' },
-    { icon:'ti-clipboard-check', bg:'#D1FAE5', col:'#059669', text:'Completó simulacro · Comp. Ciudadanas', sub:'Puntaje: 85/100', time:'Hace 4 días' },
-    { icon:'ti-robot',           bg:'#EDE9FE', col:'#7C3AED', text:'Sesión IA · Razonamiento Cuantitativo', sub:'18 preguntas respondidas', time:'Hace 5 días' },
-    { icon:'ti-clipboard-check', bg:'#DBEAFE', col:'#2563EB', text:'Completó simulacro · Comunicación Escrita', sub:'Puntaje: 74/100', time:'Hace 7 días' },
-  ];
+    // Actividad reciente
+    const actList  = document.getElementById('activity-list')!;
+    actList.innerHTML = '';
+    const recent = [...finished]
+      .sort((a, b) =>
+        new Date(b.finishedAt ?? b.attemptTimestamp).getTime() -
+        new Date(a.finishedAt ?? a.attemptTimestamp).getTime()
+      )
+      .slice(0, 6);
 
-  const actList = document.getElementById('activity-list');
-  ACTIVITIES.forEach(a => {
-    const div = document.createElement('div');
-    div.className = 'activity-row';
-    div.innerHTML = `
-      <div style="width:36px;height:36px;border-radius:9px;background:${a.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <span class="ti ${a.icon}" style="color:${a.col};font-size:16px;"></span>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.text}</p>
-        <p style="font-size:11px;color:#A09990;margin:0;">${a.sub}</p>
-      </div>
-      <span style="font-size:11px;color:#C0BDB5;flex-shrink:0;">${a.time}</span>`;
-    actList.appendChild(div);
-  });
-
-  // JWT info
-  const token = getToken();
-  if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const fmt = (ts) => new Date(ts*1000).toLocaleString('es-CO', { dateStyle:'medium', timeStyle:'short' });
-      document.getElementById('jwt-iat').textContent = fmt(payload.iat);
-      document.getElementById('jwt-exp').textContent = fmt(payload.exp);
-
-      const now     = Date.now();
-      const expMs   = payload.exp * 1000;
-      const iatMs   = payload.iat * 1000;
-      const totalMs = expMs - iatMs;
-      const remainMs = expMs - now;
-      const pct = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
-
-      const fill = document.getElementById('session-fill');
-      fill.style.width = `${pct}%`;
-
-      const statusEl = document.getElementById('session-status');
-      if (pct > 50) {
-        fill.style.background = '#22c55e';
-        statusEl.textContent  = 'Activa'; statusEl.style.background='#D1FAE5'; statusEl.style.color='#059669';
-      } else if (pct > 20) {
-        fill.style.background = '#f59e0b';
-        statusEl.textContent  = 'Pronto vence'; statusEl.style.background='#FEF3C7'; statusEl.style.color='#D97706';
-      } else {
-        fill.style.background = '#ef4444';
-        statusEl.textContent  = 'Por vencer'; statusEl.style.background='#FEE2E2'; statusEl.style.color='#D41224';
-      }
-
-      const hrs  = Math.floor(remainMs / 3_600_000);
-      const mins = Math.floor((remainMs % 3_600_000) / 60_000);
-      document.getElementById('jwt-remain').textContent = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-    } catch {}
+    if (recent.length === 0) {
+      actList.innerHTML = '<p style="font-size:13px;color:#A09990;text-align:center;padding:12px 0;">Sin actividad aún.</p>';
+    } else {
+      recent.forEach(t => {
+        const s   = getCompStyle(t.competenceId, t.testName ?? '');
+        const div = document.createElement('div');
+        div.className = 'activity-row';
+        div.innerHTML = `
+          <div style="width:36px;height:36px;border-radius:9px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span class="ti ti-clipboard-check" style="color:${s.color};font-size:16px;"></span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="font-size:13px;font-weight:700;color:#374151;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              Completó simulacro · ${t.testName ?? t.competenceId}
+            </p>
+            <p style="font-size:11px;color:#A09990;margin:0;">
+              Puntaje: ${t.score?.toFixed(0) ?? '—'}/100 · ${t.totalQuestions} preguntas
+            </p>
+          </div>
+          <span style="font-size:11px;color:#C0BDB5;flex-shrink:0;">${fmtDate(t.finishedAt ?? t.attemptTimestamp)}</span>`;
+        actList.appendChild(div);
+      });
+    }
   }
+});
 
-  // Logout
-  document.getElementById('logout-btn').addEventListener('click', logout);
-  document.getElementById('logout-hero').addEventListener('click', logout);
+document.getElementById('logout-btn')!.addEventListener('click', logout);
+document.getElementById('logout-hero')!.addEventListener('click', logout);
 </script>
 
 </BaseLayout>

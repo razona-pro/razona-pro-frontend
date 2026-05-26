@@ -347,330 +347,236 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <script>
   import { requireAuth, isAdmin, logout } from '../lib/auth';
+import { testsApi, triedsApi } from '../lib/api';
+import type { TestDto, TriedDto } from '../lib/api';
+import { getCompStyle, fmtDur } from '../lib/utils';
 
-  // Declarar funciones globales en window para uso desde onclick HTML
-  declare global {
-    interface Window {
-      openSidebar:  () => void;
-      closeSidebar: () => void;
-      startTest:    (testId: string, competenceId: string) => void;
-      filterComp:   (key: string, btn: HTMLElement) => void;
-      filterMode:   (mode: string, btn: HTMLElement) => void;
-    }
+let user;
+try { user = requireAuth(); } catch { throw new Error('redir'); }
+const admin = isAdmin();
+
+declare global {
+  interface Window {
+    openSidebar:  () => void;
+    closeSidebar: () => void;
+    filterComp:   (key: string, btn: HTMLElement) => void;
+    filterMode:   (mode: string, btn: HTMLElement) => void;
   }
+}
 
-  let user;
-  try { user = requireAuth(); } catch { throw new Error('redir'); }
-  const admin = isAdmin();
+(window as any).openSidebar = () => {
+  document.getElementById('sidebar')!.classList.add('open');
+  document.getElementById('overlay')!.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+(window as any).closeSidebar = () => {
+  document.getElementById('sidebar')!.classList.remove('open');
+  document.getElementById('overlay')!.classList.remove('open');
+  document.body.style.overflow = '';
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape') (window as any).closeSidebar(); });
 
-  window.openSidebar = () => {
-    document.getElementById('sidebar')!.classList.add('open');
-    document.getElementById('overlay')!.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  };
-  window.closeSidebar = () => {
-    document.getElementById('sidebar')!.classList.remove('open');
-    document.getElementById('overlay')!.classList.remove('open');
-    document.body.style.overflow = '';
-  };
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeSidebar(); });
+// Sidebar user info
+import { getUser } from '../lib/auth';
+const su = getUser()!;
+const inits = ((su.firstName[0] ?? '') + (su.firstSurname[0] ?? '')).toUpperCase();
+document.getElementById('sb-avatar')!.textContent = inits;
+document.getElementById('sb-name')!.textContent   = `${su.firstName} ${su.firstSurname}`.trim() || su.id;
+document.getElementById('sb-sub')!.textContent    = admin ? 'Administrador · UFPSO' : (su.programId ?? 'Estudiante · UFPSO');
+document.getElementById('tb-avatar')!.textContent = inits;
+document.getElementById('tb-name')!.textContent   = su.firstName || su.id;
+const badge = document.getElementById('tb-badge') as HTMLElement;
+if (admin) { badge.textContent = 'Admin'; badge.style.background = '#1C1917'; badge.style.color = '#F87171'; }
+else       { badge.textContent = 'Estudiante'; badge.style.background = '#FEE2E2'; badge.style.color = '#D41224'; }
 
-  const initials = (user.firstName[0] + user.firstSurname[0]).toUpperCase();
-  document.getElementById('sb-avatar')!.textContent = initials;
-  document.getElementById('sb-name')!.textContent   = `${user.firstName} ${user.firstSurname}`;
-  document.getElementById('sb-sub')!.textContent    = admin ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
-  document.getElementById('tb-avatar')!.textContent = initials;
-  document.getElementById('tb-name')!.textContent   = user.firstName;
+if (admin) document.getElementById('admin-nav')!.style.display = 'block';
+document.getElementById('logout-btn')!.addEventListener('click', logout);
 
-  const badge = document.getElementById('tb-badge') as HTMLElement | null;
-  if (badge) {
-    if (admin) { badge.textContent = 'Admin'; badge.style.background = '#1C1917'; badge.style.color = '#F87171'; }
-    else       { badge.textContent = 'Estudiante'; badge.style.background = '#FEE2E2'; badge.style.color = '#D41224'; }
-  }
+// ── Estado ────────────────────────────────────────────────────
+let allTests:  TestDto[]  = [];
+let allTrieds: TriedDto[] = [];
+let currentComp = 'ALL';
+let currentMode = 'ALL';
+let searchTerm  = '';
 
-  if (admin) (document.getElementById('admin-nav') as HTMLElement | null)?.style && (document.getElementById('admin-nav')!.style.display = 'block');
-  document.getElementById('logout-btn')!.addEventListener('click', logout);
+// ── Skeleton ──────────────────────────────────────────────────
+function showSkeleton() {
+  const grid = document.getElementById('tests-grid')!;
+  grid.innerHTML = Array(6).fill(`
+    <div class="test-card" style="min-height:200px;">
+      <div style="height:4px;background:#E8E5E0;"></div>
+      <div style="padding:18px 20px;">
+        <div class="skeleton" style="width:55%;margin-bottom:10px;"></div>
+        <div class="skeleton" style="width:80%;margin-bottom:16px;"></div>
+        <div class="skeleton" style="height:36px;"></div>
+      </div>
+    </div>`).join('');
+}
 
-  // ── MOCK TESTS DATA ──────────────────────────────────────────────────────
-  // Basado en DataInitializer: COM001-COM004 + Lectura Crítica (Saber Pro)
-  // Tests que el admin crearía en un entorno real
-  const TESTS = [
-    {
-      id:'TST00001', competenceId:'COM001', competenceKey:'lc',
-      competenceName:'Lectura Crítica',
-      color:'#D41224', bg:'#FEE2E2', short:'LC',
-      testName:'Simulacro Lectura Crítica — Nivel I',
-      description:'Analiza textos argumentativos, expositivos y narrativos. Evalúa comprensión lectora e inferencia.',
-      durationSeconds:2700, questionsToPresent:30, testMode:'EXAM',
-      difficulty:'M', attempts:142, avgScore:72.4, myBest:78,
-    },
-    {
-      id:'TST00002', competenceId:'COM001', competenceKey:'lc',
-      competenceName:'Lectura Crítica',
-      color:'#D41224', bg:'#FEE2E2', short:'LC',
-      testName:'Práctica Rápida — Textos Argumentativos',
-      description:'Enfocado en estructura argumental, conectores lógicos y tesis principales.',
-      durationSeconds:1200, questionsToPresent:15, testMode:'PRACTICE',
-      difficulty:'B', attempts:98, avgScore:80.1, myBest:85,
-    },
-    {
-      id:'TST00003', competenceId:'COM003', competenceKey:'rq',
-      competenceName:'Razonamiento Cuantitativo',
-      color:'#2563EB', bg:'#DBEAFE', short:'RC',
-      testName:'Simulacro Razonamiento Cuantitativo — Completo',
-      description:'Cubre álgebra, estadística, probabilidad y resolución de problemas matemáticos de nivel universitario.',
-      durationSeconds:3600, questionsToPresent:40, testMode:'EXAM',
-      difficulty:'A', attempts:87, avgScore:65.3, myBest:62,
-    },
-    {
-      id:'TST00004', competenceId:'COM003', competenceKey:'rq',
-      competenceName:'Razonamiento Cuantitativo',
-      color:'#2563EB', bg:'#DBEAFE', short:'RC',
-      testName:'Cronometrado — Cálculo e Interpretación',
-      description:'Simulacro con tiempo reducido. Pon a prueba tu velocidad y precisión en análisis numérico.',
-      durationSeconds:1800, questionsToPresent:20, testMode:'TIMED',
-      difficulty:'M', attempts:54, avgScore:68.7, myBest:65,
-    },
-    {
-      id:'TST00005', competenceId:'COM001', competenceKey:'cc',
-      competenceName:'Competencias Ciudadanas',
-      color:'#059669', bg:'#D1FAE5', short:'CC',
-      testName:'Simulacro Comp. Ciudadanas — Módulo I',
-      description:'Evalúa conocimiento en convivencia, participación ciudadana, pluralidad y derechos constitucionales.',
-      durationSeconds:2400, questionsToPresent:25, testMode:'EXAM',
-      difficulty:'M', attempts:116, avgScore:78.2, myBest:82,
-    },
-    {
-      id:'TST00006', competenceId:'COM001', competenceKey:'cc',
-      competenceName:'Competencias Ciudadanas',
-      color:'#059669', bg:'#D1FAE5', short:'CC',
-      testName:'Práctica — Derechos y Constitución',
-      description:'Ejercicios de comprensión constitucional y análisis de casos ciudadanos reales.',
-      durationSeconds:900, questionsToPresent:10, testMode:'PRACTICE',
-      difficulty:'B', attempts:73, avgScore:84.5, myBest:90,
-    },
-    {
-      id:'TST00007', competenceId:'COM002', competenceKey:'ce',
-      competenceName:'Comunicación Escrita',
-      color:'#7C3AED', bg:'#EDE9FE', short:'CE',
-      testName:'Simulacro Comunicación Escrita — Completo',
-      description:'Producción textual, coherencia discursiva, uso del idioma y organización de ideas.',
-      durationSeconds:3000, questionsToPresent:35, testMode:'EXAM',
-      difficulty:'A', attempts:63, avgScore:70.8, myBest:74,
-    },
-    {
-      id:'TST00008', competenceId:'COM002', competenceKey:'ce',
-      competenceName:'Comunicación Escrita',
-      color:'#7C3AED', bg:'#EDE9FE', short:'CE',
-      testName:'Práctica — Redacción y Cohesión Textual',
-      description:'Enfocado en conectores, estructura de párrafos y estrategias discursivas.',
-      durationSeconds:1500, questionsToPresent:18, testMode:'PRACTICE',
-      difficulty:'M', attempts:45, avgScore:73.2, myBest:70,
-    },
-    {
-      id:'TST00009', competenceId:'COM004', competenceKey:'en',
-      competenceName:'Inglés',
-      color:'#D97706', bg:'#FEF3C7', short:'IN',
-      testName:'Simulacro Inglés — Comprensión Lectora B1',
-      description:'Reading comprehension con textos de nivel B1. Vocabulario, gramática y comprensión global.',
-      durationSeconds:2700, questionsToPresent:30, testMode:'EXAM',
-      difficulty:'M', attempts:59, avgScore:61.4, myBest:58,
-    },
-    {
-      id:'TST00010', competenceId:'COM004', competenceKey:'en',
-      competenceName:'Inglés',
-      color:'#D97706', bg:'#FEF3C7', short:'IN',
-      testName:'Práctica Inglés — Vocabulario y Estructuras',
-      description:'Ejercicios de gramática funcional, conectores en inglés y uso del vocabulario académico.',
-      durationSeconds:1200, questionsToPresent:15, testMode:'PRACTICE',
-      difficulty:'B', attempts:81, avgScore:65.9, myBest:62,
-    },
-    {
-      id:'TST00011', competenceId:'COM001', competenceKey:'lc',
-      competenceName:'Lectura Crítica',
-      color:'#D41224', bg:'#FEE2E2', short:'LC',
-      testName:'Cronometrado — Lectura Crítica Intensiva',
-      description:'Formato exigente con tiempo reducido por pregunta. Ideal para preparación final.',
-      durationSeconds:1500, questionsToPresent:20, testMode:'TIMED',
-      difficulty:'A', attempts:31, avgScore:69.3, myBest:null,
-    },
-    {
-      id:'TST00012', competenceId:'COM003', competenceKey:'rq',
-      competenceName:'Razonamiento Cuantitativo',
-      color:'#2563EB', bg:'#DBEAFE', short:'RC',
-      testName:'Práctica — Estadística y Probabilidad',
-      description:'Ejercicios focalizados en estadística descriptiva, probabilidad y análisis de datos.',
-      durationSeconds:1800, questionsToPresent:20, testMode:'PRACTICE',
-      difficulty:'M', attempts:48, avgScore:67.1, myBest:null,
-    },
-  ];
+// ── Render tests ──────────────────────────────────────────────
+function renderTests() {
+  const grid  = document.getElementById('tests-grid')!;
+  const empty = document.getElementById('empty-state')!;
 
-  let currentComp = 'ALL';
-  let currentMode = 'ALL';
-  let searchTerm  = '';
-
-  // ── Render ────────────────────────────────────────────────────────────────
-  function renderTests() {
-    const grid  = document.getElementById('tests-grid') as HTMLElement | null;
-    const empty = document.getElementById('empty-state') as HTMLElement | null;
-
-    const filtered = TESTS.filter(t => {
-      const matchComp   = currentComp === 'ALL' || t.competenceKey === currentComp;
-      const matchMode   = currentMode === 'ALL' || t.testMode === currentMode;
-      const matchSearch = searchTerm === '' ||
-        t.testName.toLowerCase().includes(searchTerm) ||
-        t.competenceName.toLowerCase().includes(searchTerm) ||
-        t.description.toLowerCase().includes(searchTerm);
-      return matchComp && matchMode && matchSearch;
-    });
-
-    const countEl = document.getElementById('count-total');
-    if (countEl) countEl.textContent = String(filtered.length);
-
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    if (filtered.length === 0) {
-      if (empty) empty.style.display = 'block';
-      return;
-    }
-    if (empty) empty.style.display = 'none';
-
-    filtered.forEach(t => {
-      const durMin     = Math.floor(t.durationSeconds / 60);
-      const diffLabels: Record<string, string> = { B: 'Básico', M: 'Medio', A: 'Alto' };
-      const modeLabels: Record<string, string> = { PRACTICE: 'Práctica', EXAM: 'Examen', TIMED: 'Cronometrado' };
-      const modeIcons:  Record<string, string> = { PRACTICE: 'ti-leaf', EXAM: 'ti-school', TIMED: 'ti-clock' };
-
-      const card = document.createElement('div');
-      card.className = 'test-card';
-      card.innerHTML = `
-        <!-- Card accent bar -->
-        <div style="height:4px;background:linear-gradient(to right,${t.color},${t.color}99);"></div>
-
-        <div class="test-card-body">
-          <!-- Header -->
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;">
-            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-              <div style="width:40px;height:40px;border-radius:11px;background:${t.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <span style="font-size:13px;font-weight:900;color:${t.color};">${t.short}</span>
-              </div>
-              <div style="min-width:0;">
-                <p style="font-size:10px;font-weight:700;color:${t.color};text-transform:uppercase;letter-spacing:0.5px;margin:0 0 2px;">${t.competenceName}</p>
-                <h3 style="font-size:14px;font-weight:800;color:#1A1A1A;margin:0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" title="${t.testName}">${t.testName}</h3>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
-              <span class="mode-badge mode-${t.testMode}">
-                <span class="ti ${modeIcons[t.testMode] ?? ''}" style="font-size:10px;"></span>
-                ${modeLabels[t.testMode] ?? t.testMode}
-              </span>
-              <span class="mode-badge diff-${t.difficulty}" style="padding:3px 8px;">
-                ${diffLabels[t.difficulty] ?? t.difficulty}
-              </span>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <p style="font-size:12.5px;color:#6B7280;line-height:1.65;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${t.description}</p>
-
-          <!-- Meta row -->
-          <div style="display:flex;gap:14px;flex-wrap:wrap;">
-            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
-              <span class="ti ti-clock" style="font-size:13px;color:#C0BDB5;"></span>
-              <span style="font-weight:600;">${durMin} min</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
-              <span class="ti ti-help-circle" style="font-size:13px;color:#C0BDB5;"></span>
-              <span style="font-weight:600;">${t.questionsToPresent} preguntas</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
-              <span class="ti ti-users" style="font-size:13px;color:#C0BDB5;"></span>
-              <span style="font-weight:600;">${t.attempts} intentos</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
-              <span class="ti ti-chart-bar" style="font-size:13px;color:#C0BDB5;"></span>
-              <span style="font-weight:600;">Prom: ${t.avgScore}</span>
-            </div>
-          </div>
-
-          ${t.myBest !== null ? `
-          <!-- My best score -->
-          <div style="margin-top:12px;padding:8px 12px;background:${t.bg};border-radius:9px;display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:11px;font-weight:600;color:${t.color};display:flex;align-items:center;gap:5px;">
-              <span class="ti ti-star" style="font-size:12px;"></span> Mi mejor puntaje
-            </span>
-            <span style="font-size:16px;font-weight:900;color:${t.color};">${t.myBest}<span style="font-size:11px;font-weight:600;color:${t.color}aa;">/100</span></span>
-          </div>` : `
-          <!-- No attempts yet -->
-          <div style="margin-top:12px;padding:8px 12px;background:#F9F8F5;border-radius:9px;border:1px dashed #E8E5E0;display:flex;align-items:center;gap:6px;">
-            <span class="ti ti-flag" style="color:#C0BDB5;font-size:13px;"></span>
-            <span style="font-size:11px;font-weight:600;color:#A09990;">Sin intentos aún — ¡sé el primero!</span>
-          </div>`}
-        </div>
-
-        <div class="test-card-footer">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:11px;color:#A09990;">Puntaje promedio global:</span>
-            <span style="font-size:13px;font-weight:800;color:${t.color};">${t.avgScore}/100</span>
-          </div>
-          <button class="btn-start" onclick="startTest('${t.id}','${t.competenceId}')">
-            <span class="ti ti-player-play" style="font-size:13px;"></span>
-            ${t.myBest !== null ? 'Reintentar' : 'Iniciar test'}
-          </button>
-        </div>`;
-
-      grid.appendChild(card);
-    });
-  }
-
-  // ── Start test ────────────────────────────────────────────────────────────
-  window.startTest = (_testId: string, _competenceId: string) => {
-    const proceed = confirm(`¿Iniciar este test?\n\nSe registrará un nuevo intento en tu historial.`);
-    if (proceed) {
-      alert('🚧 Módulo de examen en construcción.\nConéctate al backend con POST /api/trieds/start');
-    }
-  };
-
-  // ── Filters ───────────────────────────────────────────────────────────────
-  window.filterComp = (key: string, btn: HTMLElement) => {
-    currentComp = key;
-    document.querySelectorAll('.filter-pill').forEach(p => {
-      if (!p.id.startsWith('mode-')) p.classList.remove('active');
-    });
-    btn.classList.add('active');
-    renderTests();
-  };
-
-  window.filterMode = (mode: string, btn: HTMLElement) => {
-    currentMode = mode;
-    ['mode-all', 'mode-PRACTICE', 'mode-EXAM', 'mode-TIMED'].forEach(id => {
-      document.getElementById(id)?.classList.remove('active');
-    });
-    btn.classList.add('active');
-    renderTests();
-  };
-
-  // Search
-  document.getElementById('search-input')!.addEventListener('input', (e) => {
-    searchTerm = (e.target as HTMLInputElement).value.toLowerCase().trim();
-    renderTests();
+  const filtered = allTests.filter(t => {
+    const s           = getCompStyle(t.competenceId, t.competenceName ?? '');
+    const matchComp   = currentComp === 'ALL' || s.key === currentComp;
+    const matchMode   = currentMode === 'ALL' || t.testMode === currentMode;
+    const matchSearch = !searchTerm
+      || t.testName.toLowerCase().includes(searchTerm)
+      || (t.competenceName ?? '').toLowerCase().includes(searchTerm)
+      || (t.description ?? '').toLowerCase().includes(searchTerm);
+    return matchComp && matchMode && matchSearch;
   });
 
-  // ── Read URL param ────────────────────────────────────────────────────────
-  const urlParams = new URLSearchParams(window.location.search);
-  const cParam    = urlParams.get('c');
-  if (cParam) {
-    currentComp = cParam;
-    // Mark correct pill active
-    document.querySelectorAll('.filter-pill').forEach(p => {
-      p.classList.remove('active');
-      if (p.getAttribute('onclick')?.includes(`'${cParam}'`)) p.classList.add('active');
-    });
-  }
+  document.getElementById('count-total')!.textContent = String(filtered.length);
 
-  // ── Init ──────────────────────────────────────────────────────────────────
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = '';
+
+  const modeLabel: Record<string, string> = { PRACTICE: 'Práctica', EXAM: 'Examen', TIMED: 'Cronometrado' };
+  const modeIcon:  Record<string, string> = { PRACTICE: 'ti-leaf', EXAM: 'ti-school', TIMED: 'ti-clock' };
+
+  filtered.forEach(t => {
+    const s       = getCompStyle(t.competenceId, t.competenceName ?? '');
+    const durMin  = Math.floor(t.durationSeconds / 60);
+    const myTrieds = allTrieds.filter(tr =>
+      tr.testId === t.testId && tr.status === 'FINISHED' && tr.score != null
+    );
+    const myBest  = myTrieds.length
+      ? Math.max(...myTrieds.map(tr => tr.score ?? 0))
+      : null;
+
+    const card = document.createElement('div');
+    card.className = 'test-card';
+    card.innerHTML = `
+      <div style="height:4px;background:linear-gradient(to right,${s.color},${s.color}99);"></div>
+      <div class="test-card-body">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+            <div style="width:40px;height:40px;border-radius:11px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="font-size:13px;font-weight:900;color:${s.color};">${s.short}</span>
+            </div>
+            <div style="min-width:0;">
+              <p style="font-size:10px;font-weight:700;color:${s.color};text-transform:uppercase;letter-spacing:0.5px;margin:0 0 2px;">${t.competenceName ?? t.competenceId}</p>
+              <h3 style="font-size:14px;font-weight:800;color:#1A1A1A;margin:0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" title="${t.testName}">${t.testName}</h3>
+            </div>
+          </div>
+          <span class="mode-badge mode-${t.testMode}" style="flex-shrink:0;">
+            <span class="ti ${modeIcon[t.testMode] ?? ''}" style="font-size:10px;"></span>
+            ${modeLabel[t.testMode] ?? t.testMode}
+          </span>
+        </div>
+        ${t.description ? `<p style="font-size:12.5px;color:#6B7280;line-height:1.65;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${t.description}</p>` : ''}
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
+            <span class="ti ti-clock" style="font-size:13px;color:#C0BDB5;"></span>
+            <span style="font-weight:600;">${durMin} min</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A09990;">
+            <span class="ti ti-help-circle" style="font-size:13px;color:#C0BDB5;"></span>
+            <span style="font-weight:600;">${t.questionsToPresent ?? '?'} preguntas</span>
+          </div>
+        </div>
+        ${myBest != null
+          ? `<div style="margin-top:12px;padding:8px 12px;background:${s.bg};border-radius:9px;display:flex;align-items:center;justify-content:space-between;">
+               <span style="font-size:11px;font-weight:600;color:${s.color};display:flex;align-items:center;gap:5px;"><span class="ti ti-star" style="font-size:12px;"></span> Mi mejor puntaje</span>
+               <span style="font-size:16px;font-weight:900;color:${s.color};">${myBest.toFixed(0)}<span style="font-size:11px;">/100</span></span>
+             </div>`
+          : `<div style="margin-top:12px;padding:8px 12px;background:#F9F8F5;border-radius:9px;border:1px dashed #E8E5E0;display:flex;align-items:center;gap:6px;">
+               <span class="ti ti-flag" style="color:#C0BDB5;font-size:13px;"></span>
+               <span style="font-size:11px;font-weight:600;color:#A09990;">Sin intentos aún</span>
+             </div>`}
+      </div>
+      <div class="test-card-footer">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:#A09990;">Modo:</span>
+          <span style="font-size:13px;font-weight:800;color:${s.color};">${modeLabel[t.testMode] ?? t.testMode}</span>
+        </div>
+        <button class="btn-start btn-do-start" data-tid="${t.testId}" data-cid="${t.competenceId}">
+          <span class="ti ti-player-play" style="font-size:13px;"></span>
+          ${myBest != null ? 'Reintentar' : 'Iniciar test'}
+        </button>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll<HTMLButtonElement>('.btn-do-start').forEach(btn => {
+    btn.addEventListener('click', () => startTest(btn.dataset.tid!, btn.dataset.cid!));
+  });
+}
+
+// ── Iniciar test ──────────────────────────────────────────────
+async function startTest(testId: string, competenceId: string) {
+  if (!confirm('¿Iniciar este test? Se registrará un nuevo intento en tu historial.')) return;
+  try {
+    const res = await triedsApi.start(testId, competenceId);
+    if (res.data) {
+      alert(`✅ Test iniciado correctamente.\nID intento: ${res.data.triedId}\n\nEl módulo de examen está en desarrollo.`);
+      // Recargar trieds para actualizar "mi mejor puntaje"
+      const tr = await triedsApi.findMy(0, 200);
+      if (tr.data) allTrieds = tr.data.content;
+      renderTests();
+    }
+  } catch (err: any) {
+    alert(`❌ ${err?.message ?? 'Error al iniciar el test.'}`);
+  }
+}
+
+// ── Filtros ───────────────────────────────────────────────────
+(window as any).filterComp = (key: string, btn: HTMLElement) => {
+  currentComp = key;
+  document.querySelectorAll<HTMLElement>('.filter-pill:not([id^="mode-"])').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
   renderTests();
+};
+
+(window as any).filterMode = (mode: string, btn: HTMLElement) => {
+  currentMode = mode;
+  ['mode-all','mode-PRACTICE','mode-EXAM','mode-TIMED'].forEach(id =>
+    document.getElementById(id)?.classList.remove('active')
+  );
+  btn.classList.add('active');
+  renderTests();
+};
+
+(document.getElementById('search-input') as HTMLInputElement).addEventListener('input', e => {
+  searchTerm = (e.target as HTMLInputElement).value.toLowerCase().trim();
+  renderTests();
+});
+
+// ── Parámetro URL ─────────────────────────────────────────────
+const cParam = new URLSearchParams(window.location.search).get('c');
+if (cParam) {
+  currentComp = cParam;
+  document.querySelectorAll<HTMLElement>('.filter-pill').forEach(p => {
+    p.classList.remove('active');
+    if (p.getAttribute('onclick')?.includes(`'${cParam}'`)) p.classList.add('active');
+  });
+}
+
+// ── Cargar datos ──────────────────────────────────────────────
+showSkeleton();
+Promise.allSettled([
+  testsApi.findAll(0, 100),
+  triedsApi.findMy(0, 200),
+]).then(([testsR, triedsR]) => {
+  if (testsR.status === 'fulfilled' && testsR.value.data) {
+    allTests = testsR.value.data.content;
+  }
+  if (triedsR.status === 'fulfilled' && triedsR.value.data) {
+    allTrieds = triedsR.value.data.content;
+  }
+  renderTests();
+}).catch(() => {
+  document.getElementById('tests-grid')!.innerHTML =
+    '<p style="color:#A09990;text-align:center;padding:40px;grid-column:1/-1;">Error al cargar los tests. Verifica tu conexión.</p>';
+});
 </script>
 
 </BaseLayout>
