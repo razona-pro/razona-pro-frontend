@@ -977,7 +977,8 @@ document.getElementById('sign-up').addEventListener('submit', async (e) => {
     setLoading('su-submit', 'su-label', true, 'Crear cuenta');
 
     try {
-        const res = await apiRequest('/api/auth/student/register', {
+        // ✅ CORRECTO
+const res = await apiRequest('/api/auth/register', {
             method: 'POST',
             body: JSON.stringify(payload),
         });
