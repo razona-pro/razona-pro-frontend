@@ -1,0 +1,201 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  currentPage?: string;
+}
+const { currentPage = '' } = Astro.props;
+---
+
+<header class="topbar">
+  <!-- Hamburger -->
+  <button
+    class="topbar-hamburger"
+    onclick="window.__openSidebar && window.__openSidebar()"
+    aria-label="Abrir menú"
+  >
+    <Icon name="tabler:menu-2" size={18} />
+  </button>
+
+  <!-- Mobile logo -->
+  <a href="/dashboard" class="topbar-mobile-logo">
+    <div class="topbar-logo-icon">
+      <Icon name="tabler:brain" size={16} />
+    </div>
+    <span>Razona<strong>Pro</strong></span>
+  </a>
+
+  <!-- Search -->
+  <div class="topbar-search" id="topbar-search">
+    <Icon name="tabler:search" size={15} class="search-icon" />
+    <input
+      type="text"
+      id="global-search"
+      placeholder="Buscar tests, competencias..."
+      autocomplete="off"
+    />
+  </div>
+
+  <!-- Right -->
+  <div class="topbar-right">
+    <!-- Notifications placeholder -->
+    <button class="topbar-icon-btn" id="notif-btn" title="Notificaciones" aria-label="Notificaciones">
+      <Icon name="tabler:bell" size={17} />
+      <span class="notif-dot"></span>
+    </button>
+
+    <!-- User chip -->
+    <a href="/dashboard/profile" class="topbar-user" id="topbar-user">
+      <div class="topbar-avatar" id="tb-avatar">?</div>
+      <span class="topbar-name" id="tb-name">...</span>
+      <span class="topbar-badge" id="tb-badge"></span>
+    </a>
+  </div>
+</header>
+
+<style>
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    background: var(--ui-card);
+    border-bottom: 1px solid var(--ui-border);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-hamburger {
+    display: none;
+    width: 38px; height: 38px;
+    background: var(--ui-surface);
+    border: 1.5px solid var(--ui-border);
+    border-radius: 10px;
+    align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ui-text-2);
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .topbar-hamburger:hover { border-color: var(--brand); color: var(--brand); }
+
+  .topbar-mobile-logo {
+    display: none;
+    align-items: center; gap: 0.5rem;
+    text-decoration: none; flex-shrink: 0;
+    color: var(--ui-text-1); font-size: 0.9375rem;
+    font-weight: 700;
+  }
+  .topbar-mobile-logo strong { color: var(--brand); }
+  .topbar-logo-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #D41224, #9B1F24);
+    border-radius: 8px; display: flex;
+    align-items: center; justify-content: center;
+    color: white;
+  }
+
+  .topbar-search {
+    flex: 1; max-width: 420px;
+    position: relative; display: flex; align-items: center;
+  }
+  .search-icon {
+    position: absolute; left: 0.8125rem;
+    color: var(--ui-text-3); pointer-events: none;
+  }
+  .topbar-search input {
+    width: 100%;
+    padding: 0.5625rem 1rem 0.5625rem 2.375rem;
+    background: var(--ui-surface);
+    border: 1.5px solid var(--ui-border);
+    border-radius: 12px;
+    font-size: 0.8125rem; color: var(--ui-text-1);
+    font-family: inherit; outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .topbar-search input::placeholder { color: var(--ui-text-3); }
+  .topbar-search input:focus {
+    border-color: var(--brand);
+    background: var(--ui-card);
+    box-shadow: 0 0 0 3px rgba(212,18,36,0.1);
+  }
+
+  .topbar-right {
+    margin-left: auto; display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .topbar-icon-btn {
+    width: 38px; height: 38px;
+    background: var(--ui-surface); border: 1.5px solid var(--ui-border);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ui-text-2);
+    position: relative; flex-shrink: 0; transition: all 0.2s;
+  }
+  .topbar-icon-btn:hover { border-color: var(--brand); color: var(--brand); }
+  .notif-dot {
+    position: absolute; top: 7px; right: 7px;
+    width: 7px; height: 7px;
+    background: var(--brand); border-radius: 50%;
+    border: 1.5px solid var(--ui-card);
+  }
+
+  .topbar-user {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.3125rem 0.75rem 0.3125rem 0.3125rem;
+    background: var(--ui-surface); border: 1.5px solid var(--ui-border);
+    border-radius: 10px; text-decoration: none;
+    transition: border-color 0.2s; cursor: pointer;
+  }
+  .topbar-user:hover { border-color: var(--brand); }
+
+  .topbar-avatar {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: linear-gradient(135deg, #D41224, #9B1F24);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 900; font-size: 0.6875rem;
+  }
+  .topbar-name {
+    font-size: 0.8125rem; font-weight: 700;
+    color: var(--ui-text-1); white-space: nowrap;
+  }
+  .topbar-badge {
+    font-size: 0.625rem; padding: 2px 8px;
+    border-radius: 20px; font-weight: 700; white-space: nowrap;
+  }
+
+  @media (max-width: 1023px) {
+    .topbar-hamburger { display: flex; }
+  }
+  @media (max-width: 768px) {
+    .topbar { padding: 0.75rem 1rem; }
+    .topbar-mobile-logo { display: flex; }
+    .topbar-search { display: none; }
+    .topbar-name, .topbar-badge { display: none; }
+  }
+</style>
+
+<script>
+  import { getUser, isAdmin } from '../../lib/auth';
+
+  const user = getUser();
+  if (user) {
+    const initials = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase();
+    const avatarEl = document.getElementById('tb-avatar');
+    const nameEl   = document.getElementById('tb-name');
+    const badgeEl  = document.getElementById('tb-badge') as HTMLElement;
+
+    if (avatarEl) avatarEl.textContent = initials;
+    if (nameEl)   nameEl.textContent = user.firstName;
+    if (badgeEl) {
+      if (isAdmin()) {
+        badgeEl.textContent = 'Admin';
+        badgeEl.style.background = '#1C1917';
+        badgeEl.style.color = '#F87171';
+      } else {
+        badgeEl.textContent = 'Estudiante';
+        badgeEl.style.background = 'var(--brand-pale)';
+        badgeEl.style.color = 'var(--brand)';
+      }
+    }
+  }
+</script>

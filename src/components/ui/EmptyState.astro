@@ -1,0 +1,41 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  icon?: string;
+  title: string;
+  description?: string;
+  action?: { label: string; href: string };
+}
+
+const { icon = 'tabler:mood-empty', title, description, action } = Astro.props;
+---
+
+<div class="empty-state">
+  <div class="empty-icon">
+    <Icon name={icon} size={40} />
+  </div>
+  <p class="empty-title">{title}</p>
+  {description && <p class="empty-desc">{description}</p>}
+  {action && (
+    <a href={action.href} class="empty-action">{action.label}</a>
+  )}
+</div>
+
+<style>
+  .empty-state {
+    text-align: center; padding: 3rem 1.5rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  }
+  .empty-icon { color: var(--ui-text-3); margin-bottom: 0.5rem; }
+  .empty-title { font-size: 1rem; font-weight: 700; color: var(--ui-text-1); margin: 0; }
+  .empty-desc  { font-size: 0.875rem; color: var(--ui-text-3); margin: 0; }
+  .empty-action {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1.25rem; border-radius: 9px;
+    background: var(--brand); color: white;
+    font-size: 0.875rem; font-weight: 600; text-decoration: none;
+    transition: background 0.2s;
+  }
+  .empty-action:hover { background: var(--brand-dark); }
+</style>

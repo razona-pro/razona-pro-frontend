@@ -1,0 +1,212 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Mi historial" currentPage="history">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Mi historial</span>
+    </div>
+    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Mi historial</h1>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Todos tus intentos de tests y sesiones de práctica.</p>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;gap:6px;margin-bottom:1.25rem">
+    <button class="htab active" data-tab="trieds">Tests regulares</button>
+    <button class="htab" data-tab="ai">Práctica con IA</button>
+  </div>
+
+  <!-- Stats summary -->
+  <div id="history-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">
+    <div class="hstat" style="border-left-color:#D41224">
+      <span class="hstat-label">Total intentos</span>
+      <p id="hs-total" class="hstat-val" style="color:#D41224">0</p>
+    </div>
+    <div class="hstat" style="border-left-color:#059669">
+      <span class="hstat-label">Finalizados</span>
+      <p id="hs-finished" class="hstat-val" style="color:#059669">0</p>
+    </div>
+    <div class="hstat" style="border-left-color:#2563EB">
+      <span class="hstat-label">Promedio</span>
+      <p id="hs-avg" class="hstat-val" style="color:#2563EB">—</p>
+    </div>
+    <div class="hstat" style="border-left-color:#D97706">
+      <span class="hstat-label">Mejor puntaje</span>
+      <p id="hs-best" class="hstat-val" style="color:#D97706">—</p>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
+    <select id="status-filter" style="padding:7px 14px;border:1.5px solid var(--ui-border);border-radius:10px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none;cursor:pointer">
+      <option value="ALL">Todos los estados</option>
+      <option value="FINISHED">Finalizados</option>
+      <option value="IN_PROGRESS">En progreso</option>
+      <option value="ABANDONED">Abandonados</option>
+    </select>
+    <select id="comp-filter" style="padding:7px 14px;border:1.5px solid var(--ui-border);border-radius:10px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none;cursor:pointer">
+      <option value="ALL">Todas las competencias</option>
+    </select>
+    <span id="count-label" style="font-size:0.8125rem;color:var(--ui-text-3);margin-left:auto"></span>
+  </div>
+
+  <!-- List -->
+  <div id="history-list"></div>
+
+</AppLayout>
+
+<style>
+  .htab {
+    padding: 7px 18px; border-radius: 20px; font-size: 0.875rem; font-weight: 700;
+    border: 1.5px solid var(--ui-border); background: var(--ui-card); color: var(--ui-text-2);
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .htab.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+  .hstat {
+    background: var(--ui-card); border-radius: 12px; padding: 12px 14px;
+    border: 1px solid var(--ui-border); border-left: 3px solid;
+  }
+  .hstat-label { font-size: 0.625rem; font-weight: 700; color: var(--ui-text-3); text-transform: uppercase; letter-spacing: 0.5px; }
+  .hstat-val { font-size: 1.5rem; font-weight: 900; margin: 4px 0 0; line-height: 1; }
+
+  .tried-item {
+    background: var(--ui-card); border-radius: 14px; border: 1px solid var(--ui-border);
+    padding: 1rem 1.25rem; margin-bottom: 0.625rem; display: flex; align-items: center; gap: 1rem;
+    transition: all 0.15s; cursor: pointer; flex-wrap: wrap;
+  }
+  .tried-item:hover { border-color: var(--ui-border-2); transform: translateX(2px); }
+
+  @media (max-width: 768px) {
+    #history-stats { grid-template-columns: repeat(2,1fr) !important; }
+  }
+</style>
+
+<script>
+  import { requireAuth } from '../../lib/auth';
+  import { triedsApi }   from '../../lib/api/trieds.api';
+  import { aiTriedsApi } from '../../lib/api/ai-trieds.api';
+  import type { TriedDto, AiTriedDto } from '../../lib/api/types';
+  import { getCompStyle, fmtDate, fmtDuration, scoreColor, animCount } from '../../lib/utils';
+  import { toast } from '../../lib/toast';
+
+  try { requireAuth(); } catch { throw new Error('redirect'); }
+
+  let currentTab = 'trieds';
+  let allTrieds: TriedDto[] = [];
+  let allAiTrieds: AiTriedDto[] = [];
+
+  function renderTrieds(filter = 'ALL', compFilter = 'ALL') {
+    const list = document.getElementById('history-list')!;
+    list.innerHTML = '';
+
+    const data = currentTab === 'trieds' ? allTrieds : allAiTrieds;
+    const typed = data as any[];
+
+    const filtered = typed.filter(t => {
+      const statusMatch = filter === 'ALL' || t.status === filter;
+      const compMatch   = currentTab !== 'trieds' || compFilter === 'ALL' || t.competenceId === compFilter;
+      return statusMatch && compMatch;
+    });
+
+    const countEl = document.getElementById('count-label');
+    if (countEl) countEl.textContent = `${filtered.length} resultado(s)`;
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:3rem 1rem;color:var(--ui-text-3)"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin resultados</p><p style="font-size:0.875rem">Ajusta los filtros o realiza tu primer simulacro.</p></div>';
+      return;
+    }
+
+    filtered.forEach(t => {
+      const s = getCompStyle(t.competenceId ?? '', t.testName ?? '');
+      const sc = scoreColor(t.score);
+      const statusColor: Record<string, string> = {
+        FINISHED: '#059669', IN_PROGRESS: '#2563EB', ABANDONED: '#DC2626', TIMED_OUT: '#D97706',
+      };
+      const statusLabel: Record<string, string> = {
+        FINISHED: 'Finalizado', IN_PROGRESS: 'En progreso', ABANDONED: 'Abandonado', TIMED_OUT: 'Tiempo agotado',
+      };
+
+      const div = document.createElement('div');
+      div.className = 'tried-item';
+      div.innerHTML = `
+        <div style="width:42px;height:42px;border-radius:11px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:900;color:${s.color}">${s.short}</div>
+        <div style="flex:1;min-width:160px">
+          <p style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.testName ?? t.aiTriedId ?? t.triedId}</p>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:0.6875rem;font-weight:700;padding:2px 8px;border-radius:12px;background:${statusColor[t.status] ?? '#6B7280'}18;color:${statusColor[t.status] ?? '#6B7280'}">${statusLabel[t.status] ?? t.status}</span>
+            <span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(t.finishedAt ?? t.attemptTimestamp)}</span>
+            ${t.timeSpentSeconds ? `<span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDuration(t.timeSpentSeconds)}</span>` : ''}
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          ${t.score != null
+            ? `<p style="font-size:1.5rem;font-weight:900;color:${sc};margin:0;line-height:1">${t.score.toFixed(0)}</p><p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">/100 · ${t.correctAnswers ?? 0}/${t.totalQuestions} correctas</p>`
+            : `<p style="font-size:0.875rem;color:var(--ui-text-3);margin:0">${t.totalQuestions} preg.</p>`}
+        </div>`;
+      list.appendChild(div);
+    });
+  }
+
+  function updateStats(tab: string) {
+    const data = tab === 'trieds' ? allTrieds : (allAiTrieds as any[]);
+    const finished = data.filter((t: any) => t.status === 'FINISHED' && t.score != null);
+    const scores   = finished.map((t: any) => t.score as number);
+    const avg      = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+    const best     = scores.length ? Math.max(...scores) : null;
+
+    animCount(document.getElementById('hs-total') as HTMLElement, data.length);
+    animCount(document.getElementById('hs-finished') as HTMLElement, finished.length);
+    const avgEl  = document.getElementById('hs-avg')!;
+    const bestEl = document.getElementById('hs-best')!;
+    avgEl.textContent  = finished.length ? avg.toFixed(1) : '—';
+    bestEl.textContent = best != null ? best.toFixed(0) : '—';
+  }
+
+  // Tabs
+  document.querySelectorAll<HTMLButtonElement>('.htab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.htab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.dataset.tab ?? 'trieds';
+      updateStats(currentTab);
+      renderTrieds(
+        (document.getElementById('status-filter') as HTMLSelectElement).value,
+        (document.getElementById('comp-filter') as HTMLSelectElement).value,
+      );
+    });
+  });
+
+  // Filters
+  document.getElementById('status-filter')?.addEventListener('change', e => {
+    renderTrieds((e.target as HTMLSelectElement).value, (document.getElementById('comp-filter') as HTMLSelectElement).value);
+  });
+  document.getElementById('comp-filter')?.addEventListener('change', e => {
+    renderTrieds((document.getElementById('status-filter') as HTMLSelectElement).value, (e.target as HTMLSelectElement).value);
+  });
+
+  // Load
+  Promise.allSettled([triedsApi.findMy(0, 200), aiTriedsApi.findMy(0, 100)]).then(([triedsR, aiR]) => {
+    if (triedsR.status === 'fulfilled' && triedsR.value.data) {
+      allTrieds = triedsR.value.data.content;
+
+      // Build comp filter
+      const compSel = document.getElementById('comp-filter') as HTMLSelectElement;
+      const compIds = [...new Set(allTrieds.map(t => t.competenceId))];
+      compIds.forEach(id => {
+        const opt = document.createElement('option');
+        opt.value = id; opt.textContent = id;
+        compSel.appendChild(opt);
+      });
+    }
+    if (aiR.status === 'fulfilled' && aiR.value.data) {
+      allAiTrieds = aiR.value.data.content;
+    }
+    updateStats('trieds');
+    renderTrieds();
+  }).catch(() => {
+    toast.error('Error al cargar el historial');
+  });
+</script>

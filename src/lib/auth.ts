@@ -2,29 +2,34 @@ const TOKEN_KEY = 'rp_token';
 const USER_KEY  = 'rp_user';
 
 export interface StoredUser {
-  id:           string;
-  programId?:   string;
-  email:        string;
-  firstName:    string;
+  id: string;
+  programId?: string;
+  email: string;
+  firstName: string;
   firstSurname: string;
-  userType:     'ADMIN' | 'STUDENT';
+  userType: 'ADMIN' | 'STUDENT';
 }
 
-/** Parsea el JWT y guarda sesión. firstName/firstSurname se rellenan después desde /api/students/me */
-export function saveSession(data: { token: string }): void {
-  localStorage.setItem(TOKEN_KEY, data.token);
+function parseJwt(token: string): Record<string, unknown> {
   try {
-    const payload = JSON.parse(atob(data.token.split('.')[1]));
-    const user: StoredUser = {
-      id:           payload.sub ?? '',
-      programId:    payload.programId ?? undefined,
-      email:        payload.email ?? '',
-      firstName:    payload.sub ?? '',   // temporal, se actualiza al cargar perfil
-      firstSurname: '',
-      userType:     (payload.userType ?? 'STUDENT') as 'ADMIN' | 'STUDENT',
-    };
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-  } catch { /* ignorar */ }
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch {
+    return {};
+  }
+}
+
+export function saveSession(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+  const p = parseJwt(token);
+  const user: StoredUser = {
+    id:           String(p.sub ?? ''),
+    programId:    p.programId ? String(p.programId) : undefined,
+    email:        String(p.email ?? ''),
+    firstName:    String(p.sub ?? ''),
+    firstSurname: '',
+    userType:     (p.userType as 'ADMIN' | 'STUDENT') ?? 'STUDENT',
+  };
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
 export function updateStoredUser(updates: Partial<StoredUser>): void {
@@ -34,10 +39,11 @@ export function updateStoredUser(updates: Partial<StoredUser>): void {
 }
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  return typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
 }
 
 export function getUser(): StoredUser | null {
+  if (typeof window === 'undefined') return null;
   const raw = localStorage.getItem(USER_KEY);
   if (!raw) return null;
   try { return JSON.parse(raw) as StoredUser; } catch { return null; }
@@ -46,10 +52,8 @@ export function getUser(): StoredUser | null {
 export function isAuthenticated(): boolean {
   const token = getToken();
   if (!token) return false;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.exp * 1000 > Date.now();
-  } catch { return false; }
+  const p = parseJwt(token);
+  return typeof p.exp === 'number' && p.exp * 1000 > Date.now();
 }
 
 export function isAdmin(): boolean {
@@ -63,17 +67,31 @@ export function isStudent(): boolean {
 export function logout(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
-  window.location.href = '/login';
+  window.location.href = '/auth';
 }
 
-export function requireAuth(redirectTo = '/login'): StoredUser {
+/** Redirects to /auth if not authenticated. Returns user or throws. */
+export function requireAuth(redirect = '/auth'): StoredUser {
   if (!isAuthenticated()) {
-    window.location.href = redirectTo;
-    throw new Error('No autenticado');
+    window.location.replace(redirect);
+    throw new Error('Unauthenticated');
   }
   return getUser()!;
 }
 
-export function redirectIfAuthenticated(redirectTo = '/dashboard'): void {
-  if (isAuthenticated()) window.location.href = redirectTo;
+export function redirectIfAuthenticated(to = '/dashboard'): void {
+  if (isAuthenticated()) window.location.replace(to);
+}
+
+export function getInitials(user: StoredUser): string {
+  return ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? user.firstName[1] ?? '')).toUpperCase();
+}
+
+export function getFullName(user: StoredUser): string {
+  return user.firstSurname ? `${user.firstName} ${user.firstSurname}` : user.firstName;
+}
+
+export function getTokenPayload(): Record<string, unknown> {
+  const t = getToken();
+  return t ? parseJwt(t) : {};
 }

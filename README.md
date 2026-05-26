@@ -25,7 +25,7 @@ Plataforma de razonamiento lógico de la Universidad Francisco de Paula Santande
 ## Estructura del proyecto
 
 ```
-razanapro/
+razonapro/
 ├── public/                 # Archivos estáticos (favicon, imágenes públicas)
 ├── src/
 │   ├── assets/             # Imágenes y SVGs del proyecto

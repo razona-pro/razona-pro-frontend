@@ -1,0 +1,97 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Sidebar from '../components/layout/Sidebar.astro';
+import Topbar from '../components/layout/Topbar.astro';
+
+interface Props {
+  title: string;
+  currentPage: string;
+}
+
+const { title, currentPage } = Astro.props;
+---
+
+<BaseLayout {title}>
+  <div id="sidebar-overlay" onclick="window.__closeSidebar && window.__closeSidebar()" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <Sidebar {currentPage} />
+
+    <div class="app-main">
+      <Topbar {currentPage} />
+      <main class="app-content" id="app-content">
+        <slot />
+      </main>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .app-shell {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--ui-bg-alt);
+  }
+
+  .app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .app-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ui-border-2) transparent;
+  }
+
+  #sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99;
+    backdrop-filter: blur(2px);
+  }
+
+  #sidebar-overlay.visible {
+    display: block;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (max-width: 1023px) {
+    .app-shell { overflow: visible; height: auto; min-height: 100vh; }
+    .app-main  { overflow: visible; height: auto; }
+    .app-content { overflow: visible; height: auto; padding-bottom: 3rem; }
+  }
+
+  @media (max-width: 640px) {
+    .app-content { padding: 0.875rem; }
+  }
+</style>
+
+<script>
+  function openSidebar() {
+    document.getElementById('rp-sidebar')?.classList.add('open');
+    document.getElementById('sidebar-overlay')?.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    document.getElementById('rp-sidebar')?.classList.remove('open');
+    document.getElementById('sidebar-overlay')?.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+  (window as any).__openSidebar  = openSidebar;
+  (window as any).__closeSidebar = closeSidebar;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+  });
+</script>

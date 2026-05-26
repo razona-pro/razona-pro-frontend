@@ -1,0 +1,173 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { TestDto } from '../../lib/api/types';
+import { getCompStyle } from '../../lib/utils';
+import { TEST_MODE_BG, TEST_MODE_COLOR, TEST_MODE_LABEL } from '../../lib/constants';
+
+interface Props {
+  test: TestDto;
+  bestScore?: number | null;
+}
+
+const { test, bestScore } = Astro.props;
+const comp    = getCompStyle(test.competenceId, test.competenceName ?? '');
+const durMin  = Math.floor(test.durationSeconds / 60);
+const modeColor = TEST_MODE_COLOR[test.testMode] ?? '#6B7280';
+const modeBg    = TEST_MODE_BG[test.testMode]    ?? '#F3F4F6';
+const modeLabel = TEST_MODE_LABEL[test.testMode] ?? test.testMode;
+---
+
+<div
+  class="test-card"
+  data-test-id={test.testId}
+  data-competence-id={test.competenceId}
+>
+  <div class="test-card-stripe" style={`background:linear-gradient(to right,${comp.color},${comp.color}88)`}></div>
+
+  <div class="test-card-body">
+    <div class="test-card-header">
+      <div class="comp-chip">
+        <div class="comp-chip-icon" style={`background:${comp.bg};color:${comp.color}`}>
+          {comp.short}
+        </div>
+        <div class="comp-info">
+          <span class="comp-name">{test.competenceName ?? test.competenceId}</span>
+          <span class="test-name">{test.testName}</span>
+        </div>
+      </div>
+      <span class="mode-badge" style={`background:${modeBg};color:${modeColor}`}>
+        {modeLabel}
+      </span>
+    </div>
+
+    {test.description && (
+      <p class="test-desc">{test.description}</p>
+    )}
+
+    <div class="test-meta">
+      <span class="meta-item">
+        <Icon name="tabler:clock" size={13} />
+        {durMin} min
+      </span>
+      <span class="meta-item">
+        <Icon name="tabler:help-circle" size={13} />
+        {test.questionsToPresent ?? '?'} preguntas
+      </span>
+    </div>
+
+    {bestScore != null ? (
+      <div class="score-badge" style={`background:${comp.bg};color:${comp.color}`}>
+        <Icon name="tabler:star" size={12} />
+        Mejor puntaje: <strong>{bestScore.toFixed(0)}/100</strong>
+      </div>
+    ) : (
+      <div class="no-score">
+        <Icon name="tabler:flag" size={12} />
+        Sin intentos aún
+      </div>
+    )}
+  </div>
+
+  <div class="test-card-footer">
+    <span class="footer-label" style={`color:${comp.color}`}>{modeLabel}</span>
+    <button
+      class="btn-start"
+      data-test-id={test.testId}
+      data-competence-id={test.competenceId}
+    >
+      <Icon name="tabler:player-play" size={13} />
+      {bestScore != null ? 'Reintentar' : 'Iniciar test'}
+    </button>
+  </div>
+</div>
+
+<style>
+  .test-card {
+    background: var(--ui-card);
+    border-radius: 16px; border: 1px solid var(--ui-border);
+    overflow: hidden; transition: all 0.2s ease;
+  }
+  .test-card:hover {
+    border-color: var(--ui-border-2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px var(--ui-shadow-md);
+  }
+  .test-card-stripe { height: 4px; }
+
+  .test-card-body { padding: 1.125rem 1.25rem; }
+
+  .test-card-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 0.625rem; margin-bottom: 0.75rem;
+  }
+  .comp-chip { display: flex; align-items: center; gap: 0.625rem; min-width: 0; }
+  .comp-chip-icon {
+    width: 40px; height: 40px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8125rem; font-weight: 900; flex-shrink: 0;
+  }
+  .comp-info { display: flex; flex-direction: column; min-width: 0; }
+  .comp-name {
+    font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--ui-text-3); margin-bottom: 2px;
+  }
+  .test-name {
+    font-size: 0.875rem; font-weight: 800; color: var(--ui-text-1);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px;
+  }
+
+  .mode-badge {
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 0.6875rem; font-weight: 700; flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .test-desc {
+    font-size: 0.8125rem; color: var(--ui-text-2); line-height: 1.6;
+    margin: 0 0 0.75rem;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .test-meta {
+    display: flex; gap: 0.875rem; flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.75rem; color: var(--ui-text-3); font-weight: 500;
+  }
+
+  .score-badge {
+    margin-top: 0.75rem; padding: 0.5rem 0.75rem;
+    border-radius: 9px; font-size: 0.6875rem; font-weight: 600;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .no-score {
+    margin-top: 0.75rem; padding: 0.5rem 0.75rem;
+    border-radius: 9px; border: 1px dashed var(--ui-border-2);
+    font-size: 0.6875rem; font-weight: 600; color: var(--ui-text-3);
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  .test-card-footer {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--ui-border);
+    background: var(--ui-surface);
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  }
+  .footer-label { font-size: 0.8125rem; font-weight: 700; }
+
+  .btn-start {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0.5625rem 1.125rem; border-radius: 10px;
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: white; font-size: 0.8125rem; font-weight: 700;
+    border: none; cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+    box-shadow: 0 3px 12px rgba(212,18,36,0.28);
+  }
+  .btn-start:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(212,18,36,0.38);
+  }
+  .btn-start:active { transform: translateY(0); }
+</style>

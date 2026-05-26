@@ -1,0 +1,11 @@
+export * from './types';
+export * from './client';
+export { authApi }        from './auth.api';
+export { programsApi }    from './programs.api';
+export { competencesApi } from './competences.api';
+export { studentsApi }    from './students.api';
+export { testsApi }       from './tests.api';
+export { triedsApi }      from './trieds.api';
+export { rankingsApi }    from './rankings.api';
+export { statsApi }       from './stats.api';
+export { aiTriedsApi }    from './ai-trieds.api';

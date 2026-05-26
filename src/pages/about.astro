@@ -1,15 +1,51 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
 ---
 
-<BaseLayout title="Acerca de · RazonaPro">
-  <Navbar />
-  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
-    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-      Acerca de
-    </h1>
-  </main>
-  <Footer />
+<BaseLayout title="Acerca de">
+  <div style="min-height:100dvh;display:flex;flex-direction:column">
+    <!-- Minimal navbar -->
+    <header style="background:white;border-bottom:1px solid #E8E8E8;padding:0 1.5rem">
+      <div style="max-width:75rem;margin:0 auto;height:60px;display:flex;align-items:center;justify-content:space-between">
+        <a href="/" style="display:flex;align-items:center;gap:0.5rem;text-decoration:none;font-weight:800;font-size:1rem;color:#1A1A1A;font-family:'Poppins',sans-serif">
+          <div style="width:30px;height:30px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:8px;display:flex;align-items:center;justify-content:center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 2L22 7L22 17L12 22L2 17L2 7Z" fill="rgba(255,255,255,0.2)"/><circle cx="12" cy="12" r="3" fill="white"/></svg>
+          </div>
+          Razona<span style="color:#D41224">Pro</span>
+        </a>
+        <a href="/auth" style="padding:7px 18px;border-radius:10px;background:#D41224;color:white;font-size:0.875rem;font-weight:700;text-decoration:none;font-family:'Poppins',sans-serif">
+          Acceder
+        </a>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:4rem 1.5rem;max-width:52rem;margin:0 auto;width:100%;font-family:'Poppins',sans-serif">
+      <h1 style="font-size:2.25rem;font-weight:900;color:#1A1A1A;margin:0 0 0.5rem;letter-spacing:-0.6px">Acerca de RazonaPro</h1>
+      <p style="font-size:1rem;color:#6B7280;margin:0 0 2.5rem;line-height:1.7">Plataforma inteligente de preparación para el Saber Pro — Universidad Francisco de Paula Santander Ocaña</p>
+
+      <div style="background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:18px;padding:2rem;color:white;margin-bottom:2rem">
+        <h2 style="font-size:1.25rem;font-weight:800;margin:0 0 0.75rem">Trabajo de Grado — Ingeniería de Sistemas</h2>
+        <p style="font-size:0.9375rem;opacity:0.85;margin:0;line-height:1.7">
+          Sistema inteligente para la gestión de simulacros Saber Pro con Transfer Learning e IA generativa. Desarrollado para optimizar la preparación académica de los estudiantes de la UFPSO.
+        </p>
+      </div>
+
+      {[
+        { title: 'Autores', content: 'Fabian Rojas · Código: 0192270 | Andres Gomez · Código: 0192250' },
+        { title: 'Director', content: 'Duván Andrey Márquez Pinzón' },
+        { title: 'Institución', content: 'Universidad Francisco de Paula Santander Ocaña — Facultad de Ingeniería' },
+        { title: 'Línea de investigación', content: 'Innovación Digital · Inteligencia Artificial Aplicada' },
+        { title: 'Stack tecnológico', content: 'Spring Boot 4.0.6 · Java 21 · PostgreSQL 18 · Astro v6 · TailwindCSS v4 · JWT · Bucket4j' },
+      ].map(item => (
+        <div style="margin-bottom:1.5rem;padding:1.25rem;background:#F9F9F9;border-radius:12px;border:1px solid #E8E8E8">
+          <h3 style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#D41224;margin:0 0 0.375rem">{item.title}</h3>
+          <p style="font-size:0.9375rem;color:#374151;margin:0;font-weight:500">{item.content}</p>
+        </div>
+      ))}
+    </main>
+
+    <footer style="text-align:center;padding:1.5rem;border-top:1px solid #E8E8E8;font-family:'Poppins',sans-serif">
+      <p style="font-size:0.75rem;color:#9CA3AF;margin:0">© {new Date().getFullYear()} RazonaPro · UFPSO · Todos los derechos reservados</p>
+    </footer>
+  </div>
 </BaseLayout>

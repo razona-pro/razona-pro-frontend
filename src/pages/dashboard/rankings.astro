@@ -1,0 +1,207 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Rankings" currentPage="rankings">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Rankings</span>
+    </div>
+    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Rankings</h1>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Tablas de posiciones de estudiantes UFPSO.</p>
+  </div>
+
+  <!-- Rankings tabs -->
+  <div id="ranking-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem"></div>
+
+  <!-- Leaderboard -->
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+    <div class="card-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <h2 id="ranking-name" class="card-title">Cargando...</h2>
+        <span id="ranking-meta" style="font-size:0.75rem;color:var(--ui-text-3)"></span>
+      </div>
+      <div id="leaderboard-list"></div>
+      <div id="load-more-wrap" style="margin-top:0.875rem;text-align:center">
+        <button id="load-more-btn" class="btn-load-more" style="display:none">Cargar más</button>
+      </div>
+    </div>
+
+    <!-- My position -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div id="my-position-card" class="card-section" style="display:none">
+        <h2 class="card-title" style="margin-bottom:0.875rem">Mi posición</h2>
+        <div style="text-align:center;padding:1rem">
+          <p id="my-pos-num" style="font-size:3rem;font-weight:900;color:var(--brand);margin:0;letter-spacing:-2px">#—</p>
+          <p id="my-pos-name" style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1);margin:4px 0 2px"></p>
+          <p id="my-pos-score" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0"></p>
+          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:2px 0 0">puntos totales</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:0.75rem">
+          <div style="background:var(--ui-surface);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--ui-border)">
+            <p id="my-trieds-count" style="font-size:1.125rem;font-weight:900;color:var(--ui-text-1);margin:0">0</p>
+            <p style="font-size:0.625rem;color:var(--ui-text-3);margin:2px 0 0;text-transform:uppercase;letter-spacing:0.4px">Tests</p>
+          </div>
+          <div style="background:var(--ui-surface);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--ui-border)">
+            <p id="my-trieds-score" style="font-size:1.125rem;font-weight:900;color:var(--brand);margin:0">0</p>
+            <p style="font-size:0.625rem;color:var(--ui-text-3);margin:2px 0 0;text-transform:uppercase;letter-spacing:0.4px">Puntaje</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#111;border-radius:16px;padding:1.125rem;text-align:center">
+        <p style="font-size:0.875rem;font-weight:800;color:white;margin:0 0 0.5rem">⚡ Sube en el ranking</p>
+        <p style="font-size:0.75rem;color:rgba(255,255,255,0.45);margin:0 0 0.875rem;line-height:1.55">Completa más tests y mejora tu posición.</p>
+        <a href="/tests" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.625rem;background:var(--brand);color:white;border-radius:10px;font-size:0.8125rem;font-weight:700;text-decoration:none">
+          Ver tests →
+        </a>
+      </div>
+    </div>
+  </div>
+</AppLayout>
+
+<style>
+  .card-section { background: var(--ui-card); border-radius: 16px; padding: 1.25rem 1.375rem; border: 1px solid var(--ui-border); }
+  .card-title   { font-size: 0.9375rem; font-weight: 800; color: var(--ui-text-1); margin: 0; }
+
+  .ranking-tab {
+    padding: 7px 18px; border-radius: 20px; font-size: 0.875rem; font-weight: 700;
+    border: 1.5px solid var(--ui-border); background: var(--ui-card); color: var(--ui-text-2);
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .ranking-tab.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+  .lb-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 11px;
+    transition: background 0.15s; margin-bottom: 3px;
+  }
+  .lb-row:hover { background: var(--ui-surface); }
+  .lb-row.is-me { background: rgba(212,18,36,0.06); border: 1px solid rgba(212,18,36,0.2); }
+
+  .btn-load-more {
+    padding: 8px 20px; border-radius: 10px; border: 1.5px solid var(--ui-border);
+    background: transparent; color: var(--ui-text-2); font-family: inherit; font-size: 0.875rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-load-more:hover { border-color: var(--brand); color: var(--brand); }
+
+  @media (max-width: 768px) {
+    .app-content > div:last-child > div { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+<script>
+  import { requireAuth, getUser } from '../../lib/auth';
+  import { rankingsApi } from '../../lib/api/rankings.api';
+  import type { RankingStudentDto } from '../../lib/api/types';
+  import { toast } from '../../lib/toast';
+
+  try { requireAuth(); } catch { throw new Error('redirect'); }
+  const currentUser = getUser();
+
+  let currentRankingId = '';
+  let page = 0;
+  const PAGE_SIZE = 20;
+  const medals = ['🥇', '🥈', '🥉'];
+
+  function renderLeaderboard(items: RankingStudentDto[], append = false) {
+    const list = document.getElementById('leaderboard-list')!;
+    if (!append) list.innerHTML = '';
+
+    const offset = append ? list.children.length : 0;
+
+    items.forEach((entry, i) => {
+      const pos   = offset + i + 1;
+      const isMe  = currentUser?.id === entry.studentId;
+      const div   = document.createElement('div');
+      div.className = `lb-row${isMe ? ' is-me' : ''}`;
+      div.innerHTML = `
+        <span style="font-size:${pos <= 3 ? '1.125rem' : '0.875rem'};min-width:28px;text-align:center;font-weight:700;color:${pos <= 3 ? 'inherit' : 'var(--ui-text-3)'}">${pos <= 3 ? medals[pos - 1] : pos}</span>
+        <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:0.6875rem;flex-shrink:0">${(entry.studentName ?? entry.studentId).slice(0, 2).toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <p style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${entry.studentName ?? entry.studentId}${isMe ? ' (Tú)' : ''}</p>
+          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:1px 0 0">Prog. ${entry.programId} · ${entry.triedsCount} tests</p>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <p style="font-size:1rem;font-weight:900;color:var(--brand);margin:0">${Number(entry.totalScore).toFixed(1)}</p>
+          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">pts</p>
+        </div>`;
+      list.appendChild(div);
+
+      // My position card
+      if (isMe) {
+        const card = document.getElementById('my-position-card')!;
+        card.style.display = 'block';
+        document.getElementById('my-pos-num')!.textContent   = `#${pos}`;
+        document.getElementById('my-pos-name')!.textContent  = entry.studentName ?? entry.studentId;
+        document.getElementById('my-pos-score')!.textContent = Number(entry.totalScore).toFixed(1);
+        document.getElementById('my-trieds-count')!.textContent = String(entry.triedsCount);
+        document.getElementById('my-trieds-score')!.textContent = Number(entry.triedsScore).toFixed(1);
+      }
+    });
+  }
+
+  async function loadRanking(rankingId: string, append = false) {
+    try {
+      const res = await rankingsApi.getLeaderboard(rankingId, append ? page : 0, PAGE_SIZE);
+      if (!res.data) return;
+
+      if (!append) page = 0;
+      renderLeaderboard(res.data.content, append);
+
+      const loadMoreBtn = document.getElementById('load-more-btn') as HTMLButtonElement;
+      if (!res.data.last) {
+        loadMoreBtn.style.display = 'inline-block';
+        page++;
+      } else {
+        loadMoreBtn.style.display = 'none';
+      }
+
+      const metaEl = document.getElementById('ranking-meta');
+      if (metaEl) metaEl.textContent = `${res.data.totalElements} participante(s)`;
+
+    } catch (err: any) {
+      toast.error('Error al cargar el ranking', { description: err?.message });
+    }
+  }
+
+  document.getElementById('load-more-btn')?.addEventListener('click', () => {
+    loadRanking(currentRankingId, true);
+  });
+
+  // Init
+  rankingsApi.findAll(true).then(res => {
+    const rankings = res.data ?? [];
+    const tabsEl   = document.getElementById('ranking-tabs')!;
+    const nameEl   = document.getElementById('ranking-name')!;
+
+    if (rankings.length === 0) {
+      tabsEl.innerHTML = '<p style="color:var(--ui-text-3);font-size:0.875rem">No hay rankings disponibles.</p>';
+      return;
+    }
+
+    rankings.forEach((r, i) => {
+      const btn = document.createElement('button');
+      btn.className = `ranking-tab${i === 0 ? ' active' : ''}`;
+      btn.textContent = r.rankingName;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ranking-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentRankingId = r.rankingId;
+        nameEl.textContent = r.rankingName;
+        page = 0;
+        document.getElementById('leaderboard-list')!.innerHTML = '';
+        document.getElementById('my-position-card')!.style.display = 'none';
+        loadRanking(r.rankingId);
+      });
+      tabsEl.appendChild(btn);
+    });
+
+    currentRankingId = rankings[0].rankingId;
+    nameEl.textContent = rankings[0].rankingName;
+    loadRanking(currentRankingId);
+  }).catch(() => {
+    toast.error('Error al cargar rankings');
+  });
+</script>

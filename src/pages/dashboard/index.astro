@@ -1,0 +1,356 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import StatCard from '../../components/ui/StatCard.astro';
+import CompetenceBar from '../../components/ui/CompetenceBar.astro';
+import TriedRow from '../../components/ui/TriedRow.astro';
+import RankingRow from '../../components/ui/RankingRow.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+---
+
+<AppLayout title="Dashboard" currentPage="dashboard">
+  <!-- Welcome header -->
+  <div class="dashboard-header" style="margin-bottom:1.25rem">
+    <h1 id="welcome-title" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px;">Hogar</h1>
+    <p id="welcome-sub" style="font-size:0.875rem;color:var(--ui-text-2);margin:0;">Cargando...</p>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="qa-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;overflow-x:auto;padding-bottom:4px">
+    <a href="/tests" class="qa-btn qa-primary"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg> Tests disponibles</a>
+    <a href="/ai-practice" class="qa-btn"><svg width="14" height="14" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12l2 2 4-4"/></svg> Práctica con IA</a>
+    <a href="/dashboard/rankings" class="qa-btn"><svg width="14" height="14" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M8 21H4a2 2 0 01-2-2v-4a2 2 0 012-2h4M14 21h4a2 2 0 002-2V5a2 2 0 00-2-2h-4M10 7h4v14h-4z"/></svg> Rankings</a>
+    <a href="/dashboard/history" class="qa-btn"><svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 0 .5-4.5"/><polyline points="3 3 3 7 7 7"/></svg> Mi historial</a>
+  </div>
+
+  <!-- Stats -->
+  <div id="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem">
+    <StatCard id="stat-tests"  label="Tests realizados"  value="—" sub="simulacros"       icon="tabler:clipboard-check" color="#D41224" bg="#FEE2E2" />
+    <StatCard id="stat-avg"    label="Promedio global"   value="—" sub="puntos / 100"     icon="tabler:chart-line"      color="#2563EB" bg="#DBEAFE" />
+    <StatCard id="stat-rank"   label="Posición ranking"  value="—" sub="posición actual"  icon="tabler:trophy"          color="#D97706" bg="#FEF3C7" />
+    <StatCard id="stat-streak" label="Racha activa"      value="—" sub="días consecutivos" icon="tabler:flame"           color="#059669" bg="#D1FAE5" />
+  </div>
+
+  <!-- Main grid -->
+  <div id="main-grid" style="display:grid;grid-template-columns:1fr 300px;gap:16px">
+
+    <!-- Left column -->
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+
+      <!-- Competences -->
+      <div class="card-section">
+        <div class="card-header">
+          <h2 class="card-title">Competencias Saber Pro</h2>
+          <a href="/tests" class="card-link">Practicar →</a>
+        </div>
+        <div id="comp-list">
+          <div style="color:var(--ui-text-3);font-size:0.875rem;padding:1rem 0">Cargando competencias...</div>
+        </div>
+      </div>
+
+      <!-- Recent trieds -->
+      <div class="card-section">
+        <div class="card-header">
+          <h2 class="card-title">Historial de tests</h2>
+          <a href="/dashboard/history" class="card-link">Ver todo →</a>
+        </div>
+
+        <!-- Last test highlight -->
+        <div id="last-test-card" style="background:linear-gradient(135deg,#111,#1E1E1E);border-radius:12px;padding:1rem 1.125rem;margin-bottom:0.875rem;display:flex;align-items:center;gap:0.875rem;flex-wrap:wrap">
+          <div style="width:44px;height:44px;background:rgba(212,18,36,0.18);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="20" height="20" fill="none" stroke="#D41224" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <div style="flex:1;min-width:100px">
+            <p style="color:rgba(255,255,255,0.45);font-size:0.625rem;margin:0 0 2px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700">Último test</p>
+            <p id="lt-name"  style="color:white;font-weight:800;font-size:0.9375rem;margin:0 0 2px">Sin intentos</p>
+            <p id="lt-meta"  style="color:rgba(255,255,255,0.38);font-size:0.75rem;margin:0">Comienza tu primer simulacro</p>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <p id="lt-score" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;letter-spacing:-1px">—</p>
+            <p style="color:rgba(255,255,255,0.28);font-size:0.6875rem;margin:0">/ 100 pts</p>
+          </div>
+        </div>
+
+        <div id="recent-list"></div>
+      </div>
+
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- Rankings -->
+      <div class="card-section">
+        <div class="card-header">
+          <h2 class="card-title">Rankings</h2>
+          <a href="/dashboard/rankings" class="card-link">Ver todo →</a>
+        </div>
+        <div id="ranking-list" style="margin-bottom:0.75rem"></div>
+        <div id="my-rank-card" style="display:none;margin-top:0.625rem;padding:0.625rem 0.75rem;background:#FFF1F2;border-radius:10px;border:1.5px solid #FECACA;display:flex;align-items:center;gap:0.625rem">
+          <span style="font-size:1.125rem;font-weight:900;color:#D41224;min-width:28px">#<span id="my-rank-num">—</span></span>
+          <div style="flex:1">
+            <p id="my-rank-name"  style="font-size:0.8125rem;font-weight:700;color:#991B1B;margin:0"></p>
+            <p style="font-size:0.6875rem;color:#B91C1C;margin:0;opacity:0.6">Tu posición actual</p>
+          </div>
+          <span id="my-rank-score" style="font-size:1rem;font-weight:900;color:#D41224"></span>
+        </div>
+      </div>
+
+      <!-- CTA card -->
+      <div style="background:#111111;border-radius:16px;padding:1.125rem 1.25rem">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:0.5rem">
+          <svg width="16" height="16" fill="#D41224" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <p style="font-size:0.875rem;font-weight:800;color:white;margin:0">¿Listo para practicar?</p>
+        </div>
+        <p style="font-size:0.75rem;color:rgba(255,255,255,0.42);margin:0 0 0.875rem;line-height:1.55">Toma un simulacro y mejora tu posición.</p>
+        <a href="/tests" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.6875rem 1rem;background:#D41224;color:white;border-radius:10px;font-size:0.8125rem;font-weight:800;text-decoration:none;transition:background 0.2s" onmouseover="this.style.background='#9B1F24'" onmouseout="this.style.background='#D41224'">
+          Ver tests disponibles →
+        </a>
+      </div>
+
+    </div>
+  </div>
+</AppLayout>
+
+<style>
+  .qa-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0.5625rem 1rem; border-radius: 10px;
+    font-size: 0.8125rem; font-weight: 700; text-decoration: none;
+    background: var(--ui-card); border: 1.5px solid var(--ui-border); color: var(--ui-text-1);
+    white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+  }
+  .qa-btn:hover { border-color: var(--brand); color: var(--brand); }
+  .qa-btn.qa-primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: white; border: none; box-shadow: 0 4px 14px rgba(212,18,36,0.28);
+  }
+  .qa-btn.qa-primary:hover { box-shadow: 0 6px 20px rgba(212,18,36,0.4); transform: translateY(-1px); }
+
+  .card-section {
+    background: var(--ui-card); border-radius: 16px;
+    padding: 1.25rem 1.375rem; border: 1px solid var(--ui-border);
+  }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .card-title { font-size: 0.9375rem; font-weight: 800; color: var(--ui-text-1); margin: 0; }
+  .card-link  { font-size: 0.8125rem; color: var(--brand); font-weight: 700; text-decoration: none; }
+  .card-link:hover { opacity: 0.75; }
+
+  @media (max-width: 1023px) {
+    #stats-grid  { grid-template-columns: repeat(2,1fr) !important; }
+    #main-grid   { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 640px) {
+    #stats-grid  { grid-template-columns: repeat(2,1fr) !important; gap: 8px !important; }
+  }
+  @media (max-width: 360px) {
+    #stats-grid  { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+<script>
+  import { requireAuth, isAdmin, getUser, updateStoredUser } from '../../lib/auth';
+  import { studentsApi } from '../../lib/api/students.api';
+  import { triedsApi }   from '../../lib/api/trieds.api';
+  import { competencesApi } from '../../lib/api/competences.api';
+  import { rankingsApi } from '../../lib/api/rankings.api';
+  import { getCompStyle, fmtDate, animCount, scoreColor } from '../../lib/utils';
+  import { toast } from '../../lib/toast';
+
+  let user;
+  try { user = requireAuth(); } catch { throw new Error('redirect'); }
+
+  // Welcome
+  const h = new Date().getHours();
+  const greet = h < 12 ? '¡Buenos días' : h < 18 ? '¡Buenas tardes' : '¡Buenas noches';
+  const welcomeTitle = document.getElementById('welcome-title');
+  const welcomeSub   = document.getElementById('welcome-sub');
+  if (welcomeTitle) welcomeTitle.textContent = 'Hogar';
+  if (welcomeSub)   welcomeSub.textContent   = `${greet}, ${user.firstName}! Continúa preparándote para el Saber Pro.`;
+
+  // Load all data
+  Promise.allSettled([
+    studentsApi.me(),
+    triedsApi.findMy(0, 200),
+    competencesApi.findAll(true),
+    rankingsApi.findAll(true),
+  ]).then(([profileR, triedsR, compsR, rankingsR]) => {
+
+    // Profile
+    if (profileR.status === 'fulfilled' && profileR.value.data) {
+      const p = profileR.value.data;
+      updateStoredUser({ firstName: p.firstName, firstSurname: p.firstSurname, email: p.email });
+      if (welcomeSub) welcomeSub.textContent = `${greet}, ${p.firstName}! Continúa preparándote para el Saber Pro.`;
+    }
+
+    // Trieds
+    if (triedsR.status === 'fulfilled' && triedsR.value.data) {
+      const trieds   = triedsR.value.data.content;
+      const finished = trieds.filter(t => t.status === 'FINISHED' && t.score != null);
+      const avgScore = finished.length
+        ? finished.reduce((s, t) => s + (t.score ?? 0), 0) / finished.length : 0;
+
+      // Stats
+      const statTests  = document.getElementById('stat-tests');
+      const statAvg    = document.getElementById('stat-avg');
+      if (statTests) animCount(statTests.querySelector('[id]') as HTMLElement ?? statTests, finished.length);
+      if (statAvg)   { (statAvg.querySelector('[id]') as HTMLElement ?? statAvg).textContent = avgScore.toFixed(1); }
+
+      // Update stat values via DOM
+      const updateStatVal = (cardId: string, val: string) => {
+        const card = document.getElementById(cardId);
+        if (card) {
+          const valEl = card.querySelector('.stat-value') as HTMLElement | null;
+          if (valEl) valEl.textContent = val;
+        }
+      };
+      updateStatVal('stat-tests', String(finished.length));
+      updateStatVal('stat-avg',   avgScore.toFixed(1));
+
+      // Last test
+      const sorted = [...finished].sort((a, b) =>
+        new Date(b.finishedAt ?? b.attemptTimestamp).getTime() - new Date(a.finishedAt ?? a.attemptTimestamp).getTime()
+      );
+
+      if (sorted.length > 0) {
+        const lt = sorted[0];
+        const ltName  = document.getElementById('lt-name');
+        const ltMeta  = document.getElementById('lt-meta');
+        const ltScore = document.getElementById('lt-score');
+        if (ltName)  ltName.textContent  = lt.testName ?? lt.testId;
+        if (ltMeta)  ltMeta.textContent  = `${fmtDate(lt.finishedAt ?? lt.attemptTimestamp)} · ${lt.totalQuestions} preguntas`;
+        if (ltScore) { ltScore.textContent = lt.score?.toFixed(0) ?? '—'; ltScore.style.color = scoreColor(lt.score); }
+      }
+
+      // Recent list
+      const recentList = document.getElementById('recent-list');
+      if (recentList) {
+        const recent = sorted.slice(1, 5);
+        if (recent.length > 0) {
+          recent.forEach(t => {
+            const s   = getCompStyle(t.competenceId, t.testName ?? '');
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--ui-border);background:var(--ui-surface);margin-bottom:6px;cursor:pointer;transition:all 0.15s';
+            div.onclick = () => window.location.href = '/dashboard/history';
+            div.innerHTML = `
+              <div style="width:34px;height:34px;border-radius:8px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <span style="font-size:10px;font-weight:900;color:${s.color}">${s.short}</span>
+              </div>
+              <div style="flex:1;min-width:0">
+                <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.testName ?? t.testId}</p>
+                <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">${fmtDate(t.finishedAt ?? t.attemptTimestamp)} · ${t.totalQuestions} preg.</p>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <p style="font-size:1rem;font-weight:900;color:${scoreColor(t.score)};margin:0">${t.score?.toFixed(0) ?? '—'}</p>
+                <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">/100</p>
+              </div>`;
+            recentList.appendChild(div);
+          });
+        } else {
+          recentList.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1rem 0">Sin intentos previos</p>';
+        }
+      }
+
+      // Competences bars
+      if (compsR.status === 'fulfilled' && compsR.value.data) {
+        const byComp: Record<string, number[]> = {};
+        finished.forEach(t => {
+          if (!byComp[t.competenceId]) byComp[t.competenceId] = [];
+          if (t.score != null) byComp[t.competenceId].push(t.score);
+        });
+
+        const compList = document.getElementById('comp-list');
+        if (compList) {
+          compList.innerHTML = '';
+          compsR.value.data.forEach((c, i) => {
+            const scores = byComp[c.competenceId] ?? [];
+            const score  = scores.length ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
+            const s      = getCompStyle(c.competenceId, c.competenceName);
+
+            const div = document.createElement('div');
+            div.style.cssText = 'margin-bottom:1rem;cursor:pointer';
+            div.onclick = () => window.location.href = `/tests?c=${s.key}`;
+            div.innerHTML = `
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:8px">
+                <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                  <div style="width:27px;height:27px;border-radius:7px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <span style="font-size:9px;font-weight:900;color:${s.color}">${s.short}</span>
+                  </div>
+                  <span style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1)">${c.competenceName}</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:3px;flex-shrink:0">
+                  <span style="font-size:1rem;font-weight:900;color:${s.color}">${score > 0 ? score : '—'}</span>
+                  <span style="font-size:0.6875rem;color:var(--ui-text-3)">/100</span>
+                </div>
+              </div>
+              <div style="height:6px;background:var(--ui-surface);border-radius:3px;overflow:hidden;margin-bottom:3px">
+                <div id="cbar-${i}" style="height:100%;border-radius:3px;transition:width 1.3s cubic-bezier(0.4,0,0.2,1);width:0%;background:${s.color}"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:0.6875rem;color:var(--ui-text-3)">${scores.length} intentos</span>
+                <span style="font-size:0.6875rem;color:${s.color};font-weight:600">Practicar →</span>
+              </div>`;
+            compList.appendChild(div);
+            setTimeout(() => {
+              const bar = document.getElementById(`cbar-${i}`);
+              if (bar) bar.style.width = `${score}%`;
+            }, 350 + i * 80);
+          });
+        }
+      }
+    }
+
+    // Rankings
+    if (rankingsR.status === 'fulfilled' && rankingsR.value.data && rankingsR.value.data.length > 0) {
+      const ranking = rankingsR.value.data.find(r => r.periodType === 'GENERAL') ?? rankingsR.value.data[0];
+      rankingsApi.getLeaderboard(ranking.rankingId, 0, 10).then(lbRes => {
+        if (!lbRes.data) return;
+        const items = lbRes.data.content;
+        const rankList = document.getElementById('ranking-list');
+        const medals = ['🥇', '🥈', '🥉'];
+        const currentUser = getUser();
+
+        if (rankList) {
+          items.slice(0, 5).forEach((r, i) => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;transition:background 0.15s';
+            div.onmouseenter = () => div.style.background = 'var(--ui-surface)';
+            div.onmouseleave = () => div.style.background = '';
+            div.innerHTML = `
+              <span style="font-size:0.9375rem;min-width:26px;text-align:center">${medals[i] ?? (i + 1)}</span>
+              <div style="flex:1;min-width:0">
+                <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.studentName ?? r.studentId}</p>
+                <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">Prog. ${r.programId}</p>
+              </div>
+              <span style="font-size:0.9375rem;font-weight:900;color:var(--brand);flex-shrink:0">${Number(r.totalScore).toFixed(1)}</span>`;
+            rankList.appendChild(div);
+          });
+        }
+
+        // My position
+        const myIdx = currentUser ? items.findIndex(r => r.studentId === currentUser.id) : -1;
+        const myRankCard = document.getElementById('my-rank-card');
+        if (myRankCard && myIdx >= 0) {
+          myRankCard.style.display = 'flex';
+          const me = items[myIdx];
+          const numEl   = document.getElementById('my-rank-num');
+          const nameEl  = document.getElementById('my-rank-name');
+          const scoreEl = document.getElementById('my-rank-score');
+          if (numEl)   numEl.textContent   = String(myIdx + 1);
+          if (nameEl)  nameEl.textContent  = me.studentName ?? currentUser!.id;
+          if (scoreEl) scoreEl.textContent = Number(me.totalScore).toFixed(1);
+
+          // Update stat
+          const rankStatCard = document.getElementById('stat-rank');
+          if (rankStatCard) {
+            const valEl = rankStatCard.querySelector('p:nth-child(2)') as HTMLElement | null;
+            if (valEl) valEl.textContent = `#${myIdx + 1}`;
+          }
+        }
+      }).catch(() => {});
+    }
+
+  }).catch((err) => {
+    console.error('Dashboard error:', err);
+    toast.error('Error al cargar datos', { description: 'Revisa tu conexión e intenta de nuevo.' });
+  });
+</script>

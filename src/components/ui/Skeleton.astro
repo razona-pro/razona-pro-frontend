@@ -1,0 +1,29 @@
+---
+interface Props {
+  height?: string;
+  width?: string;
+  radius?: string;
+  count?: number;
+}
+
+const { height = '18px', width = '100%', radius = '8px', count = 1 } = Astro.props;
+---
+
+{Array.from({ length: count }).map((_, i) => (
+  <div
+    class="skeleton"
+    style={`height:${height};width:${width};border-radius:${radius};margin-bottom:8px`}
+  ></div>
+))}
+
+<style>
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--ui-surface) 25%, var(--ui-border) 50%, var(--ui-surface) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite;
+  }
+</style>

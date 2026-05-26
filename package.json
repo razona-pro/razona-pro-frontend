@@ -1,5 +1,5 @@
 {
-  "name": "razanapro",
+  "name": "razonapro",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -12,8 +12,13 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.109",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.3.1",
+    "astro-icon": "^1.1.5",
     "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@iconify-json/tabler": "^1.2.35"
   }
 }

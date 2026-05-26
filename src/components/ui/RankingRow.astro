@@ -1,0 +1,41 @@
+---
+import type { RankingStudentDto } from '../../lib/api/types';
+
+interface Props {
+  entry: RankingStudentDto;
+  position: number;
+  isMe?: boolean;
+}
+
+const { entry, position, isMe = false } = Astro.props;
+const medals = ['🥇', '🥈', '🥉'];
+---
+
+<div class:list={['ranking-row', isMe && 'is-me']}>
+  <span class="rank-pos">
+    {position <= 3 ? medals[position - 1] : position}
+  </span>
+  <div class="rank-info">
+    <p class="rank-name">{entry.studentName ?? entry.studentId}</p>
+    <p class="rank-meta">Programa {entry.programId}</p>
+  </div>
+  <span class="rank-score">{Number(entry.totalScore).toFixed(1)}</span>
+</div>
+
+<style>
+  .ranking-row {
+    display: flex; align-items: center; gap: 0.625rem;
+    padding: 0.5rem 0.625rem; border-radius: 10px; transition: background 0.15s;
+  }
+  .ranking-row:hover { background: var(--ui-surface); }
+  .ranking-row.is-me { background: rgba(212,18,36,0.06); border: 1px solid rgba(212,18,36,0.2); }
+
+  .rank-pos { font-size: 0.9375rem; min-width: 26px; text-align: center; }
+  .rank-info { flex: 1; min-width: 0; }
+  .rank-name {
+    font-size: 0.8125rem; font-weight: 700; color: var(--ui-text-1);
+    margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .rank-meta { font-size: 0.6875rem; color: var(--ui-text-3); margin: 1px 0 0; }
+  .rank-score { font-size: 0.9375rem; font-weight: 900; color: var(--brand); flex-shrink: 0; }
+</style>

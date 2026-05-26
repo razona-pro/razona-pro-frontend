@@ -1,0 +1,87 @@
+---
+import { getCompStyle } from '../../lib/utils';
+
+interface Props {
+  competenceId: string;
+  competenceName: string;
+  score: number;
+  attempts: number;
+  index?: number;
+}
+
+const { competenceId, competenceName, score, attempts, index = 0 } = Astro.props;
+const s = getCompStyle(competenceId, competenceName);
+---
+
+<div class="comp-bar" onclick={`window.location.href='/tests?c=${s.key}'`} style="cursor:pointer">
+  <div class="comp-bar-header">
+    <div class="comp-bar-left">
+      <div class="comp-icon" style={`background:${s.bg};color:${s.color}`}>{s.short}</div>
+      <span class="comp-name">{competenceName}</span>
+    </div>
+    <div class="comp-bar-right">
+      <span class="comp-score" style={`color:${s.color}`}>{score > 0 ? score : '—'}</span>
+      <span class="comp-score-max">/100</span>
+    </div>
+  </div>
+  <div class="bar-track">
+    <div
+      class="bar-fill"
+      style={`background:${s.color};width:0%`}
+      data-target={score}
+      data-delay={index * 80}
+    ></div>
+  </div>
+  <span class="comp-attempts">{attempts} {attempts === 1 ? 'intento' : 'intentos'} · Practicar →</span>
+</div>
+
+<style>
+  .comp-bar { margin-bottom: 1rem; }
+
+  .comp-bar-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 5px; gap: 0.5rem;
+  }
+  .comp-bar-left { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+  .comp-icon {
+    width: 27px; height: 27px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5625rem; font-weight: 900; flex-shrink: 0;
+  }
+  .comp-name {
+    font-size: 0.8125rem; font-weight: 600; color: var(--ui-text-1);
+  }
+  .comp-bar-right { display: flex; align-items: baseline; gap: 3px; flex-shrink: 0; }
+  .comp-score { font-size: 1rem; font-weight: 900; }
+  .comp-score-max { font-size: 0.6875rem; color: var(--ui-text-3); }
+
+  .bar-track {
+    height: 6px; background: var(--ui-surface);
+    border-radius: 3px; overflow: hidden; margin-bottom: 3px;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .comp-attempts {
+    font-size: 0.6875rem; color: var(--ui-text-3); font-weight: 500;
+  }
+</style>
+
+<script>
+  // Animate bars on intersection
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const fill = entry.target.querySelector<HTMLElement>('.bar-fill');
+      if (!fill) return;
+      const target = Number(fill.dataset.target ?? 0);
+      const delay  = Number(fill.dataset.delay ?? 0);
+      setTimeout(() => { fill.style.width = `${target}%`; }, delay + 300);
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.comp-bar').forEach(el => observer.observe(el));
+</script>

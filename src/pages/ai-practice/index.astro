@@ -1,0 +1,308 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Práctica con IA" currentPage="ai-practice">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Práctica con IA</span>
+    </div>
+    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Práctica con IA</h1>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Sesiones de práctica adaptativas con inteligencia artificial.</p>
+  </div>
+
+  <!-- IA Status Banner -->
+  <div id="ai-banner" style="background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:16px;padding:1.5rem 1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden">
+    <div style="position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;background:rgba(99,102,241,0.15)"></div>
+    <div style="position:relative;display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+      <div style="width:52px;height:52px;border-radius:14px;background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="26" height="26" fill="none" stroke="#818CF8" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <h2 style="color:white;font-weight:800;font-size:1.0625rem;margin:0">Módulo de IA en desarrollo</h2>
+          <span style="padding:2px 8px;border-radius:12px;background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:#FCD34D;font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Beta</span>
+        </div>
+        <p style="color:rgba(255,255,255,0.6);font-size:0.875rem;margin:0 0 0.875rem;line-height:1.65">
+          El módulo de generación de preguntas con Transfer Learning está siendo entrenado. Mientras tanto, puedes registrar sesiones de práctica manual y llevar tu historial.
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:rgba(255,255,255,0.5)">
+            <span style="width:6px;height:6px;border-radius:50%;background:#F59E0B"></span>
+            Generación AI: Pendiente
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:rgba(255,255,255,0.5)">
+            <span style="width:6px;height:6px;border-radius:50%;background:#22C55E"></span>
+            Registro de sesiones: Activo
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start session form + history -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+    <!-- New session form -->
+    <div class="ai-card">
+      <h2 class="ai-card-title">Nueva sesión de práctica</h2>
+      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.65">Selecciona una competencia, registra cuántas preguntas practicaste y guarda tu sesión.</p>
+
+      <div id="session-msg" class="session-msg" style="display:none"></div>
+
+      <div class="field-grp">
+        <label class="field-lbl">Competencia</label>
+        <select id="ai-comp" class="field-sel">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+      <div class="field-grp">
+        <label class="field-lbl">Número de preguntas</label>
+        <input id="ai-qcount" type="number" min="1" max="20" value="10" class="field-inp" />
+      </div>
+      <div class="field-grp">
+        <label class="field-lbl">Descripción (opcional)</label>
+        <input id="ai-desc" type="text" placeholder="Ej: Repaso de textos argumentativos" class="field-inp" maxlength="200" />
+      </div>
+
+      <button id="start-ai-btn" class="ai-start-btn">
+        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Iniciar sesión
+      </button>
+
+      <!-- Active session indicator -->
+      <div id="active-session" style="display:none;margin-top:0.875rem;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:1rem">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.625rem">
+          <span style="width:8px;height:8px;border-radius:50%;background:#818CF8;animation:pulse 2s ease-in-out infinite"></span>
+          <span style="font-size:0.875rem;font-weight:700;color:#818CF8">Sesión en progreso</span>
+          <span id="active-timer" style="margin-left:auto;font-size:0.875rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ui-text-1)">00:00</span>
+        </div>
+        <p id="active-desc" style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 0.75rem"></p>
+        <div style="display:flex;gap:8px">
+          <button id="finish-ai-btn" style="flex:1;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;border:none;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer">
+            Finalizar sesión
+          </button>
+          <button id="abandon-ai-btn" style="padding:0.5625rem 0.875rem;border-radius:9px;border:1.5px solid #FCA5A5;background:transparent;color:#DC2626;font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer">
+            Abandonar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="ai-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <h2 class="ai-card-title">Historial de sesiones</h2>
+        <span id="ai-count" style="font-size:0.75rem;color:var(--ui-text-3)">0 sesiones</span>
+      </div>
+      <div id="ai-history-list"></div>
+    </div>
+
+  </div>
+</AppLayout>
+
+<style>
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+
+  .ai-card { background: var(--ui-card); border-radius: 16px; padding: 1.375rem; border: 1px solid var(--ui-border); }
+  .ai-card-title { font-size: 0.9375rem; font-weight: 800; color: var(--ui-text-1); margin: 0 0 0.5rem; }
+
+  .field-grp { margin-bottom: 0.875rem; }
+  .field-lbl { display: block; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ui-text-3); margin-bottom: 4px; }
+  .field-sel, .field-inp {
+    width: 100%; padding: 8px 12px; background: var(--ui-surface); border: 1.5px solid var(--ui-border);
+    border-radius: 9px; font-family: inherit; font-size: 0.875rem; color: var(--ui-text-1);
+    outline: none; transition: border-color 0.2s; appearance: none;
+  }
+  .field-sel:focus, .field-inp:focus { border-color: #818CF8; box-shadow: 0 0 0 3px rgba(129,140,248,0.12); }
+
+  .session-msg { padding: 8px 12px; border-radius: 8px; font-size: 0.8125rem; margin-bottom: 0.875rem; }
+  .session-msg.error   { background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C; }
+  .session-msg.success { background: #F0FDF4; border: 1px solid #BBF7D0; color: #15803D; }
+
+  .ai-start-btn {
+    width: 100%; padding: 0.6875rem; border-radius: 10px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5); color: white;
+    border: none; font-family: inherit; font-size: 0.875rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    box-shadow: 0 3px 14px rgba(99,102,241,0.35); transition: all 0.2s;
+  }
+  .ai-start-btn:hover { box-shadow: 0 6px 22px rgba(99,102,241,0.5); transform: translateY(-1px); }
+  .ai-start-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .ai-hist-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 11px; border: 1px solid var(--ui-border); background: var(--ui-surface);
+    margin-bottom: 6px; transition: all 0.15s;
+  }
+  .ai-hist-item:hover { border-color: var(--ui-border-2); }
+
+  @media (max-width: 768px) {
+    .app-content > div:last-child > div { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+<script>
+  import { requireAuth } from '../../lib/auth';
+  import { competencesApi } from '../../lib/api/competences.api';
+  import { aiTriedsApi }    from '../../lib/api/ai-trieds.api';
+  import type { AiTriedDto, CompetenceDto } from '../../lib/api/types';
+  import { getCompStyle, fmtDate, fmtDuration, scoreColor } from '../../lib/utils';
+  import { toast } from '../../lib/toast';
+
+  try { requireAuth(); } catch { throw new Error('redirect'); }
+
+  let competences: CompetenceDto[] = [];
+  let aiSessions:  AiTriedDto[]    = [];
+  let activeTriedId: string | null = null;
+  let activeStart:   number        = 0;
+  let timerInterval: ReturnType<typeof setInterval> | null = null;
+
+  // Load competences
+  competencesApi.findAll(true).then(res => {
+    competences = res.data ?? [];
+    const sel   = document.getElementById('ai-comp') as HTMLSelectElement;
+    sel.innerHTML = '<option value="">— Selecciona competencia —</option>';
+    competences.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.competenceId; opt.textContent = c.competenceName;
+      sel.appendChild(opt);
+    });
+  }).catch(() => {});
+
+  // Load history
+  function loadHistory() {
+    aiTriedsApi.findMy(0, 50).then(res => {
+      aiSessions = res.data?.content ?? [];
+      renderHistory();
+    }).catch(() => {});
+  }
+
+  function renderHistory() {
+    const list   = document.getElementById('ai-history-list')!;
+    const countEl = document.getElementById('ai-count')!;
+    countEl.textContent = `${aiSessions.length} sesión(es)`;
+
+    list.innerHTML = '';
+    if (aiSessions.length === 0) {
+      list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem 0">Sin sesiones aún.</p>';
+      return;
+    }
+
+    aiSessions.slice(0, 10).forEach(s => {
+      const sc = scoreColor(s.score);
+      const statusColor: Record<string, string> = { FINISHED: '#059669', IN_PROGRESS: '#6366F1', ABANDONED: '#DC2626' };
+      const statusLabel: Record<string, string> = { FINISHED: 'Finalizada', IN_PROGRESS: 'En progreso', ABANDONED: 'Abandonada' };
+
+      const div = document.createElement('div');
+      div.className = 'ai-hist-item';
+      div.innerHTML = `
+        <div style="width:36px;height:36px;border-radius:9px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" fill="none" stroke="#818CF8" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.description ?? 'Sesión de práctica'}</p>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:0.6875rem;font-weight:700;padding:2px 7px;border-radius:12px;background:${statusColor[s.status] ?? '#6B7280'}18;color:${statusColor[s.status] ?? '#6B7280'}">${statusLabel[s.status] ?? s.status}</span>
+            <span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(s.attemptTimestamp)}</span>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          ${s.score != null
+            ? `<p style="font-size:1rem;font-weight:900;color:${sc};margin:0">${s.score.toFixed(0)}</p><p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">/100</p>`
+            : `<p style="font-size:0.75rem;color:var(--ui-text-3);margin:0">${s.totalQuestions} preg.</p>`}
+        </div>`;
+      list.appendChild(div);
+    });
+  }
+
+  // Session timer
+  function startTimer() {
+    activeStart = Date.now();
+    timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - activeStart) / 1000);
+      const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+      const s = (elapsed % 60).toString().padStart(2, '0');
+      const timerEl = document.getElementById('active-timer');
+      if (timerEl) timerEl.textContent = `${m}:${s}`;
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  // Show/hide forms
+  function setActiveSession(id: string | null, desc?: string) {
+    activeTriedId = id;
+    const startForm   = document.getElementById('start-ai-btn')!;
+    const activeDiv   = document.getElementById('active-session')!;
+    const activeDescEl = document.getElementById('active-desc')!;
+    if (id) {
+      startForm.setAttribute('disabled', '');
+      activeDiv.style.display = 'block';
+      activeDescEl.textContent = desc ?? '';
+      startTimer();
+    } else {
+      startForm.removeAttribute('disabled');
+      activeDiv.style.display = 'none';
+      stopTimer();
+    }
+  }
+
+  // Msg helpers
+  function showMsg(type: 'error' | 'success', text: string) {
+    const el = document.getElementById('session-msg')!;
+    el.textContent = text; el.className = `session-msg ${type}`; el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
+
+  // Start
+  document.getElementById('start-ai-btn')?.addEventListener('click', async () => {
+    const compId = (document.getElementById('ai-comp') as HTMLSelectElement).value;
+    const q      = Number((document.getElementById('ai-qcount') as HTMLInputElement).value);
+    const desc   = (document.getElementById('ai-desc') as HTMLInputElement).value.trim() || undefined;
+
+    if (!compId) { showMsg('error', 'Selecciona una competencia.'); return; }
+    if (q < 1 || q > 20) { showMsg('error', 'El número de preguntas debe estar entre 1 y 20.'); return; }
+
+    try {
+      const res = await aiTriedsApi.start(compId, q, desc);
+      if (res.data) {
+        setActiveSession(res.data.aiTriedId, desc ?? `${q} preguntas · ${competences.find(c => c.competenceId === compId)?.competenceName ?? compId}`);
+        toast.success('Sesión iniciada', { description: 'Tu práctica con IA ha comenzado.' });
+      }
+    } catch (err: any) {
+      showMsg('error', err?.message ?? 'Error al iniciar la sesión.');
+    }
+  });
+
+  // Finish
+  document.getElementById('finish-ai-btn')?.addEventListener('click', async () => {
+    if (!activeTriedId) return;
+    const elapsed = Math.round((Date.now() - activeStart) / 1000);
+    try {
+      await aiTriedsApi.finish(activeTriedId, elapsed);
+      setActiveSession(null);
+      toast.success('Sesión finalizada');
+      loadHistory();
+    } catch (err: any) {
+      toast.error('Error al finalizar', { description: err?.message });
+    }
+  });
+
+  // Abandon
+  document.getElementById('abandon-ai-btn')?.addEventListener('click', async () => {
+    if (!activeTriedId || !confirm('¿Abandonar la sesión?')) return;
+    const elapsed = Math.round((Date.now() - activeStart) / 1000);
+    try {
+      await aiTriedsApi.finish(activeTriedId, elapsed);
+      setActiveSession(null);
+      toast.info('Sesión abandonada');
+      loadHistory();
+    } catch {}
+  });
+
+  loadHistory();
+</script>

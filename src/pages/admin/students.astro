@@ -1,0 +1,122 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Gestión de Estudiantes" currentPage="admin-students">
+  <div style="margin-bottom:1.25rem">
+    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Estudiantes</h1>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Gestión de estudiantes registrados en la plataforma.</p>
+  </div>
+
+  <!-- Search + actions -->
+  <div style="display:flex;gap:10px;margin-bottom:1.125rem;flex-wrap:wrap">
+    <div style="position:relative;flex:1;min-width:200px;max-width:380px">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ui-text-3);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="student-search" type="text" placeholder="Buscar por nombre, código..."
+        style="width:100%;padding:9px 14px 9px 34px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:11px;font-size:0.8125rem;color:var(--ui-text-1);font-family:inherit;outline:none"
+        onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--ui-border)'">
+    </div>
+    <div id="total-label" style="display:flex;align-items:center;padding:0 14px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:11px;font-size:0.8125rem;color:var(--ui-text-2);font-weight:600;white-space:nowrap">0 estudiantes</div>
+  </div>
+
+  <!-- Table -->
+  <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:1px solid var(--ui-border)">
+            <th class="th">Código</th>
+            <th class="th">Nombre</th>
+            <th class="th">Correo</th>
+            <th class="th">Programa</th>
+            <th class="th">Estado</th>
+            <th class="th">Email</th>
+          </tr>
+        </thead>
+        <tbody id="students-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="padding:0.875rem 1.25rem;border-top:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <span id="page-info" style="font-size:0.8125rem;color:var(--ui-text-3)"></span>
+      <div style="display:flex;gap:6px">
+        <button id="btn-prev-page" class="page-btn" disabled>← Anterior</button>
+        <button id="btn-next-page" class="page-btn">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</AppLayout>
+
+<style>
+  .th { padding: 10px 14px; text-align:left; font-size:0.6875rem; font-weight:700; color:var(--ui-text-3); text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
+  .td { padding: 10px 14px; font-size:0.875rem; color:var(--ui-text-1); border-top:1px solid var(--ui-border); }
+  .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s; }
+  .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand); }
+  .page-btn:disabled { opacity:0.4;cursor:not-allowed; }
+</style>
+
+<script>
+  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { studentsApi } from '../../lib/api/students.api';
+  import { toast } from '../../lib/toast';
+
+  try {
+    const u = requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error('Not admin'); }
+  } catch { throw new Error('redirect'); }
+
+  let page = 0;
+  const PAGE_SIZE = 20;
+  let totalPages = 1;
+  let searchStr  = '';
+  let debounce: ReturnType<typeof setTimeout>;
+
+  function renderRows(students: any[]) {
+    const tbody = document.getElementById('students-tbody')!;
+    tbody.innerHTML = '';
+    if (students.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Sin resultados</td></tr>';
+      return;
+    }
+    students.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td"><code style="background:var(--ui-surface);padding:2px 6px;border-radius:5px;font-size:0.8125rem">${s.studentId}</code></td>
+        <td class="td" style="font-weight:600">${s.firstName} ${s.firstSurname}</td>
+        <td class="td" style="font-family:monospace;font-size:0.8125rem;color:var(--ui-text-2)">${s.email}</td>
+        <td class="td"><span style="background:var(--ui-surface);padding:2px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700">${s.programId}</span></td>
+        <td class="td"><span style="padding:3px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.isActive ? '#D1FAE5' : '#FEE2E2'};color:${s.isActive ? '#059669' : '#DC2626'}">${s.isActive ? 'Activo' : 'Inactivo'}</span></td>
+        <td class="td"><span style="padding:3px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.emailVerified ? '#D1FAE5' : '#FEF3C7'};color:${s.emailVerified ? '#059669' : '#D97706'}">${s.emailVerified ? 'Verificado' : 'Pendiente'}</span></td>`;
+      document.getElementById('students-tbody')!.appendChild(tr);
+    });
+  }
+
+  async function loadPage() {
+    try {
+      const res = await studentsApi.findAll(page, PAGE_SIZE);
+      if (!res.data) return;
+      totalPages = res.data.totalPages;
+      renderRows(res.data.content);
+      const totalEl = document.getElementById('total-label');
+      const pageEl  = document.getElementById('page-info');
+      if (totalEl) totalEl.textContent = `${res.data.totalElements} estudiantes`;
+      if (pageEl)  pageEl.textContent  = `Pág. ${page + 1} de ${totalPages || 1}`;
+      (document.getElementById('btn-prev-page') as HTMLButtonElement).disabled = page === 0;
+      (document.getElementById('btn-next-page') as HTMLButtonElement).disabled = page >= totalPages - 1;
+    } catch (err: any) {
+      toast.error('Error al cargar estudiantes', { description: err?.message });
+    }
+  }
+
+  document.getElementById('btn-prev-page')?.addEventListener('click', () => { if (page > 0) { page--; loadPage(); } });
+  document.getElementById('btn-next-page')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadPage(); } });
+
+  document.getElementById('student-search')?.addEventListener('input', e => {
+    clearTimeout(debounce);
+    searchStr = (e.target as HTMLInputElement).value.trim();
+    debounce  = setTimeout(() => { page = 0; loadPage(); }, 400);
+  });
+
+  loadPage();
+</script>
