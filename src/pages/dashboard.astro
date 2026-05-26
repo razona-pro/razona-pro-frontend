@@ -615,21 +615,34 @@ const admin = isAdmin();
 document.addEventListener('keydown', e => { if (e.key === 'Escape') (window as any).closeSidebar(); });
 
 // ── Render inicial con datos del token ────────────────────────
-function paintUser(firstName: string, firstSurname: string, programId?: string) {
-  const full     = firstSurname ? `${firstName} ${firstSurname}` : firstName;
-  const initials = (firstName[0] + (firstSurname?.[0] ?? firstName[1] ?? '')).toUpperCase();
+function paintUser(firstName: string = '', firstSurname: string = '', programId?: string) {
+  const fn = firstName ?? '';
+  const fs = firstSurname ?? '';
+
+  const full = fs ? `${fn} ${fs}` : fn;
+
+  const initials =
+    (fn[0] ?? '' + (fs[0] ?? fn[1] ?? '')).toUpperCase();
 
   document.getElementById('sb-avatar')!.textContent = initials;
-  document.getElementById('sb-name')!.textContent   = full;
-  document.getElementById('sb-sub')!.textContent    = admin ? 'Administrador · UFPSO' : (programId ?? 'Estudiante · UFPSO');
+  document.getElementById('sb-name')!.textContent = full;
+  document.getElementById('sb-sub')!.textContent =
+    admin ? 'Administrador · UFPSO' : (programId ?? 'Estudiante · UFPSO');
+
   document.getElementById('tb-avatar')!.textContent = initials;
-  document.getElementById('tb-name')!.textContent   = firstName;
+  document.getElementById('tb-name')!.textContent = fn;
 
   const badge = document.getElementById('tb-badge') as HTMLElement;
-  if (admin) { badge.textContent = 'Admin'; badge.style.background = '#1C1917'; badge.style.color = '#F87171'; }
-  else       { badge.textContent = 'Estudiante'; badge.style.background = '#FEE2E2'; badge.style.color = '#D41224'; }
+  if (admin) {
+    badge.textContent = 'Admin';
+    badge.style.background = '#1C1917';
+    badge.style.color = '#F87171';
+  } else {
+    badge.textContent = 'Estudiante';
+    badge.style.background = '#FEE2E2';
+    badge.style.color = '#D41224';
+  }
 }
-
 const stored = getUser()!;
 paintUser(stored.firstName || stored.id, stored.firstSurname, stored.programId);
 

@@ -429,23 +429,58 @@ import AccessibilityWidget from '../components/AccessibilityWidget.astro';
                         <div id="email-error" class="msg-box error"></div>
 
                         <div class="field-group">
-                            <label for="recovery-email">Correo electrónico</label>
-                            <div class="input-wrap">
-                                <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                    <rect x="3" y="5" width="14" height="10" rx="1.5"
-                                          stroke="currentColor" stroke-width="1.5"/>
-                                    <path d="M3 5l7 6 7-6" stroke="currentColor"
-                                          stroke-width="1.5" stroke-linejoin="round"/>
-                                </svg>
-                                <input
-                                    id="recovery-email"
-                                    type="email"
-                                    placeholder="tu@correo.edu.co"
-                                    autocomplete="email"
-                                    required
-                                />
-                            </div>
-                        </div>
+    <label for="recovery-email">Correo electrónico</label>
+    <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="3" y="5" width="14" height="10" rx="1.5"
+                  stroke="currentColor" stroke-width="1.5"/>
+            <path d="M3 5l7 6 7-6" stroke="currentColor"
+                  stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <input
+            id="recovery-email"
+            type="email"
+            placeholder="tu@correo.edu.co"
+            autocomplete="email"
+            required
+        />
+    </div>
+</div>
+
+<div class="field-group">
+    <label for="recovery-code">Código de verificación</label>
+    <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="3" y="4" width="14" height="12" rx="1.5"
+                  stroke="currentColor" stroke-width="1.5"/>
+            <path d="M7 9h6M7 12h4" stroke="currentColor"
+                  stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input
+            id="recovery-code"
+            type="text"
+            placeholder="Código de verificación"
+            autocomplete="one-time-code"
+        />
+    </div>
+</div>
+
+<div class="field-group">
+    <label for="recovery-phone">Teléfono</label>
+    <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M6.5 3h7a1 1 0 011 1v12a1 1 0 01-1 1h-7a1 1 0 01-1-1V4a1 1 0 011-1z"
+                  stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="10" cy="15" r="0.75" fill="currentColor"/>
+        </svg>
+        <input
+            id="recovery-phone"
+            type="tel"
+            placeholder="+57 300 000 0000"
+            autocomplete="tel"
+        />
+    </div>
+</div>
 
                         <button class="btn-primary" id="btn-send-email">
                             <span id="send-label">Enviar enlace</span>
@@ -730,10 +765,12 @@ btnSendEmail.addEventListener('click', async () => {
     sendLabel.textContent = 'Enviando...';
 
     try {
+        const code  = document.getElementById('recovery-code').value.trim();
+        const phone = document.getElementById('recovery-phone').value.trim();
         /* Ajusta el endpoint según tu backend */
         await apiRequest('/api/auth/forgot-password', {
             method: 'POST',
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({ email, code: code || '', phone: phone || '' }),
         });
     } catch {
         /* Siempre mostramos éxito por seguridad (no revelar si el email existe) */
