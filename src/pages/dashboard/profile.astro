@@ -3,6 +3,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
 <AppLayout title="Mi perfil" currentPage="profile">
+
+  <!-- Modals de logout y sesión expirada vienen del Sidebar -->
+
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
@@ -12,38 +15,40 @@ import AppLayout from '../../layouts/AppLayout.astro';
     <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Información de tu cuenta y progreso.</p>
   </div>
 
-  <!-- Hero card -->
-  <div style="background:linear-gradient(135deg,#111,#1E1E1E);border-radius:18px;padding:0;overflow:hidden;position:relative;margin-bottom:1rem">
-    <div style="position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(212,18,36,0.1);pointer-events:none"></div>
+  <!-- Hero card — usando tokens del tema, no colores hardcodeados oscuros -->
+  <div style="background:linear-gradient(135deg,var(--brand),var(--brand-dark));border-radius:18px;padding:0;overflow:hidden;position:relative;margin-bottom:1rem">
+    <div style="position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.08);pointer-events:none"></div>
     <div style="padding:1.5rem 1.75rem;position:relative;display:flex;align-items:flex-start;gap:1.25rem;flex-wrap:wrap">
       <div style="position:relative;flex-shrink:0">
-        <div id="hero-avatar" style="width:68px;height:68px;border-radius:17px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.5rem;box-shadow:0 8px 24px rgba(212,18,36,0.4)">?</div>
-        <div style="position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;border-radius:50%;background:#22c55e;border:2.5px solid #111"></div>
+        <div id="hero-avatar" style="width:68px;height:68px;border-radius:17px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.5rem;box-shadow:0 8px 24px rgba(0,0,0,0.2)">?</div>
+        <div style="position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;border-radius:50%;background:#22c55e;border:2.5px solid var(--brand)"></div>
       </div>
       <div style="flex:1;min-width:160px">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:5px">
           <h2 id="hero-name" style="color:white;font-weight:900;font-size:1.25rem;margin:0;letter-spacing:-0.4px">Cargando...</h2>
-          <span id="hero-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
+          <span id="hero-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3)"></span>
         </div>
-        <p id="hero-email"   style="color:rgba(255,255,255,0.4);font-size:0.8125rem;margin:0 0 2px;font-family:monospace"></p>
-        <p id="hero-program" style="color:rgba(255,255,255,0.28);font-size:0.75rem;margin:0;text-transform:uppercase;letter-spacing:0.5px"></p>
+        <p id="hero-email" style="color:rgba(255,255,255,0.7);font-size:0.8125rem;margin:0 0 2px"></p>
+        <p id="hero-program" style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:0;text-transform:uppercase;letter-spacing:0.5px"></p>
       </div>
-      <button id="logout-hero" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(212,18,36,0.18);border:1px solid rgba(212,18,36,0.35);border-radius:10px;color:#F87171;font-size:0.8125rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;flex-shrink:0" onmouseover="this.style.background='rgba(212,18,36,0.28)'" onmouseout="this.style.background='rgba(212,18,36,0.18)'">
+      <!-- Logout usa el modal del sidebar, no el botón inline -->
+      <button id="logout-hero-btn" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:10px;color:white;font-size:0.8125rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;flex-shrink:0" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
         Cerrar sesión
       </button>
     </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.06);padding:10px 28px;display:flex;gap:20px;flex-wrap:wrap">
-      <span id="hero-id"   style="color:rgba(255,255,255,0.3);font-size:0.75rem;font-family:monospace"></span>
-      <span id="hero-type" style="color:rgba(255,255,255,0.3);font-size:0.75rem"></span>
-      <span style="color:rgba(255,255,255,0.3);font-size:0.75rem;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%"></span>Sesión activa</span>
+    <div style="border-top:1px solid rgba(255,255,255,0.12);padding:10px 28px;display:flex;gap:20px;flex-wrap:wrap">
+      <span id="hero-id"   style="color:rgba(255,255,255,0.45);font-size:0.75rem;font-family:monospace"></span>
+      <span id="hero-type" style="color:rgba(255,255,255,0.45);font-size:0.75rem"></span>
+      <span style="color:rgba(255,255,255,0.45);font-size:0.75rem;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%"></span>Sesión activa</span>
     </div>
   </div>
 
   <!-- Profile grid -->
   <div style="display:grid;grid-template-columns:1fr 280px;gap:14px">
     <div style="display:flex;flex-direction:column;gap:14px">
-      <!-- Account info -->
+
+      <!-- Información de cuenta -->
       <div class="profile-card">
         <h2 class="card-title" style="margin-bottom:1rem">Información de cuenta</h2>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -57,26 +62,26 @@ import AppLayout from '../../layouts/AppLayout.astro';
           </div>
           <div class="info-row" style="grid-column:1/-1">
             <span class="info-label">Correo electrónico</span>
-            <p id="f-email" class="info-val" style="font-family:monospace;font-size:0.8125rem"></p>
+            <p id="f-email" class="info-val" style="font-size:0.8125rem"></p>
           </div>
           <div class="info-row">
             <span class="info-label">Tipo de usuario</span>
             <p id="f-type" class="info-val"></p>
           </div>
           <div class="info-row">
-            <span class="info-label">ID de cuenta</span>
-            <p id="f-id" class="info-val" style="font-family:monospace;font-size:0.75rem;color:var(--ui-text-3)"></p>
+            <span class="info-label" id="f-id-label">Código</span>
+            <p id="f-id" class="info-val" style="font-family:monospace;font-size:0.8125rem"></p>
           </div>
-          <div class="info-row" id="f-program-row" style="display:none">
-            <span class="info-label">Programa</span>
+          <div class="info-row" id="f-program-row" style="grid-column:1/-1">
+            <span class="info-label">Programa académico</span>
             <p id="f-program" class="info-val"></p>
           </div>
         </div>
       </div>
 
-      <!-- Session -->
+      <!-- Sesión activa -->
       <div class="profile-card">
-        <h2 class="card-title" style="margin-bottom:0.875rem">Sesión activa</h2>
+        <h2 class="card-title" style="margin-bottom:0.875rem">Estado de sesión</h2>
         <div style="background:var(--ui-surface);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px;border:1px solid var(--ui-border)">
           <div style="width:36px;height:36px;background:#D1FAE5;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg width="16" height="16" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -85,18 +90,18 @@ import AppLayout from '../../layouts/AppLayout.astro';
             <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0 0 1px">Token JWT activo</p>
             <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">Autenticación verificada</p>
           </div>
-          <span id="sess-status" style="font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0;"></span>
+          <span id="sess-status" style="font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0"></span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div class="info-row"><span class="info-label">Inició</span><p id="jwt-iat" class="info-val"></p></div>
-          <div class="info-row"><span class="info-label">Expira</span><p id="jwt-exp" class="info-val"></p></div>
+          <div class="info-row"><span class="info-label">Inició</span><p id="jwt-iat" class="info-val" style="font-size:0.8125rem"></p></div>
+          <div class="info-row"><span class="info-label">Expira</span><p id="jwt-exp" class="info-val" style="font-size:0.8125rem"></p></div>
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;font-size:0.6875rem;color:var(--ui-text-3);margin-bottom:5px">
             <span>Tiempo restante</span>
             <span id="jwt-remain"></span>
           </div>
-          <div style="height:7px;background:var(--ui-surface);border-radius:4px;overflow:hidden">
+          <div style="height:7px;background:var(--ui-surface);border-radius:4px;overflow:hidden;border:1px solid var(--ui-border)">
             <div id="sess-fill" style="height:100%;border-radius:4px;width:0%;transition:width 1s ease"></div>
           </div>
         </div>
@@ -104,30 +109,38 @@ import AppLayout from '../../layouts/AppLayout.astro';
     </div>
 
     <div style="display:flex;flex-direction:column;gap:14px">
-      <!-- Quick actions -->
+
+      <!-- Acciones rápidas -->
       <div class="profile-card">
         <h2 class="card-title" style="margin-bottom:0.875rem">Acciones rápidas</h2>
         <div style="display:flex;flex-direction:column;gap:5px">
-          {[
-            { href: '/dashboard',      label: 'Dashboard',     icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' },
-            { href: '/tests',          label: 'Tests',         icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2' },
-            { href: '/dashboard/history',  label: 'Mi historial', icon: 'M12 8v4l3 3' },
-            { href: '/dashboard/rankings', label: 'Rankings',    icon: 'M8 21H4a2 2 0 01-2-2V5a2 2 0 012-2h4' },
-          ].map(item => (
-            <a href={item.href} class="quick-link">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d={item.icon}/></svg>
-              {item.label}
-            </a>
-          ))}
+          <a href="/dashboard" class="quick-link">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            Dashboard
+          </a>
+          <a href="/tests" class="quick-link">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
+            Tests disponibles
+          </a>
+          <a href="/dashboard/history" class="quick-link">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+            Mi historial
+          </a>
+          <a href="/dashboard/rankings" class="quick-link">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M8 21H4a2 2 0 01-2-2V5a2 2 0 012-2h4M14 21h4a2 2 0 002-2V5a2 2 0 00-2-2h-4M10 7h4v14h-4z"/></svg>
+            Rankings
+          </a>
+          <button id="profile-logout-btn" class="quick-link" style="border:none;cursor:pointer;color:#DC2626;border-color:#FECACA;background:#FEF2F2">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Cerrar sesión
+          </button>
         </div>
       </div>
 
-      <!-- Achievements -->
+      <!-- Logros -->
       <div class="profile-card">
         <h2 class="card-title" style="margin-bottom:0.875rem">Logros</h2>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="achievements-grid">
-          <!-- Populated via JS -->
-        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="achievements-grid"></div>
       </div>
     </div>
   </div>
@@ -138,117 +151,117 @@ import AppLayout from '../../layouts/AppLayout.astro';
   .card-title   { font-size: 0.9375rem; font-weight: 800; color: var(--ui-text-1); margin: 0; }
   .info-row     { display: flex; flex-direction: column; gap: 3px; }
   .info-label   { font-size: 0.625rem; font-weight: 700; color: var(--ui-text-3); text-transform: uppercase; letter-spacing: 0.5px; }
-  .info-val     { font-size: 0.9375rem; font-weight: 600; color: var(--ui-text-1); padding: 7px 10px; background: var(--ui-surface); border-radius: 8px; border: 1px solid var(--ui-border); margin: 0; }
+  .info-val     { font-size: 0.9375rem; font-weight: 600; color: var(--ui-text-1); padding: 7px 10px; background: var(--ui-surface); border-radius: 8px; border: 1px solid var(--ui-border); margin: 0; word-break: break-word; }
   .quick-link {
     display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 9px;
     background: var(--ui-surface); border: 1px solid var(--ui-border);
     color: var(--ui-text-1); text-decoration: none; font-size: 0.8125rem; font-weight: 500;
-    transition: all 0.15s;
+    transition: all 0.15s; font-family: inherit; text-align: left; width: 100%;
   }
   .quick-link:hover { border-color: var(--brand); color: var(--brand); }
 
   @media (max-width: 768px) {
-    .app-content > div:last-child > div { grid-template-columns: 1fr !important; }
-    .profile-card > div { grid-template-columns: 1fr !important; }
+    .app-content > div:last-child > div[style*="grid-template-columns:1fr 280px"] { grid-template-columns: 1fr !important; }
+    .profile-card > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
   }
 </style>
 
 <script>
   import { requireAuth, isAdmin, logout, getToken, updateStoredUser } from '../../lib/auth';
   import { studentsApi } from '../../lib/api/students.api';
-  import { triedsApi }   from '../../lib/api/trieds.api';
-  import { animCount }   from '../../lib/utils';
-  import { toast } from '../../lib/toast';
   import { programsApi } from '../../lib/api/programs.api';
+  import { adminsApi } from '../../lib/api/admins.api';
 
   let user;
   try { user = requireAuth(); } catch { throw new Error('redirect'); }
 
-  // Paint initial from stored
+  // ── Pintar datos iniciales desde storage ──────────────────────────
   const initials = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase();
   const fullName  = user.firstSurname ? `${user.firstName} ${user.firstSurname}` : user.firstName;
 
+  const set = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
   document.getElementById('hero-avatar')!.textContent = initials;
-  document.getElementById('hero-name')!.textContent   = fullName;
-  document.getElementById('hero-email')!.textContent  = user.email;
-  document.getElementById('hero-id')!.textContent     = `ID: ${user.id}`;
-  document.getElementById('hero-type')!.textContent   = isAdmin() ? 'Administrador' : 'Estudiante';
+  set('hero-name',  fullName);
+  set('hero-email', user.email.toLowerCase()); // mostrar en minúsculas para legibilidad
+  set('hero-id',    `ID: ${user.id}`);
+  set('hero-type',  isAdmin() ? 'Administrador del sistema' : 'Estudiante');
 
   const heroBadge = document.getElementById('hero-badge')!;
-  heroBadge.textContent = isAdmin() ? '⚙ Administrador' : '🎓 Estudiante';
-  heroBadge.style.cssText = isAdmin()
-    ? 'background:#1C1917;color:#F87171;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700'
-    : 'background:rgba(212,18,36,0.12);color:#D41224;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700';
+  heroBadge.textContent = isAdmin() ? '⚙ Admin' : '🎓 Estudiante';
 
-  document.getElementById('f-firstName')!.textContent    = user.firstName;
-  document.getElementById('f-firstSurname')!.textContent = user.firstSurname;
-  document.getElementById('f-email')!.textContent        = user.email;
-  document.getElementById('f-type')!.textContent         = isAdmin() ? 'Administrador' : 'Estudiante';
-  document.getElementById('f-id')!.textContent           = user.id;
+  // Campos del formulario
+  set('f-firstName',    user.firstName);
+  set('f-firstSurname', user.firstSurname || '—');
+  set('f-email',        user.email.toLowerCase());
+  set('f-type',         isAdmin() ? 'Administrador' : 'Estudiante');
+  set('f-id',           user.id);
 
-// Dentro del script de profile.astro, reemplaza la parte de programa:
-if (user.programId) {
-    const row = document.getElementById('f-program-row')!;
-    row.style.display = 'flex'; row.style.flexDirection = 'column';
-    // Mostrar nombre del programa desde la API
-    
-    programsApi.findById(user.programId).then(res => {
+  const idLabel = document.getElementById('f-id-label');
+  if (idLabel) idLabel.textContent = isAdmin() ? 'ID de administrador' : 'Código de estudiante';
+
+  // ── Programa académico ────────────────────────────────────────────
+  const programRow = document.getElementById('f-program-row')!;
+  if (user.programId) {
+    programRow.style.display = 'flex';
+    programRow.style.flexDirection = 'column';
+    set('hero-program', `Programa ${user.programId}`);
+    set('f-program', `Cargando...`);
+
+    programsApi.findById(user.programId)
+      .then(res => {
         if (res.data) {
-            document.getElementById('f-program')!.textContent = 
-                `${res.data.programName} (${user.programId})`;
-            document.getElementById('hero-program')!.textContent = 
-                `${res.data.programName} (${user.programId})`;
+          const name = `${res.data.programName} (${user.programId})`;
+          set('f-program',    name);
+          set('hero-program', name);
         }
-    }).catch(() => {
-        document.getElementById('f-program')!.textContent = String(user.programId);
-    });
-}
-// f-id debe mostrar código de estudiante o admin ID
-document.getElementById('f-id')!.textContent = user.id;
-// Label dinámico según tipo
-const idLabel = document.querySelector('#f-id')?.closest('.info-row')?.querySelector('.info-label');
-if (idLabel) {
-    idLabel.textContent = user.userType === 'ADMIN' ? 'ID de administrador' : 'Código de estudiante';
-}
+      })
+      .catch(() => {
+        set('f-program',    user.programId ?? '—');
+        set('hero-program', `Programa ${user.programId}`);
+      });
+  } else {
+    programRow.style.display = 'none';
+  }
 
-  // JWT session info
+  // ── JWT session info ──────────────────────────────────────────────
   const token = getToken();
   if (token) {
     try {
       const p   = JSON.parse(atob(token.split('.')[1]));
       const fmt = (ts: number) => new Date(ts * 1000).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
-      document.getElementById('jwt-iat')!.textContent = fmt(p.iat);
-      document.getElementById('jwt-exp')!.textContent = fmt(p.exp);
+      set('jwt-iat', fmt(p.iat));
+      set('jwt-exp', fmt(p.exp));
 
       const now     = Date.now();
       const total   = (p.exp - p.iat) * 1000;
-      const remain  = p.exp * 1000 - now;
-      const pct     = Math.max(0, Math.min(100, (remain / total) * 100));
+      const remain  = Math.max(0, p.exp * 1000 - now);
+      const pct     = Math.min(100, (remain / total) * 100);
       const fill    = document.getElementById('sess-fill')!;
       const status  = document.getElementById('sess-status')!;
 
       fill.style.width = `${pct}%`;
       if (pct > 50) {
         fill.style.background = '#22c55e';
-        status.textContent = 'Activa'; status.style.cssText = 'background:#D1FAE5;color:#059669;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+        status.textContent = 'Activa';
+        status.style.cssText = 'background:#D1FAE5;color:#059669;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
       } else if (pct > 20) {
         fill.style.background = '#f59e0b';
-        status.textContent = 'Por vencer'; status.style.cssText = 'background:#FEF3C7;color:#D97706;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+        status.textContent = 'Por vencer';
+        status.style.cssText = 'background:#FEF3C7;color:#D97706;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
       } else {
         fill.style.background = '#ef4444';
-        status.textContent = 'Crítica'; status.style.cssText = 'background:#FEE2E2;color:#DC2626;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+        status.textContent = 'Crítica';
+        status.style.cssText = 'background:#FEE2E2;color:#DC2626;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
       }
 
       const h = Math.floor(remain / 3_600_000);
       const m = Math.floor((remain % 3_600_000) / 60_000);
-      document.getElementById('jwt-remain')!.textContent = h > 0 ? `${h}h ${m}m` : `${m}m`;
+      set('jwt-remain', h > 0 ? `${h}h ${m}m` : `${m}m`);
     } catch {}
   }
 
-  // Logout
-  document.getElementById('logout-hero')?.addEventListener('click', logout);
-
-  // Achievements
+  // ── Logros ────────────────────────────────────────────────────────
   const achievGrid = document.getElementById('achievements-grid')!;
   const achievements = [
     { emoji: '🥇', label: 'Primer simulacro', color: '#FEF3C7', border: '#FDE68A', textColor: '#92400E' },
@@ -256,32 +269,63 @@ if (idLabel) {
     { emoji: '🎯', label: 'Puntaje perfecto',  color: '#EDE9FE', border: '#DDD6FE', textColor: '#4C1D95' },
     { emoji: '🏆', label: 'Top 10 global',     color: '#F3F4F6', border: '#E5E7EB', textColor: '#9CA3AF', locked: true },
   ];
-
   achievements.forEach(a => {
     const div = document.createElement('div');
-    div.style.cssText = `text-align:center;padding:10px 6px;background:${a.color};border-radius:11px;border:1px solid ${a.border};${a.locked ? 'opacity:0.4;filter:grayscale(1)' : ''}`;
+    div.style.cssText = `text-align:center;padding:10px 6px;background:${a.color};border-radius:11px;border:1px solid ${a.border};${(a as any).locked ? 'opacity:0.4;filter:grayscale(1)' : ''}`;
     div.innerHTML = `<div style="font-size:1.375rem;margin-bottom:3px">${a.emoji}</div><p style="font-size:0.625rem;font-weight:700;color:${a.textColor};margin:0;line-height:1.3">${a.label}</p>`;
     achievGrid.appendChild(div);
   });
 
-  // Load real profile
-  if (!isAdmin()) {
-    studentsApi.me().then(res => {
-      if (!res.data) return;
-      const p = res.data;
-      updateStoredUser({ firstName: p.firstName, firstSurname: p.firstSurname, email: p.email });
+  // ── Logout buttons — disparan el modal del sidebar ────────────────
+  const openLogoutModal = () => {
+    const modal = document.getElementById('logout-modal');
+    if (modal) modal.style.display = 'flex';
+  };
 
-      const fn = p.firstName;
-      const ln = p.firstSurname;
-      const ini = (fn[0] + ln[0]).toUpperCase();
-      const full = `${fn} ${ln}`;
+  document.getElementById('logout-hero-btn')?.addEventListener('click', openLogoutModal);
+  document.getElementById('profile-logout-btn')?.addEventListener('click', openLogoutModal);
 
-      document.getElementById('hero-avatar')!.textContent = ini;
-      document.getElementById('hero-name')!.textContent   = full;
-      document.getElementById('hero-email')!.textContent  = p.email;
-      document.getElementById('f-firstName')!.textContent    = fn;
-      document.getElementById('f-firstSurname')!.textContent = ln;
-      document.getElementById('f-email')!.textContent        = p.email;
-    }).catch(() => {});
-  }
+  if (isAdmin()) {
+  adminsApi.me().then(res => {
+    if (!res.data) return;
+    const a = res.data;
+    updateStoredUser({
+      firstName:    a.firstName,
+      firstSurname: a.firstSurname,
+      email:        a.email,
+    });
+    const fn   = a.firstName;
+    const ln   = a.firstSurname;
+    const ini  = ((fn[0] ?? '') + (ln[0] ?? '')).toUpperCase();
+    const full = ln ? `${fn} ${ln}` : fn;
+
+    document.getElementById('hero-avatar')!.textContent = ini;
+    set('hero-name',      full);
+    set('hero-email',     a.email.toLowerCase());
+    set('f-firstName',    fn);
+    set('f-firstSurname', ln);
+    set('f-email',        a.email.toLowerCase());
+  }).catch(() => {});
+} else {
+  studentsApi.me().then(res => {
+    if (!res.data) return;
+    const s = res.data;
+    updateStoredUser({
+      firstName:    s.firstName,
+      firstSurname: s.firstSurname,
+      email:        s.email,
+    });
+    const fn   = s.firstName;
+    const ln   = s.firstSurname;
+    const ini  = ((fn[0] ?? '') + (ln[0] ?? '')).toUpperCase();
+    const full = ln ? `${fn} ${ln}` : fn;
+
+    document.getElementById('hero-avatar')!.textContent = ini;
+    set('hero-name',      full);
+    set('hero-email',     s.email.toLowerCase());
+    set('f-firstName',    fn);
+    set('f-firstSurname', ln);
+    set('f-email',        s.email.toLowerCase());
+  }).catch(() => {});
+}
 </script>

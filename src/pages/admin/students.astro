@@ -4,118 +4,257 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
 <AppLayout title="Gestión de Estudiantes" currentPage="admin-students">
   <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Estudiantes</span>
+    </div>
     <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Estudiantes</h1>
     <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Gestión de estudiantes registrados en la plataforma.</p>
   </div>
 
-  <!-- Search + actions -->
-  <div style="display:flex;gap:10px;margin-bottom:1.125rem;flex-wrap:wrap">
-    <div style="position:relative;flex:1;min-width:200px;max-width:380px">
-      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ui-text-3);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="student-search" type="text" placeholder="Buscar por nombre, código..."
-        style="width:100%;padding:9px 14px 9px 34px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:11px;font-size:0.8125rem;color:var(--ui-text-1);font-family:inherit;outline:none"
-        onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--ui-border)'">
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D41224">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Total</p>
+      <p id="stat-total" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;line-height:1">—</p>
     </div>
-    <div id="total-label" style="display:flex;align-items:center;padding:0 14px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:11px;font-size:0.8125rem;color:var(--ui-text-2);font-weight:600;white-space:nowrap">0 estudiantes</div>
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #059669">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Activos</p>
+      <p id="stat-active" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">—</p>
+    </div>
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #2563EB">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Email verificado</p>
+      <p id="stat-verified" style="font-size:1.75rem;font-weight:900;color:#2563EB;margin:0;line-height:1">—</p>
+    </div>
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D97706">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Pendientes</p>
+      <p id="stat-pending" style="font-size:1.75rem;font-weight:900;color:#D97706;margin:0;line-height:1">—</p>
+    </div>
   </div>
 
-  <!-- Table -->
+  <!-- Búsqueda y filtros -->
+  <div style="display:flex;gap:8px;margin-bottom:1.125rem;flex-wrap:wrap;align-items:center">
+    <div style="position:relative;flex:1;min-width:200px;max-width:380px">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ui-text-3);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="student-search" type="text" placeholder="Buscar por nombre, código, correo..."
+        style="width:100%;padding:9px 14px 9px 34px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:11px;font-size:0.8125rem;color:var(--ui-text-1);font-family:inherit;outline:none;transition:border-color 0.2s"
+        onfocus="this.style.borderColor='var(--brand)';this.style.boxShadow='0 0 0 3px rgba(212,18,36,0.1)'"
+        onblur="this.style.borderColor='var(--ui-border)';this.style.boxShadow='none'">
+    </div>
+    <select id="filter-program" style="padding:7px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none">
+      <option value="ALL">Todos los programas</option>
+    </select>
+    <select id="filter-status" style="padding:7px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none">
+      <option value="ALL">Todos los estados</option>
+      <option value="active">Activos</option>
+      <option value="inactive">Inactivos</option>
+      <option value="verified">Email verificado</option>
+      <option value="pending">Email pendiente</option>
+    </select>
+    <span id="total-label" style="font-size:0.8125rem;color:var(--ui-text-3);margin-left:auto;white-space:nowrap"></span>
+  </div>
+
+  <!-- Tabla -->
   <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse">
         <thead>
           <tr style="border-bottom:1px solid var(--ui-border)">
             <th class="th">Código</th>
-            <th class="th">Nombre</th>
-            <th class="th">Correo</th>
+            <th class="th">Nombre completo</th>
+            <th class="th">Correo electrónico</th>
             <th class="th">Programa</th>
-            <th class="th">Estado</th>
             <th class="th">Email</th>
+            <th class="th">Estado</th>
+            <th class="th">Acciones</th>
           </tr>
         </thead>
-        <tbody id="students-tbody"></tbody>
+        <tbody id="students-tbody">
+          <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando...</td></tr>
+        </tbody>
       </table>
     </div>
-
-    <!-- Pagination -->
     <div style="padding:0.875rem 1.25rem;border-top:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
       <span id="page-info" style="font-size:0.8125rem;color:var(--ui-text-3)"></span>
       <div style="display:flex;gap:6px">
-        <button id="btn-prev-page" class="page-btn" disabled>← Anterior</button>
-        <button id="btn-next-page" class="page-btn">Siguiente →</button>
+        <button id="btn-prev" class="page-btn" disabled>← Anterior</button>
+        <button id="btn-next" class="page-btn">Siguiente →</button>
       </div>
     </div>
   </div>
 </AppLayout>
 
+<!-- Modal desactivar -->
+<div id="deactivate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:360px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="width:52px;height:52px;border-radius:14px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Desactivar estudiante?</h3>
+    <p id="deactivate-desc" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55"></p>
+    <div style="display:flex;gap:8px">
+      <button id="deactivate-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+      <button id="deactivate-confirm" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#DC2626,#991B1B);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Desactivar</button>
+    </div>
+  </div>
+</div>
+
 <style>
-  .th { padding: 10px 14px; text-align:left; font-size:0.6875rem; font-weight:700; color:var(--ui-text-3); text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
-  .td { padding: 10px 14px; font-size:0.875rem; color:var(--ui-text-1); border-top:1px solid var(--ui-border); }
-  .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s; }
-  .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand); }
-  .page-btn:disabled { opacity:0.4;cursor:not-allowed; }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
+  .th { padding:10px 14px;text-align:left;font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap }
+  .td { padding:10px 14px;font-size:0.875rem;color:var(--ui-text-1);border-top:1px solid var(--ui-border) }
+  .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
+  .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
+  .page-btn:disabled { opacity:0.4;cursor:not-allowed }
+  @media(max-width:768px){ #stat-total,.stat-col:nth-child(3),.stat-col:nth-child(4){display:none} }
 </style>
 
 <script>
   import { requireAuth, isAdmin } from '../../lib/auth';
-  import { studentsApi } from '../../lib/api/students.api';
-  import { toast } from '../../lib/toast';
+  import { studentsApi }  from '../../lib/api/students.api';
+  import { programsApi }  from '../../lib/api/programs.api';
+  import { toast }        from '../../lib/toast';
+  import type { StudentDto } from '../../lib/api/types';
 
   try {
-    const u = requireAuth();
-    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error('Not admin'); }
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
   } catch { throw new Error('redirect'); }
 
   let page = 0;
-  const PAGE_SIZE = 20;
+  const SIZE = 20;
   let totalPages = 1;
+  let totalElements = 0;
   let searchStr  = '';
+  let filterProg = 'ALL';
+  let filterStatus = 'ALL';
   let debounce: ReturnType<typeof setTimeout>;
+  let pendingDeactivateId = '';
+  let programMap: Record<string, string> = {};
+  let allStudents: StudentDto[] = [];
 
-  function renderRows(students: any[]) {
+  // Cargar programas para el filtro
+  programsApi.findAll().then(res => {
+    if (!res.data) return;
+    res.data.forEach(p => { programMap[p.programId] = p.programName; });
+    const sel = document.getElementById('filter-program') as HTMLSelectElement;
+    res.data.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.programId;
+      opt.textContent = `${p.programName} (${p.programId})`;
+      sel.appendChild(opt);
+    });
+  }).catch(() => {});
+
+  function updateStats() {
+    const active   = allStudents.filter(s => s.isActive).length;
+    const inactive = allStudents.filter(s => !s.isActive).length;
+    const verified = allStudents.filter(s => s.emailVerified).length;
+    const pending  = allStudents.filter(s => !s.emailVerified).length;
+    (document.getElementById('stat-total') as HTMLElement).textContent    = String(totalElements);
+    (document.getElementById('stat-active') as HTMLElement).textContent   = String(active);
+    (document.getElementById('stat-verified') as HTMLElement).textContent = String(verified);
+    (document.getElementById('stat-pending') as HTMLElement).textContent  = String(pending);
+    (document.getElementById('total-label') as HTMLElement).textContent   = `${allStudents.length} de ${totalElements}`;
+  }
+
+  function filterAndRender() {
+    const search = searchStr.toLowerCase();
+    const filtered = allStudents.filter(s => {
+      const fullName = `${s.firstName} ${s.firstSurname}`.toLowerCase();
+      const matchSearch = !search || fullName.includes(search) || s.studentId.includes(search) || s.email.toLowerCase().includes(search);
+      const matchProg   = filterProg === 'ALL' || s.programId === filterProg;
+      const matchStatus = filterStatus === 'ALL'
+        || (filterStatus === 'active'   && s.isActive)
+        || (filterStatus === 'inactive' && !s.isActive)
+        || (filterStatus === 'verified' && s.emailVerified)
+        || (filterStatus === 'pending'  && !s.emailVerified);
+      return matchSearch && matchProg && matchStatus;
+    });
+    renderRows(filtered);
+  }
+
+  function renderRows(students: StudentDto[]) {
     const tbody = document.getElementById('students-tbody')!;
     tbody.innerHTML = '';
-    if (students.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Sin resultados</td></tr>';
+    if (!students.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Sin resultados para los filtros aplicados.</td></tr>';
       return;
     }
     students.forEach(s => {
+      const fullName   = [s.firstName, s.firstSurname].filter(Boolean).join(' ');
+      const progName   = programMap[s.programId] ? `${programMap[s.programId]} (${s.programId})` : s.programId;
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="td"><code style="background:var(--ui-surface);padding:2px 6px;border-radius:5px;font-size:0.8125rem">${s.studentId}</code></td>
-        <td class="td" style="font-weight:600">${s.firstName} ${s.firstSurname}</td>
-        <td class="td" style="font-family:monospace;font-size:0.8125rem;color:var(--ui-text-2)">${s.email}</td>
-        <td class="td"><span style="background:var(--ui-surface);padding:2px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700">${s.programId}</span></td>
-        <td class="td"><span style="padding:3px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.isActive ? '#D1FAE5' : '#FEE2E2'};color:${s.isActive ? '#059669' : '#DC2626'}">${s.isActive ? 'Activo' : 'Inactivo'}</span></td>
-        <td class="td"><span style="padding:3px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.emailVerified ? '#D1FAE5' : '#FEF3C7'};color:${s.emailVerified ? '#059669' : '#D97706'}">${s.emailVerified ? 'Verificado' : 'Pendiente'}</span></td>`;
-      document.getElementById('students-tbody')!.appendChild(tr);
+        <td class="td"><code style="background:var(--ui-surface);padding:2px 7px;border-radius:5px;font-size:0.8125rem;font-family:monospace">${s.studentId}</code></td>
+        <td class="td" style="font-weight:600">${fullName}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${(s.email ?? '').toLowerCase()}</td>
+        <td class="td" style="font-size:0.8125rem">${progName}</td>
+        <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.emailVerified?'#D1FAE5':'#FEF3C7'};color:${s.emailVerified?'#059669':'#D97706'}">${s.emailVerified?'Verificado':'Pendiente'}</span></td>
+        <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.isActive?'#D1FAE5':'#FEE2E2'};color:${s.isActive?'#059669':'#DC2626'}">${s.isActive?'Activo':'Inactivo'}</span></td>
+        <td class="td">
+          ${s.isActive ? `<button class="btn-deact" data-id="${s.studentId}" data-name="${fullName}" style="padding:4px 10px;border-radius:7px;border:1.5px solid #FECACA;background:#FEF2F2;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Desactivar</button>` : ''}
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.btn-deact').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pendingDeactivateId = btn.dataset.id!;
+        (document.getElementById('deactivate-desc') as HTMLElement).textContent =
+          `Se desactivará la cuenta del estudiante "${btn.dataset.name}" (${btn.dataset.id}). No podrá iniciar sesión.`;
+        (document.getElementById('deactivate-modal') as HTMLElement).style.display = 'flex';
+      });
     });
   }
 
   async function loadPage() {
     try {
-      const res = await studentsApi.findAll(page, PAGE_SIZE);
+      const res = await studentsApi.findAll(page, SIZE);
       if (!res.data) return;
-      totalPages = res.data.totalPages;
-      renderRows(res.data.content);
-      const totalEl = document.getElementById('total-label');
-      const pageEl  = document.getElementById('page-info');
-      if (totalEl) totalEl.textContent = `${res.data.totalElements} estudiantes`;
-      if (pageEl)  pageEl.textContent  = `Pág. ${page + 1} de ${totalPages || 1}`;
-      (document.getElementById('btn-prev-page') as HTMLButtonElement).disabled = page === 0;
-      (document.getElementById('btn-next-page') as HTMLButtonElement).disabled = page >= totalPages - 1;
+      allStudents    = res.data.content;
+      totalPages     = res.data.totalPages;
+      totalElements  = res.data.totalElements;
+      (document.getElementById('page-info') as HTMLElement).textContent = `Pág. ${page + 1} de ${totalPages || 1}`;
+      (document.getElementById('btn-prev') as HTMLButtonElement).disabled = page === 0;
+      (document.getElementById('btn-next') as HTMLButtonElement).disabled = page >= totalPages - 1;
+      updateStats();
+      filterAndRender();
     } catch (err: any) {
       toast.error('Error al cargar estudiantes', { description: err?.message });
     }
   }
 
-  document.getElementById('btn-prev-page')?.addEventListener('click', () => { if (page > 0) { page--; loadPage(); } });
-  document.getElementById('btn-next-page')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadPage(); } });
+  document.getElementById('btn-prev')?.addEventListener('click', () => { if (page > 0) { page--; loadPage(); } });
+  document.getElementById('btn-next')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadPage(); } });
 
-  document.getElementById('student-search')?.addEventListener('input', e => {
-    clearTimeout(debounce);
+  document.getElementById('student-search')?.addEventListener('input', (e) => {
     searchStr = (e.target as HTMLInputElement).value.trim();
-    debounce  = setTimeout(() => { page = 0; loadPage(); }, 400);
+    clearTimeout(debounce);
+    debounce = setTimeout(filterAndRender, 300);
+  });
+
+  document.getElementById('filter-program')?.addEventListener('change', (e) => {
+    filterProg = (e.target as HTMLSelectElement).value; filterAndRender();
+  });
+  document.getElementById('filter-status')?.addEventListener('change', (e) => {
+    filterStatus = (e.target as HTMLSelectElement).value; filterAndRender();
+  });
+
+  // Deactivate modal
+  const deactivateModal = document.getElementById('deactivate-modal')!;
+  document.getElementById('deactivate-cancel')?.addEventListener('click', () => { deactivateModal.style.display = 'none'; });
+  deactivateModal.addEventListener('click', e => { if (e.target === deactivateModal) deactivateModal.style.display = 'none'; });
+  document.getElementById('deactivate-confirm')?.addEventListener('click', async () => {
+    try {
+      await studentsApi.deactivate(pendingDeactivateId);
+      toast.success('Estudiante desactivado');
+      deactivateModal.style.display = 'none';
+      loadPage();
+    } catch (err: any) {
+      toast.error('Error', { description: err?.message });
+      deactivateModal.style.display = 'none';
+    }
   });
 
   loadPage();

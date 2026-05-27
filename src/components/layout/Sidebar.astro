@@ -6,7 +6,6 @@ interface Props {
 }
 const { currentPage = 'dashboard' } = Astro.props;
 
-// Datos correctos y consistentes
 const mainNav = [
   { href: '/dashboard',      icon: 'tabler:home',           label: 'Inicio',           page: 'dashboard' },
   { href: '/tests',          icon: 'tabler:clipboard-list', label: 'Tests',            page: 'tests' },
@@ -19,22 +18,46 @@ const accountNav = [
   { href: '/dashboard/profile',  icon: 'tabler:user-circle',  label: 'Mi perfil',   page: 'profile' },
 ];
 
-const competences = [
-  { key: 'lc', label: 'Lectura Crítica',        color: '#D41224' },
-  { key: 'rq', label: 'Razon. Cuantitativo',    color: '#2563EB' },
-  { key: 'cc', label: 'Comp. Ciudadanas',       color: '#059669' },
-  { key: 'ce', label: 'Comunicación Escrita',   color: '#7C3AED' },
-  { key: 'en', label: 'Inglés',                 color: '#D97706' },
-];
-
 const adminNav = [
-  { href: '/admin/students',  icon: 'tabler:users',            label: 'Estudiantes',  page: 'admin-students' },
-  { href: '/admin/tests',     icon: 'tabler:file-description', label: 'Tests',        page: 'admin-tests' },
-  { href: '/admin/questions', icon: 'tabler:list-check',       label: 'Preguntas',    page: 'admin-questions' },
-  { href: '/admin/programs',  icon: 'tabler:school',           label: 'Programas',    page: 'admin-programs' },
-  { href: '/admin/rankings',  icon: 'tabler:award',            label: 'Rankings',     page: 'admin-rankings' },
+  { href: '/admin/students',    icon: 'tabler:users',            label: 'Estudiantes',   page: 'admin-students' },
+  { href: '/admin/tests',       icon: 'tabler:file-description', label: 'Tests',         page: 'admin-tests' },
+  { href: '/admin/questions',   icon: 'tabler:list-check',       label: 'Preguntas',     page: 'admin-questions' },
+  { href: '/admin/admins',      icon: 'tabler:shield-check',     label: 'Administradores', page: 'admin-admins' },
+  { href: '/admin/programs',    icon: 'tabler:school',           label: 'Programas',     page: 'admin-programs' },
+  { href: '/admin/rankings',    icon: 'tabler:award',            label: 'Rankings',      page: 'admin-rankings' },
 ];
 ---
+
+<!-- Modal de confirmación de logout -->
+<div id="logout-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:18px;padding:2rem 1.75rem;max-width:340px;width:calc(100%-2rem);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="width:52px;height:52px;border-radius:14px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round">
+        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+      </svg>
+    </div>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Cerrar sesión?</h3>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55">Se cerrará tu sesión en todos los dispositivos activos.</p>
+    <div style="display:flex;gap:8px">
+      <button id="logout-cancel" style="flex:1;padding:0.625rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+      <button id="logout-confirm" style="flex:1;padding:0.625rem;border-radius:10px;border:none;background:linear-gradient(135deg,#DC2626,#991B1B);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(220,38,38,0.3)">Cerrar sesión</button>
+    </div>
+  </div>
+</div>
+
+<!-- Token expirado modal -->
+<div id="session-expired-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+  <div style="background:var(--ui-card);border-radius:18px;padding:2rem 1.75rem;max-width:360px;width:calc(100%-2rem);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+    <div style="width:52px;height:52px;border-radius:14px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <svg width="24" height="24" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Sesión expirada</h3>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55">Tu sesión ha expirado o fue cerrada en otro dispositivo. Por favor inicia sesión nuevamente.</p>
+    <a href="/auth" style="display:flex;align-items:center;justify-content:center;padding:0.625rem;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-weight:700;font-size:0.875rem;text-decoration:none">Ir al login</a>
+  </div>
+</div>
 
 <aside id="rp-sidebar">
   <!-- Logo -->
@@ -56,7 +79,7 @@ const adminNav = [
       <p class="sb-user-sub" id="sb-sub">UFPSO</p>
     </div>
     <a href="/dashboard/profile" class="sb-settings" title="Perfil">
-      <Icon name="tabler:settings" size={15} />
+      <Icon name="tabler:user-circle" size={16} />
     </a>
   </div>
 
@@ -68,7 +91,6 @@ const adminNav = [
         <a
           href={item.href}
           class:list={['sb-item', currentPage === item.page && 'active']}
-          onclick="window.__closeSidebar && window.__closeSidebar()"
         >
           <Icon name={item.icon} size={16} />
           {item.label}
@@ -76,19 +98,16 @@ const adminNav = [
       ))
     }
 
+    <!-- Competencias dinámicas -->
     <span class="sb-section">Competencias</span>
-    {
-      competences.map(c => (
-        <a
-          href={`/tests?c=${c.key}`}
-          class:list={['sb-item sb-comp', currentPage === `comp-${c.key}` && 'active']}
-          onclick="window.__closeSidebar && window.__closeSidebar()"
-        >
-          <span class="sb-dot" style={`background:${c.color}`}></span>
-          {c.label}
-        </a>
-      ))
-    }
+    <div id="sb-competences-list">
+      <!-- Skeleton mientras carga -->
+      <div class="sb-skeleton"></div>
+      <div class="sb-skeleton" style="width:75%"></div>
+      <div class="sb-skeleton" style="width:85%"></div>
+      <div class="sb-skeleton" style="width:70%"></div>
+      <div class="sb-skeleton" style="width:80%"></div>
+    </div>
 
     <span class="sb-section">Mi cuenta</span>
     {
@@ -96,7 +115,6 @@ const adminNav = [
         <a
           href={item.href}
           class:list={['sb-item', currentPage === item.page && 'active']}
-          onclick="window.__closeSidebar && window.__closeSidebar()"
         >
           <Icon name={item.icon} size={16} />
           {item.label}
@@ -112,7 +130,6 @@ const adminNav = [
           <a
             href={item.href}
             class:list={['sb-item', currentPage === item.page && 'active']}
-            onclick="window.__closeSidebar && window.__closeSidebar()"
           >
             <Icon name={item.icon} size={16} />
             {item.label}
@@ -124,7 +141,7 @@ const adminNav = [
 
   <!-- Logout -->
   <div class="sb-footer">
-    <button id="sb-logout" class="sb-item sb-logout">
+    <button id="sb-logout" class="sb-item sb-logout" type="button">
       <Icon name="tabler:logout" size={16} />
       Cerrar sesión
     </button>
@@ -132,14 +149,20 @@ const adminNav = [
 </aside>
 
 <style>
+  @keyframes modalIn { from { opacity:0; transform:scale(0.92) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes shimmer { 0%{background-position:-400px 0}100%{background-position:400px 0} }
+
+  .sb-skeleton {
+    height: 30px; border-radius: 9px; width: 100%; margin-bottom: 4px;
+    background: linear-gradient(90deg, var(--sidebar-hover-bg) 25%, var(--sidebar-border) 50%, var(--sidebar-hover-bg) 75%);
+    background-size: 800px 100%; animation: shimmer 1.5s infinite;
+  }
+
   #rp-sidebar {
-    width: 244px;
-    min-width: 244px;
+    width: 244px; min-width: 244px;
     background: var(--sidebar-bg);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
+    display: flex; flex-direction: column;
+    overflow-y: auto; overflow-x: hidden;
     border-right: 1px solid var(--sidebar-border);
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -150,10 +173,8 @@ const adminNav = [
 
   @media (max-width: 1023px) {
     #rp-sidebar {
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      transform: translateX(-260px);
-      box-shadow: none;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      transform: translateX(-260px); box-shadow: none;
     }
     #rp-sidebar.open {
       transform: translateX(0);
@@ -161,89 +182,64 @@ const adminNav = [
     }
   }
 
-  /* Logo */
   .sb-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
+    display: flex; align-items: center; gap: 0.625rem;
     padding: 1.25rem 1rem 1rem;
     border-bottom: 1px solid var(--sidebar-border);
   }
   .sb-logo-icon {
     width: 36px; height: 36px;
     background: linear-gradient(135deg, #D41224, #9B1F24);
-    border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    color: white;
-    box-shadow: 0 4px 12px rgba(212,18,36,0.35);
-    flex-shrink: 0;
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    color: white; box-shadow: 0 4px 12px rgba(212,18,36,0.35); flex-shrink: 0;
   }
   .sb-logo-name {
-    color: var(--sidebar-hover-txt);
-    font-weight: 900; font-size: 0.9375rem;
+    color: var(--sidebar-hover-txt); font-weight: 900; font-size: 0.9375rem;
     letter-spacing: -0.4px; margin: 0; line-height: 1.1;
   }
   .sb-logo-name span { color: #D41224; }
   .sb-logo-sub {
-    color: var(--sidebar-text);
-    font-size: 0.625rem; margin: 0;
-    letter-spacing: 0.9px; text-transform: uppercase;
-    opacity: 0.5;
+    color: var(--sidebar-text); font-size: 0.625rem; margin: 0;
+    letter-spacing: 0.9px; text-transform: uppercase; opacity: 0.5;
   }
 
-  /* User */
   .sb-user {
     display: flex; align-items: center; gap: 0.625rem;
     padding: 0.875rem 1rem;
     border-bottom: 1px solid var(--sidebar-border);
   }
   .sb-avatar {
-    width: 38px; height: 38px;
-    border-radius: 10px;
+    width: 38px; height: 38px; border-radius: 10px;
     background: linear-gradient(135deg, #D41224, #9B1F24);
     display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 900; font-size: 0.875rem;
-    flex-shrink: 0;
+    color: white; font-weight: 900; font-size: 0.875rem; flex-shrink: 0;
   }
   .sb-user-info { flex: 1; min-width: 0; }
   .sb-user-name {
-    color: var(--sidebar-hover-txt);
-    font-weight: 700; font-size: 0.8125rem;
+    color: var(--sidebar-hover-txt); font-weight: 700; font-size: 0.8125rem;
     margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .sb-user-sub {
-    color: var(--sidebar-text);
-    font-size: 0.6875rem; margin: 0; opacity: 0.5;
-  }
+  .sb-user-sub { color: var(--sidebar-text); font-size: 0.6875rem; margin: 0; opacity: 0.5; }
   .sb-settings {
-    color: var(--sidebar-text);
-    opacity: 0.4; text-decoration: none;
-    padding: 0.25rem; flex-shrink: 0;
-    transition: opacity 0.2s;
+    color: var(--sidebar-text); opacity: 0.4; text-decoration: none;
+    padding: 0.25rem; flex-shrink: 0; transition: opacity 0.2s;
     display: flex; align-items: center;
   }
   .sb-settings:hover { opacity: 0.8; }
 
-  /* Nav */
   .sb-nav { padding: 0.625rem; flex: 1; }
   .sb-section {
-    display: block;
-    color: var(--sidebar-text);
-    font-size: 0.625rem; font-weight: 700;
+    display: block; color: var(--sidebar-text); font-size: 0.625rem; font-weight: 700;
     letter-spacing: 0.9px; text-transform: uppercase;
-    padding: 0 0.625rem;
-    margin: 0.875rem 0 0.3125rem;
-    opacity: 0.35;
+    padding: 0 0.625rem; margin: 0.875rem 0 0.3125rem; opacity: 0.35;
   }
 
   .sb-item {
     display: flex; align-items: center; gap: 0.5625rem;
     padding: 0.5625rem 0.625rem;
-    color: var(--sidebar-text);
-    font-size: 0.875rem; font-weight: 500;
+    color: var(--sidebar-text); font-size: 0.875rem; font-weight: 500;
     border-radius: 9px; text-decoration: none;
-    transition: all 0.15s;
-    cursor: pointer; margin-bottom: 1px;
+    transition: all 0.15s; cursor: pointer; margin-bottom: 1px;
     border: none; background: none; width: 100%;
     text-align: left; font-family: inherit;
   }
@@ -251,43 +247,217 @@ const adminNav = [
   .sb-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-txt); font-weight: 600; }
 
   .sb-comp { padding-left: 0.625rem; }
-  .sb-dot {
-    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-  }
+  .sb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-  /* Footer */
-  .sb-footer {
-    padding: 0.625rem;
-    border-top: 1px solid var(--sidebar-border);
-  }
-  .sb-logout { color: rgba(239, 68, 68, 0.5) !important; }
-  .sb-logout:hover {
-    background: rgba(212,18,36,0.08) !important;
-    color: rgba(239,68,68,0.85) !important;
-  }
+  .sb-footer { padding: 0.625rem; border-top: 1px solid var(--sidebar-border); }
+  .sb-logout { color: rgba(239, 68, 68, 0.6) !important; }
+  .sb-logout:hover { background: rgba(212,18,36,0.08) !important; color: rgba(239,68,68,0.9) !important; }
 </style>
 
 <script>
-  import { getUser, isAdmin, logout } from '../../lib/auth';
+  import { getUser, isAdmin, logout, initSessionWatcher, updateStoredUser } from '../../lib/auth';
+import { competencesApi } from '../../lib/api/competences.api';
+import { studentsApi }    from '../../lib/api/students.api';
+import { adminsApi }      from '../../lib/api/admins.api';
 
-  const user = getUser();
-  if (user) {
-    const initials = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase();
-    const fullName = user.firstSurname ? `${user.firstName} ${user.firstSurname}` : user.firstName;
+// ── Datos del usuario ─────────────────────────────────────────────
+const user = getUser();
 
-    const avatarEl = document.getElementById('sb-avatar');
-    const nameEl   = document.getElementById('sb-name');
-    const subEl    = document.getElementById('sb-sub');
+function paintUser() {
+  const u = getUser();
+  if (!u) return;
 
-    if (avatarEl) avatarEl.textContent = initials;
-    if (nameEl)   nameEl.textContent = fullName;
-    if (subEl)    subEl.textContent = isAdmin() ? 'Administrador · UFPSO' : (user.programId ?? 'Estudiante · UFPSO');
+  // Si firstName está vacío mostramos el ID como fallback temporal
+  const firstName  = u.firstName  || '';
+  const firstSurname = u.firstSurname || '';
+  const hasName    = firstName.length > 0;
+  const displayName = hasName
+    ? (firstSurname ? `${firstName} ${firstSurname}` : firstName)
+    : u.id; // fallback: mostrar ID mientras carga
 
-    if (isAdmin()) {
-      const adminSection = document.getElementById('sb-admin-section');
-      if (adminSection) adminSection.style.display = 'block';
-    }
+  const initials = hasName
+    ? ((firstName[0] ?? '') + (firstSurname[0] ?? firstName[1] ?? '')).toUpperCase()
+    : u.id.slice(0, 2).toUpperCase();
+
+  const avatarEl = document.getElementById('sb-avatar');
+  const nameEl   = document.getElementById('sb-name');
+  const subEl    = document.getElementById('sb-sub');
+
+  if (avatarEl) avatarEl.textContent = initials;
+  if (nameEl)   nameEl.textContent   = displayName;
+  if (subEl)    subEl.textContent    = isAdmin()
+    ? 'Administrador · UFPSO'
+    : (u.programId ?? 'Estudiante · UFPSO');
+
+  if (isAdmin()) {
+    const adminSection = document.getElementById('sb-admin-section');
+    if (adminSection) adminSection.style.display = 'block';
   }
+}
 
-  document.getElementById('sb-logout')?.addEventListener('click', logout);
+paintUser();
+
+// Cargar nombre real desde la API si está vacío
+const u = getUser();
+if (u && !u.firstName) {
+  if (isAdmin()) {
+    adminsApi.me().then(res => {
+      if (res.data) {
+        updateStoredUser({
+          firstName:    res.data.firstName,
+          firstSurname: res.data.firstSurname,
+          email:        res.data.email,
+        });
+        paintUser();
+      }
+    }).catch(() => {});
+  } else {
+    studentsApi.me().then(res => {
+      if (res.data) {
+        updateStoredUser({
+          firstName:    res.data.firstName,
+          firstSurname: res.data.firstSurname,
+          email:        res.data.email,
+        });
+        paintUser();
+      }
+    }).catch(() => {});
+  }
+}
+
+// ── Competencias dinámicas ────────────────────────────────────────
+const COMP_COLORS: Record<string, { color: string; bg: string }> = {
+  'lectura':   { color: '#D41224', bg: '#FEE2E2' },
+  'cuantit':   { color: '#2563EB', bg: '#DBEAFE' },
+  'razon':     { color: '#2563EB', bg: '#DBEAFE' },
+  'ciudadan':  { color: '#059669', bg: '#D1FAE5' },
+  'escrit':    { color: '#7C3AED', bg: '#EDE9FE' },
+  'comunicac': { color: '#7C3AED', bg: '#EDE9FE' },
+  'ingl':      { color: '#D97706', bg: '#FEF3C7' },
+};
+
+function getCompStyle(name: string) {
+  const n = name.toLowerCase();
+  for (const [kw, style] of Object.entries(COMP_COLORS)) {
+    if (n.includes(kw)) return style;
+  }
+  return { color: '#6B7280', bg: '#F3F4F6' };
+}
+
+// Abreviaturas para el punto
+function getShort(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('lectura'))   return 'LC';
+  if (n.includes('cuantit') || n.includes('razon')) return 'RC';
+  if (n.includes('ciudadan'))  return 'CC';
+  if (n.includes('escrit') || n.includes('comunicac')) return 'CE';
+  if (n.includes('ingl'))      return 'IN';
+  return name.slice(0, 2).toUpperCase();
+}
+
+competencesApi.findAll(true).then(res => {
+  const listEl = document.getElementById('sb-competences-list');
+  if (!listEl || !res.data?.length) return;
+  listEl.innerHTML = '';
+
+  res.data.forEach(comp => {
+    const s     = getCompStyle(comp.competenceName);
+    const short = getShort(comp.competenceName);
+
+    const a = document.createElement('a');
+    a.href = `/tests?c=${short.toLowerCase()}`;
+
+    // Estilos inline para evitar scoping de Astro
+    a.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 10px;
+      color: var(--sidebar-text);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 9px;
+      text-decoration: none;
+      transition: all 0.15s;
+      cursor: pointer;
+      margin-bottom: 1px;
+      width: 100%;
+    `;
+
+    // Punto de color
+    const dot = document.createElement('span');
+    dot.style.cssText = `
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: ${s.color};
+      flex-shrink: 0;
+      display: inline-block;
+    `;
+
+    const label = document.createElement('span');
+    label.textContent = comp.competenceName;
+    label.style.cssText = `
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.8125rem;
+    `;
+
+    a.appendChild(dot);
+    a.appendChild(label);
+
+    a.addEventListener('mouseenter', () => {
+      a.style.background = 'var(--sidebar-hover-bg)';
+      a.style.color      = 'var(--sidebar-hover-txt)';
+    });
+    a.addEventListener('mouseleave', () => {
+      a.style.background = '';
+      a.style.color      = 'var(--sidebar-text)';
+    });
+
+    listEl.appendChild(a);
+  });
+}).catch(() => {
+  const listEl = document.getElementById('sb-competences-list');
+  if (listEl) listEl.innerHTML =
+    '<p style="font-size:0.75rem;color:var(--sidebar-text);padding:0 0.625rem;opacity:0.5">No disponible</p>';
+});
+
+// ── Logout con modal ──────────────────────────────────────────────
+const logoutModal   = document.getElementById('logout-modal')!;
+const logoutCancel  = document.getElementById('logout-cancel')!;
+const logoutConfirm = document.getElementById('logout-confirm')!;
+
+document.getElementById('sb-logout')?.addEventListener('click', () => {
+  logoutModal.style.display = 'flex';
+});
+logoutCancel?.addEventListener('click', () => {
+  logoutModal.style.display = 'none';
+});
+logoutConfirm?.addEventListener('click', () => {
+  logoutModal.style.display = 'none';
+  logout();
+});
+logoutModal?.addEventListener('click', (e) => {
+  if (e.target === logoutModal) logoutModal.style.display = 'none';
+});
+
+// ── Session watcher ───────────────────────────────────────────────
+const expiredModal = document.getElementById('session-expired-modal')!;
+initSessionWatcher(() => {
+  expiredModal.style.display = 'flex';
+});
+
+// ── Sidebar mobile ────────────────────────────────────────────────
+(window as any).__closeSidebar = () => {
+  document.getElementById('rp-sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('visible');
+  document.body.style.overflow = '';
+};
+(window as any).__openSidebar = () => {
+  document.getElementById('rp-sidebar')?.classList.add('open');
+  document.getElementById('sidebar-overlay')?.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+};
 </script>

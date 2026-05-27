@@ -1,0 +1,304 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Administradores" currentPage="admin-admins">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Administradores</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Administradores</h1>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Gestión de cuentas de administrador del sistema.</p>
+      </div>
+      <button id="btn-new-admin" style="display:inline-flex;align-items:center;gap:7px;padding:0.625rem 1.125rem;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo admin
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D41224">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Total admins</p>
+      <p id="stat-total" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;line-height:1">—</p>
+    </div>
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #059669">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Activos</p>
+      <p id="stat-active" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">—</p>
+    </div>
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D97706">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Inactivos</p>
+      <p id="stat-inactive" style="font-size:1.75rem;font-weight:900;color:#D97706;margin:0;line-height:1">—</p>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:1px solid var(--ui-border)">
+            <th class="th">ID</th>
+            <th class="th">Nombre completo</th>
+            <th class="th">Correo electrónico</th>
+            <th class="th">Teléfono</th>
+            <th class="th">Último acceso</th>
+            <th class="th">Estado</th>
+            <th class="th">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="admins-tbody">
+          <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:0.875rem 1.25rem;border-top:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <span id="page-info" style="font-size:0.8125rem;color:var(--ui-text-3)"></span>
+      <div style="display:flex;gap:6px">
+        <button id="btn-prev" class="page-btn" disabled>← Anterior</button>
+        <button id="btn-next" class="page-btn">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</AppLayout>
+
+<!-- Modal crear admin -->
+<div id="create-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:480px;width:calc(100%-2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h2 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Nuevo administrador</h2>
+      <button id="modal-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);padding:4px;font-size:1.25rem;line-height:1">×</button>
+    </div>
+
+    <div id="create-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:1rem"></div>
+
+    <form id="create-form" novalidate>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="field-grp">
+          <label class="field-lbl">Primer nombre *</label>
+          <input id="c-fname" type="text" class="field-inp" placeholder="Ej: Juan" maxlength="15" required />
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Segundo nombre</label>
+          <input id="c-mname" type="text" class="field-inp" placeholder="Opcional" maxlength="15" />
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Primer apellido *</label>
+          <input id="c-lname1" type="text" class="field-inp" placeholder="Ej: Pérez" maxlength="15" required />
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Segundo apellido</label>
+          <input id="c-lname2" type="text" class="field-inp" placeholder="Opcional" maxlength="15" />
+        </div>
+        <div class="field-grp" style="grid-column:1/-1">
+          <label class="field-lbl">Correo electrónico *</label>
+          <input id="c-email" type="email" class="field-inp" placeholder="correo@dominio.com" maxlength="50" required />
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Teléfono *</label>
+          <input id="c-phone" type="tel" class="field-inp" placeholder="+573001234567" required />
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Contraseña *</label>
+          <input id="c-password" type="password" class="field-inp" placeholder="Mín. 8 caracteres" required />
+        </div>
+      </div>
+      <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0 0 1rem">* La contraseña debe tener mayúscula, minúscula y número.</p>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="create-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+        <button type="submit" id="create-submit" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
+          <span id="create-label">Crear administrador</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal desactivar admin -->
+<div id="deactivate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:360px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="width:52px;height:52px;border-radius:14px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Desactivar administrador?</h3>
+    <p id="deactivate-desc" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55"></p>
+    <div style="display:flex;gap:8px">
+      <button id="deactivate-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+      <button id="deactivate-confirm" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#DC2626,#991B1B);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Desactivar</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
+  .th { padding:10px 14px;text-align:left;font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap }
+  .td { padding:10px 14px;font-size:0.875rem;color:var(--ui-text-1);border-top:1px solid var(--ui-border) }
+  .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
+  .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
+  .page-btn:disabled { opacity:0.4;cursor:not-allowed }
+  .field-grp { display:flex;flex-direction:column;gap:4px }
+  .field-lbl { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3) }
+  .field-inp { padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none;transition:border-color 0.2s;width:100% }
+  .field-inp:focus { border-color:var(--brand);box-shadow:0 0 0 3px rgba(212,18,36,0.1) }
+  .action-btn { padding:4px 10px;border-radius:7px;border:1.5px solid;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s }
+</style>
+
+<script>
+  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { adminsApi } from '../../lib/api/admins.api';
+  import { toast } from '../../lib/toast';
+  import type { AdminDto } from '../../lib/api/types';
+
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
+
+  let page = 0;
+  const SIZE = 15;
+  let totalPages = 1;
+  let pendingDeactivateId = '';
+  let allAdmins: AdminDto[] = [];
+
+  function fmtDate(iso?: string) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+  }
+
+  async function loadPage() {
+    try {
+      const res = await adminsApi.findAll(page, SIZE);
+      if (!res.data) return;
+      allAdmins   = res.data.content;
+      totalPages  = res.data.totalPages;
+      const total = res.data.totalElements;
+      const active  = allAdmins.filter(a => a.isActive).length;
+      const inactive = allAdmins.filter(a => !a.isActive).length;
+
+      (document.getElementById('stat-total') as HTMLElement).textContent   = String(total);
+      (document.getElementById('stat-active') as HTMLElement).textContent  = String(active);
+      (document.getElementById('stat-inactive') as HTMLElement).textContent = String(inactive);
+      (document.getElementById('page-info') as HTMLElement).textContent = `Pág. ${page + 1} de ${totalPages || 1}`;
+      (document.getElementById('btn-prev') as HTMLButtonElement).disabled = page === 0;
+      (document.getElementById('btn-next') as HTMLButtonElement).disabled = page >= totalPages - 1;
+
+      renderTable();
+    } catch (err: any) {
+      toast.error('Error al cargar admins', { description: err?.message });
+    }
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('admins-tbody')!;
+    tbody.innerHTML = '';
+    if (!allAdmins.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Sin administradores</td></tr>';
+      return;
+    }
+    allAdmins.forEach(a => {
+      const fullName = [a.firstName, a.secondName, a.firstSurname, a.secondSurname].filter(Boolean).join(' ');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td"><code style="background:var(--ui-surface);padding:2px 7px;border-radius:5px;font-size:0.8125rem;font-family:monospace">${a.adminId}</code></td>
+        <td class="td" style="font-weight:600">${fullName}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${(a.email ?? '').toLowerCase()}</td>
+        <td class="td" style="font-size:0.8125rem;font-family:monospace">${a.phone ?? '—'}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-3)">${fmtDate(a.lastLoginAt)}</td>
+        <td class="td">
+          <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${a.isActive ? '#D1FAE5' : '#FEE2E2'};color:${a.isActive ? '#059669' : '#DC2626'}">
+            ${a.isActive ? 'Activo' : 'Inactivo'}
+          </span>
+        </td>
+        <td class="td">
+          <div style="display:flex;gap:5px">
+            ${a.isActive ? `<button class="action-btn btn-deactivate" data-id="${a.adminId}" data-name="${fullName}" style="border-color:#FECACA;background:#FEF2F2;color:#DC2626">Desactivar</button>` : ''}
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Deactivate buttons
+    document.querySelectorAll<HTMLButtonElement>('.btn-deactivate').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pendingDeactivateId = btn.dataset.id!;
+        (document.getElementById('deactivate-desc') as HTMLElement).textContent =
+          `Se desactivará la cuenta del administrador "${btn.dataset.name}". Esta acción puede revertirse editando el admin.`;
+        (document.getElementById('deactivate-modal') as HTMLElement).style.display = 'flex';
+      });
+    });
+  }
+
+  // Pagination
+  document.getElementById('btn-prev')?.addEventListener('click', () => { if (page > 0) { page--; loadPage(); } });
+  document.getElementById('btn-next')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadPage(); } });
+
+  // ── Create modal ──────────────────────────────────────────────────
+  const createModal = document.getElementById('create-modal')!;
+  const openCreate  = () => { createModal.style.display = 'flex'; };
+  const closeCreate = () => { createModal.style.display = 'none'; };
+
+  document.getElementById('btn-new-admin')?.addEventListener('click', openCreate);
+  document.getElementById('modal-close')?.addEventListener('click', closeCreate);
+  document.getElementById('create-cancel')?.addEventListener('click', closeCreate);
+  createModal.addEventListener('click', (e) => { if (e.target === createModal) closeCreate(); });
+
+  document.getElementById('create-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl  = document.getElementById('create-error')!;
+    const lblEl  = document.getElementById('create-label')!;
+    const submit = document.getElementById('create-submit') as HTMLButtonElement;
+    errEl.style.display = 'none';
+
+    const firstName    = (document.getElementById('c-fname') as HTMLInputElement).value.trim();
+    const secondName   = (document.getElementById('c-mname') as HTMLInputElement).value.trim() || undefined;
+    const firstSurname = (document.getElementById('c-lname1') as HTMLInputElement).value.trim();
+    const secondSurname = (document.getElementById('c-lname2') as HTMLInputElement).value.trim() || undefined;
+    const email        = (document.getElementById('c-email') as HTMLInputElement).value.trim();
+    const phone        = (document.getElementById('c-phone') as HTMLInputElement).value.trim();
+    const password     = (document.getElementById('c-password') as HTMLInputElement).value;
+
+    if (!firstName || !firstSurname || !email || !phone || !password) {
+      errEl.textContent = 'Completa todos los campos obligatorios.';
+      errEl.style.display = 'block'; return;
+    }
+
+    submit.disabled = true; lblEl.textContent = 'Creando...';
+    try {
+      await adminsApi.create({ firstName, secondName, firstSurname, secondSurname, email, phone, password });
+      toast.success('Administrador creado correctamente');
+      closeCreate();
+      (document.getElementById('create-form') as HTMLFormElement).reset();
+      page = 0; loadPage();
+    } catch (err: any) {
+      const msgs = err?.errors ? Object.values(err.errors as Record<string, string>).join(' ') : err?.message;
+      errEl.textContent = msgs ?? 'Error al crear administrador.';
+      errEl.style.display = 'block';
+    } finally {
+      submit.disabled = false; lblEl.textContent = 'Crear administrador';
+    }
+  });
+
+  // ── Deactivate modal ──────────────────────────────────────────────
+  const deactivateModal = document.getElementById('deactivate-modal')!;
+  document.getElementById('deactivate-cancel')?.addEventListener('click', () => { deactivateModal.style.display = 'none'; });
+  deactivateModal.addEventListener('click', (e) => { if (e.target === deactivateModal) deactivateModal.style.display = 'none'; });
+
+  document.getElementById('deactivate-confirm')?.addEventListener('click', async () => {
+    if (!pendingDeactivateId) return;
+    try {
+      await adminsApi.deactivate(pendingDeactivateId);
+      toast.success('Administrador desactivado');
+      deactivateModal.style.display = 'none';
+      loadPage();
+    } catch (err: any) {
+      toast.error('Error al desactivar', { description: err?.message });
+      deactivateModal.style.display = 'none';
+    }
+  });
+
+  loadPage();
+</script>

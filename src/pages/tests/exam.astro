@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
 ---
 
 <BaseLayout title="Simulacro en progreso">
@@ -8,8 +9,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <header class="exam-header">
       <div class="exam-header-left">
         <div class="exam-logo">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 2L22 7L22 17L12 22L2 17L2 7Z" fill="rgba(255,255,255,0.2)"/><circle cx="12" cy="12" r="3" fill="white"/></svg>
-        </div>
+          <Icon name="tabler:brain" size={20} class="text-white"/></div>
         <span>Razona<strong>Pro</strong></span>
       </div>
       <div class="exam-info">

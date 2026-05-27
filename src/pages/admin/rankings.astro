@@ -1,0 +1,470 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Rankings" currentPage="admin-rankings">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Rankings</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Rankings</h1>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Gestiona las tablas de posiciones y consulta el leaderboard de cada una.</p>
+      </div>
+      <button id="btn-new-ranking" style="display:inline-flex;align-items:center;gap:7px;padding:0.625rem 1.125rem;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo ranking
+      </button>
+    </div>
+  </div>
+
+  <!-- Layout dos columnas: lista rankings | leaderboard seleccionado -->
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start">
+
+    <!-- Columna izquierda: tabla de rankings -->
+    <div>
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
+        <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D41224">
+          <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Total rankings</p>
+          <p id="stat-total" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;line-height:1">—</p>
+        </div>
+        <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #059669">
+          <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Activos</p>
+          <p id="stat-active" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">—</p>
+        </div>
+        <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #7C3AED">
+          <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Participantes</p>
+          <p id="stat-participants" style="font-size:1.75rem;font-weight:900;color:#7C3AED;margin:0;line-height:1">—</p>
+        </div>
+      </div>
+
+      <!-- Tabla rankings -->
+      <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="border-bottom:1px solid var(--ui-border)">
+                <th class="th">ID</th>
+                <th class="th">Nombre</th>
+                <th class="th">Periodo</th>
+                <th class="th">Fuente</th>
+                <th class="th">Estado</th>
+                <th class="th">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="rankings-tbody">
+              <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna derecha: leaderboard del ranking seleccionado -->
+    <div style="position:sticky;top:1.5rem">
+      <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+        <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div>
+            <h2 id="lb-title" style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0">Leaderboard</h2>
+            <p id="lb-subtitle" style="font-size:0.75rem;color:var(--ui-text-3);margin:2px 0 0">Selecciona un ranking para ver posiciones</p>
+          </div>
+          <span id="lb-total" style="font-size:0.75rem;color:var(--ui-text-3);white-space:nowrap"></span>
+        </div>
+        <div id="lb-list" style="padding:0.75rem;max-height:480px;overflow-y:auto">
+          <div style="text-align:center;padding:2rem;color:var(--ui-text-3)">
+            <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 8px"><path d="M8 21H4a2 2 0 01-2-2V5a2 2 0 012-2h4M14 21h4a2 2 0 002-2V5a2 2 0 00-2-2h-4M10 7h4v14h-4z"/></svg>
+            <p style="font-size:0.8125rem;margin:0">Ningún ranking seleccionado</p>
+          </div>
+        </div>
+        <div id="lb-pagination" style="display:none;padding:0.75rem 1rem;border-top:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <button id="lb-prev" class="page-btn" disabled>←</button>
+          <span id="lb-page-info" style="font-size:0.75rem;color:var(--ui-text-3)"></span>
+          <button id="lb-next" class="page-btn">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AppLayout>
+
+<!-- Modal crear ranking -->
+<div id="create-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:460px;width:calc(100% - 2rem);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h2 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Nuevo ranking</h2>
+      <button id="modal-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);font-size:1.25rem;line-height:1;padding:4px">×</button>
+    </div>
+
+    <div id="create-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:1rem"></div>
+
+    <form id="ranking-form" novalidate>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem">
+        <div class="field-grp">
+          <label class="field-lbl">Nombre del ranking *</label>
+          <input id="r-name" type="text" class="field-inp" placeholder="Ej: Ranking General" maxlength="20" required />
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Descripción</label>
+          <input id="r-desc" type="text" class="field-inp" placeholder="Descripción breve (opcional)" maxlength="100" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field-grp">
+            <label class="field-lbl">Tipo de periodo *</label>
+            <select id="r-period" class="field-inp">
+              <option value="GENERAL">General (acumulado)</option>
+              <option value="WEEKLY">Semanal</option>
+              <option value="MONTHLY">Mensual</option>
+              <option value="DAILY">Diario</option>
+            </select>
+          </div>
+          <div class="field-grp">
+            <label class="field-lbl">Fuente de datos *</label>
+            <select id="r-source" class="field-inp">
+              <option value="ALL">Todo (tests + IA)</option>
+              <option value="TRIEDS">Solo tests</option>
+              <option value="AI_TRIEDS">Solo sesiones IA</option>
+            </select>
+          </div>
+        </div>
+        <!-- Preview de la config -->
+        <div id="config-preview" style="background:var(--ui-surface);border-radius:9px;padding:10px 12px;border:1px solid var(--ui-border);font-size:0.8125rem;color:var(--ui-text-2)">
+          <strong style="color:var(--ui-text-1)">Resumen:</strong> Ranking acumulado histórico basado en todos los intentos (tests y sesiones IA).
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="create-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+        <button type="submit" id="create-submit" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
+          <span id="create-label">Crear ranking</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal confirmar desactivar -->
+<div id="deactivate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:360px;width:calc(100% - 2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="width:52px;height:52px;border-radius:14px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Desactivar ranking?</h3>
+    <p id="deact-desc" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55"></p>
+    <div style="display:flex;gap:8px">
+      <button id="deact-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+      <button id="deact-confirm" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#DC2626,#991B1B);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Desactivar</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
+  .th { padding:10px 14px;text-align:left;font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap }
+  .td { padding:11px 14px;font-size:0.875rem;color:var(--ui-text-1);border-top:1px solid var(--ui-border);vertical-align:middle }
+  .field-grp { display:flex;flex-direction:column;gap:4px }
+  .field-lbl { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3) }
+  .field-inp { padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none;transition:border-color 0.2s;width:100%;appearance:none }
+  .field-inp:focus { border-color:var(--brand);box-shadow:0 0 0 3px rgba(212,18,36,0.1) }
+  .action-btn { padding:5px 11px;border-radius:7px;border:1.5px solid;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap }
+  .page-btn { padding:5px 12px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
+  .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
+  .page-btn:disabled { opacity:0.4;cursor:not-allowed }
+  .lb-row { display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;transition:background 0.15s;cursor:default }
+  .lb-row:hover { background:var(--ui-surface) }
+  .lb-row.is-active { background:rgba(212,18,36,0.06);border:1px solid rgba(212,18,36,0.15) }
+  @media(max-width:1023px){
+    .app-content > div > div[style*="grid-template-columns:1fr 380px"]{ grid-template-columns:1fr!important }
+    div[style*="position:sticky"]{ position:relative!important;top:auto!important }
+  }
+</style>
+
+<script>
+  import { requireAuth, isAdmin, getUser } from '../../lib/auth';
+  import { rankingsApi } from '../../lib/api/rankings.api';
+  import { toast }       from '../../lib/toast';
+  import type { RankingDto, RankingStudentDto } from '../../lib/api/types';
+
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
+
+  const currentUser = getUser();
+  const medals = ['🥇', '🥈', '🥉'];
+
+  const PERIOD_LABEL: Record<string, string> = {
+    GENERAL: 'General', WEEKLY: 'Semanal', MONTHLY: 'Mensual', DAILY: 'Diario'
+  };
+  const SOURCE_LABEL: Record<string, string> = {
+    ALL: 'Tests + IA', TRIEDS: 'Solo tests', AI_TRIEDS: 'Solo IA'
+  };
+  const PERIOD_COLOR: Record<string, string> = {
+    GENERAL: '#7C3AED', WEEKLY: '#2563EB', MONTHLY: '#059669', DAILY: '#D97706'
+  };
+  const PERIOD_BG: Record<string, string> = {
+    GENERAL: '#EDE9FE', WEEKLY: '#DBEAFE', MONTHLY: '#D1FAE5', DAILY: '#FEF3C7'
+  };
+
+  let allRankings: RankingDto[] = [];
+  let pendingDeactivateId = '';
+  let selectedRankingId   = '';
+  let lbPage = 0;
+  const LB_SIZE = 20;
+  let lbTotalPages = 1;
+  let lbTotalParticipants = 0;
+
+  // ── Cargar rankings ───────────────────────────────────────────────
+  async function load() {
+    try {
+      const res = await rankingsApi.findAll(false);
+      allRankings = res.data ?? [];
+      const active = allRankings.filter(r => r.isActive).length;
+      (document.getElementById('stat-total') as HTMLElement).textContent  = String(allRankings.length);
+      (document.getElementById('stat-active') as HTMLElement).textContent = String(active);
+      renderTable();
+      // Si hay un ranking seleccionado, recargar su leaderboard
+      if (selectedRankingId) loadLeaderboard(selectedRankingId);
+    } catch (err: any) {
+      toast.error('Error al cargar rankings', { description: err?.message });
+    }
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('rankings-tbody')!;
+    tbody.innerHTML = '';
+    if (!allRankings.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Sin rankings registrados.</td></tr>';
+      return;
+    }
+    allRankings.forEach(r => {
+      const isSelected = r.rankingId === selectedRankingId;
+      const tr = document.createElement('tr');
+      tr.style.cssText = isSelected ? 'background:rgba(212,18,36,0.04)' : '';
+      tr.innerHTML = `
+        <td class="td"><code style="background:var(--ui-surface);padding:2px 7px;border-radius:5px;font-family:monospace;font-size:0.8125rem">${r.rankingId}</code></td>
+        <td class="td" style="font-weight:700">${r.rankingName}</td>
+        <td class="td">
+          <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${PERIOD_BG[r.periodType]??'#F3F4F6'};color:${PERIOD_COLOR[r.periodType]??'#6B7280'}">
+            ${PERIOD_LABEL[r.periodType] ?? r.periodType}
+          </span>
+        </td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${SOURCE_LABEL[r.sourceFilter] ?? r.sourceFilter}</td>
+        <td class="td">
+          <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${r.isActive?'#D1FAE5':'#FEE2E2'};color:${r.isActive?'#059669':'#DC2626'}">
+            ${r.isActive ? 'Activo' : 'Inactivo'}
+          </span>
+        </td>
+        <td class="td">
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button class="action-btn btn-view" data-id="${r.rankingId}" data-name="${r.rankingName}"
+              style="border-color:${isSelected?'var(--brand)':'var(--ui-border-2)'};background:${isSelected?'rgba(212,18,36,0.08)':'var(--ui-surface)'};color:${isSelected?'var(--brand)':'var(--ui-text-1)'}">
+              ${isSelected ? '● Ver' : 'Ver'}
+            </button>
+            ${r.isActive
+              ? `<button class="action-btn btn-deact" data-id="${r.rankingId}" data-name="${r.rankingName}"
+                  style="border-color:#FECACA;background:#FEF2F2;color:#DC2626">
+                  Desactivar
+                </button>`
+              : ''
+            }
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Ver leaderboard
+    document.querySelectorAll<HTMLButtonElement>('.btn-view').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedRankingId = btn.dataset.id!;
+        lbPage = 0;
+        loadLeaderboard(selectedRankingId, btn.dataset.name!);
+        renderTable(); // refrescar para marcar fila seleccionada
+      });
+    });
+
+    // Desactivar
+    document.querySelectorAll<HTMLButtonElement>('.btn-deact').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pendingDeactivateId = btn.dataset.id!;
+        (document.getElementById('deact-desc') as HTMLElement).textContent =
+          `Se desactivará el ranking "${btn.dataset.name}". No aparecerá en la vista de los estudiantes.`;
+        (document.getElementById('deactivate-modal') as HTMLElement).style.display = 'flex';
+      });
+    });
+  }
+
+  // ── Leaderboard ───────────────────────────────────────────────────
+  async function loadLeaderboard(rankingId: string, name?: string) {
+    const lbList     = document.getElementById('lb-list')!;
+    const lbTitle    = document.getElementById('lb-title')!;
+    const lbSubtitle = document.getElementById('lb-subtitle')!;
+    const lbTotalEl  = document.getElementById('lb-total')!;
+    const lbPagEl    = document.getElementById('lb-pagination')!;
+
+    const ranking = allRankings.find(r => r.rankingId === rankingId);
+    lbTitle.textContent    = name ?? ranking?.rankingName ?? 'Leaderboard';
+    lbSubtitle.textContent = ranking
+      ? `${PERIOD_LABEL[ranking.periodType]} · ${SOURCE_LABEL[ranking.sourceFilter]}`
+      : '';
+
+    lbList.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--ui-text-3)"><div style="width:28px;height:28px;border-radius:50%;border:3px solid rgba(212,18,36,0.2);border-top-color:var(--brand);animation:spin 0.9s linear infinite;margin:0 auto 8px"></div>Cargando...</div>';
+
+    try {
+      const res = await rankingsApi.getLeaderboard(rankingId, lbPage, LB_SIZE);
+      if (!res.data) return;
+      const items = res.data.content;
+      lbTotalPages = res.data.totalPages;
+      lbTotalParticipants = res.data.totalElements;
+
+      lbTotalEl.textContent = `${lbTotalParticipants} participante(s)`;
+      (document.getElementById('stat-participants') as HTMLElement).textContent = String(lbTotalParticipants);
+
+      lbList.innerHTML = '';
+      if (!items.length) {
+        lbList.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--ui-text-3);font-size:0.875rem">Sin participantes aún.</div>';
+        lbPagEl.style.display = 'none';
+        return;
+      }
+
+      const offset = lbPage * LB_SIZE;
+      items.forEach((entry: RankingStudentDto, i: number) => {
+        const pos    = offset + i + 1;
+        const isMe   = currentUser?.id === entry.studentId;
+        const div    = document.createElement('div');
+        div.className = `lb-row${isMe ? ' is-active' : ''}`;
+        div.innerHTML = `
+          <span style="font-size:${pos<=3?'1.125rem':'0.875rem'};min-width:28px;text-align:center;font-weight:700;color:${pos<=3?'inherit':'var(--ui-text-3)'}">
+            ${pos <= 3 ? medals[pos-1] : pos}
+          </span>
+          <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:0.6875rem;flex-shrink:0">
+            ${(entry.studentName ?? entry.studentId).slice(0,2).toUpperCase()}
+          </div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              ${entry.studentName ?? entry.studentId}${isMe ? ' (tú)' : ''}
+            </p>
+            <p style="font-size:0.625rem;color:var(--ui-text-3);margin:1px 0 0">
+              Prog. ${entry.programId} · ${entry.triedsCount} test(s) · ${entry.aiTriedsCount} IA
+            </p>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <p style="font-size:1rem;font-weight:900;color:var(--brand);margin:0">${Number(entry.totalScore).toFixed(1)}</p>
+            <p style="font-size:0.6250rem;color:var(--ui-text-3);margin:0">pts</p>
+          </div>`;
+        lbList.appendChild(div);
+      });
+
+      // Paginación leaderboard
+      if (lbTotalPages > 1) {
+        lbPagEl.style.display = 'flex';
+        (document.getElementById('lb-page-info') as HTMLElement).textContent =
+          `Pág. ${lbPage + 1} / ${lbTotalPages}`;
+        (document.getElementById('lb-prev') as HTMLButtonElement).disabled = lbPage === 0;
+        (document.getElementById('lb-next') as HTMLButtonElement).disabled = lbPage >= lbTotalPages - 1;
+      } else {
+        lbPagEl.style.display = 'none';
+      }
+
+    } catch (err: any) {
+      lbList.innerHTML = `<div style="text-align:center;padding:1.5rem;color:#DC2626;font-size:0.8125rem">Error: ${err?.message ?? 'No se pudo cargar'}</div>`;
+    }
+  }
+
+  document.getElementById('lb-prev')?.addEventListener('click', () => {
+    if (lbPage > 0) { lbPage--; loadLeaderboard(selectedRankingId); }
+  });
+  document.getElementById('lb-next')?.addEventListener('click', () => {
+    if (lbPage < lbTotalPages - 1) { lbPage++; loadLeaderboard(selectedRankingId); }
+  });
+
+  // ── Create modal ──────────────────────────────────────────────────
+  const createModal = document.getElementById('create-modal')!;
+  const openCreate  = () => { createModal.style.display = 'flex'; };
+  const closeCreate = () => { createModal.style.display = 'none'; };
+
+  document.getElementById('btn-new-ranking')?.addEventListener('click', openCreate);
+  document.getElementById('modal-close')?.addEventListener('click', closeCreate);
+  document.getElementById('create-cancel')?.addEventListener('click', closeCreate);
+  createModal.addEventListener('click', e => { if (e.target === createModal) closeCreate(); });
+
+  // Preview dinámico de la configuración
+  function updatePreview() {
+    const period = (document.getElementById('r-period') as HTMLSelectElement).value;
+    const source = (document.getElementById('r-source') as HTMLSelectElement).value;
+    const periodTxt: Record<string, string> = {
+      GENERAL: 'acumulado histórico', WEEKLY: 'semanal', MONTHLY: 'mensual', DAILY: 'diario'
+    };
+    const sourceTxt: Record<string, string> = {
+      ALL: 'todos los intentos (tests y sesiones IA)',
+      TRIEDS: 'únicamente intentos de tests',
+      AI_TRIEDS: 'únicamente sesiones de práctica IA'
+    };
+    (document.getElementById('config-preview') as HTMLElement).innerHTML =
+      `<strong style="color:var(--ui-text-1)">Resumen:</strong> Ranking ${periodTxt[period]} basado en ${sourceTxt[source]}.`;
+  }
+
+  document.getElementById('r-period')?.addEventListener('change', updatePreview);
+  document.getElementById('r-source')?.addEventListener('change', updatePreview);
+
+  document.getElementById('ranking-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const errEl  = document.getElementById('create-error')!;
+    const lblEl  = document.getElementById('create-label')!;
+    const submit = document.getElementById('create-submit') as HTMLButtonElement;
+    errEl.style.display = 'none';
+
+    const rankingName = (document.getElementById('r-name') as HTMLInputElement).value.trim();
+    const description = (document.getElementById('r-desc') as HTMLInputElement).value.trim() || undefined;
+    const periodType  = (document.getElementById('r-period') as HTMLSelectElement).value;
+    const sourceFilter = (document.getElementById('r-source') as HTMLSelectElement).value;
+
+    if (!rankingName) {
+      errEl.textContent = 'El nombre del ranking es obligatorio.';
+      errEl.style.display = 'block'; return;
+    }
+
+    submit.disabled = true; lblEl.textContent = 'Creando...';
+    try {
+      await rankingsApi.create({ rankingName, description, periodType, sourceFilter });
+      toast.success('Ranking creado correctamente');
+      closeCreate();
+      (document.getElementById('ranking-form') as HTMLFormElement).reset();
+      updatePreview();
+      load();
+    } catch (err: any) {
+      errEl.textContent = err?.message ?? 'Error al crear el ranking.';
+      errEl.style.display = 'block';
+    } finally {
+      submit.disabled = false; lblEl.textContent = 'Crear ranking';
+    }
+  });
+
+  // ── Deactivate modal ──────────────────────────────────────────────
+  const deactivateModal = document.getElementById('deactivate-modal')!;
+  document.getElementById('deact-cancel')?.addEventListener('click', () => { deactivateModal.style.display = 'none'; });
+  deactivateModal.addEventListener('click', e => { if (e.target === deactivateModal) deactivateModal.style.display = 'none'; });
+  document.getElementById('deact-confirm')?.addEventListener('click', async () => {
+    try {
+      await rankingsApi.deactivate(pendingDeactivateId);
+      toast.success('Ranking desactivado');
+      if (selectedRankingId === pendingDeactivateId) {
+        selectedRankingId = '';
+        document.getElementById('lb-list')!.innerHTML =
+          '<div style="text-align:center;padding:2rem;color:var(--ui-text-3);font-size:0.875rem">Ranking desactivado.</div>';
+      }
+      deactivateModal.style.display = 'none';
+      load();
+    } catch (err: any) {
+      toast.error('Error al desactivar', { description: err?.message });
+      deactivateModal.style.display = 'none';
+    }
+  });
+
+  // ── Spin animation ────────────────────────────────────────────────
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(style);
+
+  load();
+</script>

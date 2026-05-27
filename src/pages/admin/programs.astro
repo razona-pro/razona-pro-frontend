@@ -1,0 +1,345 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Programas Académicos" currentPage="admin-programs">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Programas</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Programas académicos</h1>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Gestiona los programas de la UFPSO registrados en la plataforma.</p>
+      </div>
+      <button id="btn-new-prog" style="display:inline-flex;align-items:center;gap:7px;padding:0.625rem 1.125rem;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo programa
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D41224">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Total programas</p>
+      <p id="stat-total" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;line-height:1">—</p>
+    </div>
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #059669">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Activos</p>
+      <p id="stat-active" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">—</p>
+    </div>
+    <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D97706">
+      <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Inactivos</p>
+      <p id="stat-inactive" style="font-size:1.75rem;font-weight:900;color:#D97706;margin:0;line-height:1">—</p>
+    </div>
+  </div>
+
+  <!-- Búsqueda y filtros -->
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+    <div style="position:relative;flex:1;min-width:200px;max-width:360px">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ui-text-3);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-prog" type="text" placeholder="Buscar por nombre o ID..."
+        style="width:100%;padding:9px 14px 9px 34px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:11px;font-size:0.8125rem;color:var(--ui-text-1);font-family:inherit;outline:none;transition:all 0.2s"
+        onfocus="this.style.borderColor='var(--brand)';this.style.boxShadow='0 0 0 3px rgba(212,18,36,0.1)'"
+        onblur="this.style.borderColor='var(--ui-border)';this.style.boxShadow='none'">
+    </div>
+    <select id="filter-status" style="padding:7px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none">
+      <option value="ALL">Todos los estados</option>
+      <option value="active">Activos</option>
+      <option value="inactive">Inactivos</option>
+    </select>
+    <span id="count-label" style="font-size:0.8125rem;color:var(--ui-text-3);margin-left:auto"></span>
+  </div>
+
+  <!-- Tabla -->
+  <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:1px solid var(--ui-border)">
+            <th class="th">ID</th>
+            <th class="th">Nombre del programa</th>
+            <th class="th">Descripción</th>
+            <th class="th">Estado</th>
+            <th class="th">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="programs-tbody">
+          <tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</AppLayout>
+
+<!-- Modal crear/editar programa -->
+<div id="form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:460px;width:calc(100% - 2rem);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h2 id="modal-title" style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Nuevo programa</h2>
+      <button id="modal-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);font-size:1.25rem;line-height:1;padding:4px">×</button>
+    </div>
+
+    <div id="form-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:1rem"></div>
+
+    <form id="prog-form" novalidate>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem">
+        <div class="field-grp">
+          <label class="field-lbl">ID del programa * <span style="font-weight:400;opacity:0.6">(3 dígitos numéricos)</span></label>
+          <input id="f-id" type="text" class="field-inp" placeholder="Ej: 019" maxlength="3" pattern="[0-9]{3}" required />
+          <span style="font-size:0.6875rem;color:var(--ui-text-3)">El ID corresponde a los 3 primeros dígitos del código del estudiante.</span>
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Nombre del programa *</label>
+          <input id="f-name" type="text" class="field-inp" placeholder="Ej: Ingeniería de Sistemas" maxlength="50" required />
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Descripción</label>
+          <textarea id="f-desc" class="field-inp" rows="3" placeholder="Descripción breve del programa (opcional)" maxlength="100" style="resize:vertical"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="form-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+        <button type="submit" id="form-submit" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
+          <span id="form-label">Crear programa</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal confirmar desactivar -->
+<div id="deactivate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:360px;width:calc(100% - 2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="width:52px;height:52px;border-radius:14px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <svg width="24" height="24" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Desactivar programa?</h3>
+    <p id="deact-desc" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55"></p>
+    <div style="display:flex;gap:8px">
+      <button id="deact-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+      <button id="deact-confirm" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#D97706,#B45309);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Desactivar</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
+  .th { padding:10px 16px;text-align:left;font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap }
+  .td { padding:12px 16px;font-size:0.875rem;color:var(--ui-text-1);border-top:1px solid var(--ui-border);vertical-align:middle }
+  .field-grp { display:flex;flex-direction:column;gap:4px }
+  .field-lbl { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3) }
+  .field-inp { padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none;transition:border-color 0.2s;width:100%;appearance:none }
+  .field-inp:focus { border-color:var(--brand);box-shadow:0 0 0 3px rgba(212,18,36,0.1) }
+  .action-btn { padding:5px 12px;border-radius:7px;border:1.5px solid;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap }
+</style>
+
+<script>
+  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { programsApi } from '../../lib/api/programs.api';
+  import { toast } from '../../lib/toast';
+  import type { ProgramDto } from '../../lib/api/types';
+
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
+
+  let allPrograms: ProgramDto[] = [];
+  let editingId = '';
+  let pendingDeactivateId = '';
+
+  // ── Cargar ────────────────────────────────────────────────────────
+  async function load() {
+    try {
+      const res = await programsApi.findAll();
+      allPrograms = res.data ?? [];
+      const active   = allPrograms.filter(p => p.isActive).length;
+      const inactive = allPrograms.filter(p => !p.isActive).length;
+      (document.getElementById('stat-total') as HTMLElement).textContent   = String(allPrograms.length);
+      (document.getElementById('stat-active') as HTMLElement).textContent  = String(active);
+      (document.getElementById('stat-inactive') as HTMLElement).textContent = String(inactive);
+      applyFilters();
+    } catch (err: any) {
+      toast.error('Error al cargar programas', { description: err?.message });
+    }
+  }
+
+  // ── Filtrar y renderizar ──────────────────────────────────────────
+  function applyFilters() {
+    const search = (document.getElementById('search-prog') as HTMLInputElement).value.toLowerCase().trim();
+    const status = (document.getElementById('filter-status') as HTMLSelectElement).value;
+    const filtered = allPrograms.filter(p => {
+      const matchSearch = !search || p.programName.toLowerCase().includes(search) || p.programId.includes(search);
+      const matchStatus = status === 'ALL'
+        || (status === 'active'   && p.isActive)
+        || (status === 'inactive' && !p.isActive);
+      return matchSearch && matchStatus;
+    });
+    (document.getElementById('count-label') as HTMLElement).textContent = `${filtered.length} programa(s)`;
+    renderTable(filtered);
+  }
+
+  function renderTable(programs: ProgramDto[]) {
+    const tbody = document.getElementById('programs-tbody')!;
+    tbody.innerHTML = '';
+    if (!programs.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Sin resultados.</td></tr>';
+      return;
+    }
+    programs.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td">
+          <code style="background:var(--ui-surface);padding:3px 9px;border-radius:6px;font-family:monospace;font-size:0.875rem;font-weight:700;color:var(--brand);border:1px solid var(--ui-border)">${p.programId}</code>
+        </td>
+        <td class="td" style="font-weight:700;max-width:220px">${p.programName}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${p.description ?? ''}">${p.description ?? '—'}</td>
+        <td class="td">
+          <span style="padding:3px 10px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${p.isActive?'#D1FAE5':'#FEE2E2'};color:${p.isActive?'#059669':'#DC2626'}">
+            ${p.isActive ? 'Activo' : 'Inactivo'}
+          </span>
+        </td>
+        <td class="td">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="action-btn btn-edit" data-id="${p.programId}"
+              style="border-color:var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1)">
+              Editar
+            </button>
+            ${p.isActive
+              ? `<button class="action-btn btn-deact" data-id="${p.programId}" data-name="${p.programName}"
+                  style="border-color:#FDE68A;background:#FEF3C7;color:#D97706">
+                  Desactivar
+                </button>`
+              : `<button class="action-btn btn-react" data-id="${p.programId}"
+                  style="border-color:#A7F3D0;background:#D1FAE5;color:#059669">
+                  Reactivar
+                </button>`
+            }
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Editar
+    document.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prog = allPrograms.find(p => p.programId === btn.dataset.id);
+        if (!prog) return;
+        openModal(prog);
+      });
+    });
+
+    // Desactivar
+    document.querySelectorAll<HTMLButtonElement>('.btn-deact').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pendingDeactivateId = btn.dataset.id!;
+        (document.getElementById('deact-desc') as HTMLElement).textContent =
+          `Se desactivará el programa "${btn.dataset.name}" (${btn.dataset.id}). Los nuevos estudiantes no podrán registrarse en él.`;
+        (document.getElementById('deactivate-modal') as HTMLElement).style.display = 'flex';
+      });
+    });
+
+    // Reactivar
+    document.querySelectorAll<HTMLButtonElement>('.btn-react').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await programsApi.update(btn.dataset.id!, { programName: allPrograms.find(p => p.programId === btn.dataset.id)!.programName });
+          // El backend no tiene endpoint de reactivar directamente, usamos update con isActive implícito
+          // Alternativa: llamar update y luego reload
+          toast.info('Para reactivar, edita el programa y guarda los cambios.');
+          openModal(allPrograms.find(p => p.programId === btn.dataset.id)!);
+        } catch {}
+      });
+    });
+  }
+
+  // ── Modal crear/editar ────────────────────────────────────────────
+  const formModal = document.getElementById('form-modal')!;
+
+  function openModal(prog?: ProgramDto) {
+    editingId = prog?.programId ?? '';
+    (document.getElementById('modal-title') as HTMLElement).textContent = prog ? 'Editar programa' : 'Nuevo programa';
+    (document.getElementById('form-label') as HTMLElement).textContent  = prog ? 'Guardar cambios' : 'Crear programa';
+    (document.getElementById('f-id') as HTMLInputElement).value   = prog?.programId ?? '';
+    (document.getElementById('f-id') as HTMLInputElement).disabled = !!prog; // no editar ID en modo edición
+    (document.getElementById('f-name') as HTMLInputElement).value = prog?.programName ?? '';
+    (document.getElementById('f-desc') as HTMLTextAreaElement).value = prog?.description ?? '';
+    (document.getElementById('form-error') as HTMLElement).style.display = 'none';
+    formModal.style.display = 'flex';
+  }
+
+  const closeModal = () => { formModal.style.display = 'none'; editingId = ''; };
+
+  document.getElementById('btn-new-prog')?.addEventListener('click', () => openModal());
+  document.getElementById('modal-close')?.addEventListener('click', closeModal);
+  document.getElementById('form-cancel')?.addEventListener('click', closeModal);
+  formModal.addEventListener('click', e => { if (e.target === formModal) closeModal(); });
+
+  document.getElementById('prog-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const errEl  = document.getElementById('form-error')!;
+    const lblEl  = document.getElementById('form-label')!;
+    const submit = document.getElementById('form-submit') as HTMLButtonElement;
+    errEl.style.display = 'none';
+
+    const programId   = (document.getElementById('f-id') as HTMLInputElement).value.trim();
+    const programName = (document.getElementById('f-name') as HTMLInputElement).value.trim();
+    const description = (document.getElementById('f-desc') as HTMLTextAreaElement).value.trim() || undefined;
+
+    if (!programId || !/^[0-9]{3}$/.test(programId)) {
+      errEl.textContent = 'El ID debe ser exactamente 3 dígitos numéricos.';
+      errEl.style.display = 'block'; return;
+    }
+    if (!programName) {
+      errEl.textContent = 'El nombre del programa es obligatorio.';
+      errEl.style.display = 'block'; return;
+    }
+
+    submit.disabled = true; lblEl.textContent = editingId ? 'Guardando...' : 'Creando...';
+    try {
+      if (editingId) {
+        await programsApi.update(editingId, { programName, description });
+        toast.success('Programa actualizado correctamente');
+      } else {
+        await programsApi.create({ programId, programName, description });
+        toast.success('Programa creado correctamente');
+      }
+      closeModal();
+      load();
+    } catch (err: any) {
+      errEl.textContent = err?.message ?? 'Error al guardar el programa.';
+      errEl.style.display = 'block';
+    } finally {
+      submit.disabled = false;
+      lblEl.textContent = editingId ? 'Guardar cambios' : 'Crear programa';
+    }
+  });
+
+  // ── Deactivate modal ──────────────────────────────────────────────
+  const deactivateModal = document.getElementById('deactivate-modal')!;
+  document.getElementById('deact-cancel')?.addEventListener('click', () => { deactivateModal.style.display = 'none'; });
+  deactivateModal.addEventListener('click', e => { if (e.target === deactivateModal) deactivateModal.style.display = 'none'; });
+  document.getElementById('deact-confirm')?.addEventListener('click', async () => {
+    try {
+      await programsApi.deactivate(pendingDeactivateId);
+      toast.success('Programa desactivado');
+      deactivateModal.style.display = 'none';
+      load();
+    } catch (err: any) {
+      toast.error('Error al desactivar', { description: err?.message });
+      deactivateModal.style.display = 'none';
+    }
+  });
+
+  // ── Filtros en tiempo real ────────────────────────────────────────
+  let debounce: ReturnType<typeof setTimeout>;
+  document.getElementById('search-prog')?.addEventListener('input', () => {
+    clearTimeout(debounce); debounce = setTimeout(applyFilters, 250);
+  });
+  document.getElementById('filter-status')?.addEventListener('change', applyFilters);
+
+  load();
+</script>

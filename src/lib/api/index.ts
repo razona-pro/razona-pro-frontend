@@ -9,3 +9,4 @@ export { triedsApi }      from './trieds.api';
 export { rankingsApi }    from './rankings.api';
 export { statsApi }       from './stats.api';
 export { aiTriedsApi }    from './ai-trieds.api';
+export { adminsApi }      from './admins.api';
