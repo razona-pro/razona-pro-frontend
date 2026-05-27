@@ -3,91 +3,221 @@ import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
 <AppLayout title="Rankings" currentPage="rankings">
-  <div style="margin-bottom:1.25rem">
+  <div style="margin-bottom:1.5rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Rankings</span>
     </div>
-    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Rankings</h1>
-    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Tablas de posiciones de estudiantes UFPSO.</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Rankings</h1>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Tablas de posiciones de estudiantes UFPSO.</p>
+      </div>
+      <div id="ranking-total-chip" style="display:none;padding:6px 14px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:20px;font-size:0.8125rem;font-weight:700;color:var(--ui-text-2)">
+        <span id="ranking-total-num" style="color:var(--brand)">0</span> participantes
+      </div>
+    </div>
   </div>
 
-  <!-- Rankings tabs -->
-  <div id="ranking-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem"></div>
+  <!-- Tabs -->
+  <div id="ranking-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem"></div>
 
-  <!-- Leaderboard -->
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
-    <div class="card-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-        <h2 id="ranking-name" class="card-title">Cargando...</h2>
-        <span id="ranking-meta" style="font-size:0.75rem;color:var(--ui-text-3)"></span>
+  <!-- Layout principal -->
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">
+
+    <!-- Columna leaderboard -->
+    <div>
+      <!-- Podio top 3 -->
+      <div id="podium-section" style="display:none;margin-bottom:1.25rem">
+        <div id="podium-wrap" style="display:flex;align-items:flex-end;justify-content:center;background:var(--ui-card);border-radius:18px;border:1px solid var(--ui-border);padding:1.5rem 1rem 0;overflow:hidden"></div>
       </div>
-      <div id="leaderboard-list"></div>
-      <div id="load-more-wrap" style="margin-top:0.875rem;text-align:center">
-        <button id="load-more-btn" class="btn-load-more" style="display:none">Cargar más</button>
+
+      <!-- Leaderboard card -->
+      <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--ui-border)">
+          <h2 id="ranking-name" style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0">Cargando...</h2>
+          <div id="lb-loading" style="width:8px;height:8px;border-radius:50%;border:2px solid rgba(212,18,36,0.2);border-top-color:var(--brand);animation:spin 1s linear infinite"></div>
+        </div>
+        <div id="leaderboard-list" style="padding:0.625rem 0.75rem"></div>
+        <div style="padding:0.75rem;text-align:center">
+          <button id="load-more-btn" style="display:none;padding:8px 20px;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-2);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--brand)';this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--ui-border)';this.style.color='var(--ui-text-2)'">
+            Cargar más resultados
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- My position -->
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div id="my-position-card" class="card-section" style="display:none">
-        <h2 class="card-title" style="margin-bottom:0.875rem">Mi posición</h2>
-        <div style="text-align:center;padding:1rem">
-          <p id="my-pos-num" style="font-size:3rem;font-weight:900;color:var(--brand);margin:0;letter-spacing:-2px">#—</p>
-          <p id="my-pos-name" style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1);margin:4px 0 2px"></p>
-          <p id="my-pos-score" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0"></p>
-          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:2px 0 0">puntos totales</p>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:0.75rem">
-          <div style="background:var(--ui-surface);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--ui-border)">
-            <p id="my-trieds-count" style="font-size:1.125rem;font-weight:900;color:var(--ui-text-1);margin:0">0</p>
-            <p style="font-size:0.625rem;color:var(--ui-text-3);margin:2px 0 0;text-transform:uppercase;letter-spacing:0.4px">Tests</p>
+    <!-- Columna lateral -->
+    <div style="display:flex;flex-direction:column;gap:14px;position:sticky;top:1.5rem">
+
+      <!-- Mi posición -->
+      <div id="my-position-card" style="display:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));border-radius:16px;padding:1.25rem;overflow:hidden;position:relative">
+        <div style="position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.08);pointer-events:none"></div>
+        <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.6);margin:0">Mi posición</p>
+        <p id="my-pos-num" style="font-size:3rem;font-weight:900;color:white;margin:0;letter-spacing:-2px;line-height:1">#—</p>
+        <p id="my-pos-name" style="font-size:0.9375rem;font-weight:700;color:rgba(255,255,255,0.85);margin:0 0 1rem"></p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;text-align:center">
+            <p id="my-pos-score" style="font-size:1.25rem;font-weight:900;color:white;margin:0 0 2px">—</p>
+            <p style="font-size:0.625rem;color:rgba(255,255,255,0.6);margin:0;text-transform:uppercase;letter-spacing:0.4px">Puntos</p>
           </div>
-          <div style="background:var(--ui-surface);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--ui-border)">
-            <p id="my-trieds-score" style="font-size:1.125rem;font-weight:900;color:var(--brand);margin:0">0</p>
-            <p style="font-size:0.625rem;color:var(--ui-text-3);margin:2px 0 0;text-transform:uppercase;letter-spacing:0.4px">Puntaje</p>
+          <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;text-align:center">
+            <p id="my-trieds-count" style="font-size:1.25rem;font-weight:900;color:white;margin:0 0 2px">—</p>
+            <p style="font-size:0.625rem;color:rgba(255,255,255,0.6);margin:0;text-transform:uppercase;letter-spacing:0.4px">Tests</p>
           </div>
         </div>
       </div>
 
-      <div style="background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:16px;padding:1.125rem;text-align:center">
-        <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">⚡ Sube en el ranking</p>
-        <p style="font-size:0.75rem;color:var(--ui-text-2);margin:0 0 0.875rem;line-height:1.55">Completa más tests y mejora tu posición.</p>
-        <a href="/tests" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.625rem;background:var(--brand);color:white;border-radius:10px;font-size:0.8125rem;font-weight:700;text-decoration:none">
-          Ver tests →
+      <!-- CTA -->
+      <div style="background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:16px;padding:1.125rem 1.25rem">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem">
+          <div style="width:38px;height:38px;background:var(--brand-pale);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="18" height="18" fill="#D41224" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <p style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0">Sube en el ranking</p>
+        </div>
+        <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 1rem;line-height:1.6">Completa más simulacros para mejorar tu posición.</p>
+        <a href="/tests" style="display:flex;align-items:center;justify-content:center;padding:0.6875rem;background:var(--brand);color:white;border-radius:10px;font-size:0.8125rem;font-weight:800;text-decoration:none;box-shadow:0 3px 12px rgba(212,18,36,0.25);transition:all 0.2s" onmouseover="this.style.background='var(--brand-dark)'" onmouseout="this.style.background='var(--brand)'">
+          Ver tests disponibles →
         </a>
+      </div>
+
+      <!-- Info ranking -->
+      <div id="ranking-info-card" style="display:none;background:var(--ui-card);border-radius:14px;padding:1rem 1.125rem;border:1px solid var(--ui-border)">
+        <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ui-text-3);margin:0 0 8px">Acerca de este ranking</p>
+        <div id="ranking-info-content"></div>
       </div>
     </div>
   </div>
 </AppLayout>
 
-<style>
-  .card-section { background: var(--ui-card); border-radius: 16px; padding: 1.25rem 1.375rem; border: 1px solid var(--ui-border); }
-  .card-title   { font-size: 0.9375rem; font-weight: 800; color: var(--ui-text-1); margin: 0; }
+<!-- is:global para elementos creados dinámicamente -->
+<style is:global>
+  @keyframes spin      { to { transform: rotate(360deg); } }
+  @keyframes fadeInUp  { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes podiumIn  { from{opacity:0;transform:scale(0.85) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)} }
+  @keyframes rowSlide  { from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)} }
 
+  /* Tabs */
   .ranking-tab {
     padding: 7px 18px; border-radius: 20px; font-size: 0.875rem; font-weight: 700;
     border: 1.5px solid var(--ui-border); background: var(--ui-card); color: var(--ui-text-2);
-    cursor: pointer; transition: all 0.15s; font-family: inherit;
+    cursor: pointer; transition: all 0.2s; font-family: inherit; white-space: nowrap;
   }
-  .ranking-tab.active { background: var(--brand); color: white; border-color: var(--brand); }
+  .ranking-tab:hover  { border-color: var(--brand); color: var(--brand); }
+  .ranking-tab.active { background: var(--brand); color: white; border-color: var(--brand); box-shadow: 0 3px 10px rgba(212,18,36,0.25); }
 
+  /* ── PODIO ── */
+  .podium-slot {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+  }
+  .podium-slot-first { flex: 1.15; }
+  .podium-crown  { font-size: 1.25rem; animation: fadeInUp 0.5s 0.1s both; }
+  .podium-avatar {
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; color: white; flex-shrink: 0;
+    animation: fadeInUp 0.5s ease both;
+  }
+  .podium-av-1 { width: 62px; height: 62px; font-size: 1.25rem; background: linear-gradient(135deg,#F59E0B,#D97706); box-shadow: 0 6px 20px rgba(245,158,11,0.35); }
+  .podium-av-2 { width: 50px; height: 50px; font-size: 1rem;   background: linear-gradient(135deg,#94A3B8,#64748B); box-shadow: 0 4px 14px rgba(148,163,184,0.3); }
+  .podium-av-3 { width: 46px; height: 46px; font-size: 0.9375rem; background: linear-gradient(135deg,#B45309,#92400E); box-shadow: 0 4px 14px rgba(180,83,9,0.3); }
+  .podium-name { font-size: 0.8125rem; font-weight: 700; color: var(--ui-text-1); margin: 0; text-align: center; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .podium-name-1 { font-size: 0.9375rem; }
+  .podium-prog  { font-size: 0.625rem; color: var(--ui-text-3); margin: 0; text-align: center; }
+  .podium-score { font-size: 0.875rem; font-weight: 900; margin: 3px 0 8px; text-align: center; }
+  .podium-score-1 { font-size: 1.0625rem; }
+  .podium-stand {
+    width: 100%; border-radius: 10px 10px 0 0;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px; padding: 10px 8px;
+  }
+  .ps-gold   { background: linear-gradient(to bottom,#FEF3C7,#FDE68A); height: 90px; }
+  .ps-silver { background: linear-gradient(to bottom,#F1F5F9,#E2E8F0); height: 68px; }
+  .ps-bronze { background: linear-gradient(to bottom,#FEF3C7,#FED7AA); height: 52px; }
+  .podium-medal { font-size: 1.125rem; }
+  .podium-pos   { font-size: 1.25rem; font-weight: 900; color: rgba(0,0,0,0.3); }
+
+  /* ── FILAS DEL LEADERBOARD ── */
   .lb-row {
-    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 11px;
-    transition: background 0.15s; margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    transition: background 0.15s;
+    cursor: default;
+    animation: rowSlide 0.25s ease both;
   }
   .lb-row:hover { background: var(--ui-surface); }
-  .lb-row.is-me { background: rgba(212,18,36,0.06); border: 1px solid rgba(212,18,36,0.2); }
 
-  .btn-load-more {
-    padding: 8px 20px; border-radius: 10px; border: 1.5px solid var(--ui-border);
-    background: transparent; color: var(--ui-text-2); font-family: inherit; font-size: 0.875rem;
-    font-weight: 600; cursor: pointer; transition: all 0.15s;
+  .lb-row.is-me {
+    background: rgba(212,18,36,0.05);
+    border: 1.5px solid rgba(212,18,36,0.2);
+    margin: 4px 0;
   }
-  .btn-load-more:hover { border-color: var(--brand); color: var(--brand); }
+  .lb-row.lb-top-1 { background: linear-gradient(to right,rgba(245,158,11,0.07),transparent); }
+  .lb-row.lb-top-2 { background: linear-gradient(to right,rgba(148,163,184,0.07),transparent); }
+  .lb-row.lb-top-3 { background: linear-gradient(to right,rgba(180,83,9,0.05),transparent); }
+
+  .lb-pos {
+    font-size: 0.875rem;
+    font-weight: 700;
+    min-width: 30px;
+    text-align: center;
+    color: var(--ui-text-3);
+    flex-shrink: 0;
+  }
+  .lb-pos-medal { font-size: 1.0625rem; }
+
+  .lb-avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg,#D41224,#9B1F24);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 900; font-size: 0.6875rem;
+    flex-shrink: 0;
+  }
+  .lb-row.is-me .lb-avatar {
+    box-shadow: 0 0 0 2px var(--brand), 0 0 0 4px rgba(212,18,36,0.15);
+  }
+
+  .lb-info { flex: 1; min-width: 0; }
+  .lb-name {
+    font-size: 0.875rem; font-weight: 700; color: var(--ui-text-1);
+    margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .lb-meta { font-size: 0.6875rem; color: var(--ui-text-3); margin: 2px 0 0; }
+
+  .lb-score-wrap { text-align: right; flex-shrink: 0; }
+  .lb-score-val { font-size: 1.0625rem; font-weight: 900; color: var(--brand); margin: 0; }
+  .lb-score-lbl { font-size: 0.5625rem; color: var(--ui-text-3); margin: 0; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  .lb-you-badge {
+    display: inline-block;
+    font-size: 0.5625rem; background: var(--brand); color: white;
+    padding: 1px 6px; border-radius: 8px; font-weight: 700;
+    margin-left: 5px; vertical-align: middle;
+  }
+
+  .lb-divider {
+    text-align: center; padding: 6px 12px;
+    font-size: 0.6875rem; color: var(--ui-text-3);
+    border-top: 1px dashed var(--ui-border); margin: 4px 0;
+  }
 
   @media (max-width: 768px) {
-    .app-content > div:last-child > div { grid-template-columns: 1fr !important; }
+    .app-content > div:last-child > div[style*="grid-template-columns:1fr 300px"] {
+      grid-template-columns: 1fr !important;
+    }
+    div[style*="position:sticky"] { position: relative !important; top: auto !important; }
+    .podium-av-1 { width: 52px !important; height: 52px !important; }
+    .podium-av-2, .podium-av-3 { width: 42px !important; height: 42px !important; }
   }
 </style>
 
@@ -103,81 +233,203 @@ import AppLayout from '../../layouts/AppLayout.astro';
   let currentRankingId = '';
   let page = 0;
   const PAGE_SIZE = 20;
-  const medals = ['🥇', '🥈', '🥉'];
+  let lbTotalPages = 1;
+  let allLoaded: RankingStudentDto[] = [];
 
+  const PERIOD_LABEL: Record<string,string> = { GENERAL:'General', WEEKLY:'Semanal', MONTHLY:'Mensual', DAILY:'Diario' };
+  const SOURCE_LABEL: Record<string,string>  = { ALL:'Tests + IA', TRIEDS:'Solo tests', AI_TRIEDS:'Solo IA' };
+  const PERIOD_COLOR: Record<string,string>  = { GENERAL:'#7C3AED', WEEKLY:'#2563EB', MONTHLY:'#059669', DAILY:'#D97706' };
+  const PERIOD_BG:    Record<string,string>  = { GENERAL:'#EDE9FE', WEEKLY:'#DBEAFE', MONTHLY:'#D1FAE5', DAILY:'#FEF3C7' };
+
+  function ini(name: string, id: string) {
+    const parts = (name || id).trim().split(' ');
+    return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? parts[0]?.[1] ?? '')).toUpperCase();
+  }
+
+  // ── PODIO ──────────────────────────────────────────────────────────
+  function renderPodium(items: RankingStudentDto[]) {
+    const section = document.getElementById('podium-section')!;
+    const wrap    = document.getElementById('podium-wrap')!;
+    if (items.length < 1) { section.style.display = 'none'; return; }
+
+    section.style.display = 'block';
+    wrap.innerHTML = '';
+    wrap.style.animation = 'podiumIn 0.5s cubic-bezier(0.34,1.46,0.64,1) both';
+
+    const order = [items[1], items[0], items[2]]; // 2-1-3
+    const positions = [
+      { pos: 2, avClass: 'podium-av-2', standClass: 'ps-silver', medal: '🥈', nameClass: '', scoreColor: '#94A3B8', crown: false },
+      { pos: 1, avClass: 'podium-av-1', standClass: 'ps-gold',   medal: '🥇', nameClass: 'podium-name-1', scoreColor: '#D97706', crown: true },
+      { pos: 3, avClass: 'podium-av-3', standClass: 'ps-bronze', medal: '🥉', nameClass: '', scoreColor: '#B45309', crown: false },
+    ];
+
+    order.forEach((entry, i) => {
+      const conf = positions[i];
+      if (!entry) { wrap.appendChild(document.createElement('div')); return; }
+
+      const name = entry.studentName ?? entry.studentId;
+      const slot = document.createElement('div');
+      slot.className = `podium-slot${conf.pos === 1 ? ' podium-slot-first' : ''}`;
+
+      slot.innerHTML = `
+        ${conf.crown ? `<div class="podium-crown">👑</div>` : ''}
+        <div class="podium-avatar ${conf.avClass}" style="animation-delay:${i*0.1}s">${ini(name, entry.studentId)}</div>
+        <p class="podium-name ${conf.nameClass}" title="${name}">${name.split(' ')[0]}</p>
+        <p class="podium-prog">Prog. ${entry.programId}</p>
+        <p class="podium-score ${conf.pos === 1 ? 'podium-score-1' : ''}" style="color:${conf.scoreColor}">
+          ${Number(entry.totalScore).toFixed(1)} pts
+        </p>
+        <div class="podium-stand ${conf.standClass}">
+          <span class="podium-medal">${conf.medal}</span>
+          <span class="podium-pos">${conf.pos}</span>
+        </div>`;
+      wrap.appendChild(slot);
+    });
+  }
+
+  // ── LEADERBOARD ────────────────────────────────────────────────────
   function renderLeaderboard(items: RankingStudentDto[], append = false) {
     const list = document.getElementById('leaderboard-list')!;
-    if (!append) list.innerHTML = '';
+    if (!append) { list.innerHTML = ''; allLoaded = []; }
+    allLoaded = [...allLoaded, ...items];
 
-    const offset = append ? list.children.length : 0;
+    const offset = append ? list.querySelectorAll('.lb-row').length : 0;
+    const medals  = ['🥇','🥈','🥉'];
 
     items.forEach((entry, i) => {
       const pos   = offset + i + 1;
       const isMe  = currentUser?.id === entry.studentId;
-      const div   = document.createElement('div');
-      div.className = `lb-row${isMe ? ' is-me' : ''}`;
-      div.innerHTML = `
-        <span style="font-size:${pos <= 3 ? '1.125rem' : '0.875rem'};min-width:28px;text-align:center;font-weight:700;color:${pos <= 3 ? 'inherit' : 'var(--ui-text-3)'}">${pos <= 3 ? medals[pos - 1] : pos}</span>
-        <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:0.6875rem;flex-shrink:0">${(entry.studentName ?? entry.studentId).slice(0, 2).toUpperCase()}</div>
-        <div style="flex:1;min-width:0">
-          <p style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${entry.studentName ?? entry.studentId}${isMe ? ' (Tú)' : ''}</p>
-          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:1px 0 0">Prog. ${entry.programId} · ${entry.triedsCount} tests</p>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <p style="font-size:1rem;font-weight:900;color:var(--brand);margin:0">${Number(entry.totalScore).toFixed(1)}</p>
-          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">pts</p>
-        </div>`;
-      list.appendChild(div);
+      const name  = entry.studentName ?? entry.studentId;
+      const isTop = pos <= 3;
 
-      // My position card
+      const row = document.createElement('div');
+      row.className = `lb-row${isMe ? ' is-me' : ''}${isTop ? ` lb-top-${pos}` : ''}`;
+      row.style.animationDelay = `${i * 0.03}s`;
+
+      // Posición
+      const posEl = document.createElement('span');
+      posEl.className = `lb-pos${isTop ? ' lb-pos-medal' : ''}`;
+      posEl.textContent = isTop ? medals[pos - 1] : String(pos);
+
+      // Avatar
+      const avEl = document.createElement('div');
+      avEl.className = 'lb-avatar';
+      avEl.textContent = ini(name, entry.studentId);
+
+      // Info
+      const infoEl = document.createElement('div');
+      infoEl.className = 'lb-info';
+
+      const nameEl = document.createElement('p');
+      nameEl.className = 'lb-name';
+      nameEl.textContent = name;
       if (isMe) {
-        const card = document.getElementById('my-position-card')!;
-        card.style.display = 'block';
+        const badge = document.createElement('span');
+        badge.className = 'lb-you-badge';
+        badge.textContent = 'Tú';
+        nameEl.appendChild(badge);
+      }
+
+      const metaEl = document.createElement('p');
+      metaEl.className = 'lb-meta';
+      metaEl.textContent = `Prog. ${entry.programId} · ${entry.triedsCount} test(s)`;
+
+      infoEl.appendChild(nameEl);
+      infoEl.appendChild(metaEl);
+
+      // Puntaje
+      const scoreWrap = document.createElement('div');
+      scoreWrap.className = 'lb-score-wrap';
+      scoreWrap.innerHTML = `
+        <p class="lb-score-val">${Number(entry.totalScore).toFixed(1)}</p>
+        <p class="lb-score-lbl">pts</p>`;
+
+      row.appendChild(posEl);
+      row.appendChild(avEl);
+      row.appendChild(infoEl);
+      row.appendChild(scoreWrap);
+      list.appendChild(row);
+
+      // Mi posición card lateral
+      if (isMe) {
+        const card    = document.getElementById('my-position-card')!;
+        card.style.display  = 'block';
         document.getElementById('my-pos-num')!.textContent   = `#${pos}`;
-        document.getElementById('my-pos-name')!.textContent  = entry.studentName ?? entry.studentId;
+        document.getElementById('my-pos-name')!.textContent  = name;
         document.getElementById('my-pos-score')!.textContent = Number(entry.totalScore).toFixed(1);
         document.getElementById('my-trieds-count')!.textContent = String(entry.triedsCount);
-        document.getElementById('my-trieds-score')!.textContent = Number(entry.triedsScore).toFixed(1);
       }
     });
   }
 
+  // ── CARGAR RANKING ─────────────────────────────────────────────────
   async function loadRanking(rankingId: string, append = false) {
+    const loading = document.getElementById('lb-loading')!;
+    loading.style.display = 'block';
+
     try {
       const res = await rankingsApi.getLeaderboard(rankingId, append ? page : 0, PAGE_SIZE);
       if (!res.data) return;
 
-      if (!append) page = 0;
-      renderLeaderboard(res.data.content, append);
-
-      const loadMoreBtn = document.getElementById('load-more-btn') as HTMLButtonElement;
-      if (!res.data.last) {
-        loadMoreBtn.style.display = 'inline-block';
-        page++;
-      } else {
-        loadMoreBtn.style.display = 'none';
+      if (!append) {
+        page = 0;
+        document.getElementById('my-position-card')!.style.display = 'none';
       }
 
-      const metaEl = document.getElementById('ranking-meta');
-      if (metaEl) metaEl.textContent = `${res.data.totalElements} participante(s)`;
+      renderPodium(append ? allLoaded.concat(res.data.content) : res.data.content);
+      renderLeaderboard(res.data.content, append);
+
+      lbTotalPages = res.data.totalPages;
+
+      const totalNum  = document.getElementById('ranking-total-num');
+      const totalChip = document.getElementById('ranking-total-chip') as HTMLElement;
+      if (totalNum)  totalNum.textContent  = String(res.data.totalElements);
+      if (totalChip) totalChip.style.display = 'flex';
+
+      const loadMoreBtn = document.getElementById('load-more-btn') as HTMLButtonElement;
+      if (!res.data.last) { loadMoreBtn.style.display = 'inline-block'; page++; }
+      else { loadMoreBtn.style.display = 'none'; }
 
     } catch (err: any) {
       toast.error('Error al cargar el ranking', { description: err?.message });
+    } finally {
+      loading.style.display = 'none';
     }
+  }
+
+  // ── INFO CARD LATERAL ─────────────────────────────────────────────
+  function updateInfoCard(ranking: any) {
+    const card    = document.getElementById('ranking-info-card') as HTMLElement;
+    const content = document.getElementById('ranking-info-content')!;
+    card.style.display = 'block';
+    content.innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${PERIOD_BG[ranking.periodType]??'#F3F4F6'};color:${PERIOD_COLOR[ranking.periodType]??'#6B7280'}">
+          📅 ${PERIOD_LABEL[ranking.periodType] ?? ranking.periodType}
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#F3F4F6;color:#6B7280">
+          📊 ${SOURCE_LABEL[ranking.sourceFilter] ?? ranking.sourceFilter}
+        </span>
+      </div>
+      ${ranking.description
+        ? `<p style="font-size:0.75rem;color:var(--ui-text-2);margin:0;line-height:1.5">${ranking.description}</p>`
+        : `<p style="font-size:0.75rem;color:var(--ui-text-3);margin:0">Ranking histórico acumulado de todos los intentos.</p>`}`;
   }
 
   document.getElementById('load-more-btn')?.addEventListener('click', () => {
     loadRanking(currentRankingId, true);
   });
 
-  // Init
+  // ── INIT ──────────────────────────────────────────────────────────
   rankingsApi.findAll(true).then(res => {
     const rankings = res.data ?? [];
     const tabsEl   = document.getElementById('ranking-tabs')!;
     const nameEl   = document.getElementById('ranking-name')!;
 
     if (rankings.length === 0) {
-      tabsEl.innerHTML = '<p style="color:var(--ui-text-3);font-size:0.875rem">No hay rankings disponibles.</p>';
+      tabsEl.innerHTML = '<p style="color:var(--ui-text-3);font-size:0.875rem">No hay rankings activos.</p>';
+      nameEl.textContent = 'Sin rankings';
+      document.getElementById('lb-loading')!.style.display = 'none';
       return;
     }
 
@@ -193,6 +445,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
         page = 0;
         document.getElementById('leaderboard-list')!.innerHTML = '';
         document.getElementById('my-position-card')!.style.display = 'none';
+        document.getElementById('podium-section')!.style.display = 'none';
+        updateInfoCard(r);
         loadRanking(r.rankingId);
       });
       tabsEl.appendChild(btn);
@@ -200,8 +454,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
     currentRankingId = rankings[0].rankingId;
     nameEl.textContent = rankings[0].rankingName;
+    updateInfoCard(rankings[0]);
     loadRanking(currentRankingId);
-  }).catch(() => {
-    toast.error('Error al cargar rankings');
-  });
+
+  }).catch(() => { toast.error('Error al cargar rankings'); });
 </script>
