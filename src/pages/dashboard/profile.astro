@@ -159,6 +159,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
   import { triedsApi }   from '../../lib/api/trieds.api';
   import { animCount }   from '../../lib/utils';
   import { toast } from '../../lib/toast';
+  import { programsApi } from '../../lib/api/programs.api';
 
   let user;
   try { user = requireAuth(); } catch { throw new Error('redirect'); }
@@ -185,12 +186,30 @@ import AppLayout from '../../layouts/AppLayout.astro';
   document.getElementById('f-type')!.textContent         = isAdmin() ? 'Administrador' : 'Estudiante';
   document.getElementById('f-id')!.textContent           = user.id;
 
-  if (user.programId) {
+// Dentro del script de profile.astro, reemplaza la parte de programa:
+if (user.programId) {
     const row = document.getElementById('f-program-row')!;
     row.style.display = 'flex'; row.style.flexDirection = 'column';
-    document.getElementById('f-program')!.textContent = user.programId;
-    document.getElementById('hero-program')!.textContent = `Programa: ${user.programId}`;
-  }
+    // Mostrar nombre del programa desde la API
+    
+    programsApi.findById(user.programId).then(res => {
+        if (res.data) {
+            document.getElementById('f-program')!.textContent = 
+                `${res.data.programName} (${user.programId})`;
+            document.getElementById('hero-program')!.textContent = 
+                `${res.data.programName} (${user.programId})`;
+        }
+    }).catch(() => {
+        document.getElementById('f-program')!.textContent = String(user.programId);
+    });
+}
+// f-id debe mostrar código de estudiante o admin ID
+document.getElementById('f-id')!.textContent = user.id;
+// Label dinámico según tipo
+const idLabel = document.querySelector('#f-id')?.closest('.info-row')?.querySelector('.info-label');
+if (idLabel) {
+    idLabel.textContent = user.userType === 'ADMIN' ? 'ID de administrador' : 'Código de estudiante';
+}
 
   // JWT session info
   const token = getToken();

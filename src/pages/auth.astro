@@ -237,6 +237,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
     </div>
+    <div id="info-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:white;border-radius:20px;padding:2.5rem 2rem;max-width:380px;width:calc(100% - 2rem);text-align:center;animation:slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
+    <div id="info-modal-icon" style="width:64px;height:64px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center"></div>
+    <h3 id="info-modal-title" style="font-family:'Poppins',sans-serif;font-size:1.125rem;font-weight:800;color:#1A1A1A;margin:0 0 0.5rem"></h3>
+    <p id="info-modal-desc"  style="font-family:'Poppins',sans-serif;font-size:0.875rem;color:#6B7280;margin:0 0 1.5rem;line-height:1.65"></p>
+    <button id="info-modal-ok" style="width:100%;padding:0.75rem;border-radius:12px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.875rem;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(212,18,36,.3)">Entendido</button>
+  </div>
+</div>
   </main>
 </BaseLayout>
 
@@ -587,7 +595,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         setTimeout(() => window.location.replace('/dashboard'), 600);
       }
     } catch (err: any) {
-      showMsg('login-msg', err?.message ?? 'Credenciales incorrectas.', 'error');
+      showInfoModal('error', 'Error al ingresar', err?.message ?? 'Credenciales incorrectas.');
     } finally {
       setLoading('login-btn', 'login-label', false, 'Ingresar');
     }
@@ -631,7 +639,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         phone:         (document.getElementById('r-phone')  as HTMLInputElement).value.trim(),
         password: pw,
       });
-      showMsg('register-msg', '¡Cuenta creada! Revisa tu correo para verificarla.', 'success');
+      showInfoModal('success', '¡Registro exitoso!', 'Revisa tu correo para verificar tu cuenta.', () => switchView('login'));
       toast.success('¡Registro exitoso!', { description: 'Verifica tu correo antes de iniciar sesión.' });
       setTimeout(() => switchView('login'), 3000);
     } catch (err: any) {
@@ -654,13 +662,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     setLoading('forgot-btn', 'forgot-label', true, 'Enviar enlace');
     try {
       await authApi.forgotPassword(email, code, phone);
-      showMsg('forgot-msg', 'Si los datos coinciden, recibirás un enlace en tu correo.', 'success');
+      showInfoModal('info', 'Correo enviado', 'Si los datos coinciden recibirás un enlace. Revisa tu bandeja de entrada.', () => switchView('login'));
       toast.success('Correo enviado', { description: 'Revisa tu bandeja de entrada.' });
     } catch {
       // Always show success for security (don't reveal if email exists)
-      showMsg('forgot-msg', 'Si los datos coinciden, recibirás un enlace en tu correo.', 'success');
+      showInfoModal('info', 'Correo enviado', 'Si los datos coinciden recibirás un enlace. Revisa tu bandeja de entrada.', () => switchView('login'));
     } finally {
       setLoading('forgot-btn', 'forgot-label', false, 'Enviar enlace');
     }
   });
+
+  function showInfoModal(type: 'success' | 'error' | 'info', title: string, desc: string, onOk?: () => void) {
+    const modal    = document.getElementById('info-modal')!;
+    const iconEl   = document.getElementById('info-modal-icon')!;
+    const titleEl  = document.getElementById('info-modal-title')!;
+    const descEl   = document.getElementById('info-modal-desc')!;
+    const okBtn    = document.getElementById('info-modal-ok')!;
+
+    const configs = {
+        success: { bg: '#D1FAE5', color: '#059669', icon: '<svg width="28" height="28" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>' },
+        error:   { bg: '#FEE2E2', color: '#DC2626', icon: '<svg width="28" height="28" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' },
+        info:    { bg: '#DBEAFE', color: '#2563EB', icon: '<svg width="28" height="28" fill="none" stroke="#2563EB" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' },
+    };
+    const cfg = configs[type];
+    iconEl.style.background = cfg.bg;
+    iconEl.innerHTML = cfg.icon;
+    titleEl.textContent = title;
+    descEl.textContent  = desc;
+    modal.style.display = 'flex';
+
+    const handler = () => {
+        modal.style.display = 'none';
+        okBtn.removeEventListener('click', handler);
+        onOk?.();
+    };
+    okBtn.addEventListener('click', handler);
+}
 </script>

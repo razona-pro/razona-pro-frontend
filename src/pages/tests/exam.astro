@@ -429,11 +429,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
     // Diff badge
     const diffEl = document.getElementById('q-diff-badge')!;
-    diffEl.textContent = DIFF_LABEL[q.difficultyLevel] ?? q.difficultyLevel;
+    const diffPoints: Record<string, string> = { B: '1 pt · Básico', M: '3 pts · Medio', A: '5 pts · Alto' };
+    diffEl.textContent = diffPoints[q.difficultyLevel] ?? q.difficultyLevel;
     diffEl.style.cssText = `background:${DIFF_BG[q.difficultyLevel] ?? '#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel] ?? '#6B7280'};padding:4px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
 
-    // Statement
-    document.getElementById('q-statement')!.textContent = q.statement;
+    // Statement — preservar saltos de línea
+    const stmtEl = document.getElementById('q-statement')!;
+    stmtEl.innerHTML = '';
+    const lines = (q.statement || '').split('\n');
+    lines.forEach((line, i) => {
+        if (i > 0) stmtEl.appendChild(document.createElement('br'));
+        stmtEl.appendChild(document.createTextNode(line));
+    });
 
     // Options
     const optsEl = document.getElementById('q-options')!;
@@ -442,31 +449,44 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     const selectedOpt = answers[q.questionId];
 
     (q.options ?? []).forEach((opt, i) => {
-      const btn = document.createElement('button');
-      btn.className = `q-option${selectedOpt === opt.optionId ? ' selected' : ''}`;
-      btn.innerHTML = `
-        <span class="opt-letter">${letters[i] ?? i + 1}</span>
-        <span class="opt-text">${opt.optionText}</span>
-      `;
-      if (selectedOpt) btn.disabled = true;
-      btn.addEventListener('click', () => selectAnswer(q.questionId, opt.optionId, idx));
-      optsEl.appendChild(btn);
+        const btn = document.createElement('button');
+        const isSelected = selectedOpt === opt.optionId;
+        btn.className = `q-option${isSelected ? ' selected' : ''}`;
+        
+        const letterSpan = document.createElement('span');
+        letterSpan.className = 'opt-letter';
+        letterSpan.textContent = letters[i] ?? String(i + 1);
+        
+        const textSpan = document.createElement('span');
+        textSpan.className = 'opt-text';
+        // Preservar saltos de línea en opciones también
+        const optLines = (opt.optionText || '').split('\n');
+        optLines.forEach((line, li) => {
+            if (li > 0) textSpan.appendChild(document.createElement('br'));
+            textSpan.appendChild(document.createTextNode(line));
+        });
+        
+        btn.appendChild(letterSpan);
+        btn.appendChild(textSpan);
+        
+        if (selectedOpt) btn.disabled = true;
+        btn.addEventListener('click', () => selectAnswer(q.questionId, opt.optionId, idx));
+        optsEl.appendChild(btn);
     });
 
-    // Nav buttons
+    // Número de pregunta en el nav
     const prevBtn = document.getElementById('btn-prev') as HTMLButtonElement;
     const nextBtn = document.getElementById('btn-next') as HTMLButtonElement;
     prevBtn.disabled   = idx === 0;
-    nextBtn.textContent = idx === questions.length - 1 ? 'Finalizar' : 'Siguiente';
     if (idx === questions.length - 1) {
-      nextBtn.innerHTML = 'Finalizar <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        nextBtn.innerHTML = 'Finalizar <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
     } else {
-      nextBtn.innerHTML = 'Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
+        nextBtn.innerHTML = 'Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
     }
 
     updateQNav();
     updateProgress();
-  }
+}
 
   function selectAnswer(questionId: string, optionId: string, qIdx: number) {
     if (answers[questionId]) return; // Already answered

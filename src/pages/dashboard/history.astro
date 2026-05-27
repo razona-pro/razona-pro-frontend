@@ -186,20 +186,26 @@ import AppLayout from '../../layouts/AppLayout.astro';
   document.getElementById('comp-filter')?.addEventListener('change', e => {
     renderTrieds((document.getElementById('status-filter') as HTMLSelectElement).value, (e.target as HTMLSelectElement).value);
   });
+  import { competencesApi } from '../../lib/api/competences.api';
 
+  let competencesMap: Record<string, string> = {};
   // Load
-  Promise.allSettled([triedsApi.findMy(0, 200), aiTriedsApi.findMy(0, 100)]).then(([triedsR, aiR]) => {
+Promise.allSettled([triedsApi.findMy(0, 200), aiTriedsApi.findMy(0, 100), competencesApi.findAll(false)])
+  .then(([triedsR, aiR, compsR]) => {
+    if (compsR.status === 'fulfilled' && compsR.value.data) {
+        compsR.value.data.forEach(c => { competencesMap[c.competenceId] = c.competenceName; });
+    }
     if (triedsR.status === 'fulfilled' && triedsR.value.data) {
-      allTrieds = triedsR.value.data.content;
-
-      // Build comp filter
-      const compSel = document.getElementById('comp-filter') as HTMLSelectElement;
-      const compIds = [...new Set(allTrieds.map(t => t.competenceId))];
-      compIds.forEach(id => {
-        const opt = document.createElement('option');
-        opt.value = id; opt.textContent = id;
-        compSel.appendChild(opt);
-      });
+        allTrieds = triedsR.value.data.content;
+        // Poblar el filtro de competencias con nombres reales:
+        const compSel = document.getElementById('comp-filter') as HTMLSelectElement;
+        const compIds = [...new Set(allTrieds.map(t => t.competenceId))];
+        compIds.forEach(id => {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = competencesMap[id] ?? id; // nombre en vez de ID
+            compSel.appendChild(opt);
+        });
     }
     if (aiR.status === 'fulfilled' && aiR.value.data) {
       allAiTrieds = aiR.value.data.content;

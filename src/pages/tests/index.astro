@@ -27,14 +27,10 @@ import EmptyState from '../../components/ui/EmptyState.astro';
   <!-- Filters -->
   <div style="margin-bottom:1rem">
     <!-- Competence filters -->
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center">
-      <span style="font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin-right:2px">Competencia:</span>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center">
+    <span style="font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin-right:2px">Competencia:</span>
+    <div class="fpill-comp-container" style="display:contents">
       <button class="fpill active" data-comp="ALL">Todas</button>
-      <button class="fpill" data-comp="lc" data-color="#D41224">Lectura Crítica</button>
-      <button class="fpill" data-comp="rq" data-color="#2563EB">Razon. Cuantitativo</button>
-      <button class="fpill" data-comp="cc" data-color="#059669">Comp. Ciudadanas</button>
-      <button class="fpill" data-comp="ce" data-color="#7C3AED">Comun. Escrita</button>
-      <button class="fpill" data-comp="en" data-color="#D97706">Inglés</button>
     </div>
     <!-- Mode filters -->
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
@@ -109,6 +105,7 @@ import EmptyState from '../../components/ui/EmptyState.astro';
   import { getCompStyle } from '../../lib/utils';
   import { TEST_MODE_BG, TEST_MODE_COLOR, TEST_MODE_LABEL } from '../../lib/constants';
   import { toast } from '../../lib/toast';
+  import { competencesApi } from '../../lib/api/competences.api';
 
   try { requireAuth(); } catch { throw new Error('redirect'); }
 
@@ -271,6 +268,25 @@ import EmptyState from '../../components/ui/EmptyState.astro';
     });
   }
 
+  competencesApi.findAll(true).then(res => {
+    if (!res.data) return;
+    const container = document.querySelector('.fpill-comp-container') as HTMLElement;
+    if (!container) return;
+    res.data.forEach(comp => {
+        const s = getCompStyle(comp.competenceId, comp.competenceName);
+        const btn = document.createElement('button');
+        btn.className = 'fpill fpill-comp';
+        btn.dataset.comp = s.key;
+        btn.textContent = comp.competenceName;
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.fpill:not(.fpill-mode)').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterComp = s.key;
+            render();
+        });
+        container.appendChild(btn);
+    });
+}).catch(() => {});
   // Load data
   showSkeleton();
   Promise.allSettled([testsApi.findAll(0, 100), triedsApi.findMy(0, 200)]).then(([testsR, triedsR]) => {
