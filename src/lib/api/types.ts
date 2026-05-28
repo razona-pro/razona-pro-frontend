@@ -106,6 +106,7 @@ export interface TriedDto {
   timeSpentSeconds?: number;
   attemptTimestamp: string;
   finishedAt?: string;
+  questions?: any[];
 }
 
 // ── Rankings ──────────────────────────────────────────────────────
@@ -151,4 +152,38 @@ export interface AiTriedDto {
   description?: string;
   attemptTimestamp: string;
   finishedAt?: string;
+}
+
+export interface OptionReview {
+  optionId: string;
+  optionText: string;
+  isCorrect: boolean;
+  wasSelected: boolean;
+}
+
+export interface QuestionReview {
+  questionId: string;
+  statement: string;
+  explanation?: string;
+  source?: string;
+  difficultyLevel: string;
+  answeredCorrectly: boolean;
+  selectedOptionId?: string;
+  correctOptionId?: string;
+  options: OptionReview[];
+}
+
+export interface TriedReviewDto {
+  triedId: string;
+  testId: string;
+  testName?: string;
+  competenceId: string;
+  status: string;
+  score?: number;
+  totalQuestions: number;
+  correctAnswers?: number;
+  timeSpentSeconds?: number;
+  attemptTimestamp: string;
+  finishedAt?: string;
+  questions: QuestionReview[];
 }

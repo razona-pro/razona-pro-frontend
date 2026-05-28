@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-import type { PagedResponse, TriedDto } from './types';
+import type { PagedResponse, TriedDto, TriedReviewDto } from './types';
 
 export const triedsApi = {
   findMy: (page = 0, size = 100) =>
@@ -20,4 +20,6 @@ export const triedsApi = {
       `/api/trieds/${triedId}/finish${timeSpentSeconds != null ? `?timeSpentSeconds=${timeSpentSeconds}` : ''}`,
       { method: 'PUT' }
     ),
+  getReview: (triedId: string) =>
+    apiFetch<TriedReviewDto>(`/api/trieds/${triedId}/review`),
 };

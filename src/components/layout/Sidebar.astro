@@ -326,7 +326,9 @@ if (u && !u.firstName) {
 }
 
 // ── Competencias dinámicas ────────────────────────────────────────
-const COMP_COLORS: Record<string, { color: string; bg: string }> = {
+const COMP_COLORS: Record<string, {
+[x: string]: any; color: string; bg: string 
+}> = {
   'lectura':   { color: '#D41224', bg: '#FEE2E2' },
   'cuantit':   { color: '#2563EB', bg: '#DBEAFE' },
   'razon':     { color: '#2563EB', bg: '#DBEAFE' },
@@ -336,7 +338,7 @@ const COMP_COLORS: Record<string, { color: string; bg: string }> = {
   'ingl':      { color: '#D97706', bg: '#FEF3C7' },
 };
 
-function getCompStyle(name: string) {
+function getCompStyle(name: string, competenceName?: string) {
   const n = name.toLowerCase();
   for (const [kw, style] of Object.entries(COMP_COLORS)) {
     if (n.includes(kw)) return style;
@@ -359,15 +361,16 @@ competencesApi.findAll(true).then(res => {
   const listEl = document.getElementById('sb-competences-list');
   if (!listEl || !res.data?.length) return;
   listEl.innerHTML = '';
-
+ 
   res.data.forEach(comp => {
-    const s     = getCompStyle(comp.competenceName);
-    const short = getShort(comp.competenceName);
-
+    const s = getCompStyle(comp.competenceId, comp.competenceName);
+ 
+    // ← CAMBIO CLAVE: usar ruta dinámica /tests/<key> en vez de /tests?c=<key>
+    const href = s.key ? `/tests/${s.key}` : `/tests`;
+ 
     const a = document.createElement('a');
-    a.href = `/tests?c=${short.toLowerCase()}`;
-
-    // Estilos inline para evitar scoping de Astro
+    a.href = href;
+ 
     a.style.cssText = `
       display: flex;
       align-items: center;
@@ -383,7 +386,14 @@ competencesApi.findAll(true).then(res => {
       margin-bottom: 1px;
       width: 100%;
     `;
-
+ 
+    // Resaltar si estamos en esa ruta
+    if (window.location.pathname === href || window.location.pathname.startsWith(href + '/')) {
+      a.style.background = 'var(--sidebar-active-bg)';
+      a.style.color      = 'var(--sidebar-active-txt)';
+      a.style.fontWeight = '600';
+    }
+ 
     // Punto de color
     const dot = document.createElement('span');
     dot.style.cssText = `
@@ -394,7 +404,7 @@ competencesApi.findAll(true).then(res => {
       flex-shrink: 0;
       display: inline-block;
     `;
-
+ 
     const label = document.createElement('span');
     label.textContent = comp.competenceName;
     label.style.cssText = `
@@ -403,19 +413,23 @@ competencesApi.findAll(true).then(res => {
       text-overflow: ellipsis;
       font-size: 0.8125rem;
     `;
-
+ 
     a.appendChild(dot);
     a.appendChild(label);
-
+ 
     a.addEventListener('mouseenter', () => {
-      a.style.background = 'var(--sidebar-hover-bg)';
-      a.style.color      = 'var(--sidebar-hover-txt)';
+      if (window.location.pathname !== href) {
+        a.style.background = 'var(--sidebar-hover-bg)';
+        a.style.color      = 'var(--sidebar-hover-txt)';
+      }
     });
     a.addEventListener('mouseleave', () => {
-      a.style.background = '';
-      a.style.color      = 'var(--sidebar-text)';
+      if (window.location.pathname !== href) {
+        a.style.background = '';
+        a.style.color      = 'var(--sidebar-text)';
+      }
     });
-
+ 
     listEl.appendChild(a);
   });
 }).catch(() => {

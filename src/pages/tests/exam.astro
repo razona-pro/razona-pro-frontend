@@ -1,633 +1,458 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Icon } from 'astro-icon/components';
+export const prerender = false;
+import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
-<BaseLayout title="Simulacro en progreso">
-  <div class="exam-shell">
-
-    <!-- HEADER -->
-    <header class="exam-header">
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-        <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white">
-          <Icon name="tabler:brain" size={16} />
+<AppLayout title="Simulacro en curso" currentPage="tests">
+  <!-- Header del exam -->
+  <div id="exam-header" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.25rem">
+      <div>
+        <p id="exam-competence" style="font-size:0.75rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:0.05em;margin:0 0 4px"></p>
+        <h1 id="exam-title" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0;letter-spacing:-0.5px"></h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="timer-chip" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:var(--ui-card);border:1.5px solid var(--ui-border);font-size:0.875rem;font-weight:700;color:var(--ui-text-1)">
+          <span>⏱</span><span id="timer-display">00:00</span>
         </div>
-        <span style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1)">Razona<strong style="color:var(--brand)">Pro</strong></span>
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div style="margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span id="progress-label" style="font-size:0.75rem;font-weight:600;color:var(--ui-text-3)"></span>
+        <span id="answered-label" style="font-size:0.75rem;font-weight:600;color:var(--ui-text-3)"></span>
+      </div>
+      <div style="height:6px;background:var(--ui-border);border-radius:10px;overflow:hidden">
+        <div id="progress-bar" style="height:100%;background:linear-gradient(to right,var(--brand),var(--brand-dark));border-radius:10px;transition:width 0.3s ease;width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading inicial -->
+  <div id="exam-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem;gap:1rem">
+    <div style="width:48px;height:48px;border-radius:50%;border:3px solid rgba(212,18,36,0.15);border-top-color:#D41224;animation:spin 0.85s linear infinite"></div>
+    <p style="font-size:0.875rem;color:var(--ui-text-3)">Iniciando simulacro...</p>
+  </div>
+
+  <!-- Tarjeta de pregunta -->
+  <div id="question-card" style="display:none;background:var(--ui-card);border-radius:18px;border:1px solid var(--ui-border);overflow:hidden">
+    <!-- Stripe top -->
+    <div style="height:4px;background:linear-gradient(to right,var(--brand),var(--brand-dark))"></div>
+
+    <div style="padding:1.5rem 1.75rem">
+      <!-- Metadata de pregunta -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem">
+        <span id="q-number-badge" style="font-size:0.6875rem;font-weight:800;color:var(--brand);background:var(--brand-pale);padding:3px 12px;border-radius:20px;border:1.5px solid rgba(212,18,36,0.2)"></span>
+        <span id="q-diff-badge" style="padding:3px 12px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
+        <span id="q-answered-badge" style="display:none;padding:3px 12px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#D1FAE5;color:#059669;border:1px solid #A7F3D0">✓ Respondida</span>
       </div>
 
-      <div style="flex:1;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;padding:0 0.75rem">
-        <span id="exam-comp-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0;background:#FEE2E2;color:#D41224">...</span>
-        <span id="exam-name" style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cargando...</span>
+      <!-- Enunciado -->
+      <div id="q-statement" style="font-size:0.9375rem;color:var(--ui-text-1);line-height:1.85;margin-bottom:1.5rem;font-weight:500;padding:16px 18px;background:var(--ui-surface);border-radius:12px;border:1px solid var(--ui-border)"></div>
+
+      <!-- Opciones -->
+      <div id="options-container" style="display:flex;flex-direction:column;gap:8px"></div>
+
+      <!-- Hint cambio de respuesta -->
+      <p id="change-hint" style="display:none;font-size:0.75rem;color:var(--ui-text-3);margin:10px 0 0;text-align:center">
+        💡 Puedes cambiar tu respuesta antes de pasar a la siguiente pregunta
+      </p>
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <div id="exam-nav" style="display:none;margin-top:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <button id="btn-prev" onclick="handlePrev()" style="display:flex;align-items:center;gap:6px;padding:0.75rem 1.25rem;border-radius:12px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-2);font-weight:600;font-size:0.875rem;cursor:pointer;font-family:inherit;transition:all 0.15s">
+      ← Anterior
+    </button>
+
+    <div style="display:flex;align-items:center;gap:8px">
+      <!-- Indicadores mini -->
+      <div id="dot-nav" style="display:flex;gap:4px;flex-wrap:wrap;max-width:240px;justify-content:center"></div>
+    </div>
+
+    <button id="btn-next" onclick="handleNext()" style="display:flex;align-items:center;gap:6px;padding:0.75rem 1.5rem;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-weight:700;font-size:0.875rem;cursor:pointer;border:none;font-family:inherit;transition:opacity 0.15s">
+      Siguiente →
+    </button>
+  </div>
+
+  <!-- Modal resumen final -->
+  <div id="summary-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem">
+    <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:420px;width:100%;border:1px solid var(--ui-border)">
+      <h2 style="font-size:1.375rem;font-weight:900;color:var(--ui-text-1);margin:0 0 6px;text-align:center">¿Finalizar simulacro?</h2>
+      <p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;margin:0 0 1.5rem">Revisa tu progreso antes de confirmar</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.5rem">
+        <div style="text-align:center;padding:14px 10px;background:var(--ui-surface);border-radius:12px;border:1px solid var(--ui-border)">
+          <p id="summary-answered" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">0</p>
+          <p style="font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;margin:4px 0 0">Respondidas</p>
+        </div>
+        <div style="text-align:center;padding:14px 10px;background:var(--ui-surface);border-radius:12px;border:1px solid var(--ui-border)">
+          <p id="summary-pending" style="font-size:1.75rem;font-weight:900;color:#D97706;margin:0;line-height:1">0</p>
+          <p style="font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;margin:4px 0 0">Pendientes</p>
+        </div>
+        <div style="text-align:center;padding:14px 10px;background:var(--ui-surface);border-radius:12px;border:1px solid var(--ui-border)">
+          <p id="summary-total" style="font-size:1.75rem;font-weight:900;color:var(--ui-text-1);margin:0;line-height:1">0</p>
+          <p style="font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;margin:4px 0 0">Total</p>
+        </div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-        <div id="timer-wrap" style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:10px;font-size:0.875rem;color:var(--ui-text-1);transition:all 0.3s">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span id="timer-display" style="font-size:0.9375rem;font-weight:800;font-variant-numeric:tabular-nums">--:--</span>
-        </div>
-        <button id="abandon-btn" title="Abandonar" style="width:34px;height:34px;border-radius:8px;background:transparent;border:1.5px solid var(--ui-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ui-text-3);transition:all 0.2s" onmouseover="this.style.borderColor='#DC2626';this.style.color='#DC2626';this.style.background='#FEF2F2'" onmouseout="this.style.borderColor='var(--ui-border)';this.style.color='var(--ui-text-3)';this.style.background='transparent'">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button id="btn-confirm-finish" onclick="confirmFinish()" style="width:100%;padding:0.875rem;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-weight:700;font-size:0.9375rem;border:none;cursor:pointer;font-family:inherit">
+          Finalizar y ver resultados
+        </button>
+        <button onclick="closeSummary()" style="width:100%;padding:0.875rem;border-radius:12px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-2);font-weight:600;font-size:0.875rem;cursor:pointer;font-family:inherit">
+          Seguir respondiendo
         </button>
       </div>
-    </header>
-
-    <!-- BODY -->
-    <div class="exam-body">
-
-      <!-- Sidebar navegador -->
-      <aside class="exam-sidebar">
-        <div style="padding:1rem 0.875rem;display:flex;flex-direction:column;gap:1rem;height:100%">
-          <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0">Preguntas</p>
-
-          <div id="q-nav" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px"></div>
-
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:#D1FAE5;border:1.5px solid #059669;flex-shrink:0"></span>Respondida</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:var(--brand);flex-shrink:0"></span>Actual</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:var(--ui-surface);border:1.5px solid var(--ui-border);flex-shrink:0"></span>Pendiente</div>
-          </div>
-
-          <div style="margin-top:auto">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <span style="font-size:0.625rem;font-weight:600;color:var(--ui-text-3)">Progreso</span>
-              <span id="sidebar-pct" style="font-size:0.625rem;font-weight:700;color:var(--brand)">0%</span>
-            </div>
-            <div style="height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;margin-bottom:1rem">
-              <div id="sidebar-bar-fill" style="height:100%;background:linear-gradient(to right,var(--brand),#FF2D42);border-radius:3px;width:0%;transition:width 0.5s ease"></div>
-            </div>
-            <button id="finish-btn" style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(212,18,36,0.28);display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.2s" onmouseover="this.style.boxShadow='0 5px 16px rgba(212,18,36,0.42)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 3px 10px rgba(212,18,36,0.28)';this.style.transform='none'">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Finalizar simulacro
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Main -->
-      <main class="exam-main">
-        <!-- Loading -->
-        <div id="exam-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;gap:1rem">
-          <div style="width:44px;height:44px;border-radius:50%;border:3px solid rgba(212,18,36,0.15);border-top-color:#D41224;animation:spin 0.85s linear infinite"></div>
-          <p style="font-size:0.875rem;color:var(--ui-text-3)">Cargando preguntas...</p>
-        </div>
-
-        <!-- Carta de pregunta -->
-        <div id="question-card" style="display:none;max-width:760px;margin:0 auto;width:100%">
-
-          <!-- Barra de progreso -->
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem">
-            <div style="flex:1;height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;border:1px solid var(--ui-border)">
-              <div id="q-progress-fill" style="height:100%;border-radius:3px;background:linear-gradient(to right,var(--brand),#FF2D42);width:0%;transition:width 0.5s ease"></div>
-            </div>
-            <span id="q-progress-label" style="font-size:0.75rem;font-weight:600;color:var(--ui-text-3);white-space:nowrap;flex-shrink:0">0 / 0</span>
-          </div>
-
-          <!-- Cabecera de pregunta -->
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-            <span id="q-number-badge" style="font-size:0.6875rem;font-weight:800;color:var(--brand);background:var(--brand-pale);border:1.5px solid rgba(212,18,36,0.2);padding:3px 10px;border-radius:20px">P1</span>
-            <span id="q-comp-chip" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
-            <span id="q-diff-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
-          </div>
-
-          <!-- Enunciado -->
-          <div style="background:var(--ui-card);border-radius:14px;padding:1.5rem 1.625rem;border:1px solid var(--ui-border);margin-bottom:1rem">
-            <p id="q-statement" style="font-size:1rem;font-weight:500;color:var(--ui-text-1);line-height:1.85;margin:0"></p>
-          </div>
-
-          <!-- Opciones -->
-          <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.25rem"></div>
-
-          <!-- Navegación -->
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:0.25rem">
-            <button id="btn-prev" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:var(--ui-card);border:1.5px solid var(--ui-border);color:var(--ui-text-2);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s" disabled>
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
-              Anterior
-            </button>
-
-            <span style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1)">
-              <span id="mobile-q-num">1</span>
-              <span style="color:var(--ui-text-3);font-weight:400"> / <span id="mobile-q-total">0</span></span>
-            </span>
-
-            <button id="btn-next" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;border:none;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(212,18,36,0.28);transition:all 0.15s">
-              Siguiente
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
-        </div>
-      </main>
     </div>
   </div>
+</AppLayout>
 
-  <!-- Modal finalizar -->
-  <div id="finish-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
-    <div style="background:var(--ui-card);border-radius:20px;padding:2rem 1.75rem;max-width:360px;width:calc(100% - 2rem);text-align:center;animation:modalIn 0.35s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
-      <div style="width:60px;height:60px;background:#FEF3C7;border-radius:15px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
-        <svg width="28" height="28" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <h3 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Finalizar simulacro?</h3>
-      <p id="finish-modal-desc" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.65"></p>
-      <div style="display:flex;gap:8px">
-        <button id="finish-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Continuar</button>
-        <button id="finish-confirm" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)">Finalizar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Resultados -->
-  <div id="results-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
-    <div style="background:var(--ui-card);border-radius:24px;padding:2.5rem 2rem;max-width:440px;width:calc(100% - 2rem);text-align:center;animation:modalIn 0.4s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.25)">
-      <div id="result-icon-wrap" style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center"></div>
-      <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.25rem">Tu puntaje</p>
-      <p id="result-score" style="font-size:4.5rem;font-weight:900;margin:0;line-height:1;letter-spacing:-3px;color:var(--brand)">0</p>
-      <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">/ 100 puntos</p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-          <p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p>
-          <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Correctas</p>
-        </div>
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-          <p id="res-wrong" style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p>
-          <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Incorrectas</p>
-        </div>
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-          <p id="res-time" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 2px">0</p>
-          <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Minutos</p>
-        </div>
-      </div>
-      <p id="result-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.65"></p>
-      <div style="display:flex;gap:8px">
-        <a href="/tests" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem;transition:all 0.15s">Otro test</a>
-        <a href="/dashboard" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem;box-shadow:0 3px 12px rgba(212,18,36,0.28)">Dashboard</a>
-      </div>
-    </div>
-  </div>
-</BaseLayout>
-
-<!-- is:global para que los estilos apliquen a elementos creados con JS -->
 <style is:global>
-  @keyframes spin    { to { transform: rotate(360deg); } }
-  @keyframes modalIn { from{opacity:0;transform:scale(0.9) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)} }
-  @keyframes fadeIn  { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
-  @keyframes optSlide { from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)} }
-  @keyframes selectPop { 0%{transform:scale(1)}40%{transform:scale(0.97)}100%{transform:scale(1)} }
-  @keyframes timerPulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.03)} }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  .exam-shell {
-    display: flex; flex-direction: column;
-    height: 100dvh; overflow: hidden;
-    background: var(--ui-bg-alt); font-family: 'Poppins', sans-serif;
-  }
-  .exam-header {
-    display: flex; align-items: center;
-    padding: 0 1.25rem; height: 56px;
-    background: var(--ui-card); border-bottom: 1px solid var(--ui-border);
-    flex-shrink: 0; gap: 0.5rem; z-index: 20;
-  }
-  .exam-body { display: flex; flex: 1; overflow: hidden; }
-  .exam-sidebar {
-    width: 200px; min-width: 200px;
-    background: var(--ui-card); border-right: 1px solid var(--ui-border);
-    overflow-y: auto; flex-shrink: 0;
-  }
-  .exam-main { flex: 1; overflow-y: auto; padding: 1.5rem 1.25rem; }
-
-  /* Botones del navegador de preguntas */
-  .q-nav-item {
-    width: 100%; aspect-ratio: 1/1; border-radius: 6px;
-    border: 1.5px solid var(--ui-border);
-    background: var(--ui-surface); color: var(--ui-text-3);
-    font-size: 0.625rem; font-weight: 700; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-family: inherit; transition: all 0.15s;
-  }
-  .q-nav-item:hover    { border-color: var(--brand); color: var(--brand); }
-  .q-nav-item.current  { background: var(--brand); border-color: var(--brand); color: white; }
-  .q-nav-item.answered { background: #D1FAE5; border-color: #059669; color: #059669; }
-
-  /* Opción de respuesta */
-  .exam-option {
-    display: flex;
-    align-items: stretch;
-    width: 100%;
-    background: var(--ui-card);
-    border: 1.5px solid var(--ui-border);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: border-color 0.18s, background 0.18s, transform 0.18s, box-shadow 0.18s;
-    text-align: left;
+  .opt-btn {
+    display: flex; align-items: stretch;
+    border-radius: 12px; border: 2px solid var(--ui-border);
+    background: var(--ui-card); cursor: pointer;
+    transition: all 0.15s; overflow: hidden; width: 100%;
     font-family: inherit;
-    overflow: hidden;
-    animation: optSlide 0.25s ease both;
   }
-  .exam-option:hover:not(:disabled) {
-    border-color: var(--brand);
-    background: rgba(212,18,36,0.03);
-    transform: translateX(3px);
-    box-shadow: 0 3px 12px rgba(212,18,36,0.08);
-  }
-  .exam-option:disabled { cursor: default; }
-  .exam-option:disabled:not(.selected):hover {
-    border-color: var(--ui-border);
-    background: var(--ui-card);
-    transform: none;
-    box-shadow: none;
-  }
+  .opt-btn:hover:not(.selected) { border-color: var(--brand); transform: translateX(2px); }
+  .opt-btn.selected { border-color: var(--brand); background: var(--brand-pale); }
 
-  /* Opción seleccionada */
-  .exam-option.selected {
-    border-color: var(--brand);
-    background: rgba(212,18,36,0.05);
-    animation: selectPop 0.25s ease;
-  }
-  .exam-option.selected .opt-letter-col {
-    background: var(--brand);
-    border-right-color: rgba(212,18,36,0.3);
-  }
-  .exam-option.selected .opt-letter-badge {
-    background: rgba(255,255,255,0.25);
-    border-color: transparent;
-    color: white;
-    font-weight: 900;
-  }
-  .exam-option.selected .opt-body-text {
-    color: var(--ui-text-1);
-    font-weight: 600;
-  }
-
-  /* Columna de letra */
-  .opt-letter-col {
-    width: 52px;
-    min-width: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--ui-surface);
-    border-right: 1.5px solid var(--ui-border);
-    transition: background 0.18s, border-color 0.18s;
-    flex-shrink: 0;
-  }
-  .opt-letter-badge {
-    width: 28px; height: 28px; border-radius: 7px;
-    border: 1.5px solid var(--ui-border-2);
+  .opt-letter {
+    min-width: 44px; width: 44px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem; font-weight: 800; color: var(--ui-text-2);
-    background: var(--ui-card);
-    transition: all 0.18s;
+    font-size: 0.8125rem; font-weight: 800; color: var(--ui-text-3);
+    background: var(--ui-surface); flex-shrink: 0;
+    border-right: 2px solid var(--ui-border);
+    transition: all 0.15s;
   }
+  .opt-btn.selected .opt-letter { background: var(--brand); color: white; border-color: var(--brand); }
 
-  /* Cuerpo del texto */
-  .opt-body {
-    flex: 1;
-    padding: 0.9375rem 1rem;
-    display: flex;
-    align-items: center;
+  .opt-text {
+    flex: 1; padding: 0.875rem 1rem;
+    font-size: 0.875rem; line-height: 1.65;
+    color: var(--ui-text-2); text-align: left;
+    transition: color 0.15s;
   }
-  .opt-body-text {
-    font-size: 0.9375rem;
-    color: var(--ui-text-2);
-    line-height: 1.65;
-    margin: 0;
-    transition: color 0.18s;
-  }
+  .opt-btn.selected .opt-text { color: var(--ui-text-1); font-weight: 600; }
 
-  /* Timer danger */
-  .timer-danger {
-    background: #FEE2E2 !important;
-    border-color: #FECACA !important;
-    color: #DC2626 !important;
-    animation: timerPulse 1s ease-in-out infinite;
-  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ui-border); transition: all 0.2s; flex-shrink: 0; }
+  .dot.answered { background: #059669; }
+  .dot.current { background: var(--brand); transform: scale(1.4); }
+  .dot.current.answered { background: var(--brand); }
 
-  @media (max-width: 768px) {
-    .exam-sidebar { display: none; }
-    .exam-main    { padding: 1rem; }
-  }
-  @media (max-width: 480px) {
-    .exam-header { padding: 0 0.875rem; gap: 6px; }
+  #summary-modal[style*="flex"] { display: flex !important; }
+  #summary-modal[style*="none"] { display: none !important; }
+
+  @media (max-width: 500px) {
+    #dot-nav { display: none; }
   }
 </style>
 
 <script>
   import { requireAuth } from '../../lib/auth';
-  import { testsApi }  from '../../lib/api/tests.api';
-  import { triedsApi } from '../../lib/api/trieds.api';
-  import type { QuestionDto } from '../../lib/api/types';
-  import { getCompStyle, fmtTimer, scoreColor } from '../../lib/utils';
-  import { toast } from '../../lib/toast';
+  import { triedsApi }  from '../../lib/api/trieds.api';
+  import { toast }      from '../../lib/toast';
 
-  try { requireAuth(); } catch { throw new Error('redirect'); }
+  try { requireAuth(); } catch { window.location.replace('/auth/login'); }
 
-  const params       = new URLSearchParams(window.location.search);
-  const triedId      = params.get('tried');
-  const testId       = params.get('test');
-  const competenceId = params.get('comp');
+  // ── Constantes ─────────────────────────────────────────
+  const UNANSWERED_ID = 'OTN000';
+  const LETTERS = ['A','B','C','D','E','F','G'];
+  const DIFF_LABEL: Record<string,string> = { B:'Básico', M:'Medio', A:'Alto' };
+  const DIFF_COLOR: Record<string,string> = { B:'#059669', M:'#D97706', A:'#D41224' };
+  const DIFF_BG:    Record<string,string> = { B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
 
-  if (!triedId || !testId || !competenceId) {
-    window.location.replace('/tests');
-    throw new Error('Missing params');
-  }
+  // ── Estado ──────────────────────────────────────────────
+  let triedId       = '';
+  let questions: any[] = [];
+  let currentIndex  = 0;
+  let selectedOptions: Record<string, string> = {};   // { questionId: optionId } — solo local hasta navegar
+  let savedOptions:    Record<string, string> = {};   // lo que ya fue guardado en backend
+  let timerInterval: any = null;
+  let elapsedSeconds = 0;
+  let isSaving = false;
+  let isFinishing = false;
 
-  let questions:   QuestionDto[] = [];
-  let answers:     Record<string, string> = {};
-  let currentIdx   = 0;
-  let startTime    = Date.now();
-  let timerInt:    ReturnType<typeof setInterval> | null = null;
-  let examFinished = false;
+  // ── Helpers DOM ─────────────────────────────────────────
+  const $ = (id: string) => document.getElementById(id)!;
 
-  const DIFF_LABEL: Record<string, string> = { B: 'Básico · 1pt', M: 'Medio · 3pts', A: 'Alto · 5pts' };
-  const DIFF_COLOR: Record<string, string> = { B: '#059669', M: '#D97706', A: '#D41224' };
-  const DIFF_BG:    Record<string, string> = { B: '#D1FAE5', M: '#FEF3C7', A: '#FEE2E2' };
-  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
-
-  // ── Convertir \n literales (backslash-n) a saltos de línea reales ──
-  function processText(raw: string): string {
-    return raw.replace(/\\n/g, '\n');
-  }
-
-  // ── Renderizar texto con saltos de línea en un elemento ──
   function renderText(el: HTMLElement, raw: string) {
     el.innerHTML = '';
-    const lines = processText(raw).split('\n');
-    lines.forEach((line, i) => {
+    (raw || '').replace(/\\n/g, '\n').split('\n').forEach((line, i) => {
       if (i > 0) el.appendChild(document.createElement('br'));
       if (line.trim()) el.appendChild(document.createTextNode(line));
     });
   }
 
-  async function init() {
+  // ── Timer ───────────────────────────────────────────────
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      elapsedSeconds++;
+      const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+      const s = String(elapsedSeconds % 60).padStart(2, '0');
+      $('timer-display').textContent = `${m}:${s}`;
+    }, 1000);
+  }
+
+  // ── Render pregunta ─────────────────────────────────────
+  function renderQuestion(idx: number) {
+    currentIndex = idx;
+    const q = questions[idx];
+    if (!q) return;
+
+    // Badges
+    $('q-number-badge').textContent = `Pregunta ${idx + 1} de ${questions.length}`;
+
+    const diffBadge = $('q-diff-badge') as HTMLElement;
+    diffBadge.textContent = DIFF_LABEL[q.difficultyLevel] ?? q.difficultyLevel;
+    diffBadge.style.background = DIFF_BG[q.difficultyLevel] ?? '#F3F4F6';
+    diffBadge.style.color = DIFF_COLOR[q.difficultyLevel] ?? '#6B7280';
+
+    // Badge "Respondida"
+    const answeredBadge = $('q-answered-badge') as HTMLElement;
+    const isSaved = !!savedOptions[q.questionId];
+    answeredBadge.style.display = isSaved ? 'inline-flex' : 'none';
+
+    // Enunciado
+    const stmtEl = $('q-statement');
+    renderText(stmtEl, q.statement ?? q.questionStatement ?? '');
+
+    // Opciones — excluir OTN000
+    const visibleOptions = (q.options ?? []).filter((o: any) => o.optionId !== UNANSWERED_ID);
+    const container = $('options-container');
+    container.innerHTML = '';
+
+    visibleOptions.forEach((opt: any, oi: number) => {
+      const isSelected = selectedOptions[q.questionId] === opt.optionId;
+      const btn = document.createElement('button');
+      btn.className = `opt-btn${isSelected ? ' selected' : ''}`;
+      btn.innerHTML = `
+        <div class="opt-letter">${LETTERS[oi] ?? String(oi + 1)}</div>
+        <div class="opt-text"></div>
+      `;
+      (btn.querySelector('.opt-text') as HTMLElement).textContent = opt.optionText;
+      btn.onclick = () => handleSelectOption(q.questionId, opt.optionId);
+      container.appendChild(btn);
+    });
+
+    // Hint cambio
+    const hint = $('change-hint') as HTMLElement;
+    hint.style.display = selectedOptions[q.questionId] ? 'block' : 'none';
+
+    // Navegación
+    updateNav(idx);
+    updateProgress();
+  }
+
+  function handleSelectOption(questionId: string, optionId: string) {
+    // Solo actualizar estado local + UI — NO llamar API todavía
+    selectedOptions[questionId] = optionId;
+
+    // Re-render opciones visualmente
+    const q = questions[currentIndex];
+    const visibleOptions = (q.options ?? []).filter((o: any) => o.optionId !== UNANSWERED_ID);
+    const container = $('options-container');
+    container.querySelectorAll('.opt-btn').forEach((btn: Element, oi: number) => {
+      const opt = visibleOptions[oi];
+      const isSelected = opt?.optionId === optionId;
+      btn.classList.toggle('selected', isSelected);
+    });
+
+    // Mostrar hint
+    ($('change-hint') as HTMLElement).style.display = 'block';
+    // Mostrar badge respondida localmente
+    ($('q-answered-badge') as HTMLElement).style.display = 'inline-flex';
+
+    updateProgress();
+    updateDots();
+  }
+
+  // ── Guardar respuesta en backend ─────────────────────────
+  async function saveCurrentAnswer(): Promise<boolean> {
+    const q = questions[currentIndex];
+    if (!q) return true;
+    const selected = selectedOptions[q.questionId];
+    if (!selected) return true; // Sin respuesta, ok seguir
+    if (savedOptions[q.questionId] === selected) return true; // Ya guardado, no repetir
+
+    isSaving = true;
     try {
-      const [testRes, questionsRes] = await Promise.all([
-        testsApi.findById(testId!, competenceId!),
-        testsApi.getQuestions(testId!, competenceId!),
-      ]);
+      await triedsApi.submitAnswer(triedId, q.questionId, selected);
+      savedOptions[q.questionId] = selected;
+      return true;
+    } catch (err: any) {
+      toast.error('Error al guardar respuesta', { description: err?.message });
+      return false;
+    } finally {
+      isSaving = false;
+    }
+  }
 
-      const test = testRes.data;
-      questions  = questionsRes.data ?? [];
+  // ── Navegación ───────────────────────────────────────────
+  async function handleNext() {
+    if (isSaving || isFinishing) return;
 
-      if (!test || questions.length === 0) {
-        toast.error('Error al cargar el test');
+    // Guardar respuesta actual ANTES de navegar
+    const ok = await saveCurrentAnswer();
+    if (!ok) return;
+
+    if (currentIndex < questions.length - 1) {
+      renderQuestion(currentIndex + 1);
+    } else {
+      // Última pregunta → mostrar resumen
+      showSummaryModal();
+    }
+  }
+
+  async function handlePrev() {
+    if (isSaving || isFinishing) return;
+    if (currentIndex === 0) return;
+
+    // Guardar respuesta actual antes de ir atrás
+    await saveCurrentAnswer();
+    renderQuestion(currentIndex - 1);
+  }
+
+  // Exponer globalmente para los onclick
+  (window as any).handleNext = handleNext;
+  (window as any).handlePrev = handlePrev;
+
+  function updateNav(idx: number) {
+    const btnPrev = $('btn-prev') as HTMLButtonElement;
+    const btnNext = $('btn-next') as HTMLButtonElement;
+
+    btnPrev.style.opacity = idx === 0 ? '0.4' : '1';
+    btnPrev.style.pointerEvents = idx === 0 ? 'none' : 'auto';
+
+    const isLast = idx === questions.length - 1;
+    btnNext.textContent = isLast ? 'Finalizar ✓' : 'Siguiente →';
+
+    // Dots
+    updateDots();
+  }
+
+  function updateDots() {
+    const dotNav = $('dot-nav');
+    dotNav.innerHTML = '';
+    questions.forEach((q, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'dot' +
+        (selectedOptions[q.questionId] ? ' answered' : '') +
+        (i === currentIndex ? ' current' : '');
+      dotNav.appendChild(dot);
+    });
+  }
+
+  function updateProgress() {
+    const answered = questions.filter(q => selectedOptions[q.questionId]).length;
+    const total = questions.length;
+    const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+
+    ($('progress-bar') as HTMLElement).style.width = `${pct}%`;
+    ($('progress-label') as HTMLElement).textContent = `Pregunta ${currentIndex + 1} de ${total}`;
+    ($('answered-label') as HTMLElement).textContent = `${answered} respondidas`;
+  }
+
+  // ── Modal resumen ────────────────────────────────────────
+  function showSummaryModal() {
+    const answered = questions.filter(q => selectedOptions[q.questionId]).length;
+    const total = questions.length;
+
+    $('summary-answered').textContent = String(answered);
+    $('summary-pending').textContent  = String(total - answered);
+    $('summary-total').textContent    = String(total);
+
+    const modal = $('summary-modal');
+    modal.style.display = 'flex';
+  }
+
+  function closeSummary() {
+    $('summary-modal').style.display = 'none';
+  }
+  (window as any).closeSummary = closeSummary;
+
+  async function confirmFinish() {
+    if (isFinishing) return;
+    isFinishing = true;
+
+    const btn = $('btn-confirm-finish') as HTMLButtonElement;
+    btn.textContent = 'Finalizando...';
+    btn.disabled = true;
+
+    try {
+      // Guardar la pregunta actual si tiene selección pendiente
+      await saveCurrentAnswer();
+
+      // Finalizar intento
+      await triedsApi.finish(triedId);
+      clearInterval(timerInterval);
+      window.location.replace(`/tests/review/${triedId}`);
+    } catch (err: any) {
+      toast.error('Error al finalizar', { description: err?.message });
+      btn.textContent = 'Finalizar y ver resultados';
+      btn.disabled = false;
+      isFinishing = false;
+    }
+  }
+  (window as any).confirmFinish = confirmFinish;
+
+  // ── Init ─────────────────────────────────────────────────
+  async function init() {
+    const params = new URLSearchParams(window.location.search);
+    const testId       = params.get('testId');
+    const competenceId = params.get('competenceId');
+
+    if (!testId || !competenceId) {
+      toast.error('Parámetros inválidos');
+      window.location.replace('/tests');
+      return;
+    }
+
+    try {
+      const res = await triedsApi.start(testId, competenceId);
+      if (!res.data) throw new Error('No se pudo iniciar el simulacro');
+
+      const data = res.data;
+      triedId   = data.triedId;
+      questions = (data.questions ?? []).map((q: any) => ({
+        ...q,
+        options: (q.options ?? []).filter((o: any) => o.optionId !== UNANSWERED_ID),
+      }));
+
+      if (questions.length === 0) {
+        toast.error('Este test no tiene preguntas activas');
         window.location.replace('/tests');
         return;
       }
 
-      // Header
-      const s = getCompStyle(competenceId!, test.competenceName ?? '');
-      const badgeEl = document.getElementById('exam-comp-badge')!;
-      const nameEl  = document.getElementById('exam-name')!;
-      badgeEl.textContent = test.competenceName ?? competenceId!;
-      badgeEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0`;
-      nameEl.textContent = test.testName;
+      // Mostrar UI
+      $('exam-loading').style.display = 'none';
+      $('exam-header').style.display  = 'block';
+      $('question-card').style.display = 'block';
+      $('exam-nav').style.display     = 'flex';
 
-      // Total móvil
-      const mobileTotal = document.getElementById('mobile-q-total');
-      if (mobileTotal) mobileTotal.textContent = String(questions.length);
+      // Metadata
+      $('exam-competence').textContent = data.competenceId ?? '';
+      $('exam-title').textContent      = data.testName ?? data.testId ?? '';
 
-      // Timer
-      let remaining = test.durationSeconds;
-      updateTimer(remaining);
-      timerInt = setInterval(() => {
-        remaining--;
-        updateTimer(remaining);
-        const wrap = document.getElementById('timer-wrap');
-        if (remaining <= 60) wrap?.classList.add('timer-danger');
-        if (remaining <= 0) {
-          clearInterval(timerInt!);
-          toast.warning('Tiempo agotado');
-          finishExam(true);
-        }
-      }, 1000);
-
-      buildQNav();
-      document.getElementById('exam-loading')!.style.display = 'none';
-      document.getElementById('question-card')!.style.display = 'block';
+      startTimer();
       renderQuestion(0);
 
     } catch (err: any) {
-      toast.error('Error al cargar el simulacro', { description: err?.message });
-      window.location.replace('/tests');
+      $('exam-loading').innerHTML = `
+        <div style="text-align:center;padding:2rem">
+          <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 8px">No se pudo iniciar el simulacro</p>
+          <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 16px">${err?.message ?? 'Error desconocido'}</p>
+          <a href="/tests" style="color:var(--brand);font-weight:600;text-decoration:none">← Volver a tests</a>
+        </div>`;
     }
-  }
-
-  function updateTimer(secs: number) {
-    const el = document.getElementById('timer-display');
-    if (el) el.textContent = fmtTimer(secs);
-  }
-
-  // ── Navegador de preguntas ────────────────────────────────────────
-  function buildQNav() {
-    const nav = document.getElementById('q-nav')!;
-    nav.innerHTML = '';
-    questions.forEach((_, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'q-nav-item' + (i === 0 ? ' current' : '');
-      btn.textContent = String(i + 1);
-      btn.addEventListener('click', () => renderQuestion(i));
-      nav.appendChild(btn);
-    });
-  }
-
-  function updateQNav() {
-    document.getElementById('q-nav')!.querySelectorAll<HTMLElement>('.q-nav-item').forEach((btn, i) => {
-      btn.classList.remove('current', 'answered');
-      if (i === currentIdx) btn.classList.add('current');
-      else if (answers[questions[i].questionId]) btn.classList.add('answered');
-    });
-
-    const answered = Object.keys(answers).length;
-    const total    = questions.length;
-    const pct      = total > 0 ? Math.round((answered / total) * 100) : 0;
-
-    const sBar  = document.getElementById('sidebar-bar-fill');
-    const sPct  = document.getElementById('sidebar-pct');
-    const mFill = document.getElementById('q-progress-fill');
-    const mLbl  = document.getElementById('q-progress-label');
-    if (sBar)  sBar.style.width  = `${pct}%`;
-    if (sPct)  sPct.textContent  = `${pct}%`;
-    if (mFill) mFill.style.width = `${pct}%`;
-    if (mLbl)  mLbl.textContent  = `${answered} / ${total}`;
-  }
-
-  // ── Renderizar pregunta ───────────────────────────────────────────
-  function renderQuestion(idx: number) {
-    currentIdx = idx;
-    const q = questions[idx];
-    if (!q) return;
-
-    const s = getCompStyle(competenceId!, '');
-
-    // Número
-    const numBadge = document.getElementById('q-number-badge');
-    if (numBadge) numBadge.textContent = `P${idx + 1}`;
-
-    // Móvil
-    const mobileNum = document.getElementById('mobile-q-num');
-    if (mobileNum) mobileNum.textContent = String(idx + 1);
-
-    // Competencia chip
-    const chipEl = document.getElementById('q-comp-chip')!;
-    chipEl.textContent = s.short;
-    chipEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
-
-    // Dificultad
-    const diffEl = document.getElementById('q-diff-badge')!;
-    diffEl.textContent = DIFF_LABEL[q.difficultyLevel] ?? q.difficultyLevel;
-    diffEl.style.cssText = `background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
-
-    // Enunciado — convierte \n literales a saltos de línea reales
-    const stmtEl = document.getElementById('q-statement')!;
-    renderText(stmtEl, q.statement);
-
-    // Opciones
-    const optsEl = document.getElementById('q-options')!;
-    optsEl.innerHTML = '';
-    const selectedOpt = answers[q.questionId];
-
-    (q.options ?? []).forEach((opt, i) => {
-      const btn = document.createElement('button');
-      btn.className = `exam-option${selectedOpt === opt.optionId ? ' selected' : ''}`;
-      btn.style.animationDelay = `${i * 0.045}s`;
-      if (selectedOpt) btn.disabled = true;
-
-      // Columna de letra
-      const letterCol = document.createElement('div');
-      letterCol.className = 'opt-letter-col';
-      const letterBadge = document.createElement('span');
-      letterBadge.className = 'opt-letter-badge';
-      letterBadge.textContent = LETTERS[i] ?? String(i + 1);
-      letterCol.appendChild(letterBadge);
-
-      // Cuerpo con texto
-      const body = document.createElement('div');
-      body.className = 'opt-body';
-      const textP = document.createElement('p');
-      textP.className = 'opt-body-text';
-      // Renderizar saltos de línea en opciones también
-      renderText(textP, opt.optionText);
-      body.appendChild(textP);
-
-      btn.appendChild(letterCol);
-      btn.appendChild(body);
-      btn.addEventListener('click', () => selectAnswer(q.questionId, opt.optionId, idx));
-      optsEl.appendChild(btn);
-    });
-
-    // Navegación
-    const prevBtn = document.getElementById('btn-prev') as HTMLButtonElement;
-    const nextBtn = document.getElementById('btn-next') as HTMLButtonElement;
-    prevBtn.disabled = idx === 0;
-    prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
-
-    const isLast = idx === questions.length - 1;
-    if (isLast) {
-      nextBtn.style.background = 'linear-gradient(135deg, #059669, #047857)';
-      nextBtn.style.boxShadow  = '0 3px 10px rgba(5,150,105,0.28)';
-      nextBtn.innerHTML = `
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Finalizar`;
-    } else {
-      nextBtn.style.background = 'linear-gradient(135deg, var(--brand), var(--brand-dark))';
-      nextBtn.style.boxShadow  = '0 3px 10px rgba(212,18,36,0.28)';
-      nextBtn.innerHTML = `Siguiente
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>`;
-    }
-
-    updateQNav();
-  }
-
-  function selectAnswer(questionId: string, optionId: string, qIdx: number) {
-    if (answers[questionId]) return;
-    answers[questionId] = optionId;
-
-    document.getElementById('q-options')!.querySelectorAll<HTMLButtonElement>('.exam-option').forEach((btn, i) => {
-      btn.disabled = true;
-      const opt = questions[qIdx].options?.[i];
-      if (opt?.optionId === optionId) btn.classList.add('selected');
-    });
-
-    updateQNav();
-
-    // Auto-avance
-    if (qIdx < questions.length - 1) {
-      setTimeout(() => renderQuestion(qIdx + 1), 750);
-    }
-  }
-
-  // ── Botones de nav ────────────────────────────────────────────────
-  document.getElementById('btn-prev')?.addEventListener('click', () => {
-    if (currentIdx > 0) renderQuestion(currentIdx - 1);
-  });
-  document.getElementById('btn-next')?.addEventListener('click', () => {
-    if (currentIdx < questions.length - 1) renderQuestion(currentIdx + 1);
-    else openFinishModal();
-  });
-
-  function openFinishModal() {
-    const answered   = Object.keys(answers).length;
-    const unanswered = questions.length - answered;
-    const descEl     = document.getElementById('finish-modal-desc')!;
-    descEl.textContent = unanswered > 0
-      ? `Tienes ${unanswered} pregunta(s) sin responder. Puedes volver y completarlas o finalizar ahora.`
-      : '¡Has respondido todas las preguntas! Tu resultado será calculado.';
-    document.getElementById('finish-modal')!.style.display = 'flex';
-  }
-
-  document.getElementById('finish-btn')?.addEventListener('click', openFinishModal);
-  document.getElementById('abandon-btn')?.addEventListener('click', () => {
-    if (confirm('¿Seguro que quieres abandonar? Tu progreso se perderá.')) finishExam(true);
-  });
-  document.getElementById('finish-cancel')?.addEventListener('click', () => {
-    document.getElementById('finish-modal')!.style.display = 'none';
-  });
-  document.getElementById('finish-confirm')?.addEventListener('click', () => {
-    document.getElementById('finish-modal')!.style.display = 'none';
-    finishExam(false);
-  });
-
-  async function finishExam(_timedOut = false) {
-    if (examFinished) return;
-    examFinished = true;
-    if (timerInt) clearInterval(timerInt);
-    const elapsed = Math.round((Date.now() - startTime) / 1000);
-    try {
-      const res = await triedsApi.finish(triedId!, elapsed);
-      if (res.data) showResults(res.data.score ?? 0, res.data.correctAnswers ?? 0, elapsed);
-    } catch {
-      showResults(0, 0, elapsed);
-    }
-  }
-
-  function showResults(score: number, correct: number, elapsed: number) {
-    const sc       = scoreColor(score);
-    const iconWrap = document.getElementById('result-icon-wrap')!;
-    const scoreEl  = document.getElementById('result-score')!;
-
-    iconWrap.style.background = score >= 60 ? '#D1FAE5' : score >= 40 ? '#FEF3C7' : '#FEE2E2';
-    iconWrap.innerHTML = score >= 60
-      ? `<svg width="38" height="38" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`
-      : `<svg width="38" height="38" fill="none" stroke="${score >= 40 ? '#D97706' : '#DC2626'}" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>`;
-
-    scoreEl.style.color = sc;
-    document.getElementById('res-correct')!.textContent = String(correct);
-    document.getElementById('res-wrong')!.textContent   = String(questions.length - correct);
-    document.getElementById('res-time')!.textContent    = String(Math.round(elapsed / 60));
-    document.getElementById('result-msg')!.textContent  = score >= 80
-      ? '¡Excelente desempeño! Estás muy bien preparado para el Saber Pro.'
-      : score >= 60
-      ? '¡Buen trabajo! Sigue practicando para alcanzar la excelencia.'
-      : '¡No te rindas! Revisa las competencias y vuelve a intentarlo.';
-
-    document.getElementById('results-overlay')!.style.display = 'flex';
-
-    // Animación del puntaje
-    let n = 0;
-    scoreEl.textContent = '0';
-    const step = Math.max(1, Math.floor(score / 60));
-    const intv = setInterval(() => {
-      n = Math.min(n + step, score);
-      scoreEl.textContent = n.toFixed(0);
-      if (n >= score) clearInterval(intv);
-    }, 20);
   }
 
   init();
