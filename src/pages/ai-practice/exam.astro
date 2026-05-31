@@ -1,0 +1,739 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+---
+
+<BaseLayout title="Práctica IA en progreso">
+<div class="exam-shell">
+
+  <!-- HEADER -->
+  <header class="exam-header">
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#6366F1,#4F46E5);display:flex;align-items:center;justify-content:center;color:white">
+        <Icon name="tabler:brain" size={16} />
+      </div>
+      <span style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1)">Razona<strong style="color:#6366F1">Pro</strong> IA</span>
+    </div>
+    <div style="flex:1;padding:0 0.75rem;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden">
+      <span id="hdr-comp" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#EDE9FE;color:#7C3AED;flex-shrink:0">Competencia</span>
+      <span id="hdr-progress" style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-2);white-space:nowrap">0 / 0</span>
+      <span id="hdr-score" style="font-size:0.8125rem;color:var(--ui-text-3);white-space:nowrap">0 correctas</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <button id="abandon-btn" style="padding:5px 12px;border-radius:8px;border:1.5px solid #FECACA;background:transparent;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
+        Abandonar
+      </button>
+    </div>
+  </header>
+
+  <div class="exam-body">
+
+    <!-- SIDEBAR -->
+    <aside class="exam-sidebar">
+      <div style="padding:1rem 0.875rem;display:flex;flex-direction:column;height:100%;gap:1rem">
+        <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0">Preguntas</p>
+        <div id="q-nav" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px"></div>
+
+        <!-- Leyenda -->
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)">
+            <span style="width:9px;height:9px;border-radius:2px;background:#D1FAE5;border:1.5px solid #059669;flex-shrink:0"></span>Correcta
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)">
+            <span style="width:9px;height:9px;border-radius:2px;background:#FEE2E2;border:1.5px solid #DC2626;flex-shrink:0"></span>Incorrecta
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)">
+            <span style="width:9px;height:9px;border-radius:2px;background:#6366F1;flex-shrink:0"></span>Actual
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)">
+            <span style="width:9px;height:9px;border-radius:2px;background:var(--ui-surface);border:1.5px solid var(--ui-border);flex-shrink:0"></span>Sin responder
+          </div>
+        </div>
+
+        <!-- Barra de progreso respondidas -->
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:0.6875rem;color:var(--ui-text-3);margin-bottom:5px">
+            <span>Respondidas</span>
+            <span id="sb-pct" style="font-weight:700;color:#6366F1">0%</span>
+          </div>
+          <div style="height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden">
+            <div id="sb-bar" style="height:100%;background:linear-gradient(to right,#6366F1,#818CF8);border-radius:3px;width:0%;transition:width 0.5s ease"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:auto">
+          <button id="finish-btn" style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(212,18,36,0.28);display:flex;align-items:center;justify-content:center;gap:5px">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Finalizar práctica
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="exam-main">
+      <!-- Loading -->
+      <div id="exam-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:1rem">
+        <div style="width:44px;height:44px;border-radius:50%;border:3px solid rgba(99,102,241,0.15);border-top-color:#6366F1;animation:spin 0.85s linear infinite"></div>
+        <p style="font-size:0.875rem;color:var(--ui-text-3)">Cargando preguntas...</p>
+      </div>
+
+      <!-- Question card -->
+      <div id="question-card" style="display:none;max-width:760px;margin:0 auto;width:100%">
+
+        <!-- Progreso -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem">
+          <div style="flex:1;height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;border:1px solid var(--ui-border)">
+            <div id="qprog-fill" style="height:100%;border-radius:3px;background:linear-gradient(to right,#6366F1,#818CF8);width:0%;transition:width 0.5s ease"></div>
+          </div>
+          <span id="qprog-label" style="font-size:0.75rem;font-weight:600;color:var(--ui-text-3);white-space:nowrap;flex-shrink:0">0 / 0</span>
+        </div>
+
+        <!-- Cabecera pregunta -->
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+          <span id="q-num-badge" style="font-size:0.6875rem;font-weight:800;color:#6366F1;background:#EDE9FE;border:1.5px solid rgba(99,102,241,0.2);padding:3px 10px;border-radius:20px">P1</span>
+          <span id="q-diff-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
+          <span id="q-answered-badge" style="display:none;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#D1FAE5;color:#059669">✓ Respondida</span>
+        </div>
+
+        <!-- Enunciado -->
+        <div style="background:var(--ui-card);border-radius:14px;padding:1.5rem 1.625rem;border:1px solid var(--ui-border);margin-bottom:1rem">
+          <p id="q-statement" style="font-size:1rem;font-weight:500;color:var(--ui-text-1);line-height:1.85;margin:0"></p>
+        </div>
+
+        <!-- Opciones -->
+        <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.125rem"></div>
+
+        <!-- Pistas (antes de responder) -->
+        <div id="hint-section" style="margin-bottom:1.125rem">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <span style="font-size:0.75rem;color:var(--ui-text-3);font-weight:600">¿Necesitas una pista?</span>
+            <button class="hbtn" data-level="1" type="button">💡 Pista 1 — Conceptual</button>
+            <button class="hbtn" data-level="2" type="button" disabled>💡 Pista 2 — Analítica</button>
+            <button class="hbtn" data-level="3" type="button" disabled>💡 Pista 3 — Orientada</button>
+          </div>
+          <div id="hint-box" style="display:none;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 14px">
+            <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0369A1;margin:0 0 5px">💡 Pista</p>
+            <p id="hint-text" style="font-size:0.875rem;color:#0C4A6E;margin:0;line-height:1.65"></p>
+            <div id="hint-loading" style="display:none;font-size:0.8125rem;color:#0369A1">Generando pista...</div>
+          </div>
+        </div>
+
+        <!-- Feedback (después de responder) -->
+        <div id="feedback-box" style="display:none;border-radius:12px;padding:1.125rem 1.25rem;margin-bottom:1.125rem">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span id="fb-icon" style="font-size:1.375rem"></span>
+            <span id="fb-title" style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1)"></span>
+          </div>
+          <p id="fb-explanation" style="font-size:0.875rem;color:var(--ui-text-2);margin:0;line-height:1.65"></p>
+        </div>
+
+        <!-- Navegación -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
+          <button id="btn-prev" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:var(--ui-card);border:1.5px solid var(--ui-border);color:var(--ui-text-2);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s" disabled>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Anterior
+          </button>
+          <span id="mobile-counter" style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1)">1 <span style="color:var(--ui-text-3);font-weight:400">/ 0</span></span>
+          <button id="btn-next" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;border:none;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(99,102,241,0.28);transition:all 0.15s">
+            Siguiente
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Resultados -->
+<div id="results-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:var(--ui-card);border-radius:24px;padding:2.5rem 2rem;max-width:440px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.4s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.25)">
+    <div id="result-icon" style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;font-size:2.5rem"></div>
+    <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.25rem">Tu puntaje final</p>
+    <p id="result-score" style="font-size:4.5rem;font-weight:900;margin:0;line-height:1;letter-spacing:-3px;color:#6366F1">0</p>
+    <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">/ 100 puntos</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem">
+      <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
+        <p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Correctas</p>
+      </div>
+      <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
+        <p id="res-wrong" style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Incorrectas</p>
+      </div>
+      <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
+        <p id="res-total" style="font-size:1.625rem;font-weight:900;color:#6366F1;margin:0 0 2px">0</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Total</p>
+      </div>
+    </div>
+    <p id="result-msg" style="font-size:0.9375rem;color:var(--ui-text-2);margin:0 0 1.75rem;line-height:1.65"></p>
+    <div style="display:flex;gap:8px">
+      <button id="result-new" style="flex:1;padding:0.75rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;cursor:pointer">Nueva sesión</button>
+      <a href="/dashboard" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:10px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;text-decoration:none;font-weight:700">Dashboard</a>
+    </div>
+  </div>
+</div>
+</BaseLayout>
+
+<style is:global>
+  @keyframes spin    { to { transform: rotate(360deg); } }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.9) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)} }
+  @keyframes optIn   { from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)} }
+  @keyframes popIn   { 0%{transform:scale(1)}40%{transform:scale(0.97)}100%{transform:scale(1)} }
+
+  .exam-shell {
+    display:flex; flex-direction:column;
+    height:100dvh; overflow:hidden;
+    background:var(--ui-bg-alt); font-family:'Poppins',sans-serif;
+  }
+  .exam-header {
+    display:flex; align-items:center;
+    padding:0 1.25rem; height:56px;
+    background:var(--ui-card); border-bottom:1px solid var(--ui-border);
+    flex-shrink:0; gap:0.5rem; z-index:20;
+  }
+  .exam-body { display:flex; flex:1; overflow:hidden; }
+  .exam-sidebar {
+    width:200px; min-width:200px;
+    background:var(--ui-card); border-right:1px solid var(--ui-border);
+    overflow-y:auto; flex-shrink:0;
+  }
+  .exam-main { flex:1; overflow-y:auto; padding:1.5rem 1.25rem; }
+
+  /* Nav de preguntas */
+  .qnav-item {
+    width:100%; aspect-ratio:1/1; border-radius:6px;
+    border:1.5px solid var(--ui-border);
+    background:var(--ui-surface); color:var(--ui-text-3);
+    font-size:0.625rem; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-family:inherit; transition:all 0.15s;
+  }
+  .qnav-item.current  { background:#6366F1; border-color:#6366F1; color:white; }
+  .qnav-item.correct  { background:#D1FAE5; border-color:#059669; color:#059669; }
+  .qnav-item.wrong    { background:#FEE2E2; border-color:#DC2626; color:#DC2626; }
+  .qnav-item:hover:not(.current):not(.correct):not(.wrong) { border-color:#6366F1; color:#6366F1; }
+
+  /* Opciones de respuesta */
+  .ai-opt {
+    display:flex; align-items:stretch; width:100%;
+    background:var(--ui-card); border:1.5px solid var(--ui-border);
+    border-radius:12px; cursor:pointer;
+    transition:border-color 0.18s, background 0.18s, transform 0.18s;
+    text-align:left; font-family:inherit; overflow:hidden;
+    animation:optIn 0.2s ease both;
+  }
+  .ai-opt:hover:not(:disabled):not(.correct):not(.wrong) {
+    border-color:#6366F1; background:rgba(99,102,241,0.03); transform:translateX(3px);
+  }
+  .ai-opt:disabled { cursor:not-allowed; }
+  .ai-opt.correct  { border-color:#059669 !important; background:#F0FDF4 !important; animation:popIn 0.3s ease; }
+  .ai-opt.wrong    { border-color:#DC2626 !important; background:#FEF2F2 !important; }
+
+  .opt-letter {
+    width:52px; min-width:52px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--ui-surface); border-right:1.5px solid var(--ui-border);
+    flex-shrink:0; transition:all 0.18s;
+  }
+  .ai-opt.correct .opt-letter { background:#059669; border-color:#059669; }
+  .ai-opt.wrong   .opt-letter { background:#DC2626; border-color:#DC2626; }
+
+  .opt-badge {
+    width:28px; height:28px; border-radius:7px;
+    border:1.5px solid var(--ui-border-2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.75rem; font-weight:800; color:var(--ui-text-2);
+    background:var(--ui-card); transition:all 0.18s;
+  }
+  .ai-opt.correct .opt-badge,
+  .ai-opt.wrong   .opt-badge { background:rgba(255,255,255,0.25); border-color:transparent; color:white; }
+
+  .opt-body { flex:1; padding:0.9375rem 1rem; display:flex; align-items:center; }
+  .opt-text { font-size:0.9375rem; color:var(--ui-text-2); line-height:1.65; margin:0; }
+  .ai-opt.correct .opt-text { color:var(--ui-text-1); font-weight:600; }
+
+  /* Pistas */
+  .hbtn {
+    padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:600;
+    border:1.5px solid #BAE6FD; background:#F0F9FF; color:#0369A1;
+    cursor:pointer; transition:all 0.15s; font-family:inherit;
+  }
+  .hbtn:hover:not(:disabled) { background:#0369A1; color:white; border-color:#0369A1; }
+  .hbtn:disabled { opacity:0.35; cursor:not-allowed; }
+
+  @media (max-width:768px) {
+    .exam-sidebar { display:none; }
+    .exam-main    { padding:1rem; }
+  }
+</style>
+
+<script>
+  import { requireAuth } from '../../lib/auth';
+  import { aiTriedsApi } from '../../lib/api/ai-trieds.api';
+  import { competencesApi } from '../../lib/api/competences.api';
+  import type { AiQuestionDto, AiAnswerResultDto } from '../../lib/api/types';
+  import { scoreColor, fmtTimer } from '../../lib/utils';
+  import { toast } from '../../lib/toast';
+
+  try { requireAuth(); } catch { throw new Error('redirect'); }
+
+  const LETTERS = ['A','B','C','D','E','F'];
+  const DIFF_BG:    Record<number, string> = {};
+  const DIFF_COLOR: Record<number, string> = {};
+  // difficulty 1-3: green, 4-6: yellow, 7-10: red
+  for (let i=1;i<=10;i++) {
+    DIFF_BG[i]    = i<=3?'#D1FAE5':i<=6?'#FEF3C7':'#FEE2E2';
+    DIFF_COLOR[i] = i<=3?'#059669':i<=6?'#D97706':'#DC2626';
+  }
+
+  // ── State ──────────────────────────────────────────────────────
+  const params    = new URLSearchParams(window.location.search);
+  const aiTriedId = params.get('tried') ?? '';
+  const compId    = params.get('comp')  ?? '';
+
+  if (!aiTriedId) { window.location.replace('/ai-practice'); throw new Error(); }
+
+  let questions:    AiQuestionDto[] = [];
+  let feedbacks:    Record<string, AiAnswerResultDto> = {};
+  let hintState:    Record<string, { level: number; text: string }> = {};
+  let currentIdx    = 0;
+  let startTime     = Date.now();
+  let examFinished  = false;
+  let submitting    = false;
+
+  // ── Init ───────────────────────────────────────────────────────
+  async function init() {
+    try {
+      const [qRes] = await Promise.all([
+        aiTriedsApi.listQuestions(aiTriedId),
+      ]);
+      questions = qRes.data ?? [];
+
+      if (!questions.length) {
+        toast.error('Sin preguntas cargadas');
+        window.location.replace('/ai-practice');
+        return;
+      }
+
+      // Inicializar hintState desde datos del backend
+      questions.forEach(q => {
+        hintState[q.aiQuestionId] = { level: q.hintsUsed, text: '' };
+      });
+
+      // Cargar nombre de competencia
+      if (compId) {
+        competencesApi.findById(compId).then(r => {
+          const el = document.getElementById('hdr-comp');
+          if (el && r.data) el.textContent = r.data.competenceName;
+        }).catch(() => {});
+      }
+
+      // Ir a la primera sin responder, o la primera si todas respondidas
+      const firstUnanswered = questions.findIndex(q => q.selectedIndex === null);
+      currentIdx = firstUnanswered >= 0 ? firstUnanswered : 0;
+
+      buildNav();
+      renderQuestion(currentIdx);
+
+      document.getElementById('exam-loading')!.style.display = 'none';
+      document.getElementById('question-card')!.style.display = 'block';
+
+    } catch (err: any) {
+      toast.error('Error al cargar sesión', { description: err?.message });
+      window.location.replace('/ai-practice');
+    }
+  }
+
+  // ── Navegador ──────────────────────────────────────────────────
+  function buildNav() {
+    const nav = document.getElementById('q-nav')!;
+    nav.innerHTML = '';
+    questions.forEach((q, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'qnav-item';
+      btn.textContent = String(i + 1);
+      btn.addEventListener('click', () => renderQuestion(i));
+      nav.appendChild(btn);
+    });
+    updateNav();
+  }
+
+  function updateNav() {
+    const navItems = document.querySelectorAll<HTMLElement>('.qnav-item');
+    navItems.forEach((item, i) => {
+      item.classList.remove('current','correct','wrong');
+      const q = questions[i];
+      if (i === currentIdx) {
+        item.classList.add('current');
+      } else {
+        const fb = feedbacks[q.aiQuestionId];
+        const answered = fb !== undefined || q.selectedIndex !== null;
+        if (answered) {
+          const ok = fb?.isCorrect ?? q.isCorrect;
+          item.classList.add(ok ? 'correct' : 'wrong');
+        }
+      }
+    });
+
+    // Barra de progreso sidebar
+    const answered = questions.filter(q => feedbacks[q.aiQuestionId] !== undefined || q.selectedIndex !== null).length;
+    const pct      = Math.round((answered / questions.length) * 100);
+    const bar      = document.getElementById('sb-bar');
+    const pctEl    = document.getElementById('sb-pct');
+    if (bar)   bar.style.width    = `${pct}%`;
+    if (pctEl) pctEl.textContent  = `${pct}%`;
+
+    // Score en header
+    const correctCount = questions.filter(q => {
+      const fb = feedbacks[q.aiQuestionId];
+      return fb?.isCorrect === true || (fb === undefined && q.isCorrect === true);
+    }).length;
+    const hdrScore    = document.getElementById('hdr-score');
+    const hdrProgress = document.getElementById('hdr-progress');
+    if (hdrScore)    hdrScore.textContent    = `${correctCount} correcta${correctCount !== 1 ? 's' : ''}`;
+    if (hdrProgress) hdrProgress.textContent = `${answered} / ${questions.length}`;
+  }
+
+  // ── Renderizar pregunta ────────────────────────────────────────
+  function renderQuestion(idx: number) {
+    currentIdx = idx;
+    const q    = questions[idx];
+    if (!q) return;
+
+    const fb       = feedbacks[q.aiQuestionId];
+    const isAnswered = fb !== undefined || q.selectedIndex !== null;
+
+    // Badges
+    const numBadge      = document.getElementById('q-num-badge')!;
+    const diffBadge     = document.getElementById('q-diff-badge')!;
+    const answeredBadge = document.getElementById('q-answered-badge')!;
+    numBadge.textContent = `P${q.questionNumber}`;
+    diffBadge.textContent = `Dif. ${q.difficultyLevel}/10`;
+    diffBadge.style.cssText = `background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
+    answeredBadge.style.display = isAnswered ? 'inline' : 'none';
+
+    // Barra de progreso principal
+    const progFill  = document.getElementById('qprog-fill');
+    const progLabel = document.getElementById('qprog-label');
+    const pct       = Math.round((q.questionNumber / q.totalQuestions) * 100);
+    if (progFill)  progFill.style.width   = `${pct}%`;
+    if (progLabel) progLabel.textContent  = `${q.questionNumber} / ${q.totalQuestions}`;
+
+    // Counter móvil
+    const mc = document.getElementById('mobile-counter');
+    if (mc) mc.innerHTML = `${q.questionNumber} <span style="color:var(--ui-text-3);font-weight:400">/ ${q.totalQuestions}</span>`;
+
+    // Enunciado
+    document.getElementById('q-statement')!.textContent = q.statement;
+
+    // Opciones
+    renderOptions(q, fb);
+
+    // Hints vs Feedback
+    if (isAnswered) {
+      showFeedback(q, fb);
+      hideHintSection();
+    } else {
+      hideFeedback();
+      showHintSection(q);
+    }
+
+    // Botones de nav
+    const prevBtn = document.getElementById('btn-prev') as HTMLButtonElement;
+    const nextBtn = document.getElementById('btn-next') as HTMLButtonElement;
+    prevBtn.disabled = idx === 0;
+    prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+
+    const isLast = idx === questions.length - 1;
+    if (isLast) {
+      nextBtn.style.background = 'linear-gradient(135deg,#059669,#047857)';
+      nextBtn.style.boxShadow  = '0 3px 10px rgba(5,150,105,0.28)';
+      nextBtn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Finalizar`;
+    } else {
+      nextBtn.style.background = 'linear-gradient(135deg,#6366F1,#4F46E5)';
+      nextBtn.style.boxShadow  = '0 3px 10px rgba(99,102,241,0.28)';
+      nextBtn.innerHTML = `Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>`;
+    }
+
+    updateNav();
+  }
+
+  // ── Opciones ───────────────────────────────────────────────────
+  function renderOptions(q: AiQuestionDto, fb?: AiAnswerResultDto) {
+    const optsEl = document.getElementById('q-options')!;
+    optsEl.innerHTML = '';
+
+    const isAnswered    = fb !== undefined || q.selectedIndex !== null;
+    const selectedIdx   = fb?.selectedIndex  ?? q.selectedIndex  ?? -1;
+    const correctIdx    = fb?.correctIndex   ?? -1; // solo disponible si respondido en esta sesión
+    const isCorrect     = fb?.isCorrect      ?? q.isCorrect;
+
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'ai-opt';
+      btn.style.animationDelay = `${i * 0.05}s`;
+
+      let marker = LETTERS[i];
+      let extraCls = '';
+
+      if (isAnswered) {
+        btn.disabled = true;
+        if (correctIdx >= 0) {
+          // Respuesta de esta sesión — sabemos cuál es la correcta
+          if (i === correctIdx) { extraCls = 'correct'; marker = '✓'; }
+          else if (i === selectedIdx && !isCorrect) { extraCls = 'wrong'; marker = '✗'; }
+        } else {
+          // Respuesta de sesión anterior — solo sabemos selected y si fue correct
+          if (i === selectedIdx) {
+            extraCls = isCorrect ? 'correct' : 'wrong';
+            marker   = isCorrect ? '✓' : '✗';
+          }
+        }
+        if (extraCls) btn.classList.add(extraCls);
+      } else {
+        btn.addEventListener('click', () => {
+          if (submitting) return;
+          selectAnswer(q, i);
+        });
+      }
+
+      btn.innerHTML = `
+        <div class="opt-letter">
+          <span class="opt-badge">${marker}</span>
+        </div>
+        <div class="opt-body">
+          <p class="opt-text">${opt.text}</p>
+        </div>`;
+      optsEl.appendChild(btn);
+    });
+  }
+
+  // ── Responder ──────────────────────────────────────────────────
+  async function selectAnswer(q: AiQuestionDto, selectedIndex: number) {
+    if (submitting) return;
+    submitting = true;
+
+    // Highlight seleccionada mientras se procesa
+    const btns = document.querySelectorAll<HTMLButtonElement>('.ai-opt');
+    btns.forEach((b, i) => {
+      b.disabled = true;
+      if (i === selectedIndex) b.style.borderColor = '#6366F1';
+    });
+
+    try {
+      const res = await aiTriedsApi.submitAnswer(aiTriedId, q.aiQuestionId, selectedIndex);
+      const fb  = res.data!;
+
+      // Guardar feedback en memoria
+      feedbacks[q.aiQuestionId]  = fb;
+      // Actualizar la pregunta localmente
+      questions[currentIdx] = {
+        ...questions[currentIdx],
+        selectedIndex: fb.selectedIndex,
+        isCorrect:     fb.isCorrect,
+      };
+
+      renderOptions(q, fb);
+      showFeedback(q, fb);
+      hideHintSection();
+      updateNav();
+
+      // Actualizar header score
+      const hdrScore = document.getElementById('hdr-score');
+      if (hdrScore) hdrScore.textContent = `${fb.correctAnswers} correcta${fb.correctAnswers !== 1 ? 's' : ''}`;
+
+      // Auto-terminar si todas respondidas
+      if (fb.finished) {
+        setTimeout(() => showResults(fb.finalScore ?? 0, fb.correctAnswers, fb.totalQuestions), 800);
+      }
+
+    } catch (err: any) {
+      // Desbloquear opciones si falla
+      document.querySelectorAll<HTMLButtonElement>('.ai-opt').forEach(b => { b.disabled = false; b.style.borderColor = ''; });
+      toast.error('Error al enviar respuesta', { description: err?.message });
+    } finally {
+      submitting = false;
+    }
+  }
+
+  // ── Feedback ───────────────────────────────────────────────────
+  function showFeedback(q: AiQuestionDto, fb?: AiAnswerResultDto) {
+    const box   = document.getElementById('feedback-box')!;
+    const icon  = document.getElementById('fb-icon')!;
+    const title = document.getElementById('fb-title')!;
+    const expEl = document.getElementById('fb-explanation')!;
+
+    const isCorrect = fb?.isCorrect ?? q.isCorrect;
+
+    box.style.display = 'block';
+    box.style.background  = isCorrect ? '#F0FDF4' : '#FEF2F2';
+    box.style.border      = `1px solid ${isCorrect ? '#A7F3D0' : '#FECACA'}`;
+    icon.textContent       = isCorrect ? '✅' : '❌';
+    title.textContent      = isCorrect ? '¡Respuesta correcta!' : 'Respuesta incorrecta';
+
+    if (fb?.explanation) {
+      expEl.textContent = fb.explanation;
+    } else {
+      expEl.textContent = isCorrect
+        ? 'Bien hecho. Seleccionaste la opción correcta.'
+        : 'Revisa el concepto. Navega a otras preguntas para continuar.';
+    }
+  }
+
+  function hideFeedback() {
+    document.getElementById('feedback-box')!.style.display = 'none';
+  }
+
+  // ── Pistas ──────────────────────────────────────────────────────
+  function showHintSection(q: AiQuestionDto) {
+    const section = document.getElementById('hint-section')!;
+    section.style.display = 'block';
+
+    const hs = hintState[q.aiQuestionId] ?? { level: q.hintsUsed, text: '' };
+
+    document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
+      const level = Number(btn.dataset.level);
+      // Habilitado si level <= hs.level + 1 (progresión obligatoria)
+      btn.disabled = level > hs.level + 1;
+    });
+
+    // Mostrar pista actual si ya se pidió
+    const hintBox  = document.getElementById('hint-box')!;
+    const hintText = document.getElementById('hint-text')!;
+    if (hs.text) {
+      hintBox.style.display = 'block';
+      hintText.textContent  = hs.text;
+    } else {
+      hintBox.style.display = 'none';
+    }
+  }
+
+  function hideHintSection() {
+    document.getElementById('hint-section')!.style.display = 'none';
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const q     = questions[currentIdx];
+      const level = Number(btn.dataset.level);
+      const hs    = hintState[q.aiQuestionId] ?? { level: q.hintsUsed, text: '' };
+
+      if (level > hs.level + 1) return; // no debería pasar, pero por si acaso
+
+      const hintBox     = document.getElementById('hint-box')!;
+      const hintText    = document.getElementById('hint-text')!;
+      const hintLoading = document.getElementById('hint-loading')!;
+
+      hintBox.style.display     = 'block';
+      hintLoading.style.display = 'block';
+      hintText.textContent      = '';
+      btn.disabled = true;
+
+      try {
+        const res = await aiTriedsApi.getHint(aiTriedId, q.aiQuestionId, level);
+        const hint = res.data!;
+
+        hintState[q.aiQuestionId] = { level: Math.max(hs.level, hint.hintLevel), text: hint.hint };
+        questions[currentIdx] = { ...questions[currentIdx], hintsUsed: Math.max(q.hintsUsed, hint.hintLevel) };
+
+        hintText.textContent      = hint.hint;
+        hintLoading.style.display = 'none';
+
+        // Actualizar disponibilidad de botones
+        showHintSection(questions[currentIdx]);
+      } catch (err: any) {
+        hintText.textContent      = 'No se pudo generar la pista.';
+        hintLoading.style.display = 'none';
+        btn.disabled = false;
+        toast.error('Error al obtener pista', { description: err?.message });
+      }
+    });
+  });
+
+  // ── Navegación ──────────────────────────────────────────────────
+  document.getElementById('btn-prev')?.addEventListener('click', () => {
+    if (currentIdx > 0) renderQuestion(currentIdx - 1);
+  });
+
+  document.getElementById('btn-next')?.addEventListener('click', () => {
+    if (currentIdx < questions.length - 1) renderQuestion(currentIdx + 1);
+    else finishExam();
+  });
+
+  document.getElementById('finish-btn')?.addEventListener('click', finishExam);
+
+  document.getElementById('abandon-btn')?.addEventListener('click', async () => {
+    if (!confirm('¿Abandonar la sesión? Tu progreso se guardará.')) return;
+    try {
+      await aiTriedsApi.finish(aiTriedId, Math.round((Date.now() - startTime) / 1000));
+    } catch {}
+    window.location.replace('/ai-practice');
+  });
+
+  // ── Finalizar ───────────────────────────────────────────────────
+  async function finishExam() {
+    if (examFinished) return;
+    const answered  = questions.filter(q => feedbacks[q.aiQuestionId] || q.selectedIndex !== null).length;
+    const total     = questions.length;
+    const pending   = total - answered;
+
+    if (pending > 0) {
+      const ok = confirm(`Tienes ${pending} pregunta(s) sin responder. ¿Finalizar de todos modos?`);
+      if (!ok) return;
+    }
+
+    examFinished = true;
+    const elapsed = Math.round((Date.now() - startTime) / 1000);
+
+    try {
+      const res = await aiTriedsApi.finish(aiTriedId, elapsed);
+      const t   = res.data!;
+      showResults(t.score ?? 0, t.correctAnswers ?? 0, t.totalQuestions);
+    } catch (err: any) {
+      // Calcular localmente si falla
+      const correct = questions.filter(q => feedbacks[q.aiQuestionId]?.isCorrect || q.isCorrect).length;
+      const score   = total > 0 ? Math.round((correct / total) * 100) : 0;
+      showResults(score, correct, total);
+    }
+  }
+
+  function showResults(score: number, correct: number, total: number) {
+    const sc    = scoreColor(score);
+    const wrong = total - correct;
+
+    const icon = document.getElementById('result-icon')!;
+    icon.textContent    = score >= 80 ? '🏆' : score >= 60 ? '🎯' : '💪';
+    icon.style.background = score >= 80 ? '#D1FAE5' : score >= 60 ? '#FEF3C7' : '#FEE2E2';
+
+    document.getElementById('result-score')!.style.color = sc;
+    document.getElementById('res-correct')!.textContent  = String(correct);
+    document.getElementById('res-wrong')!.textContent    = String(wrong);
+    document.getElementById('res-total')!.textContent    = String(total);
+    document.getElementById('result-msg')!.textContent   = score >= 80
+      ? '¡Excelente dominio de la competencia! Sigue así.'
+      : score >= 60
+      ? '¡Buen trabajo! Practica más para consolidar los conceptos.'
+      : '¡Sigue practicando! Cada sesión mejora tu desempeño.';
+
+    const overlay = document.getElementById('results-overlay')!;
+    overlay.style.display = 'flex';
+
+    // Animar score
+    const scoreEl = document.getElementById('result-score')!;
+    let n = 0;
+    scoreEl.textContent = '0';
+    const step = Math.max(1, Math.floor(score / 60));
+    const intv = setInterval(() => {
+      n = Math.min(n + step, Math.round(score));
+      scoreEl.textContent = String(n);
+      if (n >= Math.round(score)) clearInterval(intv);
+    }, 20);
+  }
+
+  document.getElementById('result-new')?.addEventListener('click', () => {
+    window.location.replace('/ai-practice');
+  });
+
+  init();
+</script>

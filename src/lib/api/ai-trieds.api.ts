@@ -5,11 +5,11 @@ import type {
 } from './types';
 
 export const aiTriedsApi = {
-  // ── Estado del módulo ─────────────────────────────────
+  // Estado del módulo IA
   status: () =>
     apiFetch<AiStatusDto>('/api/ai-trieds/status'),
 
-  // ── Historial ─────────────────────────────────────────
+  // Historial del estudiante
   findMy: (page = 0, size = 20) =>
     apiFetch<PagedResponse<AiTriedDto>>(
       `/api/ai-trieds/my?page=${page}&size=${size}`
@@ -18,33 +18,36 @@ export const aiTriedsApi = {
   findById: (aiTriedId: string) =>
     apiFetch<AiTriedDto>(`/api/ai-trieds/${aiTriedId}`),
 
-  // ── Flujo adaptativo ──────────────────────────────────
-  /** Inicia sesión y devuelve la primera pregunta generada */
+  // Iniciar sesión — genera batch completo y devuelve primera pregunta
   start: (competenceId: string, totalQuestions: number, description?: string) =>
     apiFetch<AiStartResponseDto>('/api/ai-trieds/start', {
       method: 'POST',
       body:   JSON.stringify({ competenceId, totalQuestions, description }),
     }),
 
-  /** Obtiene la siguiente pregunta (idempotente si ya hay una activa) */
-  nextQuestion: (aiTriedId: string) =>
-    apiFetch<AiQuestionDto>(`/api/ai-trieds/${aiTriedId}/next`),
+  // Listar todas las preguntas del intento (para navegación)
+  listQuestions: (aiTriedId: string) =>
+    apiFetch<AiQuestionDto[]>(`/api/ai-trieds/${aiTriedId}/questions`),
 
-  /** Envía respuesta — el servidor evalúa y adapta la dificultad */
-  submitAnswer: (aiTriedId: string, questionId: string, selectedOptionId: string) =>
+  // Revisión con respuestas correctas reveladas
+  getReview: (aiTriedId: string) =>
+    apiFetch<AiQuestionDto[]>(`/api/ai-trieds/${aiTriedId}/review`),
+
+  // Responder — body: { aiQuestionId, selectedIndex }
+  submitAnswer: (aiTriedId: string, aiQuestionId: string, selectedIndex: number) =>
     apiFetch<AiAnswerResultDto>(`/api/ai-trieds/${aiTriedId}/answer`, {
       method: 'POST',
-      body:   JSON.stringify({ questionId, selectedOptionId }),
+      body:   JSON.stringify({ aiQuestionId, selectedIndex }),
     }),
 
-  /** Solicita una pista en el nivel indicado (1, 2 o 3) */
-  getHint: (aiTriedId: string, questionId: string, hintLevel: number) =>
+  // Pista progresiva — body: { aiQuestionId, hintLevel }
+  getHint: (aiTriedId: string, aiQuestionId: string, hintLevel: number) =>
     apiFetch<AiHintDto>(`/api/ai-trieds/${aiTriedId}/hint`, {
       method: 'POST',
-      body:   JSON.stringify({ questionId, hintLevel }),
+      body:   JSON.stringify({ aiQuestionId, hintLevel }),
     }),
 
-  /** Finaliza la sesión manualmente */
+  // Finalizar manualmente
   finish: (aiTriedId: string, timeSpentSeconds?: number) =>
     apiFetch<AiTriedDto>(
       `/api/ai-trieds/${aiTriedId}/finish${
@@ -54,7 +57,7 @@ export const aiTriedsApi = {
     ),
 };
 
-// ── Pistas para tests estáticos ───────────────────────────────────────
+// Pistas para preguntas del banco estático
 export const aiHintApi = {
   getHint: (competenceId: string, questionId: string, hintLevel: number) =>
     apiFetch<AiHintDto>(

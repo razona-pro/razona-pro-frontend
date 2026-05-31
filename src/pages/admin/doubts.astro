@@ -1,0 +1,294 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Dudas reportadas" currentPage="admin-doubts">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Dudas reportadas</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Dudas reportadas</h1>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Reportes de los estudiantes sobre preguntas del banco o sesiones IA.</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div id="chip-open"     class="stat-chip" style="border-left-color:#D97706"><span class="sc-label">Abiertas</span><p id="n-open" class="sc-val" style="color:#D97706">—</p></div>
+        <div id="chip-reviewed" class="stat-chip" style="border-left-color:#2563EB"><span class="sc-label">Revisadas</span><p id="n-rev" class="sc-val" style="color:#2563EB">—</p></div>
+        <div id="chip-closed"   class="stat-chip" style="border-left-color:#059669"><span class="sc-label">Cerradas</span><p id="n-cls" class="sc-val" style="color:#059669">—</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
+    <button class="sfilt active" data-status="">Todas</button>
+    <button class="sfilt" data-status="OPEN">Abiertas</button>
+    <button class="sfilt" data-status="REVIEWED">Revisadas</button>
+    <button class="sfilt" data-status="CLOSED">Cerradas</button>
+    <span id="count-label" style="font-size:0.8125rem;color:var(--ui-text-3);margin-left:auto"></span>
+  </div>
+
+  <!-- Lista -->
+  <div id="doubts-list"></div>
+
+  <!-- Paginación -->
+  <div style="margin-top:1rem;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <span id="page-info" style="font-size:0.8125rem;color:var(--ui-text-3)"></span>
+    <div style="display:flex;gap:6px">
+      <button id="btn-prev" class="page-btn" disabled>← Anterior</button>
+      <button id="btn-next" class="page-btn">Siguiente →</button>
+    </div>
+  </div>
+</AppLayout>
+
+<!-- Modal ver detalle / cambiar estado -->
+<div id="detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:520px;width:calc(100%-2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h2 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Detalle de duda</h2>
+      <button id="detail-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);font-size:1.25rem;line-height:1;padding:4px">×</button>
+    </div>
+
+    <div style="margin-bottom:1rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div class="info-row"><span class="info-label">Estudiante</span><p id="d-student" class="info-val"></p></div>
+        <div class="info-row"><span class="info-label">Fuente</span><p id="d-source" class="info-val"></p></div>
+        <div class="info-row"><span class="info-label">Competencia</span><p id="d-comp" class="info-val"></p></div>
+        <div class="info-row"><span class="info-label">Fecha</span><p id="d-date" class="info-val"></p></div>
+      </div>
+
+      <div class="info-row" style="margin-bottom:8px">
+        <span class="info-label">Enunciado de la pregunta</span>
+        <div id="d-statement" style="padding:10px 12px;background:var(--ui-surface);border-radius:8px;border:1px solid var(--ui-border);font-size:0.875rem;color:var(--ui-text-1);line-height:1.6;max-height:120px;overflow-y:auto"></div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">Mensaje del estudiante</span>
+        <div id="d-message" style="padding:10px 12px;background:var(--ui-surface);border-radius:8px;border:1px solid var(--ui-border);font-size:0.875rem;color:var(--ui-text-2);line-height:1.6"></div>
+      </div>
+    </div>
+
+    <!-- Cambiar estado -->
+    <div style="border-top:1px solid var(--ui-border);padding-top:1rem">
+      <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3);margin:0 0 8px">Cambiar estado</p>
+      <div style="display:flex;gap:8px">
+        <button class="status-btn" data-status="OPEN"     style="flex:1;background:#FEF3C7;border:1.5px solid #FDE68A;color:#92400E">Abrir</button>
+        <button class="status-btn" data-status="REVIEWED" style="flex:1;background:#DBEAFE;border:1.5px solid #BFDBFE;color:#1D4ED8">Revisada</button>
+        <button class="status-btn" data-status="CLOSED"   style="flex:1;background:#D1FAE5;border:1.5px solid #A7F3D0;color:#065F46">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
+  @keyframes shimmer { 0%{background-position:-400px 0}100%{background-position:400px 0} }
+
+  .stat-chip { background:var(--ui-card);border-radius:12px;padding:10px 14px;border:1px solid var(--ui-border);border-left:3px solid;text-align:center;min-width:80px }
+  .sc-label  { font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;display:block }
+  .sc-val    { font-size:1.375rem;font-weight:900;margin:2px 0 0;line-height:1 }
+
+  .sfilt {
+    padding:6px 16px;border-radius:20px;font-size:0.8125rem;font-weight:600;
+    border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-2);
+    cursor:pointer;transition:all 0.15s;font-family:inherit;
+  }
+  .sfilt:hover  { border-color:var(--brand);color:var(--brand); }
+  .sfilt.active { background:var(--brand);color:white;border-color:var(--brand); }
+
+  .doubt-card {
+    background:var(--ui-card);border-radius:14px;border:1px solid var(--ui-border);
+    padding:1rem 1.25rem;margin-bottom:0.5rem;cursor:pointer;transition:all 0.15s;
+  }
+  .doubt-card:hover { border-color:var(--ui-border-2);background:var(--ui-surface);transform:translateX(2px); }
+
+  .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
+  .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
+  .page-btn:disabled { opacity:0.4;cursor:not-allowed }
+
+  .info-row  { display:flex;flex-direction:column;gap:3px }
+  .info-label { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ui-text-3) }
+  .info-val  { font-size:0.875rem;font-weight:600;color:var(--ui-text-1);background:var(--ui-surface);border-radius:7px;padding:5px 9px;border:1px solid var(--ui-border);margin:0 }
+
+  .status-btn { padding:8px;border-radius:9px;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer;transition:all 0.15s }
+  .status-btn:hover { filter:brightness(0.92) }
+
+  .skel { background:linear-gradient(90deg,var(--ui-surface) 25%,var(--ui-border) 50%,var(--ui-surface) 75%);background-size:400px 100%;animation:shimmer 1.5s infinite;border-radius:14px }
+</style>
+
+<script>
+  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { apiFetch }             from '../../lib/api/client';
+  import { toast }                from '../../lib/toast';
+
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
+
+  // ── Tipos locales ────────────────────────────────────────────
+  interface DoubtDto {
+    doubtId: string; studentId: string; source: string;
+    competenceId?: string; questionId?: string; aiQuestionId?: string;
+    statement?: string; message?: string; status: string; createdAt: string;
+  }
+  interface Paged<T> { content: T[]; page: number; size: number; totalElements: number; totalPages: number; last: boolean; }
+
+  let page       = 0;
+  const SIZE     = 15;
+  let totalPages = 1;
+  let filterStatus = '';
+  let selectedDoubt: DoubtDto | null = null;
+
+  const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; border: string }> = {
+    OPEN:     { label: 'Abierta',  bg:'#FEF3C7', color:'#92400E', border:'#FDE68A' },
+    REVIEWED: { label: 'Revisada', bg:'#DBEAFE', color:'#1D4ED8', border:'#BFDBFE' },
+    CLOSED:   { label: 'Cerrada',  bg:'#D1FAE5', color:'#065F46', border:'#A7F3D0' },
+  };
+
+  function fmtDate(iso: string) {
+    return new Date(iso).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+  }
+
+  // ── Cargar dudas ─────────────────────────────────────────────
+  async function loadPage() {
+    const list = document.getElementById('doubts-list')!;
+    list.innerHTML = '<div class="skel" style="height:70px;margin-bottom:8px"></div><div class="skel" style="height:70px;margin-bottom:8px;width:90%"></div><div class="skel" style="height:70px;width:85%"></div>';
+
+    const qs = filterStatus ? `?status=${filterStatus}&page=${page}&size=${SIZE}` : `?page=${page}&size=${SIZE}`;
+    try {
+      const res = await apiFetch<Paged<DoubtDto>>(`/api/doubts${qs}`);
+      const data = res.data!;
+
+      totalPages = data.totalPages;
+      (document.getElementById('page-info') as HTMLElement).textContent  = `Pág. ${page + 1} de ${totalPages || 1} — ${data.totalElements} duda(s)`;
+      (document.getElementById('count-label') as HTMLElement).textContent = `${data.totalElements} resultado(s)`;
+      (document.getElementById('btn-prev') as HTMLButtonElement).disabled  = page === 0;
+      (document.getElementById('btn-next') as HTMLButtonElement).disabled  = page >= totalPages - 1;
+
+      // Stats rápidas (solo si no hay filtro)
+      if (!filterStatus) {
+        const open   = data.content.filter(d => d.status === 'OPEN').length;
+        const rev    = data.content.filter(d => d.status === 'REVIEWED').length;
+        const closed = data.content.filter(d => d.status === 'CLOSED').length;
+        (document.getElementById('n-open') as HTMLElement).textContent = String(open);
+        (document.getElementById('n-rev')  as HTMLElement).textContent = String(rev);
+        (document.getElementById('n-cls')  as HTMLElement).textContent = String(closed);
+      }
+
+      renderList(data.content);
+    } catch (err: any) {
+      list.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--ui-text-3)">Error al cargar: ${err?.message}</div>`;
+    }
+  }
+
+  function renderList(doubts: DoubtDto[]) {
+    const list = document.getElementById('doubts-list')!;
+    list.innerHTML = '';
+
+    if (!doubts.length) {
+      list.innerHTML = '<div style="text-align:center;padding:2.5rem;color:var(--ui-text-3)"><p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin dudas</p><p style="font-size:0.875rem">No hay reportes con los filtros actuales.</p></div>';
+      return;
+    }
+
+    doubts.forEach(d => {
+      const sc = STATUS_CONFIG[d.status] ?? { label: d.status, bg:'#F3F4F6', color:'#6B7280', border:'#E5E7EB' };
+      const card = document.createElement('div');
+      card.className = 'doubt-card';
+      card.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:38px;height:38px;border-radius:9px;background:${d.source==='AI'?'rgba(99,102,241,0.1)':'rgba(212,18,36,0.08)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" fill="none" stroke="${d.source==='AI'?'#818CF8':'#D41224'}" stroke-width="1.8" viewBox="0 0 24 24">
+              ${d.source==='AI'
+                ? '<path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>'
+                : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+              }
+            </svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+              <span style="font-size:0.6875rem;font-weight:700;padding:2px 8px;border-radius:12px;background:${d.source==='AI'?'rgba(99,102,241,0.1)':'rgba(212,18,36,0.08)'};color:${d.source==='AI'?'#6366F1':'#D41224'}">${d.source}</span>
+              <span style="padding:2px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${sc.bg};color:${sc.color};border:1px solid ${sc.border}">${sc.label}</span>
+              <span style="font-size:0.6875rem;color:var(--ui-text-3)">Estudiante: ${d.studentId}</span>
+              <span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(d.createdAt)}</span>
+            </div>
+            <p style="font-size:0.875rem;color:var(--ui-text-1);margin:0 0 2px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              ${d.statement?.substring(0,100) ?? 'Sin enunciado disponible'}${(d.statement?.length ?? 0) > 100 ? '…' : ''}
+            </p>
+            ${d.message ? `<p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.message}</p>` : ''}
+          </div>
+          <svg width="16" height="16" fill="none" stroke="var(--ui-text-3)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg>
+        </div>`;
+
+      card.addEventListener('click', () => openDetail(d));
+      list.appendChild(card);
+    });
+  }
+
+  // ── Modal detalle ─────────────────────────────────────────────
+  function openDetail(d: DoubtDto) {
+    selectedDoubt = d;
+    const sc = STATUS_CONFIG[d.status];
+
+    (document.getElementById('d-student') as HTMLElement).textContent  = d.studentId;
+    (document.getElementById('d-source') as HTMLElement).textContent   = d.source === 'AI' ? '🤖 Sesión IA' : '📋 Banco estático';
+    (document.getElementById('d-comp') as HTMLElement).textContent     = d.competenceId ?? '—';
+    (document.getElementById('d-date') as HTMLElement).textContent     = fmtDate(d.createdAt);
+    (document.getElementById('d-statement') as HTMLElement).textContent = d.statement ?? 'Sin enunciado';
+    (document.getElementById('d-message') as HTMLElement).textContent  = d.message ?? '(Sin mensaje adicional)';
+
+    // Resaltar botón del estado actual
+    document.querySelectorAll<HTMLButtonElement>('.status-btn').forEach(btn => {
+      btn.style.opacity = btn.dataset.status === d.status ? '0.5' : '1';
+      btn.disabled = btn.dataset.status === d.status;
+    });
+
+    (document.getElementById('detail-modal') as HTMLElement).style.display = 'flex';
+  }
+
+  document.getElementById('detail-close')?.addEventListener('click', () => {
+    (document.getElementById('detail-modal') as HTMLElement).style.display = 'none';
+    selectedDoubt = null;
+  });
+
+  document.getElementById('detail-modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('detail-modal')) {
+      (document.getElementById('detail-modal') as HTMLElement).style.display = 'none';
+      selectedDoubt = null;
+    }
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.status-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!selectedDoubt) return;
+      const newStatus = btn.dataset.status!;
+      try {
+        await apiFetch(`/api/doubts/${selectedDoubt.doubtId}/status?status=${newStatus}`, { method: 'PUT' });
+        toast.success(`Estado cambiado a: ${STATUS_CONFIG[newStatus]?.label ?? newStatus}`);
+        (document.getElementById('detail-modal') as HTMLElement).style.display = 'none';
+        selectedDoubt = null;
+        loadPage();
+      } catch (err: any) {
+        toast.error('Error al actualizar estado', { description: err?.message });
+      }
+    });
+  });
+
+  // ── Filtros y paginación ──────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.sfilt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sfilt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterStatus = btn.dataset.status ?? '';
+      page = 0;
+      loadPage();
+    });
+  });
+
+  document.getElementById('btn-prev')?.addEventListener('click', () => { if (page > 0) { page--; loadPage(); } });
+  document.getElementById('btn-next')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadPage(); } });
+
+  loadPage();
+</script>

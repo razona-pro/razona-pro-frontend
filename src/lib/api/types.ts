@@ -188,7 +188,57 @@ export interface TriedReviewDto {
   questions: QuestionReview[];
 }
 
-// ── AI Trieds (nueva versión) ──────────────────────────────────────────
+export interface AiTriedDto {
+  aiTriedId: string;
+  status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED';
+  score?: number;
+  totalQuestions: number;
+  correctAnswers?: number;
+  timeSpentSeconds?: number;
+  description?: string;
+  attemptTimestamp: string;
+  finishedAt?: string;
+}
+
+export interface AiOptionDto {
+  id:   string;   // "OPT0", "OPT1", etc.
+  text: string;
+}
+
+export interface AiQuestionDto {
+  aiQuestionId:    string;
+  statement:       string;
+  options:         AiOptionDto[];
+  difficultyLevel: number;
+  questionNumber:  number;
+  totalQuestions:  number;
+  hintsUsed:       number;
+  selectedIndex:   number | null;   // null = no respondida
+  isCorrect:       boolean | null;  // null = no respondida
+}
+
+export interface AiStartResponseDto {
+  tried:          AiTriedDto;
+  firstQuestion:  AiQuestionDto;
+  totalGenerated: number;
+}
+
+export interface AiAnswerResultDto {
+  isCorrect:       boolean;
+  selectedIndex:   number;
+  correctIndex:    number;
+  explanation:     string;
+  correctAnswers:  number;
+  totalAnswered:   number;
+  totalQuestions:  number;
+  finished:        boolean;
+  finalScore:      number | null;
+}
+
+export interface AiHintDto {
+  hint:      string;
+  hintLevel: number;
+}
 
 export interface AiStatusDto {
   enabled:   boolean;
@@ -196,40 +246,4 @@ export interface AiStatusDto {
   model:     string;
   reachable: boolean;
   message:   string;
-}
-
-export interface AiOptionDto {
-  id:   string;  // "OPT0", "OPT1", etc.
-  text: string;
-}
-
-export interface AiQuestionDto {
-  questionId:      string;
-  statement:       string;
-  options:         AiOptionDto[];
-  difficultyLevel: number;
-  questionNumber:  number;
-  totalQuestions:  number;
-}
-
-export interface AiStartResponseDto {
-  tried:         AiTriedDto;
-  firstQuestion: AiQuestionDto;
-}
-
-export interface AiAnswerResultDto {
-  isCorrect:        boolean;
-  selectedOptionId: string;
-  correctOptionId:  string;
-  explanation:      string;
-  correctAnswers:   number;
-  totalAnswered:    number;
-  totalQuestions:   number;
-  finished:         boolean;
-  finalScore:       number | null;
-}
-
-export interface AiHintDto {
-  hint:      string;
-  hintLevel: number;
 }
