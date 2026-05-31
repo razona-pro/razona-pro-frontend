@@ -110,32 +110,58 @@ import StatCard from '../../components/ui/StatCard.astro';
           </div>
         </div>
 
-        <!-- Métricas del sistema -->
-        <div class="admin-section-card" style="margin-top:16px">
-          <h2 class="admin-section-title" style="margin-bottom:1rem">Métricas de uso</h2>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="metric-item">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <span style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1)">Tasa de satisfacción</span>
-                <span id="admin-satisfaction" style="font-size:1rem;font-weight:900;color:#059669">—%</span>
-              </div>
-              <div style="height:6px;background:var(--ui-surface);border-radius:3px;overflow:hidden">
-                <div id="admin-sat-bar" style="height:100%;border-radius:3px;background:linear-gradient(to right,#059669,#34D399);width:0%;transition:width 1.2s ease"></div>
-              </div>
-              <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:4px 0 0">Simulacros con puntaje ≥60</p>
-            </div>
-            <div class="metric-item">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <span style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1)">Competencias activas</span>
-                <span id="admin-comp-count" style="font-size:1rem;font-weight:900;color:#2563EB">—</span>
-              </div>
-              <div style="height:6px;background:var(--ui-surface);border-radius:3px;overflow:hidden">
-                <div id="admin-comp-bar" style="height:100%;border-radius:3px;background:linear-gradient(to right,#2563EB,#60A5FA);width:0%;transition:width 1.2s ease"></div>
-              </div>
-              <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:4px 0 0">De las 6 áreas Saber Pro</p>
-            </div>
-          </div>
-        </div>
+        <!-- Métricas del sistema + Estado IA -->
+<div class="admin-section-card" style="margin-top:16px">
+  <h2 class="admin-section-title" style="margin-bottom:1rem">Métricas del sistema</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div class="metric-item">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1)">Tasa de satisfacción</span>
+        <span id="admin-satisfaction" style="font-size:1rem;font-weight:900;color:#059669">—%</span>
+      </div>
+      <div style="height:6px;background:var(--ui-surface);border-radius:3px;overflow:hidden">
+        <div id="admin-sat-bar" style="height:100%;border-radius:3px;background:linear-gradient(to right,#059669,#34D399);width:0%;transition:width 1.2s ease"></div>
+      </div>
+      <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:4px 0 0">Simulacros con puntaje ≥60</p>
+    </div>
+    <div class="metric-item">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1)">Competencias activas</span>
+        <span id="admin-comp-count" style="font-size:1rem;font-weight:900;color:#2563EB">—</span>
+      </div>
+      <div style="height:6px;background:var(--ui-surface);border-radius:3px;overflow:hidden">
+        <div id="admin-comp-bar" style="height:100%;border-radius:3px;background:linear-gradient(to right,#2563EB,#60A5FA);width:0%;transition:width 1.2s ease"></div>
+      </div>
+      <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:4px 0 0">De las 6 áreas Saber Pro</p>
+    </div>
+  </div>
+
+  <!-- Estado módulo IA -->
+  <div id="admin-ai-status" style="background:var(--ui-surface);border-radius:12px;padding:14px;border:1px solid var(--ui-border)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="ai-status-dot" style="width:10px;height:10px;border-radius:50%;background:#D4D4D4;flex-shrink:0"></div>
+        <span style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1)">Módulo IA</span>
+        <span id="ai-status-badge" style="font-size:0.625rem;padding:2px 8px;border-radius:12px;font-weight:700;background:#F3F4F6;color:#6B7280">Verificando...</span>
+      </div>
+      <span id="ai-model-label" style="font-size:0.75rem;color:var(--ui-text-3)"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="background:var(--ui-card);border-radius:9px;padding:10px;border:1px solid var(--ui-border);text-align:center">
+        <p id="ai-stat-sessions" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">—</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Sesiones IA</p>
+      </div>
+      <div style="background:var(--ui-card);border-radius:9px;padding:10px;border:1px solid var(--ui-border);text-align:center">
+        <p id="ai-stat-questions" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">—</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Preguntas gen.</p>
+      </div>
+      <div style="background:var(--ui-card);border-radius:9px;padding:10px;border:1px solid var(--ui-border);text-align:center">
+        <p id="ai-stat-accuracy" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">—</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">% aciertos IA</p>
+      </div>
+    </div>
+  </div>
+</div>
       </div>
 
       <!-- Panel lateral admin -->
@@ -461,6 +487,40 @@ async function initAdminDashboard() {
   } catch (err: any) {
     toast.error('Error al cargar estadísticas', { description: err?.message });
   }
+
+  // Estado IA
+try {
+  const { aiTriedsApi } = await import('../../lib/api/ai-trieds.api');
+  const { apiFetch }    = await import('../../lib/api/client');
+
+  const aiStatus = await aiTriedsApi.status();
+  const dot    = document.getElementById('ai-status-dot')!;
+  const badge  = document.getElementById('ai-status-badge')!;
+  const modelL = document.getElementById('ai-model-label')!;
+
+  if (aiStatus.data?.enabled && aiStatus.data?.reachable) {
+    dot.style.background   = '#22C55E';
+    dot.style.boxShadow    = '0 0 6px rgba(34,197,94,0.5)';
+    badge.textContent      = 'Activo';
+    badge.style.background = '#D1FAE5';
+    badge.style.color      = '#059669';
+    modelL.textContent     = aiStatus.data.model;
+  } else {
+    dot.style.background   = '#EF4444';
+    badge.textContent      = aiStatus.data?.enabled ? 'No alcanzable' : 'Deshabilitado';
+    badge.style.background = '#FEE2E2';
+    badge.style.color      = '#DC2626';
+    modelL.textContent     = aiStatus.data?.provider ?? '';
+  }
+
+  // Stats de sesiones IA — consultar desde API
+  const aiRes = await apiFetch<any>('/api/ai-trieds/my?page=0&size=1'); // solo para saber si hay datos
+  // Como admin no tiene /my, usamos un endpoint diferente o simplemente mostramos "N/A"
+  // Si tienes endpoint admin de ai_trieds, úsalo aquí
+  document.getElementById('ai-stat-sessions')!.textContent  = '—';
+  document.getElementById('ai-stat-questions')!.textContent = '—';
+  document.getElementById('ai-stat-accuracy')!.textContent  = '—';
+} catch {}
 }
 
 async function initStudentDashboard() {

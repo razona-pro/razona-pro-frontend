@@ -7,9 +7,12 @@ interface Props {
 const { currentPage = 'dashboard' } = Astro.props;
 
 const mainNav = [
-  { href: '/dashboard',      icon: 'tabler:home',           label: 'Inicio',           page: 'dashboard' },
-  { href: '/tests',          icon: 'tabler:clipboard-list', label: 'Tests',            page: 'tests' },
-  { href: '/ai-practice',    icon: 'tabler:robot',          label: 'Práctica con IA',  page: 'ai-practice' },
+  { href: '/dashboard', icon: 'tabler:home', label: 'Inicio', page: 'dashboard' },
+];
+
+const studentNav = [
+  { href: '/tests',       icon: 'tabler:clipboard-list', label: 'Tests',           page: 'tests' },
+  { href: '/ai-practice', icon: 'tabler:robot',          label: 'Práctica con IA', page: 'ai-practice' },
 ];
 
 const accountNav = [
@@ -22,10 +25,11 @@ const adminNav = [
   { href: '/admin/students',    icon: 'tabler:users',            label: 'Estudiantes',   page: 'admin-students' },
   { href: '/admin/tests',       icon: 'tabler:file-description', label: 'Tests',         page: 'admin-tests' },
   { href: '/admin/questions',   icon: 'tabler:list-check',       label: 'Preguntas',     page: 'admin-questions' },
+  { href: '/admin/competences', icon: 'tabler:brain',            label: 'Competencias',  page: 'admin-competences' }, // ← NUEVO
   { href: '/admin/admins',      icon: 'tabler:shield-check',     label: 'Administradores', page: 'admin-admins' },
   { href: '/admin/programs',    icon: 'tabler:school',           label: 'Programas',     page: 'admin-programs' },
   { href: '/admin/rankings',    icon: 'tabler:award',            label: 'Rankings',      page: 'admin-rankings' },
-  { href: '/admin/doubts', icon: 'tabler:message-question', label: 'Dudas', page: 'admin-doubts' },
+  { href: '/admin/doubts',      icon: 'tabler:message-question', label: 'Dudas',         page: 'admin-doubts' },
 ];
 ---
 
@@ -85,60 +89,53 @@ const adminNav = [
   </div>
 
   <!-- Nav -->
-  <nav class="sb-nav">
-    <span class="sb-section">Principal</span>
-    {
-      mainNav.map(item => (
-        <a
-          href={item.href}
-          class:list={['sb-item', currentPage === item.page && 'active']}
-        >
-          <Icon name={item.icon} size={16} />
-          {item.label}
-        </a>
-      ))
-    }
+<nav class="sb-nav">
+  <span class="sb-section">Principal</span>
+  {mainNav.map(item => (
+    <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
+      <Icon name={item.icon} size={16} />
+      {item.label}
+    </a>
+  ))}
 
-    <!-- Competencias dinámicas -->
+  <!-- Solo estudiantes -->
+  <div id="sb-student-nav" style="display:none">
+    {studentNav.map(item => (
+      <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
+        <Icon name={item.icon} size={16} />
+        {item.label}
+      </a>
+    ))}
+  </div>
+
+  <!-- Competencias: solo estudiantes -->
+  <div id="sb-competences-section" style="display:none">
     <span class="sb-section">Competencias</span>
     <div id="sb-competences-list">
-      <!-- Skeleton mientras carga -->
       <div class="sb-skeleton"></div>
       <div class="sb-skeleton" style="width:75%"></div>
       <div class="sb-skeleton" style="width:85%"></div>
-      <div class="sb-skeleton" style="width:70%"></div>
-      <div class="sb-skeleton" style="width:80%"></div>
     </div>
+  </div>
 
-    <span class="sb-section">Mi cuenta</span>
-    {
-      accountNav.map(item => (
-        <a
-          href={item.href}
-          class:list={['sb-item', currentPage === item.page && 'active']}
-        >
-          <Icon name={item.icon} size={16} />
-          {item.label}
-        </a>
-      ))
-    }
+  <span class="sb-section">Mi cuenta</span>
+  {accountNav.map(item => (
+    <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
+      <Icon name={item.icon} size={16} />
+      {item.label}
+    </a>
+  ))}
 
-    <!-- Admin section — shown via JS if admin -->
-    <div id="sb-admin-section" style="display:none">
-      <span class="sb-section" style="color:rgba(212,18,36,0.5)">Administración</span>
-      {
-        adminNav.map(item => (
-          <a
-            href={item.href}
-            class:list={['sb-item', currentPage === item.page && 'active']}
-          >
-            <Icon name={item.icon} size={16} />
-            {item.label}
-          </a>
-        ))
-      }
-    </div>
-  </nav>
+  <div id="sb-admin-section" style="display:none">
+    <span class="sb-section" style="color:rgba(212,18,36,0.5)">Administración</span>
+    {adminNav.map(item => (
+      <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
+        <Icon name={item.icon} size={16} />
+        {item.label}
+      </a>
+    ))}
+  </div>
+</nav>
 
   <!-- Logout -->
   <div class="sb-footer">
@@ -291,8 +288,11 @@ function paintUser() {
     : (u.programId ?? 'Estudiante · UFPSO');
 
   if (isAdmin()) {
-    const adminSection = document.getElementById('sb-admin-section');
-    if (adminSection) adminSection.style.display = 'block';
+    document.getElementById('sb-admin-section')?.style.setProperty('display', 'block');
+    // Admin NO ve secciones de estudiante
+  } else {
+    document.getElementById('sb-student-nav')?.style.setProperty('display', 'block');
+    document.getElementById('sb-competences-section')?.style.setProperty('display', 'block');
   }
 }
 
@@ -357,7 +357,7 @@ function getShort(name: string): string {
   if (n.includes('ingl'))      return 'IN';
   return name.slice(0, 2).toUpperCase();
 }
-
+if (!isAdmin()) {
 competencesApi.findAll(true).then(res => {
   const listEl = document.getElementById('sb-competences-list');
   if (!listEl || !res.data?.length) return;
@@ -435,9 +435,15 @@ competencesApi.findAll(true).then(res => {
   });
 }).catch(() => {
   const listEl = document.getElementById('sb-competences-list');
-  if (listEl) listEl.innerHTML =
-    '<p style="font-size:0.75rem;color:var(--sidebar-text);padding:0 0.625rem;opacity:0.5">No disponible</p>';
-});
+    if (listEl) listEl.innerHTML =
+      '<p style="font-size:0.75rem;color:var(--ui-text-text);padding:0 0.625rem;opacity:0.5">No disponible</p>';
+  });
+} else {
+  // Admin: oculta la sección completamente
+  const listEl = document.getElementById('sb-competences-list');
+  if (listEl) listEl.closest('span.sb-section')?.remove();
+  if (listEl) listEl.remove();
+}
 
 // ── Logout con modal ──────────────────────────────────────────────
 const logoutModal   = document.getElementById('logout-modal')!;

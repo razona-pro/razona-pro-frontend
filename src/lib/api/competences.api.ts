@@ -11,6 +11,8 @@ export const competencesApi = {
     apiFetch<CompetenceDto>(`/api/competences/${id}`, { method: 'PUT', body: JSON.stringify(p) }),
   deactivate: (id: string) =>
     apiFetch<void>(`/api/competences/${id}`, { method: 'DELETE' }),
+    activate: (id: string) =>
+  apiFetch<CompetenceDto>(`/api/competences/${id}/activate`, { method: 'PUT' }),
 
   // Questions
   getQuestions: (competenceId: string, page = 0, size = 50) =>
@@ -34,5 +36,5 @@ export const competencesApi = {
   deactivateQuestion: (competenceId: string, questionId: string) =>
     apiFetch<void>(`/api/competences/${competenceId}/questions/${questionId}`, {
       method: 'DELETE',
-    }),
+    })
 };
