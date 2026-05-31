@@ -3,306 +3,697 @@ import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
 <AppLayout title="Práctica con IA" currentPage="ai-practice">
-  <div style="margin-bottom:1.25rem">
-    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
-      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Práctica con IA</span>
-    </div>
-    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Práctica con IA</h1>
-    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Sesiones de práctica adaptativas con inteligencia artificial.</p>
-  </div>
 
-  <!-- IA Status Banner -->
-  <div id="ai-banner" style="background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:16px;padding:1.5rem 1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden">
-    <div style="position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;background:rgba(99,102,241,0.15)"></div>
-    <div style="position:relative;display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap">
-      <div style="width:52px;height:52px;border-radius:14px;background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="26" height="26" fill="none" stroke="#818CF8" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+  <!-- ═══ ESTADO: Setup ═══ -->
+  <div id="view-setup">
+    <div style="margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+        <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none">Dashboard</a>
+        <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Práctica con IA</span>
       </div>
-      <div style="flex:1;min-width:200px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-          <h2 style="color:white;font-weight:800;font-size:1.0625rem;margin:0">Módulo de IA en desarrollo</h2>
-          <span style="padding:2px 8px;border-radius:12px;background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:#FCD34D;font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Beta</span>
-        </div>
-        <p style="color:rgba(255,255,255,0.6);font-size:0.875rem;margin:0 0 0.875rem;line-height:1.65">
-          El módulo de generación de preguntas con Transfer Learning está siendo entrenado. Mientras tanto, puedes registrar sesiones de práctica manual y llevar tu historial.
-        </p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:rgba(255,255,255,0.5)">
-            <span style="width:6px;height:6px;border-radius:50%;background:#F59E0B"></span>
-            Generación AI: Pendiente
-          </div>
-          <div style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:rgba(255,255,255,0.5)">
-            <span style="width:6px;height:6px;border-radius:50%;background:#22C55E"></span>
-            Registro de sesiones: Activo
-          </div>
-        </div>
+      <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 4px;letter-spacing:-0.5px">Práctica adaptativa con IA</h1>
+      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">El sistema genera preguntas en tiempo real y adapta la dificultad a tu nivel.</p>
+    </div>
+
+    <!-- Banner de estado IA -->
+    <div id="ai-status-banner" style="border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:10px;border:1px solid var(--ui-border)">
+      <div id="status-icon" style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--ui-surface)">
+        <svg id="status-spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0"/></svg>
+        <svg id="status-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg id="status-x" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <p id="status-title" style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1);margin:0 0 2px">Verificando módulo IA...</p>
+        <p id="status-msg" style="font-size:0.8125rem;color:var(--ui-text-2);margin:0;line-height:1.5"></p>
       </div>
     </div>
+
+    <!-- Formulario de configuración -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:var(--ui-card);border-radius:16px;padding:1.5rem;border:1px solid var(--ui-border)">
+        <h2 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0 0 1.125rem">Configurar sesión</h2>
+
+        <div class="field-grp">
+          <label class="field-lbl">Competencia *</label>
+          <select id="setup-comp" class="field-sel">
+            <option value="">Cargando competencias...</option>
+          </select>
+        </div>
+
+        <div class="field-grp">
+          <label class="field-lbl">Número de preguntas</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            {[5, 10, 15, 20].map(n => (
+              <button class="q-pill" data-q={n} type="button">{n}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="field-grp">
+          <label class="field-lbl">Descripción (opcional)</label>
+          <input id="setup-desc" type="text" class="field-inp" placeholder="Ej: Repaso para el parcial" maxlength="200" />
+        </div>
+
+        <div id="setup-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:0.875rem"></div>
+
+        <button id="start-btn" style="width:100%;padding:0.75rem;border-radius:10px;border:none;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;font-family:inherit;font-weight:700;font-size:0.9375rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(99,102,241,0.35);transition:all 0.2s" disabled>
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Iniciar práctica
+        </button>
+      </div>
+
+      <!-- Info lateral -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:16px;padding:1.375rem;color:white">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(99,102,241,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
+            <svg width="22" height="22" fill="none" stroke="#818CF8" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+          </div>
+          <h3 style="font-size:1rem;font-weight:800;margin:0 0 0.5rem">¿Cómo funciona?</h3>
+          <ul style="font-size:0.8125rem;color:rgba(255,255,255,0.75);line-height:1.7;padding-left:1rem;margin:0">
+            <li>La IA genera preguntas únicas en tiempo real</li>
+            <li>La dificultad se adapta a tu nivel (ELO educativo)</li>
+            <li>Puedes pedir pistas en 3 niveles de ayuda</li>
+            <li>Recibes explicación detallada tras cada respuesta</li>
+          </ul>
+        </div>
+        <div style="background:var(--ui-card);border-radius:14px;padding:1.125rem;border:1px solid var(--ui-border)">
+          <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0 0 8px">Nota técnica</p>
+          <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0;line-height:1.6">La generación de cada pregunta puede tomar 5-30 segundos dependiendo del hardware. Una pantalla de carga te avisará mientras el modelo trabaja.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial rápido -->
+    <div style="margin-top:1.5rem;background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+      <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between">
+        <h2 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0">Sesiones recientes</h2>
+        <span id="hist-count" style="font-size:0.75rem;color:var(--ui-text-3)"></span>
+      </div>
+      <div id="hist-list" style="padding:0.75rem"></div>
+    </div>
   </div>
 
-  <!-- Start session form + history -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <!-- ═══ ESTADO: Cargando pregunta ═══ -->
+  <div id="view-loading" style="display:none;min-height:70vh;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem">
+    <div style="width:64px;height:64px;border-radius:50%;border:4px solid rgba(99,102,241,0.2);border-top-color:#6366F1;animation:spin 0.9s linear infinite"></div>
+    <div style="text-align:center">
+      <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px" id="loading-title">Generando pregunta con IA...</p>
+      <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0">El modelo está pensando, puede tomar unos segundos</p>
+    </div>
+  </div>
 
-    <!-- New session form -->
-    <div class="ai-card">
-      <h2 class="ai-card-title">Nueva sesión de práctica</h2>
-      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.65">Selecciona una competencia, registra cuántas preguntas practicaste y guarda tu sesión.</p>
+  <!-- ═══ ESTADO: Pregunta activa ═══ -->
+  <div id="view-question" style="display:none;max-width:800px;margin:0 auto;width:100%">
 
-      <div id="session-msg" class="session-msg" style="display:none"></div>
-
-      <div class="field-grp">
-        <label class="field-lbl">Competencia</label>
-        <select id="ai-comp" class="field-sel">
-          <option value="">Cargando...</option>
-        </select>
+    <!-- Header de sesión -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="q-comp-chip" style="padding:4px 12px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#EDE9FE;color:#7C3AED">Competencia</span>
+        <span id="q-diff-chip" style="padding:4px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:var(--ui-surface);color:var(--ui-text-2)">Dif. —</span>
       </div>
-      <div class="field-grp">
-        <label class="field-lbl">Número de preguntas</label>
-        <input id="ai-qcount" type="number" min="1" max="20" value="10" class="field-inp" />
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="q-progress-label" style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1)">1 / 10</span>
+        <span id="q-score-inline" style="font-size:0.875rem;color:var(--ui-text-3)">0 correctas</span>
+        <button id="abandon-btn" style="padding:5px 12px;border-radius:8px;border:1.5px solid #FECACA;background:transparent;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Abandonar</button>
       </div>
-      <div class="field-grp">
-        <label class="field-lbl">Descripción (opcional)</label>
-        <input id="ai-desc" type="text" placeholder="Ej: Repaso de textos argumentativos" class="field-inp" maxlength="200" />
-      </div>
+    </div>
 
-      <button id="start-ai-btn" class="ai-start-btn">
-        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        Iniciar sesión
+    <!-- Barra de progreso -->
+    <div style="height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;margin-bottom:1.25rem;border:1px solid var(--ui-border)">
+      <div id="q-progress-bar" style="height:100%;border-radius:3px;background:linear-gradient(to right,#6366F1,#818CF8);width:0%;transition:width 0.5s ease"></div>
+    </div>
+
+    <!-- Enunciado -->
+    <div style="background:var(--ui-card);border-radius:14px;padding:1.5rem 1.625rem;border:1px solid var(--ui-border);margin-bottom:1.125rem">
+      <p id="q-statement" style="font-size:1rem;font-weight:500;color:var(--ui-text-1);line-height:1.85;margin:0"></p>
+    </div>
+
+    <!-- Opciones -->
+    <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.125rem"></div>
+
+    <!-- Pistas -->
+    <div id="hint-section" style="margin-bottom:1.125rem">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:0.75rem;color:var(--ui-text-3);font-weight:600">¿Necesitas una pista?</span>
+        <button class="hint-btn" data-level="1" type="button">Pista 1 — Conceptual</button>
+        <button class="hint-btn" data-level="2" type="button">Pista 2 — Analítica</button>
+        <button class="hint-btn" data-level="3" type="button">Pista 3 — Orientada</button>
+      </div>
+      <div id="hint-box" style="display:none;margin-top:10px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 14px">
+        <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0369A1;margin:0 0 5px">💡 Pista</p>
+        <p id="hint-text" style="font-size:0.875rem;color:#0C4A6E;margin:0;line-height:1.65"></p>
+        <div id="hint-loading" style="display:none;font-size:0.8125rem;color:#0369A1;margin:0">Generando pista...</div>
+      </div>
+    </div>
+
+    <!-- Feedback (oculto hasta responder) -->
+    <div id="feedback-box" style="display:none;border-radius:12px;padding:1.125rem 1.25rem;margin-bottom:1.125rem">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span id="feedback-icon" style="font-size:1.25rem"></span>
+        <span id="feedback-title" style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1)"></span>
+      </div>
+      <p id="feedback-explanation" style="font-size:0.875rem;color:var(--ui-text-2);margin:0;line-height:1.65"></p>
+    </div>
+
+    <!-- Botón de acción -->
+    <div style="display:flex;justify-content:flex-end">
+      <button id="action-btn" style="display:none;padding:0.75rem 1.75rem;border-radius:11px;border:none;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;font-family:inherit;font-weight:700;font-size:0.9375rem;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35);transition:all 0.2s">
+        Siguiente pregunta →
       </button>
+    </div>
+  </div>
 
-      <!-- Active session indicator -->
-      <div id="active-session" style="display:none;margin-top:0.875rem;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:1rem">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.625rem">
-          <span style="width:8px;height:8px;border-radius:50%;background:#818CF8;animation:pulse 2s ease-in-out infinite"></span>
-          <span style="font-size:0.875rem;font-weight:700;color:#818CF8">Sesión en progreso</span>
-          <span id="active-timer" style="margin-left:auto;font-size:0.875rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ui-text-1)">00:00</span>
-        </div>
-        <p id="active-desc" style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 0.75rem"></p>
-        <div style="display:flex;gap:8px">
-          <button id="finish-ai-btn" style="flex:1;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;border:none;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer">
-            Finalizar sesión
-          </button>
-          <button id="abandon-ai-btn" style="padding:0.5625rem 0.875rem;border-radius:9px;border:1.5px solid #FCA5A5;background:transparent;color:#DC2626;font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer">
-            Abandonar
-          </button>
-        </div>
+  <!-- ═══ ESTADO: Resultados ═══ -->
+  <div id="view-results" style="display:none;max-width:560px;margin:0 auto;width:100%;text-align:center;padding:2rem 1rem">
+    <div id="result-icon" style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;font-size:2.5rem"></div>
+    <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.25rem">Tu puntaje final</p>
+    <p id="result-score" style="font-size:5rem;font-weight:900;margin:0;line-height:1;letter-spacing:-3px">0</p>
+    <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">/ 100 puntos</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.5rem">
+      <div style="background:var(--ui-card);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
+        <p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Correctas</p>
+      </div>
+      <div style="background:var(--ui-card);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
+        <p id="res-wrong" style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Incorrectas</p>
+      </div>
+      <div style="background:var(--ui-card);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
+        <p id="res-total" style="font-size:1.625rem;font-weight:900;color:#6366F1;margin:0 0 2px">0</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Total</p>
       </div>
     </div>
 
-    <!-- History -->
-    <div class="ai-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-        <h2 class="ai-card-title">Historial de sesiones</h2>
-        <span id="ai-count" style="font-size:0.75rem;color:var(--ui-text-3)">0 sesiones</span>
-      </div>
-      <div id="ai-history-list"></div>
-    </div>
+    <p id="result-msg" style="font-size:0.9375rem;color:var(--ui-text-2);margin:0 0 1.75rem;line-height:1.65"></p>
 
+    <div style="display:flex;gap:10px">
+      <button id="result-new-btn" style="flex:1;padding:0.75rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;cursor:pointer">Nueva sesión</button>
+      <a href="/dashboard" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:10px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;text-decoration:none;font-weight:700">Ir al dashboard</a>
+    </div>
   </div>
 </AppLayout>
 
 <style>
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes selectPop { 0%{transform:scale(1)}40%{transform:scale(0.97)}100%{transform:scale(1)} }
 
-  .ai-card { background: var(--ui-card); border-radius: 16px; padding: 1.375rem; border: 1px solid var(--ui-border); }
-  .ai-card-title { font-size: 0.9375rem; font-weight: 800; color: var(--ui-text-1); margin: 0 0 0.5rem; }
-
-  .field-grp { margin-bottom: 0.875rem; }
-  .field-lbl { display: block; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ui-text-3); margin-bottom: 4px; }
-  .field-sel, .field-inp {
-    width: 100%; padding: 8px 12px; background: var(--ui-surface); border: 1.5px solid var(--ui-border);
-    border-radius: 9px; font-family: inherit; font-size: 0.875rem; color: var(--ui-text-1);
-    outline: none; transition: border-color 0.2s; appearance: none;
+  .field-grp { display:flex;flex-direction:column;gap:4px;margin-bottom:0.875rem }
+  .field-lbl { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3) }
+  .field-sel,.field-inp {
+    width:100%;padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);
+    border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);
+    outline:none;transition:border-color 0.2s;appearance:none
   }
-  .field-sel:focus, .field-inp:focus { border-color: #818CF8; box-shadow: 0 0 0 3px rgba(129,140,248,0.12); }
+  .field-sel:focus,.field-inp:focus { border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,0.12) }
 
-  .session-msg { padding: 8px 12px; border-radius: 8px; font-size: 0.8125rem; margin-bottom: 0.875rem; }
-  .session-msg.error   { background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C; }
-  .session-msg.success { background: #F0FDF4; border: 1px solid #BBF7D0; color: #15803D; }
-
-  .ai-start-btn {
-    width: 100%; padding: 0.6875rem; border-radius: 10px;
-    background: linear-gradient(135deg, #6366F1, #4F46E5); color: white;
-    border: none; font-family: inherit; font-size: 0.875rem; font-weight: 700;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-    box-shadow: 0 3px 14px rgba(99,102,241,0.35); transition: all 0.2s;
+  .q-pill {
+    padding:5px 14px;border-radius:20px;font-size:0.8125rem;font-weight:600;
+    border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-2);
+    cursor:pointer;transition:all 0.15s;font-family:inherit
   }
-  .ai-start-btn:hover { box-shadow: 0 6px 22px rgba(99,102,241,0.5); transform: translateY(-1px); }
-  .ai-start-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .q-pill.active { background:#6366F1;color:white;border-color:#6366F1 }
 
-  .ai-hist-item {
-    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-    border-radius: 11px; border: 1px solid var(--ui-border); background: var(--ui-surface);
-    margin-bottom: 6px; transition: all 0.15s;
+  .hint-btn {
+    padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;
+    border:1.5px solid #BAE6FD;background:#F0F9FF;color:#0369A1;
+    cursor:pointer;transition:all 0.15s;font-family:inherit
   }
-  .ai-hist-item:hover { border-color: var(--ui-border-2); }
+  .hint-btn:hover { background:#0369A1;color:white;border-color:#0369A1 }
+  .hint-btn:disabled { opacity:0.4;cursor:not-allowed }
 
-  @media (max-width: 768px) {
-    .app-content > div:last-child > div { grid-template-columns: 1fr !important; }
+  .exam-option {
+    display:flex;align-items:stretch;width:100%;
+    background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:12px;
+    cursor:pointer;transition:all 0.18s;text-align:left;font-family:inherit;overflow:hidden;
+    animation:fadeUp 0.2s ease both
+  }
+  .exam-option:hover:not(.selected):not(:disabled) {
+    border-color:#6366F1;background:rgba(99,102,241,0.03);transform:translateX(3px)
+  }
+  .exam-option.selected { border-color:#6366F1;background:rgba(99,102,241,0.05);animation:selectPop 0.25s ease }
+  .exam-option.correct { border-color:#059669 !important;background:#F0FDF4 !important }
+  .exam-option.wrong   { border-color:#DC2626 !important;background:#FEF2F2 !important }
+  .exam-option:disabled { cursor:not-allowed }
+
+  .opt-letter {
+    width:52px;min-width:52px;display:flex;align-items:center;justify-content:center;
+    background:var(--ui-surface);border-right:1.5px solid var(--ui-border);flex-shrink:0;
+    transition:all 0.18s
+  }
+  .exam-option.selected .opt-letter { background:#6366F1;border-right-color:rgba(99,102,241,0.3) }
+  .exam-option.correct  .opt-letter { background:#059669;border-right-color:#059669 }
+  .exam-option.wrong    .opt-letter { background:#DC2626;border-right-color:#DC2626 }
+
+  .opt-badge {
+    width:28px;height:28px;border-radius:7px;border:1.5px solid var(--ui-border-2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.75rem;font-weight:800;color:var(--ui-text-2);background:var(--ui-card);
+  }
+  .exam-option.selected .opt-badge,
+  .exam-option.correct  .opt-badge,
+  .exam-option.wrong    .opt-badge { background:rgba(255,255,255,0.25);border-color:transparent;color:white }
+
+  .opt-body { flex:1;padding:0.9375rem 1rem;display:flex;align-items:center }
+  .opt-text { font-size:0.9375rem;color:var(--ui-text-2);line-height:1.65;margin:0;transition:color 0.18s }
+  .exam-option.selected .opt-text { color:var(--ui-text-1);font-weight:600 }
+
+  .hist-item {
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+    border:1px solid var(--ui-border);background:var(--ui-surface);margin-bottom:6px;
+  }
+
+  @media (max-width:768px) {
+    #view-setup > div:last-of-type > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr!important }
+    #view-setup > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr!important }
   }
 </style>
 
 <script>
-  import { requireAuth } from '../../lib/auth';
-  import { competencesApi } from '../../lib/api/competences.api';
-  import { aiTriedsApi }    from '../../lib/api/ai-trieds.api';
-  import type { AiTriedDto, CompetenceDto } from '../../lib/api/types';
-  import { getCompStyle, fmtDate, fmtDuration, scoreColor } from '../../lib/utils';
+  import { requireAuth }      from '../../lib/auth';
+  import { competencesApi }   from '../../lib/api/competences.api';
+  import { aiTriedsApi }      from '../../lib/api/ai-trieds.api';
+  import type { AiQuestionDto, AiTriedDto } from '../../lib/api/types';
+  import { fmtDate, scoreColor } from '../../lib/utils';
   import { toast } from '../../lib/toast';
 
   try { requireAuth(); } catch { throw new Error('redirect'); }
 
-  let competences: CompetenceDto[] = [];
-  let aiSessions:  AiTriedDto[]    = [];
-  let activeTriedId: string | null = null;
-  let activeStart:   number        = 0;
-  let timerInterval: ReturnType<typeof setInterval> | null = null;
+  const LETTERS = ['A','B','C','D','E','F'];
 
-  // Load competences
-  competencesApi.findAll(true).then(res => {
-    competences = res.data ?? [];
-    const sel   = document.getElementById('ai-comp') as HTMLSelectElement;
-    sel.innerHTML = '<option value="">— Selecciona competencia —</option>';
-    competences.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.competenceId; opt.textContent = c.competenceName;
-      sel.appendChild(opt);
-    });
-  }).catch(() => {});
+  // ── Estado global ─────────────────────────────────────────────────
+  let currentTriedId    = '';
+  let currentQuestion:  AiQuestionDto | null = null;
+  let answeredCount     = 0;
+  let correctCount      = 0;
+  let totalQuestions    = 10;
+  let selectedCompId    = '';
+  let selectedCompName  = '';
+  let selectedQ         = 10;
+  let questionAnswered  = false;
+  let sessionStartTime  = 0;
+  let aiEnabled         = false;
 
-  // Load history
-  function loadHistory() {
-    aiTriedsApi.findMy(0, 50).then(res => {
-      aiSessions = res.data?.content ?? [];
-      renderHistory();
-    }).catch(() => {});
-  }
-
-  function renderHistory() {
-    const list   = document.getElementById('ai-history-list')!;
-    const countEl = document.getElementById('ai-count')!;
-    countEl.textContent = `${aiSessions.length} sesión(es)`;
-
-    list.innerHTML = '';
-    if (aiSessions.length === 0) {
-      list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem 0">Sin sesiones aún.</p>';
-      return;
-    }
-
-    aiSessions.slice(0, 10).forEach(s => {
-      const sc = scoreColor(s.score);
-      const statusColor: Record<string, string> = { FINISHED: '#059669', IN_PROGRESS: '#6366F1', ABANDONED: '#DC2626' };
-      const statusLabel: Record<string, string> = { FINISHED: 'Finalizada', IN_PROGRESS: 'En progreso', ABANDONED: 'Abandonada' };
-
-      const div = document.createElement('div');
-      div.className = 'ai-hist-item';
-      div.innerHTML = `
-        <div style="width:36px;height:36px;border-radius:9px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="16" height="16" fill="none" stroke="#818CF8" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
-        </div>
-        <div style="flex:1;min-width:0">
-          <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.description ?? 'Sesión de práctica'}</p>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <span style="font-size:0.6875rem;font-weight:700;padding:2px 7px;border-radius:12px;background:${statusColor[s.status] ?? '#6B7280'}18;color:${statusColor[s.status] ?? '#6B7280'}">${statusLabel[s.status] ?? s.status}</span>
-            <span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(s.attemptTimestamp)}</span>
-          </div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          ${s.score != null
-            ? `<p style="font-size:1rem;font-weight:900;color:${sc};margin:0">${s.score.toFixed(0)}</p><p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">/100</p>`
-            : `<p style="font-size:0.75rem;color:var(--ui-text-3);margin:0">${s.totalQuestions} preg.</p>`}
-        </div>`;
-      list.appendChild(div);
+  // ── Vistas ────────────────────────────────────────────────────────
+  function showView(name: 'setup' | 'loading' | 'question' | 'results') {
+    ['setup','loading','question','results'].forEach(v => {
+      const el = document.getElementById(`view-${v}`)!;
+      el.style.display = v === name ? (v === 'loading' ? 'flex' : 'block') : 'none';
     });
   }
 
-  // Session timer
-  function startTimer() {
-    activeStart = Date.now();
-    timerInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - activeStart) / 1000);
-      const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
-      const s = (elapsed % 60).toString().padStart(2, '0');
-      const timerEl = document.getElementById('active-timer');
-      if (timerEl) timerEl.textContent = `${m}:${s}`;
-    }, 1000);
-  }
+  // ── Verificar estado IA ───────────────────────────────────────────
+  async function checkAiStatus() {
+    try {
+      const res = await aiTriedsApi.status();
+      const s   = res.data!;
+      aiEnabled = s.enabled && s.reachable;
 
-  function stopTimer() {
-    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  }
+      const banner   = document.getElementById('ai-status-banner')!;
+      const titleEl  = document.getElementById('status-title')!;
+      const msgEl    = document.getElementById('status-msg')!;
+      const spinner  = document.getElementById('status-spinner')!;
+      const check    = document.getElementById('status-check')!;
+      const xIcon    = document.getElementById('status-x')!;
+      const icon     = document.getElementById('status-icon')!;
+      const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
 
-  // Show/hide forms
-  function setActiveSession(id: string | null, desc?: string) {
-    activeTriedId = id;
-    const startForm   = document.getElementById('start-ai-btn')!;
-    const activeDiv   = document.getElementById('active-session')!;
-    const activeDescEl = document.getElementById('active-desc')!;
-    if (id) {
-      startForm.setAttribute('disabled', '');
-      activeDiv.style.display = 'block';
-      activeDescEl.textContent = desc ?? '';
-      startTimer();
-    } else {
-      startForm.removeAttribute('disabled');
-      activeDiv.style.display = 'none';
-      stopTimer();
+      spinner.style.display = 'none';
+
+      if (aiEnabled) {
+        check.style.display = 'inline';
+        banner.style.cssText += ';background:#F0FDF4;border-color:#A7F3D0';
+        icon.style.background = '#D1FAE5';
+        titleEl.textContent = `IA activa — Modelo: ${s.model}`;
+        titleEl.style.color = '#059669';
+        msgEl.textContent   = s.message;
+      } else {
+        xIcon.style.display = 'inline';
+        banner.style.cssText += ';background:#FEF2F2;border-color:#FECACA';
+        icon.style.background = '#FEE2E2';
+        titleEl.textContent = 'IA no disponible';
+        titleEl.style.color = '#DC2626';
+        msgEl.textContent   = s.message;
+        startBtn.disabled = true;
+        startBtn.style.opacity = '0.5';
+        startBtn.style.cursor  = 'not-allowed';
+      }
+    } catch (err) {
+      const msgEl = document.getElementById('status-msg')!;
+      msgEl.textContent = 'No se pudo verificar el estado del módulo IA.';
     }
   }
 
-  // Msg helpers
-  function showMsg(type: 'error' | 'success', text: string) {
-    const el = document.getElementById('session-msg')!;
-    el.textContent = text; el.className = `session-msg ${type}`; el.style.display = 'block';
-    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  // ── Cargar competencias ───────────────────────────────────────────
+  async function loadCompetences() {
+    const sel = document.getElementById('setup-comp') as HTMLSelectElement;
+    try {
+      const res = await competencesApi.findAll(true);
+      sel.innerHTML = '<option value="">— Selecciona una competencia —</option>';
+      (res.data ?? []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.competenceId;
+        opt.textContent = c.competenceName;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', () => {
+        const opt = sel.options[sel.selectedIndex];
+        selectedCompId   = opt.value;
+        selectedCompName = opt.text;
+        validateSetup();
+      });
+    } catch { sel.innerHTML = '<option value="">Error al cargar competencias</option>'; }
   }
 
-  // Start
-  document.getElementById('start-ai-btn')?.addEventListener('click', async () => {
-    const compId = (document.getElementById('ai-comp') as HTMLSelectElement).value;
-    const q      = Number((document.getElementById('ai-qcount') as HTMLInputElement).value);
-    const desc   = (document.getElementById('ai-desc') as HTMLInputElement).value.trim() || undefined;
+  // ── Configuración de preguntas ────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.q-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.q-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedQ = Number(btn.dataset.q);
+      validateSetup();
+    });
+  });
 
-    if (!compId) { showMsg('error', 'Selecciona una competencia.'); return; }
-    if (q < 1 || q > 20) { showMsg('error', 'El número de preguntas debe estar entre 1 y 20.'); return; }
+  // Activar 10 por defecto
+  document.querySelector<HTMLButtonElement>('.q-pill[data-q="10"]')?.classList.add('active');
+
+  function validateSetup() {
+    const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
+    if (aiEnabled && selectedCompId && selectedQ > 0) {
+      startBtn.disabled = false;
+      startBtn.style.opacity = '1';
+    }
+  }
+
+  // ── Iniciar sesión ────────────────────────────────────────────────
+  document.getElementById('start-btn')?.addEventListener('click', async () => {
+    if (!selectedCompId) { toast.warning('Selecciona una competencia'); return; }
+
+    const desc = (document.getElementById('setup-desc') as HTMLInputElement).value.trim() || undefined;
+    const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
+    startBtn.disabled = true;
+
+    showView('loading');
+    (document.getElementById('loading-title') as HTMLElement).textContent =
+      'Iniciando sesión y generando primera pregunta...';
 
     try {
-      const res = await aiTriedsApi.start(compId, q, desc);
-      if (res.data) {
-        setActiveSession(res.data.aiTriedId, desc ?? `${q} preguntas · ${competences.find(c => c.competenceId === compId)?.competenceName ?? compId}`);
-        toast.success('Sesión iniciada', { description: 'Tu práctica con IA ha comenzado.' });
+      const res = await aiTriedsApi.start(selectedCompId, selectedQ, desc);
+      if (!res.data) throw new Error('Sin datos de respuesta');
+
+      currentTriedId   = res.data.tried.aiTriedId;
+      totalQuestions   = selectedQ;
+      answeredCount    = 0;
+      correctCount     = 0;
+      questionAnswered = false;
+      sessionStartTime = Date.now();
+
+      // Actualizar chip de competencia
+      (document.getElementById('q-comp-chip') as HTMLElement).textContent = selectedCompName;
+
+      renderQuestion(res.data.firstQuestion);
+      showView('question');
+    } catch (err: any) {
+      showView('setup');
+      startBtn.disabled = false;
+      const errEl = document.getElementById('setup-error')!;
+      errEl.textContent  = err?.message ?? 'Error al iniciar la sesión. Verifica que Ollama esté corriendo.';
+      errEl.style.display = 'block';
+    }
+  });
+
+  // ── Renderizar pregunta ───────────────────────────────────────────
+  function renderQuestion(q: AiQuestionDto) {
+    currentQuestion  = q;
+    questionAnswered = false;
+
+    // Header
+    updateProgressUI(q.questionNumber, q.totalQuestions);
+
+    // Dificultad
+    const diffChip = document.getElementById('q-diff-chip')!;
+    diffChip.textContent = `Dif. ${q.difficultyLevel}/10`;
+    const dColor = q.difficultyLevel <= 3 ? '#059669' : q.difficultyLevel <= 7 ? '#D97706' : '#DC2626';
+    const dBg    = q.difficultyLevel <= 3 ? '#D1FAE5' : q.difficultyLevel <= 7 ? '#FEF3C7' : '#FEE2E2';
+    diffChip.style.color      = dColor;
+    diffChip.style.background = dBg;
+
+    // Enunciado
+    (document.getElementById('q-statement') as HTMLElement).textContent = q.statement;
+
+    // Opciones
+    const optsEl = document.getElementById('q-options')!;
+    optsEl.innerHTML = '';
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'exam-option';
+      btn.style.animationDelay = `${i * 0.06}s`;
+      btn.innerHTML = `
+        <div class="opt-letter"><span class="opt-badge">${LETTERS[i]}</span></div>
+        <div class="opt-body"><p class="opt-text">${opt.text}</p></div>`;
+      btn.addEventListener('click', () => selectOption(opt.id, i));
+      optsEl.appendChild(btn);
+    });
+
+    // Feedback y action
+    document.getElementById('feedback-box')!.style.display = 'none';
+    document.getElementById('action-btn')!.style.display   = 'none';
+    document.getElementById('hint-box')!.style.display     = 'none';
+
+    // Habilitar pistas
+    document.querySelectorAll<HTMLButtonElement>('.hint-btn').forEach(b => b.disabled = false);
+  }
+
+  function updateProgressUI(num: number, total: number) {
+    (document.getElementById('q-progress-label') as HTMLElement).textContent = `${num} / ${total}`;
+    (document.getElementById('q-progress-bar')   as HTMLElement).style.width =
+      `${Math.round((num / total) * 100)}%`;
+    (document.getElementById('q-score-inline') as HTMLElement).textContent =
+      `${correctCount} corresta${correctCount !== 1 ? 's' : ''}`;
+  }
+
+  // ── Seleccionar opción ────────────────────────────────────────────
+  async function selectOption(optionId: string, optIndex: number) {
+    if (questionAnswered || !currentQuestion) return;
+    questionAnswered = true;
+
+    // Marcar seleccionada visualmente
+    const allBtns = document.querySelectorAll<HTMLButtonElement>('.exam-option');
+    allBtns[optIndex].classList.add('selected');
+    allBtns.forEach(b => (b as HTMLButtonElement).disabled = true);
+    document.querySelectorAll<HTMLButtonElement>('.hint-btn').forEach(b => b.disabled = true);
+
+    // Enviar al servidor
+    showView('loading');
+    (document.getElementById('loading-title') as HTMLElement).textContent = 'Evaluando respuesta...';
+
+    try {
+      const res = await aiTriedsApi.submitAnswer(
+        currentTriedId, currentQuestion!.questionId, optionId);
+      const result = res.data!;
+
+      answeredCount = result.totalAnswered;
+      if (result.isCorrect) correctCount = result.correctAnswers;
+      (document.getElementById('q-score-inline') as HTMLElement).textContent =
+        `${result.correctAnswers} correcta${result.correctAnswers !== 1 ? 's' : ''}`;
+
+      // Mostrar vista de pregunta con feedback
+      showView('question');
+
+      // Colorear opciones
+      const correctIdx = parseInt(result.correctOptionId.replace('OPT', ''));
+      allBtns[optIndex].classList.remove('selected');
+      allBtns[optIndex].classList.add(result.isCorrect ? 'correct' : 'wrong');
+      allBtns[optIndex].querySelector('.opt-badge')!.textContent = result.isCorrect ? '✓' : '✗';
+      if (!result.isCorrect) {
+        allBtns[correctIdx].classList.add('correct');
+        allBtns[correctIdx].querySelector('.opt-badge')!.textContent = '✓';
+      }
+
+      // Feedback box
+      const fbBox   = document.getElementById('feedback-box')!;
+      const fbIcon  = document.getElementById('feedback-icon')!;
+      const fbTitle = document.getElementById('feedback-title')!;
+      const fbExp   = document.getElementById('feedback-explanation')!;
+      fbBox.style.display      = 'block';
+      fbBox.style.background   = result.isCorrect ? '#F0FDF4' : '#FEF2F2';
+      fbBox.style.border       = `1px solid ${result.isCorrect ? '#A7F3D0' : '#FECACA'}`;
+      fbIcon.textContent        = result.isCorrect ? '✅' : '❌';
+      fbTitle.textContent       = result.isCorrect ? '¡Correcto!' : 'Respuesta incorrecta';
+      fbExp.textContent         = result.explanation || 'Sin explicación disponible.';
+
+      // Botón de acción
+      const actionBtn = document.getElementById('action-btn') as HTMLButtonElement;
+      actionBtn.style.display = 'inline-flex';
+
+      if (result.finished) {
+        actionBtn.textContent = 'Ver resultados finales 🏆';
+        actionBtn.onclick     = () => showResults(result.finalScore ?? 0, result.correctAnswers, result.totalQuestions);
+      } else {
+        actionBtn.textContent = 'Siguiente pregunta →';
+        actionBtn.onclick     = fetchNextQuestion;
       }
     } catch (err: any) {
-      showMsg('error', err?.message ?? 'Error al iniciar la sesión.');
+      showView('question');
+      toast.error('Error al enviar respuesta', { description: err?.message });
+      questionAnswered = false; // Permitir reintentar
+      allBtns.forEach(b => (b as HTMLButtonElement).disabled = false);
     }
-  });
+  }
 
-  // Finish
-  document.getElementById('finish-ai-btn')?.addEventListener('click', async () => {
-    if (!activeTriedId) return;
-    const elapsed = Math.round((Date.now() - activeStart) / 1000);
+  // ── Siguiente pregunta ────────────────────────────────────────────
+  async function fetchNextQuestion() {
+    showView('loading');
+    (document.getElementById('loading-title') as HTMLElement).textContent =
+      'Generando siguiente pregunta adaptativa...';
     try {
-      await aiTriedsApi.finish(activeTriedId, elapsed);
-      setActiveSession(null);
-      toast.success('Sesión finalizada');
-      loadHistory();
+      const res = await aiTriedsApi.nextQuestion(currentTriedId);
+      renderQuestion(res.data!);
+      showView('question');
     } catch (err: any) {
-      toast.error('Error al finalizar', { description: err?.message });
+      showView('question');
+      toast.error('Error al obtener siguiente pregunta', { description: err?.message });
     }
+  }
+
+  // ── Pistas ────────────────────────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.hint-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!currentQuestion || questionAnswered) return;
+      const level  = Number(btn.dataset.level);
+      const hintBox    = document.getElementById('hint-box')!;
+      const hintText   = document.getElementById('hint-text')!;
+      const hintLoading = document.getElementById('hint-loading')!;
+
+      hintBox.style.display     = 'block';
+      hintLoading.style.display = 'block';
+      hintText.textContent      = '';
+
+      try {
+        const res = await aiTriedsApi.getHint(
+          currentTriedId, currentQuestion.questionId, level);
+        hintText.textContent      = res.data!.hint;
+        hintLoading.style.display = 'none';
+      } catch (err: any) {
+        hintText.textContent      = 'No se pudo generar la pista en este momento.';
+        hintLoading.style.display = 'none';
+        toast.error('Error al obtener pista', { description: err?.message });
+      }
+    });
   });
 
-  // Abandon
-  document.getElementById('abandon-ai-btn')?.addEventListener('click', async () => {
-    if (!activeTriedId || !confirm('¿Abandonar la sesión?')) return;
-    const elapsed = Math.round((Date.now() - activeStart) / 1000);
+  // ── Abandonar ─────────────────────────────────────────────────────
+  document.getElementById('abandon-btn')?.addEventListener('click', async () => {
+    if (!confirm('¿Abandonar la sesión? Tu progreso se guardará.')) return;
     try {
-      await aiTriedsApi.finish(activeTriedId, elapsed);
-      setActiveSession(null);
-      toast.info('Sesión abandonada');
-      loadHistory();
+      const elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
+      await aiTriedsApi.finish(currentTriedId, elapsed);
     } catch {}
+    showView('setup');
+    loadHistory();
+    toast.info('Sesión abandonada');
   });
 
+  // ── Resultados ────────────────────────────────────────────────────
+  function showResults(score: number, correct: number, total: number) {
+    const wrong = total - correct;
+    const sc    = scoreColor(score);
+
+    const iconEl = document.getElementById('result-icon')!;
+    iconEl.textContent    = score >= 80 ? '🏆' : score >= 60 ? '🎯' : '💪';
+    iconEl.style.background = score >= 80 ? '#D1FAE5' : score >= 60 ? '#FEF3C7' : '#FEE2E2';
+
+    // Animar puntaje
+    const scoreEl = document.getElementById('result-score')!;
+    scoreEl.style.color = sc;
+    let n = 0;
+    scoreEl.textContent = '0';
+    const step = Math.max(1, Math.floor(score / 60));
+    const intv = setInterval(() => {
+      n = Math.min(n + step, Math.round(score));
+      scoreEl.textContent = String(n);
+      if (n >= Math.round(score)) clearInterval(intv);
+    }, 20);
+
+    (document.getElementById('res-correct') as HTMLElement).textContent = String(correct);
+    (document.getElementById('res-wrong')   as HTMLElement).textContent = String(wrong);
+    (document.getElementById('res-total')   as HTMLElement).textContent = String(total);
+
+    (document.getElementById('result-msg') as HTMLElement).textContent = score >= 80
+      ? '¡Excelente! Tienes un dominio sólido de esta competencia.'
+      : score >= 60
+      ? '¡Buen trabajo! Sigue practicando para alcanzar la excelencia.'
+      : '¡No te rindas! Revisa los conceptos y vuelve a practicar.';
+
+    showView('results');
+    loadHistory();
+  }
+
+  document.getElementById('result-new-btn')?.addEventListener('click', () => {
+    showView('setup');
+    currentTriedId   = '';
+    currentQuestion  = null;
+    answeredCount    = 0;
+    correctCount     = 0;
+    questionAnswered = false;
+  });
+
+  // ── Historial ─────────────────────────────────────────────────────
+  async function loadHistory() {
+    const list    = document.getElementById('hist-list')!;
+    const countEl = document.getElementById('hist-count')!;
+    try {
+      const res = await aiTriedsApi.findMy(0, 8);
+      const items = res.data?.content ?? [];
+      countEl.textContent = `${res.data?.totalElements ?? 0} sesión(es)`;
+
+      if (!items.length) {
+        list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1rem">Sin sesiones. ¡Empieza ahora!</p>';
+        return;
+      }
+
+      list.innerHTML = '';
+      const statusLabel: Record<string,string> = {
+        FINISHED:'Finalizada', IN_PROGRESS:'En progreso', ABANDONED:'Abandonada'
+      };
+      const statusColor: Record<string,string> = {
+        FINISHED:'#059669', IN_PROGRESS:'#6366F1', ABANDONED:'#DC2626'
+      };
+
+      items.forEach((s: AiTriedDto) => {
+        const sc = scoreColor(s.score ?? 0);
+        const div = document.createElement('div');
+        div.className = 'hist-item';
+        div.innerHTML = `
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" fill="none" stroke="#818CF8" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.description ?? 'Sesión de práctica'}</p>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:0.6875rem;font-weight:700;padding:1px 7px;border-radius:12px;background:${statusColor[s.status] ?? '#6B7280'}18;color:${statusColor[s.status] ?? '#6B7280'}">${statusLabel[s.status] ?? s.status}</span>
+              <span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(s.attemptTimestamp)}</span>
+              <span style="font-size:0.6875rem;color:var(--ui-text-3)">${s.totalQuestions} preg.</span>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            ${s.score != null
+              ? `<p style="font-size:1rem;font-weight:900;color:${sc};margin:0">${s.score.toFixed(0)}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">/100</p>`
+              : `<p style="font-size:0.75rem;color:var(--ui-text-3);margin:0">${s.correctAnswers ?? 0}/${s.totalQuestions}</p>`
+            }
+          </div>`;
+        list.appendChild(div);
+      });
+    } catch {
+      list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1rem">Error al cargar historial</p>';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────
+  showView('setup');
+  checkAiStatus();
+  loadCompetences();
   loadHistory();
 </script>

@@ -187,3 +187,49 @@ export interface TriedReviewDto {
   finishedAt?: string;
   questions: QuestionReview[];
 }
+
+// ── AI Trieds (nueva versión) ──────────────────────────────────────────
+
+export interface AiStatusDto {
+  enabled:   boolean;
+  provider:  string;
+  model:     string;
+  reachable: boolean;
+  message:   string;
+}
+
+export interface AiOptionDto {
+  id:   string;  // "OPT0", "OPT1", etc.
+  text: string;
+}
+
+export interface AiQuestionDto {
+  questionId:      string;
+  statement:       string;
+  options:         AiOptionDto[];
+  difficultyLevel: number;
+  questionNumber:  number;
+  totalQuestions:  number;
+}
+
+export interface AiStartResponseDto {
+  tried:         AiTriedDto;
+  firstQuestion: AiQuestionDto;
+}
+
+export interface AiAnswerResultDto {
+  isCorrect:        boolean;
+  selectedOptionId: string;
+  correctOptionId:  string;
+  explanation:      string;
+  correctAnswers:   number;
+  totalAnswered:    number;
+  totalQuestions:   number;
+  finished:         boolean;
+  finalScore:       number | null;
+}
+
+export interface AiHintDto {
+  hint:      string;
+  hintLevel: number;
+}
