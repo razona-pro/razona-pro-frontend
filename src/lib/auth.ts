@@ -3,6 +3,8 @@ const USER_KEY  = 'rp_user';
 const LOGOUT_EVENT = 'rp_logout'; // BroadcastChannel event name
 
 export interface StoredUser {
+[x: string]: any;
+[x: string]: any;
   id: string;
   programId?: string;
   email: string;

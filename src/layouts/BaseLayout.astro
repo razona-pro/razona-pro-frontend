@@ -21,7 +21,6 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} · RazonaPro</title>
 
-    <!-- Anti-FOUC: apply saved a11y prefs before first paint -->
     <script is:inline>
       (function () {
         try {
@@ -46,7 +45,33 @@ const {
   </head>
 
   <body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Global async loading overlay -->
+    <div id="rp-global-loader" role="status" aria-label="Procesando" aria-live="polite">
+      <div class="rp-loader-card">
+        <div class="rp-loader-ring"></div>
+        <p id="rp-loader-msg" class="rp-loader-text">Procesando...</p>
+      </div>
+    </div>
+
     <slot />
     <AccessibilityWidget />
+
+    <script is:inline>
+      window.rpLoader = {
+        show: function(msg) {
+          var el  = document.getElementById('rp-global-loader');
+          var txt = document.getElementById('rp-loader-msg');
+          if (txt) txt.textContent = msg || 'Procesando...';
+          if (el) el.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        },
+        hide: function() {
+          var el = document.getElementById('rp-global-loader');
+          if (el) el.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      };
+    </script>
   </body>
 </html>

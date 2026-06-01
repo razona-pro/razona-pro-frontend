@@ -152,6 +152,7 @@ export interface AiTriedDto {
   description?: string;
   attemptTimestamp: string;
   finishedAt?: string;
+  totalAnswered?: number;
 }
 
 export interface OptionReview {
@@ -233,6 +234,9 @@ export interface AiAnswerResultDto {
   totalQuestions:  number;
   finished:        boolean;
   finalScore:      number | null;
+  earnedPoints?:   number;
+  maxPoints?:      number;
+  nextDifficulty?: number;
 }
 
 export interface AiHintDto {

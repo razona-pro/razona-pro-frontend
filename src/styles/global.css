@@ -20,7 +20,7 @@
 @import "tailwindcss";
 
 /* ── 3. Tailwind theme tokens ────────────────────────────── */
-@theme {
+:root {
   --font-family-sans: 'Poppins', system-ui, -apple-system, sans-serif;
   --color-brand:       #D41224;
   --color-brand-dark:  #9B1F24;
@@ -33,7 +33,7 @@
    --brand-*    → UFPSO. INMUTABLES.
    --ui-*       → UI. MUTABLES con temas.
    --sidebar-*  → Sidebar. CLARO por defecto.
-═══════════════════════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════ */
 :root {
   /* Brand UFPSO — NUNCA cambian */
   --brand:       #D41224;
@@ -532,4 +532,92 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   GLOBAL ASYNC LOADER
+══════════════════════════════════════════════════════════════════ */
+#rp-global-loader {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  z-index: 9970;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+#rp-global-loader.active {
+  opacity: 1; pointer-events: all;
+}
+.rp-loader-card {
+  background: var(--ui-card, #fff);
+  border-radius: 18px;
+  padding: 2.25rem 3rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1.125rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  min-width: 200px; text-align: center;
+}
+.rp-loader-ring {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 3.5px solid rgba(212,18,36,0.15);
+  border-top-color: #D41224;
+  animation: spin 0.85s linear infinite;
+}
+.rp-loader-text {
+  font-size: 0.9375rem; font-weight: 600;
+  color: var(--ui-text-1, #1A1A1A); margin: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANTI-FRAUDE EXÁMENES
+══════════════════════════════════════════════════════════════════ */
+.exam-antifraud {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.exam-antifraud ::selection { background: transparent; }
+.exam-antifraud img { pointer-events: none; }
+
+/* Aviso de tab perdido */
+.tab-warning-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9900;
+  background: #D97706; color: #fff;
+  padding: 10px 20px; text-align: center;
+  font-size: 0.875rem; font-weight: 600;
+  animation: slideDown 0.3s ease;
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MEJORAS GENERALES COMPONENTES
+══════════════════════════════════════════════════════════════════ */
+/* Transiciones suaves para cards */
+.card-ui, .test-card, .profile-card {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s, background 0.25s;
+}
+
+/* Mejorar scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--ui-border-2) transparent; }
+*::-webkit-scrollbar { width: 5px; height: 5px; }
+*::-webkit-scrollbar-thumb { background: var(--ui-border-2); border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+
+/* Focus ring mejorado */
+:focus-visible {
+  outline: 2.5px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Animación de entrada para modales/overlays */
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(0.93) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }

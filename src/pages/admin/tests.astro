@@ -125,6 +125,43 @@ import AppLayout from '../../layouts/AppLayout.astro';
   </div>
 </div>
 
+<!-- Modal: Asociar preguntas a test recién creado -->
+<div id="assoc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:600;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;width:100%;max-width:700px;overflow:hidden;animation:cardIn 0.3s ease both;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
+
+    <!-- Header -->
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 2px">Asociar preguntas</h3>
+        <p id="assoc-test-name" style="font-size:0.75rem;color:var(--ui-text-3);margin:0"></p>
+      </div>
+      <button id="assoc-close" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--ui-border);background:var(--ui-surface);cursor:pointer;color:var(--ui-text-2);font-size:1rem;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+
+    <!-- Filtros -->
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--ui-border);display:flex;gap:10px;flex-wrap:wrap">
+      <select id="assoc-filter-comp" style="flex:1;min-width:180px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-surface);font-family:inherit;font-size:0.8125rem;color:var(--ui-text-1)">
+        <option value="">Todas las competencias</option>
+      </select>
+      <input id="assoc-search" type="text" placeholder="Buscar por enunciado..." style="flex:2;min-width:200px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-surface);font-family:inherit;font-size:0.8125rem;color:var(--ui-text-1)"/>
+    </div>
+
+    <!-- Lista de preguntas -->
+    <div id="assoc-question-list" style="max-height:380px;overflow-y:auto;padding:0.75rem 1.5rem;display:flex;flex-direction:column;gap:6px">
+      <p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Cargando preguntas...</p>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:1rem 1.5rem;border-top:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between">
+      <span id="assoc-selected-count" style="font-size:0.8125rem;color:var(--ui-text-3)">0 preguntas seleccionadas</span>
+      <div style="display:flex;gap:8px">
+        <button id="assoc-skip" style="padding:0.5rem 1rem;border-radius:9px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-2);font-family:inherit;font-weight:600;font-size:0.8125rem;cursor:pointer">Omitir</button>
+        <button id="assoc-save" style="padding:0.5rem 1.25rem;border-radius:9px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.8125rem;cursor:pointer;box-shadow:0 3px 10px rgba(212,18,36,0.25)">Asociar seleccionadas</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal desactivar -->
 <div id="deactivate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:360px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
@@ -156,6 +193,17 @@ import AppLayout from '../../layouts/AppLayout.astro';
   import { competencesApi } from '../../lib/api/competences.api';
   import { toast }          from '../../lib/toast';
   import type { TestDto }   from '../../lib/api/types';
+
+  const apiBase = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080';
+
+declare global {
+  interface Window {
+    rpLoader?: {
+      show: (message?: string) => void;
+      hide: () => void;
+    };
+  }
+}
 
   try {
     requireAuth();
@@ -321,6 +369,157 @@ import AppLayout from '../../layouts/AppLayout.astro';
       deactivateModal.style.display = 'none';
     }
   });
+  // ── Asociar preguntas ──────────────────────────────────────────────────
+let assocTestId  = '';
+let assocSelected = new Set<string>();
+let allQuestions: any[] = [];
+
+function openAssocModal(testId: string, testName: string) {
+  assocTestId = testId;
+  assocSelected.clear();
+  document.getElementById('assoc-test-name')!.textContent = testName;
+  document.getElementById('assoc-modal')!.style.display   = 'flex';
+  document.getElementById('assoc-selected-count')!.textContent = '0 preguntas seleccionadas';
+  loadAssocQuestions();
+}
+
+async function loadAssocQuestions() {
+  const list = document.getElementById('assoc-question-list')!;
+  list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Cargando...</p>';
+
+  try {
+    // Cargar preguntas del banco (todas, para asociar)
+    const res = await fetch(`${apiBase}/api/questions?page=0&size=200`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('rp_token')}` }
+    });
+    const json = await res.json();
+    allQuestions = json.data?.content ?? json.data ?? [];
+
+    // Cargar competencias para el filtro
+    const compRes = await fetch(`${apiBase}/api/competences?active=true`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('rp_token')}` }
+    });
+    const compJson = await compRes.json();
+    const comps    = compJson.data ?? [];
+    const compSel  = document.getElementById('assoc-filter-comp') as HTMLSelectElement;
+    compSel.innerHTML = '<option value="">Todas las competencias</option>';
+    comps.forEach((c: any) => {
+      const opt = document.createElement('option');
+      opt.value = c.competenceId;
+      opt.textContent = c.competenceName;
+      compSel.appendChild(opt);
+    });
+
+    renderAssocList(allQuestions);
+  } catch (err) {
+    list.innerHTML = '<p style="color:#DC2626;text-align:center;padding:1.5rem;font-size:0.875rem">Error al cargar las preguntas</p>';
+  }
+}
+
+function renderAssocList(questions: any[]) {
+  const list = document.getElementById('assoc-question-list')!;
+  const search = (document.getElementById('assoc-search') as HTMLInputElement).value.toLowerCase();
+  const compFilter = (document.getElementById('assoc-filter-comp') as HTMLSelectElement).value;
+
+  const filtered = questions.filter(q => {
+    const matchComp   = !compFilter || q.competenceId === compFilter;
+    const matchSearch = !search || q.statement?.toLowerCase().includes(search);
+    return matchComp && matchSearch;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">No se encontraron preguntas.</p>';
+    return;
+  }
+
+  list.innerHTML = '';
+  filtered.forEach(q => {
+    const checked = assocSelected.has(q.questionId);
+    const row = document.createElement('label');
+    row.style.cssText = `display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid ${checked ? 'var(--brand)' : 'var(--ui-border)'};background:${checked ? 'rgba(212,18,36,0.04)' : 'var(--ui-surface)'};cursor:pointer;transition:all 0.15s`;
+
+    const diffMap: Record<string, string> = { B: 'Básico', M: 'Medio', A: 'Alto' };
+    const diffColors: Record<string, string> = { B: '#059669', M: '#D97706', A: '#DC2626' };
+    const diff = q.difficultyLevel ?? 'M';
+
+    row.innerHTML = `
+      <input type="checkbox" data-qid="${q.questionId}" ${checked ? 'checked' : ''}
+        style="margin-top:3px;accent-color:var(--brand);width:15px;height:15px;flex-shrink:0" />
+      <div style="flex:1;min-width:0">
+        <p style="font-size:0.8125rem;color:var(--ui-text-1);margin:0 0 4px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
+          ${q.statement ?? 'Sin enunciado'}
+        </p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(212,18,36,0.1);color:var(--brand)">${q.competenceName ?? ''}</span>
+          <span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:10px;color:${diffColors[diff]};background:${diffColors[diff]}1A">${diffMap[diff] ?? diff}</span>
+        </div>
+      </div>`;
+
+    row.querySelector('input')?.addEventListener('change', (e) => {
+      const chk = e.target as HTMLInputElement;
+      if (chk.checked) assocSelected.add(q.questionId);
+      else             assocSelected.delete(q.questionId);
+      row.style.borderColor = chk.checked ? 'var(--brand)' : 'var(--ui-border)';
+      row.style.background  = chk.checked ? 'rgba(212,18,36,0.04)' : 'var(--ui-surface)';
+      document.getElementById('assoc-selected-count')!.textContent =
+        `${assocSelected.size} pregunta(s) seleccionada(s)`;
+    });
+
+    list.appendChild(row);
+  });
+}
+
+// Filtros en tiempo real
+document.getElementById('assoc-filter-comp')?.addEventListener('change', () => renderAssocList(allQuestions));
+document.getElementById('assoc-search')?.addEventListener('input',  () => renderAssocList(allQuestions));
+
+// Cerrar / omitir
+document.getElementById('assoc-close')?.addEventListener('click', () => {
+  document.getElementById('assoc-modal')!.style.display = 'none';
+});
+document.getElementById('assoc-skip')?.addEventListener('click', () => {
+  document.getElementById('assoc-modal')!.style.display = 'none';
+  toast.success('Test creado. Puedes asociar preguntas en cualquier momento.');
+});
+
+// Guardar asociaciones
+document.getElementById('assoc-save')?.addEventListener('click', async () => {
+  if (!assocSelected.size) {
+    toast.error('Selecciona al menos una pregunta');
+    return;
+  }
+  window.rpLoader?.show('Asociando preguntas...');
+  try {
+    await fetch(`${apiBase}/api/tests/${assocTestId}/questions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('rp_token')}`
+      },
+      body: JSON.stringify({ questionIds: [...assocSelected] })
+    });
+    window.rpLoader?.hide();
+    document.getElementById('assoc-modal')!.style.display = 'none';
+    toast.success(`${assocSelected.size} pregunta(s) asociadas al test.`);
+    // Recargar tabla de tests
+    loadPage();
+  } catch (err: any) {
+    window.rpLoader?.hide();
+    toast.error('Error al asociar preguntas', { description: err?.message });
+  }
+});
+
+// ── Al crear test exitosamente, abrir modal de asociación ──────────────
+// Busca en tu handler de submit del modal de creación de test la línea
+// donde cierras el modal y recargas, y REEMPLÁZALA con esto:
+//
+//   closeCreateModal();
+//   openAssocModal(newTest.testId, newTest.testName);
+//
+// Ejemplo (adaptar según el nombre de tu función y el campo del response):
+// const created = await res.json();
+// const t = created.data;
+// openAssocModal(t.testId, t.testName);
 
   loadPage();
 </script>

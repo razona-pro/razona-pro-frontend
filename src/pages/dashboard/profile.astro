@@ -52,14 +52,12 @@ import AppLayout from '../../layouts/AppLayout.astro';
       <div class="profile-card">
         <h2 class="card-title" style="margin-bottom:1rem">Información de cuenta</h2>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="info-row">
-            <span class="info-label">Primer nombre</span>
-            <p id="f-firstName" class="info-val"></p>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Primer apellido</span>
-            <p id="f-firstSurname" class="info-val"></p>
-          </div>
+          <div class="fg">
+  <label class="fl">Nombre completo</label>
+  <input type="text" class="fi" id="f-fullName" readonly
+    style="background:var(--ui-surface);cursor:default"
+    title="El nombre se actualiza desde la administración" />
+</div>
           <div class="info-row" style="grid-column:1/-1">
             <span class="info-label">Correo electrónico</span>
             <p id="f-email" class="info-val" style="font-size:0.8125rem"></p>
@@ -191,8 +189,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
   heroBadge.textContent = isAdmin() ? '⚙ Admin' : '🎓 Estudiante';
 
   // Campos del formulario
-  set('f-firstName',    user.firstName);
-  set('f-firstSurname', user.firstSurname || '—');
+  const parts = [user.firstName, user.secondName, user.firstLastName, user.secondLastName].filter(Boolean).join(' ');
+  set('f-fullName', parts || '—');
   set('f-email',        user.email.toLowerCase());
   set('f-type',         isAdmin() ? 'Administrador' : 'Estudiante');
   set('f-id',           user.id);

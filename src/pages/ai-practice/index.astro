@@ -2,55 +2,55 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
-<AppLayout title="Práctica con IA" currentPage="ai-practice">
+<AppLayout title="Práctica adaptativa con IA" currentPage="ai-practice">
 
-  <!-- Setup view -->
   <div id="view-setup">
     <div style="margin-bottom:1.25rem">
       <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
         <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none">Dashboard</a>
-        <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Práctica con IA</span>
+        <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Práctica IA</span>
       </div>
       <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 4px;letter-spacing:-0.5px">Práctica adaptativa con IA</h1>
-      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">La IA genera preguntas únicas y adapta la dificultad a tu nivel en tiempo real.</p>
+      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Las preguntas se generan en tiempo real y la dificultad se ajusta según tu desempeño.</p>
     </div>
 
-    <!-- Banner estado IA -->
-    <div id="ai-banner" style="border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:10px;border:1px solid var(--ui-border);background:var(--ui-card)">
+    <!-- Banner estado IA (simplificado para estudiantes) -->
+    <div id="ai-banner" style="border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;border:1px solid var(--ui-border);background:var(--ui-card)">
       <div id="banner-icon" style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--ui-surface)">
         <div style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(99,102,241,0.2);border-top-color:#6366F1;animation:spin 0.85s linear infinite"></div>
       </div>
       <div style="flex:1">
-        <p id="banner-title" style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1);margin:0 0 2px">Verificando módulo IA...</p>
-        <p id="banner-msg" style="font-size:0.8125rem;color:var(--ui-text-2);margin:0;line-height:1.5"></p>
+        <p id="banner-title" style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1);margin:0 0 2px">Verificando disponibilidad...</p>
+        <p id="banner-msg" style="font-size:0.8125rem;color:var(--ui-text-2);margin:0"></p>
       </div>
+      <span id="banner-badge" style="font-size:0.6875rem;font-weight:700;padding:4px 12px;border-radius:20px;flex-shrink:0"></span>
     </div>
 
-    <!-- Grid: form + info -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.5rem">
-      <!-- Formulario -->
+      <!-- Configuración -->
       <div style="background:var(--ui-card);border-radius:16px;padding:1.5rem;border:1px solid var(--ui-border)">
         <h2 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0 0 1.125rem">Configurar sesión</h2>
 
         <div class="fg">
-          <label class="fl">Competencia *</label>
+          <label class="fl">Competencia a practicar</label>
           <select id="setup-comp" class="fi">
-            <option value="">Cargando...</option>
+            <option value="">Selecciona una competencia...</option>
           </select>
         </div>
 
         <div class="fg">
           <label class="fl">Número de preguntas</label>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            {[5, 10, 15, 20].map(n => (
+            {[5, 8, 10, 15].map(n => (
               <button class="qpill" data-q={n} type="button">{n}</button>
             ))}
           </div>
+          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:6px 0 0">La dificultad se ajusta automáticamente tras cada respuesta.</p>
         </div>
 
         <div class="fg">
-          <label class="fl">Descripción <span style="font-weight:400;opacity:0.6">(opcional)</span></label>
-          <input id="setup-desc" type="text" class="fi" placeholder="Ej: Repaso para el examen" maxlength="200" />
+          <label class="fl">Notas de sesión <span style="font-weight:400;opacity:0.6">(opcional)</span></label>
+          <input id="setup-desc" type="text" class="fi" placeholder="Ej: Preparación parcial — semana 3" maxlength="200" />
         </div>
 
         <div id="setup-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:0.875rem"></div>
@@ -59,27 +59,32 @@ import AppLayout from '../../layouts/AppLayout.astro';
           style="width:100%;padding:0.75rem;border-radius:10px;border:none;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;font-family:inherit;font-weight:700;font-size:0.9375rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(99,102,241,0.35);transition:all 0.2s;opacity:0.5"
           disabled>
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <span id="start-label">Iniciar práctica</span>
+          Iniciar sesión adaptativa
         </button>
       </div>
 
-      <!-- Info -->
+      <!-- Cómo funciona -->
       <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:16px;padding:1.375rem;color:white">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(99,102,241,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
-            <svg width="22" height="22" fill="none" stroke="#818CF8" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+        <div style="background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:16px;padding:1.375rem;color:white;flex:1">
+          <h3 style="font-size:1rem;font-weight:800;margin:0 0 1rem">Dificultad adaptativa</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <div style="width:24px;height:24px;border-radius:6px;background:rgba(99,102,241,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;font-weight:800;color:#818CF8">1</div>
+              <p style="font-size:0.8125rem;color:rgba(255,255,255,0.75);margin:0;line-height:1.6">La primera pregunta es de dificultad media (nivel 5/10).</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <div style="width:24px;height:24px;border-radius:6px;background:rgba(99,102,241,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;font-weight:800;color:#818CF8">2</div>
+              <p style="font-size:0.8125rem;color:rgba(255,255,255,0.75);margin:0;line-height:1.6">Según tus aciertos y errores, la siguiente pregunta sube o baja de nivel.</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <div style="width:24px;height:24px;border-radius:6px;background:rgba(99,102,241,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;font-weight:800;color:#818CF8">3</div>
+              <p style="font-size:0.8125rem;color:rgba(255,255,255,0.75);margin:0;line-height:1.6">El puntaje final refleja tanto la cantidad correcta como la dificultad alcanzada.</p>
+            </div>
           </div>
-          <h3 style="font-size:1rem;font-weight:800;margin:0 0 0.5rem">¿Cómo funciona?</h3>
-          <ul style="font-size:0.8125rem;color:rgba(255,255,255,0.75);line-height:1.7;padding-left:1rem;margin:0">
-            <li>La IA genera preguntas únicas en tiempo real</li>
-            <li>Feedback inmediato con explicación tras cada respuesta</li>
-            <li>Pistas progresivas en 3 niveles de ayuda</li>
-            <li>Dificultad adaptativa según tu desempeño</li>
-          </ul>
         </div>
         <div style="background:var(--ui-card);border-radius:14px;padding:1.125rem;border:1px solid var(--ui-border)">
-          <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0 0 6px">Nota técnica</p>
-          <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0;line-height:1.6">Todas las preguntas se generan al inicio (batch). La pantalla de carga puede tardar 10-30 segundos dependiendo del modelo configurado.</p>
+          <p style="font-size:0.75rem;font-weight:700;color:var(--ui-text-1);margin:0 0 6px">Sistema de puntuación</p>
+          <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0;line-height:1.6">Cada pregunta vale tantos puntos como su nivel de dificultad (1 a 10). Una pregunta de nivel 8 aportará hasta 8 puntos si la respondes correctamente.</p>
         </div>
       </div>
     </div>
@@ -98,23 +103,68 @@ import AppLayout from '../../layouts/AppLayout.astro';
     </div>
   </div>
 
-  <!-- Loading overlay al iniciar -->
-  <div id="view-starting" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
-    <div style="background:var(--ui-card);border-radius:20px;padding:2.5rem 2rem;max-width:380px;width:calc(100%-2rem);text-align:center">
-      <div style="width:64px;height:64px;border-radius:50%;border:4px solid rgba(99,102,241,0.2);border-top-color:#6366F1;animation:spin 0.85s linear infinite;margin:0 auto 1.25rem"></div>
-      <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Generando preguntas con IA...</h3>
-      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0;line-height:1.6">El modelo está pensando. Esto puede tardar entre 10 y 30 segundos. No cierres esta ventana.</p>
-      <div style="margin-top:1rem;height:3px;background:var(--ui-surface);border-radius:2px;overflow:hidden">
-        <div style="height:100%;background:#6366F1;border-radius:2px;animation:loadBar 2s ease-in-out infinite"></div>
+  <!-- Modal pre-inicio (instrucciones) -->
+  <div id="prestart-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+    <div style="background:var(--ui-card);border-radius:22px;padding:0;max-width:500px;width:calc(100%-2rem);overflow:hidden;animation:modalIn 0.35s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.2)">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#6366F1,#4F46E5);padding:1.75rem 2rem">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center">
+            <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size:1.0625rem;font-weight:800;color:white;margin:0">Sesión Adaptativa con IA</h3>
+            <p style="font-size:0.8125rem;color:rgba(255,255,255,0.7);margin:0" id="ps-subtitle">Preparándote...</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center">
+            <p id="ps-q-count" style="font-size:1.5rem;font-weight:900;color:white;margin:0">—</p>
+            <p style="font-size:0.625rem;color:rgba(255,255,255,0.65);margin:0;text-transform:uppercase;letter-spacing:0.4px">Preguntas</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center">
+            <p style="font-size:1.5rem;font-weight:900;color:white;margin:0">1–10</p>
+            <p style="font-size:0.625rem;color:rgba(255,255,255,0.65);margin:0;text-transform:uppercase;letter-spacing:0.4px">Niveles</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center">
+            <p id="ps-est-time" style="font-size:1.5rem;font-weight:900;color:white;margin:0">—</p>
+            <p style="font-size:0.625rem;color:rgba(255,255,255,0.65);margin:0;text-transform:uppercase;letter-spacing:0.4px">Min. aprox.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Body -->
+      <div style="padding:1.5rem 2rem">
+        <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0 0 10px">Instrucciones</p>
+        <ul style="list-style:none;padding:0;margin:0 0 1.25rem;display:flex;flex-direction:column;gap:8px">
+          <li style="display:flex;align-items:flex-start;gap:8px;font-size:0.875rem;color:var(--ui-text-2)">
+            <span style="width:20px;height:20px;border-radius:5px;background:#EDE9FE;color:#6366F1;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.625rem;font-weight:800;margin-top:1px">1</span>
+            Comenzarás en dificultad media. La IA ajustará cada nueva pregunta en función de tu respuesta anterior.
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:8px;font-size:0.875rem;color:var(--ui-text-2)">
+            <span style="width:20px;height:20px;border-radius:5px;background:#EDE9FE;color:#6366F1;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.625rem;font-weight:800;margin-top:1px">2</span>
+            Puedes solicitar hasta 3 pistas por pregunta. Úsalas si las necesitas, sin penalización en el puntaje.
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:8px;font-size:0.875rem;color:var(--ui-text-2)">
+            <span style="width:20px;height:20px;border-radius:5px;background:#EDE9FE;color:#6366F1;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.625rem;font-weight:800;margin-top:1px">3</span>
+            Al finalizar verás tu puntaje ponderado, cuántos puntos obtuviste del total posible y el análisis de tu sesión.
+          </li>
+        </ul>
+        <div style="display:flex;gap:8px">
+          <button id="ps-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+          <button id="ps-confirm" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(99,102,241,0.35)">
+            Comenzar sesión
+          </button>
+        </div>
       </div>
     </div>
   </div>
+
 </AppLayout>
 
 <style>
   @keyframes spin    { to { transform: rotate(360deg); } }
   @keyframes shimmer { 0%{background-position:-400px 0}100%{background-position:400px 0} }
-  @keyframes loadBar { 0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%} }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)} }
 
   .fg { display:flex;flex-direction:column;gap:4px;margin-bottom:0.875rem }
   .fl { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3) }
@@ -126,7 +176,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
   .fi:focus { border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,0.12) }
 
   .qpill {
-    padding:5px 14px;border-radius:20px;font-size:0.8125rem;font-weight:600;
+    padding:5px 18px;border-radius:20px;font-size:0.8125rem;font-weight:600;
     border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-2);
     cursor:pointer;transition:all 0.15s;font-family:inherit
   }
@@ -159,11 +209,12 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
   try { requireAuth(); } catch { throw new Error('redirect'); }
 
-  let aiEnabled = false;
-  let selectedQ = 10;
+  let aiEnabled      = false;
+  let selectedQ      = 10;
   let selectedCompId = '';
+  let selectedCompName = '';
 
-  // Verificar estado IA
+  // ── Estado IA ──────────────────────────────────────────────────────────
   aiTriedsApi.status().then(res => {
     const s = res.data!;
     aiEnabled = s.enabled && s.reachable;
@@ -171,6 +222,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
     const icon    = document.getElementById('banner-icon')!;
     const title   = document.getElementById('banner-title')!;
     const msg     = document.getElementById('banner-msg')!;
+    const badge   = document.getElementById('banner-badge')!;
     const banner  = document.getElementById('ai-banner')!;
     const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
 
@@ -178,26 +230,30 @@ import AppLayout from '../../layouts/AppLayout.astro';
       icon.innerHTML = `<svg width="18" height="18" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
       icon.style.background = '#D1FAE5';
       banner.style.cssText += ';background:#F0FDF4;border-color:#A7F3D0';
-      title.textContent = `IA activa — ${s.model}`;
+      title.textContent = 'Módulo de IA activo y disponible';
       title.style.color = '#059669';
-      msg.textContent   = s.message;
+      msg.textContent   = 'Puedes iniciar una sesión de práctica adaptativa en cualquier momento.';
+      badge.textContent = 'Disponible';
+      badge.style.cssText = 'background:#D1FAE5;color:#059669;font-size:0.6875rem;font-weight:700;padding:4px 12px;border-radius:20px;flex-shrink:0';
     } else {
       icon.innerHTML = `<svg width="18" height="18" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
       icon.style.background = '#FEE2E2';
       banner.style.cssText += ';background:#FEF2F2;border-color:#FECACA';
-      title.textContent = 'Módulo IA no disponible';
+      title.textContent = 'Módulo de IA no disponible';
       title.style.color = '#DC2626';
-      msg.textContent   = s.message;
+      msg.textContent   = 'El servicio no está disponible en este momento. Puedes usar los simulacros del banco de preguntas.';
+      badge.textContent = 'No disponible';
+      badge.style.cssText = 'background:#FEE2E2;color:#DC2626;font-size:0.6875rem;font-weight:700;padding:4px 12px;border-radius:20px;flex-shrink:0';
       startBtn.style.cursor = 'not-allowed';
     }
   }).catch(() => {
     document.getElementById('banner-title')!.textContent = 'No se pudo verificar el módulo IA';
   });
 
-  // Cargar competencias
+  // ── Competencias ────────────────────────────────────────────────────────
   competencesApi.findAll(true).then(res => {
     const sel = document.getElementById('setup-comp') as HTMLSelectElement;
-    sel.innerHTML = '<option value="">— Selecciona una competencia —</option>';
+    sel.innerHTML = '<option value="">Selecciona una competencia...</option>';
     (res.data ?? []).forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.competenceId;
@@ -205,12 +261,14 @@ import AppLayout from '../../layouts/AppLayout.astro';
       sel.appendChild(opt);
     });
     sel.addEventListener('change', () => {
-      selectedCompId = sel.value;
+      selectedCompId   = sel.value;
+      const opt = sel.options[sel.selectedIndex];
+      selectedCompName = opt ? opt.textContent ?? '' : '';
       validateForm();
     });
   }).catch(() => {});
 
-  // Pills de cantidad
+  // ── Pills cantidad ──────────────────────────────────────────────────────
   document.querySelector<HTMLButtonElement>('.qpill[data-q="10"]')?.classList.add('active');
   document.querySelectorAll<HTMLButtonElement>('.qpill').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -224,36 +282,46 @@ import AppLayout from '../../layouts/AppLayout.astro';
   function validateForm() {
     const btn = document.getElementById('start-btn') as HTMLButtonElement;
     const ok  = aiEnabled && selectedCompId !== '' && selectedQ > 0;
-    btn.disabled = !ok;
+    btn.disabled      = !ok;
     btn.style.opacity = ok ? '1' : '0.5';
     btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
   }
 
-  // Iniciar sesión
-  document.getElementById('start-btn')?.addEventListener('click', async () => {
-    if (!selectedCompId || !selectedQ) return;
+  // ── Abrir modal pre-inicio ──────────────────────────────────────────────
+  document.getElementById('start-btn')?.addEventListener('click', () => {
+    if (!selectedCompId || !selectedQ || !aiEnabled) return;
+
+    // Llenar datos del modal
+    document.getElementById('ps-subtitle')!.textContent  = selectedCompName;
+    document.getElementById('ps-q-count')!.textContent   = String(selectedQ);
+    document.getElementById('ps-est-time')!.textContent  = String(Math.max(5, Math.round(selectedQ * 1.5)));
+    document.getElementById('prestart-modal')!.style.display = 'flex';
+  });
+
+  document.getElementById('ps-cancel')?.addEventListener('click', () => {
+    document.getElementById('prestart-modal')!.style.display = 'none';
+  });
+
+  // ── Confirmar e iniciar ─────────────────────────────────────────────────
+  document.getElementById('ps-confirm')?.addEventListener('click', async () => {
+    document.getElementById('prestart-modal')!.style.display = 'none';
     const desc = (document.getElementById('setup-desc') as HTMLInputElement).value.trim() || undefined;
     const errEl = document.getElementById('setup-error')!;
     errEl.style.display = 'none';
 
-    // Mostrar loading overlay
-    document.getElementById('view-starting')!.style.display = 'flex';
-    const lbl = document.getElementById('start-label')!;
-    lbl.textContent = 'Generando...';
-
+    window.rpLoader?.show('Generando la primera pregunta con IA...');
     try {
       const res = await aiTriedsApi.start(selectedCompId, selectedQ, desc);
       const triedId = res.data!.tried.aiTriedId;
-      window.location.href = `/ai-practice/exam?tried=${triedId}&comp=${selectedCompId}`;
+      window.location.href = `/ai-practice/exam?tried=${triedId}&comp=${selectedCompId}&total=${selectedQ}`;
     } catch (err: any) {
-      document.getElementById('view-starting')!.style.display = 'none';
-      lbl.textContent = 'Iniciar práctica';
-      errEl.textContent  = err?.message ?? 'Error al iniciar la sesión IA.';
+      window.rpLoader?.hide();
+      errEl.textContent  = err?.message ?? 'No se pudo iniciar la sesión. Inténtalo de nuevo.';
       errEl.style.display = 'block';
     }
   });
 
-  // Historial
+  // ── Historial ───────────────────────────────────────────────────────────
   aiTriedsApi.findMy(0, 8).then(res => {
     const list    = document.getElementById('hist-list')!;
     const countEl = document.getElementById('hist-count')!;
@@ -262,25 +330,24 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
     list.innerHTML = '';
     if (!items.length) {
-      list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1rem">Sin sesiones. ¡Empieza ahora!</p>';
+      list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">No tienes sesiones aún. ¡Inicia tu primera práctica!</p>';
       return;
     }
 
-    const STATUS: Record<string, { label: string; color: string }> = {
-      FINISHED:    { label: 'Finalizada', color: '#059669' },
-      IN_PROGRESS: { label: 'En progreso', color: '#6366F1' },
-      ABANDONED:   { label: 'Abandonada', color: '#DC2626' },
+    const STATUS: Record<string, { label: string; color: string; bg: string }> = {
+      FINISHED:    { label: 'Finalizada',  color: '#059669', bg: '#D1FAE5' },
+      IN_PROGRESS: { label: 'En progreso', color: '#6366F1', bg: '#EDE9FE' },
+      ABANDONED:   { label: 'Abandonada',  color: '#DC2626', bg: '#FEE2E2' },
     };
 
     items.forEach((s: AiTriedDto) => {
       const sc  = scoreColor(s.score ?? 0);
-      const st  = STATUS[s.status] ?? { label: s.status, color: '#6B7280' };
+      const st  = STATUS[s.status] ?? { label: s.status, color: '#6B7280', bg: '#F3F4F6' };
       const div = document.createElement('div');
       div.className = 'hist-item';
       div.onclick = () => {
-        if (s.status === 'IN_PROGRESS') {
-          window.location.href = `/ai-practice/exam?tried=${s.aiTriedId}`;
-        }
+        if (s.status === 'IN_PROGRESS')
+          window.location.href = `/ai-practice/exam?tried=${s.aiTriedId}&resume=1`;
       };
       div.innerHTML = `
         <div style="width:36px;height:36px;border-radius:9px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#818CF8">
@@ -289,23 +356,23 @@ import AppLayout from '../../layouts/AppLayout.astro';
         <div style="flex:1;min-width:0">
           <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
             ${s.description ?? 'Sesión de práctica'}
-            ${s.status === 'IN_PROGRESS' ? '<span style="font-size:0.625rem;background:#EDE9FE;color:#6366F1;padding:1px 6px;border-radius:8px;margin-left:5px;font-weight:700">Reanudar</span>' : ''}
+            ${s.status === 'IN_PROGRESS' ? '<span style="font-size:0.625rem;background:#EDE9FE;color:#6366F1;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:700">Reanudar</span>' : ''}
           </p>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span style="font-size:0.6875rem;font-weight:700;padding:1px 7px;border-radius:12px;background:${st.color}18;color:${st.color}">${st.label}</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:0.6875rem;font-weight:700;padding:2px 8px;border-radius:12px;background:${st.bg};color:${st.color}">${st.label}</span>
             <span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(s.attemptTimestamp)}</span>
-            <span style="font-size:0.6875rem;color:var(--ui-text-3)">${s.totalQuestions} preg.</span>
+            <span style="font-size:0.6875rem;color:var(--ui-text-3)">${s.totalQuestions} preguntas</span>
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0">
           ${s.score != null
-            ? `<p style="font-size:1rem;font-weight:900;color:${sc};margin:0">${s.score.toFixed(0)}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">/100</p>`
+            ? `<p style="font-size:1rem;font-weight:900;color:${sc};margin:0">${s.score.toFixed(0)}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">/100 pts</p>`
             : `<p style="font-size:0.75rem;color:var(--ui-text-3);margin:0">${s.correctAnswers ?? 0}/${s.totalQuestions}</p>`}
         </div>`;
       list.appendChild(div);
     });
   }).catch(() => {
     document.getElementById('hist-list')!.innerHTML =
-      '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1rem">Error al cargar historial</p>';
+      '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Error al cargar el historial</p>';
   });
 </script>

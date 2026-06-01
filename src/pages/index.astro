@@ -14,14 +14,11 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
     --rp-muted:   #C0000E;
     --rp-text:    #12030A;
     --rp-text-sec: #5A2028;
-    --rp-text-muted: #8B5A60;
     --rp-border:  rgba(212,18,36,0.14);
   }
-
   * { box-sizing: border-box; }
   body { font-family: 'Poppins', sans-serif; background: white; color: var(--rp-text); overflow-x: hidden; }
 
-  /* Navbar */
   #navbar { position: fixed; top:0; width:100%; z-index:50; transition: all 0.5s; }
   #navbar.scrolled {
     background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
@@ -191,6 +188,12 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
   @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
   .reveal { opacity:0; transform:translateY(18px); transition: opacity 0.5s ease, transform 0.5s ease; }
   .reveal.visible { opacity:1; transform:translateY(0); }
+
+  /* Auth-aware nav */
+  #nav-auth-logged   { display: none; }
+  #nav-auth-guest    { display: flex; align-items: center; gap: 0.75rem; }
+  #hero-cta-logged   { display: none; }
+  #hero-cta-guest    { display: flex; }
 </style>
 
 <!-- Navbar -->
@@ -207,8 +210,13 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
       <li><a href="#simulacros" class="nav-link">Simulacros</a></li>
     </ul>
     <div class="nav-ctas">
-      <a href="/auth" class="nav-signin-link">Iniciar sesión</a>
-      <a href="/auth?tab=register" class="btn-primary-nav">Registrarse</a>
+      <!-- Guest -->
+      <div id="nav-auth-guest">
+        <a href="/auth" class="nav-signin-link">Iniciar sesión</a>
+        <a href="/auth?tab=register" class="btn-primary-nav">Registrarse</a>
+      </div>
+      <!-- Logged in -->
+      <a id="nav-auth-logged" href="/dashboard" class="btn-primary-nav">Mi panel</a>
     </div>
   </div>
 </header>
@@ -224,7 +232,7 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
     <div>
       <div class="hero-badge">
         <span class="pulse"></span>
-        Potenciado por Transfer Learning &amp; IA Generativa
+        Potenciado por IA Adaptativa y Transfer Learning
       </div>
       <h1 class="hero-headline">
         Tu éxito en el<br/>
@@ -232,17 +240,30 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
         impulsado por IA.
       </h1>
       <p class="hero-sub">
-        RazonaPro calibra tu aprendizaje en tiempo real y te prepara con simulacros adaptativos.
+        RazonaPro ajusta la dificultad en tiempo real y te prepara con simulacros adaptativos.
         Supera las pruebas de Estado con un plan que evoluciona contigo.
       </p>
-      <div class="hero-ctas">
+
+      <!-- CTAs para invitados -->
+      <div class="hero-ctas" id="hero-cta-guest">
         <a href="/auth?tab=register" class="btn-hero-primary">
-          Empieza gratis
+          Comenzar gratis
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
         </a>
         <a href="#como-funciona" class="btn-hero-ghost">
           <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           Cómo funciona
+        </a>
+      </div>
+
+      <!-- CTA para autenticados -->
+      <div class="hero-ctas" id="hero-cta-logged" style="display:none">
+        <a href="/dashboard" class="btn-hero-primary">
+          Ir a mi panel
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <a href="/tests" class="btn-hero-ghost">
+          Ver simulacros disponibles
         </a>
       </div>
     </div>
@@ -252,17 +273,17 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
       <div style="background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);border:1px solid rgba(212,18,36,0.18);border-radius:20px;padding:1.75rem;box-shadow:0 12px 48px rgba(212,18,36,0.1);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
           <div>
-            <p style="font-size:0.625rem;text-transform:uppercase;letter-spacing:0.18em;color:#9CA3AF;margin:0 0 3px;">Mi Panel de Progreso</p>
-            <h3 style="font-size:0.9375rem;font-weight:600;color:#1A1A1A;margin:0;">Estado de Calibración</h3>
+            <p style="font-size:0.625rem;text-transform:uppercase;letter-spacing:0.18em;color:#9CA3AF;margin:0 0 3px;">Panel de Progreso</p>
+            <h3 style="font-size:0.9375rem;font-weight:600;color:#1A1A1A;margin:0;">Calibración Adaptativa</h3>
           </div>
-          <span style="padding:4px 10px;font-size:0.6875rem;font-weight:700;background:rgba(16,185,129,0.12);color:#34D399;border-radius:20px;border:1px solid rgba(16,185,129,0.3);">● Activo</span>
+          <span style="padding:4px 10px;font-size:0.6875rem;font-weight:700;background:rgba(16,185,129,0.12);color:#34D399;border-radius:20px;border:1px solid rgba(16,185,129,0.3);">Activo</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:1.25rem;">
           {[
-            { name: 'Lectura Crítica',        pct: 87, color: '#D41224' },
-            { name: 'Razon. Cuantitativo',     pct: 74, color: '#2563EB' },
-            { name: 'Comp. Ciudadanas',         pct: 91, color: '#059669' },
-            { name: 'Comunicación Escrita',     pct: 83, color: '#7C3AED' },
+            { name: 'Lectura Crítica',       pct: 87, color: '#D41224' },
+            { name: 'Razonamiento Cuant.',    pct: 74, color: '#2563EB' },
+            { name: 'Competencias Ciudadanas',pct: 91, color: '#059669' },
+            { name: 'Comunicación Escrita',   pct: 83, color: '#7C3AED' },
           ].map(s => (
             <div>
               <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:5px;">
@@ -334,15 +355,15 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
           <svg width="22" height="22" fill="none" stroke="#D41224" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         </div>
         <h3 class="how-title">Aprendizaje Personalizado</h3>
-        <p class="how-text">Cada simulacro se adapta a tu nivel mediante algoritmos de Transfer Learning, identificando tus áreas de mejora.</p>
+        <p class="how-text">Cada pregunta se adapta a tu nivel mediante algoritmos de Transfer Learning e IRT, identificando con precisión tus áreas de mejora.</p>
       </div>
       <div class="how-card reveal" style="animation-delay:0.1s">
         <div class="how-num">02</div>
         <div class="how-icon">
           <svg width="22" height="22" fill="none" stroke="#D41224" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
         </div>
-        <h3 class="how-title">Tutor IA 24/7</h3>
-        <p class="how-text">Retroalimentación inmediata generada por IA especializada en el currículo Saber Pro, con explicaciones contextualizadas.</p>
+        <h3 class="how-title">Retroalimentación Inmediata</h3>
+        <p class="how-text">Recibe explicaciones detalladas generadas por IA especializada en el currículo Saber Pro, con pistas progresivas cuando las necesites.</p>
       </div>
       <div class="how-card reveal" style="animation-delay:0.2s">
         <div class="how-num">03</div>
@@ -350,7 +371,7 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
           <svg width="22" height="22" fill="none" stroke="#D41224" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
         </div>
         <h3 class="how-title">Analítica en Tiempo Real</h3>
-        <p class="how-text">Visualiza tu progreso con métricas predictivas que estiman tu puntaje final en el Saber Pro.</p>
+        <p class="how-text">Visualiza tu progreso con métricas precisas y rankings que reflejan tu desempeño ponderado por dificultad.</p>
       </div>
     </div>
   </div>
@@ -361,8 +382,8 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
   <div class="cta-card reveal">
     <p style="font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.25em;color:var(--rp-muted);font-weight:700;margin-bottom:1rem;">Universidad Francisco de Paula Santander Ocaña</p>
     <h2 class="cta-title">¿Listo para asegurar<br/><span class="text-gradient">tu futuro académico?</span></h2>
-    <p class="cta-sub">Únete a los estudiantes UFPSO que ya transforman su método de estudio con inteligencia artificial adaptativa.</p>
-    <a href="/auth?tab=register" class="btn-hero-primary" style="display:inline-flex">
+    <p class="cta-sub">Únete a los estudiantes UFPSO que transforman su método de estudio con inteligencia artificial adaptativa.</p>
+    <a href="/auth?tab=register" id="cta-main-btn" class="btn-hero-primary" style="display:inline-flex">
       Comenzar ahora — es gratis
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
     </a>
@@ -383,9 +404,7 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
   </div>
 </footer>
 
-<!-- ─── Scripts ──────────────────────────────────────────────────────────── -->
-
-<!-- 1. Animaciones de UI (no necesita la URL del API) -->
+<!-- Scripts -->
 <script>
   // Navbar scroll
   window.addEventListener('scroll', () => {
@@ -414,7 +433,7 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
   }, { threshold: 0.18 });
   document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
-  // Counter animation helper (exportada en window para reutilizar)
+  // Counter animation
   function animCounter(el: HTMLElement, target: number) {
     const dur = 1600; const start = performance.now();
     function step(now: number) {
@@ -428,7 +447,6 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
   }
   (window as any).__animCounter = animCounter;
 
-  // Trigger counters when visible
   const counterObs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
@@ -438,18 +456,33 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
     });
   }, { threshold: 0.5 });
   document.querySelectorAll('.counter').forEach(el => counterObs.observe(el));
+
+  // Auth-aware UI
+  (function checkAuth() {
+    const token = localStorage.getItem('rp_token');
+    if (!token) return;
+    try {
+      const p = JSON.parse(atob(token.split('.')[1]));
+      if (typeof p.exp === 'number' && p.exp * 1000 > Date.now()) {
+        // Autenticado
+        document.getElementById('nav-auth-guest')!.style.display = 'none';
+        document.getElementById('nav-auth-logged')!.style.display = 'flex';
+        document.getElementById('hero-cta-guest')!.style.display = 'none';
+        document.getElementById('hero-cta-logged')!.style.display = 'flex';
+        const ctaBtn = document.getElementById('cta-main-btn') as HTMLAnchorElement;
+        if (ctaBtn) { ctaBtn.href = '/dashboard'; ctaBtn.textContent = 'Ir a mi panel'; }
+      }
+    } catch(e) {}
+  })();
 </script>
 
-<!-- 2. Fetch de stats — usa apiBase del servidor de Astro -->
 <script define:vars={{ apiBase }}>
   const MOCK = {
     activeStudents: 2847, completedTrieds: 12530,
     totalQuestions: 2150, activeCompetences: 6,
-    totalTests: 42,       satisfactionRate: 94,
+    totalTests: 42, satisfactionRate: 94,
   };
-
   function applyStats(d) {
-    // d es el objeto HomeStatsDto ya desenvuelto
     const setTarget = (id, val) => {
       const el = document.getElementById(id);
       if (el) el.dataset.target = String(val);
@@ -458,15 +491,12 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
     setTarget('stat-trieds',      d.completedTrieds);
     setTarget('stat-questions',   d.totalQuestions);
     setTarget('stat-competences', d.activeCompetences);
-
     const heroTests    = document.getElementById('hero-stat-tests');
     const heroAvg      = document.getElementById('hero-stat-avg');
     const heroStudents = document.getElementById('hero-stat-students');
     if (heroTests)    heroTests.textContent    = String(d.totalTests);
     if (heroAvg)      heroAvg.textContent      = Number(d.satisfactionRate).toFixed(0) + '%';
     if (heroStudents) heroStudents.textContent = String(d.activeStudents);
-
-    // Re-dispara contadores (ya pueden estar visibles en pantalla)
     const animFn = window.__animCounter;
     if (animFn) {
       document.querySelectorAll('.counter').forEach(el => {
@@ -475,23 +505,10 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
       });
     }
   }
-
   fetch(apiBase + '/api/stats/home')
-    .then(res => {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-    .then(json => {
-      // El backend envuelve en ApiResponse<T> → { success, data: { ... } }
-      // Si la respuesta ya es el DTO directamente (sin wrapper) también funciona
-      const d = json.data ?? json;
-      if (!d || typeof d.activeStudents === 'undefined') throw new Error('formato inesperado');
-      applyStats(d);
-    })
-    .catch(err => {
-      console.warn('Stats API no disponible, usando valores de ejemplo.', err.message);
-      applyStats(MOCK);
-    });
+    .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+    .then(json => { const d = json.data ?? json; if (d?.activeStudents !== undefined) applyStats(d); else applyStats(MOCK); })
+    .catch(() => applyStats(MOCK));
 </script>
 
 </BaseLayout>
