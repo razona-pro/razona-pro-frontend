@@ -37,7 +37,6 @@ export function updateStoredUser(updates: Partial<StoredUser>): void {
   if (!current) return;
   const merged = { ...current, ...updates };
   localStorage.setItem(USER_KEY, JSON.stringify(merged));
-  // Notificar a otros componentes en la misma pestaña
   window.dispatchEvent(new CustomEvent('rp:user-updated', { detail: merged }));
 }
 
@@ -70,7 +69,7 @@ export function tokenSecondsLeft(): number {
 export function isAdmin(): boolean   { return getUser()?.userType === 'ADMIN'; }
 export function isStudent(): boolean { return getUser()?.userType === 'STUDENT'; }
 
-/** Nombre completo con los 4 segmentos no nulos */
+/** Nombre completo con los 4 segmentos — CORREGIDO para incluir secondName y secondSurname */
 export function getFullName(user: StoredUser | null): string {
   if (!user) return '';
   return [user.firstName, user.secondName, user.firstSurname, user.secondSurname]
@@ -79,7 +78,9 @@ export function getFullName(user: StoredUser | null): string {
 }
 
 export function getInitials(user: StoredUser): string {
-  return ((user.firstName?.[0] ?? '') + (user.firstSurname?.[0] ?? '')).toUpperCase();
+  const fn = user.firstName?.[0] ?? '';
+  const ln = user.firstSurname?.[0] ?? '';
+  return (fn + ln).toUpperCase() || user.id.slice(0, 2).toUpperCase();
 }
 
 export function logout(): void {

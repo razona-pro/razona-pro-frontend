@@ -142,8 +142,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 .fi[readonly] { cursor: default; opacity: 0.75; }
 </style>
 
-<script>
-  import { requireAuth, isAdmin, logout, getToken, updateStoredUser } from '../../lib/auth';
+<script>import { requireAuth, isAdmin, getToken, updateStoredUser, getFullName } from '../../lib/auth';
 import { studentsApi } from '../../lib/api/students.api';
 import { programsApi } from '../../lib/api/programs.api';
 import { adminsApi }   from '../../lib/api/admins.api';
@@ -151,23 +150,19 @@ import { adminsApi }   from '../../lib/api/admins.api';
 let user;
 try { user = requireAuth(); } catch { throw new Error('redirect'); }
 
-// set() actualiza inputs (.value) y el resto (.textContent)
 const set = (id: string, val: string) => {
   const el = document.getElementById(id);
   if (!el) return;
-  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-    el.value = val;
-  } else {
-    el.textContent = val;
-  }
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) el.value = val;
+  else el.textContent = val;
 };
 
-// ── Datos iniciales desde localStorage ───────────────────────────────
-const initials  = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase();
-const fullName  = user.firstSurname ? `${user.firstName} ${user.firstSurname}` : user.firstName;
+// Nombre completo inicial desde localStorage (puede tener solo firstName+firstSurname al inicio)
+const initFull     = getFullName(user) || user.id;
+const initInitials = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase() || user.id.slice(0,2).toUpperCase();
 
-document.getElementById('hero-avatar')!.textContent = initials;
-set('hero-name',   fullName);
+document.getElementById('hero-avatar')!.textContent = initInitials;
+set('hero-name',   initFull);
 set('hero-email',  user.email.toLowerCase());
 set('hero-id',     `ID: ${user.id}`);
 set('hero-type',   isAdmin() ? 'Administrador del sistema' : 'Estudiante');
@@ -175,8 +170,7 @@ set('hero-type',   isAdmin() ? 'Administrador del sistema' : 'Estudiante');
 const heroBadge = document.getElementById('hero-badge')!;
 heroBadge.textContent = isAdmin() ? '⚙ Admin' : '🎓 Estudiante';
 
-// Campo "Nombre completo" en el formulario
-set('f-fullName', fullName);
+set('f-fullName', initFull);
 set('f-email',    user.email.toLowerCase());
 set('f-type',     isAdmin() ? 'Administrador' : 'Estudiante');
 set('f-id',       user.id);
@@ -184,31 +178,29 @@ set('f-id',       user.id);
 const idLabel = document.getElementById('f-id-label');
 if (idLabel) idLabel.textContent = isAdmin() ? 'ID de administrador' : 'Código de estudiante';
 
-// ── Programa académico ────────────────────────────────────────────────
+// Programa
 const programRow = document.getElementById('f-program-row')!;
 if (user.programId) {
   programRow.style.display = 'flex';
   programRow.style.flexDirection = 'column';
   set('hero-program', `Programa ${user.programId}`);
   set('f-program', 'Cargando...');
-
   programsApi.findById(user.programId)
     .then(res => {
       if (res.data) {
         const name = `${res.data.programName} (${user.programId})`;
-        set('f-program',    name);
+        set('f-program', name);
         set('hero-program', name);
       }
     })
     .catch(() => {
-      set('f-program',    user.programId ?? '—');
-      set('hero-program', `Programa ${user.programId}`);
+      set('f-program', user.programId ?? '—');
     });
 } else {
   programRow.style.display = 'none';
 }
 
-// ── JWT session info ──────────────────────────────────────────────────
+// JWT session info
 const token = getToken();
 if (token) {
   try {
@@ -217,54 +209,46 @@ if (token) {
       new Date(ts * 1000).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
     set('jwt-iat', fmt(p.iat));
     set('jwt-exp', fmt(p.exp));
-
     const now    = Date.now();
     const total  = (p.exp - p.iat) * 1000;
     const remain = Math.max(0, p.exp * 1000 - now);
     const pct    = Math.min(100, (remain / total) * 100);
     const fill   = document.getElementById('sess-fill')!;
     const status = document.getElementById('sess-status')!;
-
     fill.style.width = `${pct}%`;
     if (pct > 50) {
       fill.style.background = '#22c55e';
-      status.textContent    = 'Activa';
-      status.style.cssText  = 'background:#D1FAE5;color:#059669;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+      status.textContent   = 'Activa';
+      status.style.cssText = 'background:#D1FAE5;color:#059669;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
     } else if (pct > 20) {
       fill.style.background = '#f59e0b';
-      status.textContent    = 'Por vencer';
-      status.style.cssText  = 'background:#FEF3C7;color:#D97706;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+      status.textContent   = 'Por vencer';
+      status.style.cssText = 'background:#FEF3C7;color:#D97706;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
     } else {
       fill.style.background = '#ef4444';
-      status.textContent    = 'Crítica';
-      status.style.cssText  = 'background:#FEE2E2;color:#DC2626;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+      status.textContent   = 'Crítica';
+      status.style.cssText = 'background:#FEE2E2;color:#DC2626;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
     }
-
     const h = Math.floor(remain / 3_600_000);
     const m = Math.floor((remain % 3_600_000) / 60_000);
     set('jwt-remain', h > 0 ? `${h}h ${m}m` : `${m}m`);
   } catch {}
 }
 
-// ── Logout ────────────────────────────────────────────────────────────
-const openLogoutModal = () => {
-  const modal = document.getElementById('logout-modal');
-  if (modal) modal.style.display = 'flex';
-};
-document.getElementById('logout-hero-btn')?.addEventListener('click', openLogoutModal);
-document.getElementById('profile-logout-btn')?.addEventListener('click', openLogoutModal);
-
-// ── Cargar nombre real desde API ──────────────────────────────────────
+// ── Cargar nombre COMPLETO desde API (incluye secondName y secondSurname) ──
 if (isAdmin()) {
   adminsApi.me().then(res => {
     if (!res.data) return;
-    const a    = res.data;
-    const fn   = a.firstName;
-    const ln   = a.firstSurname;
-    const full = ln ? `${fn} ${ln}` : fn;
-    const ini  = ((fn[0] ?? '') + (ln[0] ?? '')).toUpperCase();
-    updateStoredUser({ firstName: fn, firstSurname: ln, email: a.email });
-
+    const a = res.data;
+    // Usar los 4 segmentos del nombre
+    const parts  = [a.firstName, a.secondName, a.firstSurname, a.secondSurname].filter(Boolean);
+    const full   = parts.join(' ');
+    const ini    = ((a.firstName?.[0] ?? '') + (a.firstSurname?.[0] ?? '')).toUpperCase();
+    updateStoredUser({
+      firstName: a.firstName, secondName: a.secondName,
+      firstSurname: a.firstSurname, secondSurname: a.secondSurname,
+      email: a.email
+    });
     document.getElementById('hero-avatar')!.textContent = ini;
     set('hero-name',  full);
     set('hero-email', a.email.toLowerCase());
@@ -274,13 +258,16 @@ if (isAdmin()) {
 } else {
   studentsApi.me().then(res => {
     if (!res.data) return;
-    const s    = res.data;
-    const fn   = s.firstName;
-    const ln   = s.firstSurname;
-    const full = ln ? `${fn} ${ln}` : fn;
-    const ini  = ((fn[0] ?? '') + (ln[0] ?? '')).toUpperCase();
-    updateStoredUser({ firstName: fn, firstSurname: ln, email: s.email });
-
+    const s = res.data;
+    // Usar los 4 segmentos del nombre
+    const parts = [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean);
+    const full  = parts.join(' ');
+    const ini   = ((s.firstName?.[0] ?? '') + (s.firstSurname?.[0] ?? '')).toUpperCase();
+    updateStoredUser({
+      firstName: s.firstName, secondName: s.secondName,
+      firstSurname: s.firstSurname, secondSurname: s.secondSurname,
+      email: s.email
+    });
     document.getElementById('hero-avatar')!.textContent = ini;
     set('hero-name',  full);
     set('hero-email', s.email.toLowerCase());

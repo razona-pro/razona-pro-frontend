@@ -201,27 +201,36 @@ const adminNav = [
 
   // ── Pintar usuario ──────────────────────────────────────────────
   function paintUser() {
-    const u = getUser();
-    if (!u) return;
-    const full     = getFullName(u) || u.id;
-    const initials = getInitials(u) || u.id.slice(0,2).toUpperCase();
-    const avatarEl = document.getElementById('sb-avatar');
-    const nameEl   = document.getElementById('sb-name');
-    const subEl    = document.getElementById('sb-sub');
-    if (avatarEl) avatarEl.textContent = initials;
-    if (nameEl)   nameEl.textContent   = full;
-    if (subEl)    subEl.textContent    = isAdmin()
-      ? 'Administrador · UFPSO'
-      : (u.programId ? `Programa ${u.programId}` : 'Estudiante · UFPSO');
+  const u = getUser();
+  if (!u) return;
 
-    if (isAdmin()) {
-      document.getElementById('sb-admin-section')?.style.setProperty('display','block');
-    } else {
-      document.getElementById('sb-student-only')?.style.setProperty('display','block');
-      document.getElementById('sb-student-account')?.style.setProperty('display','block');
-      document.getElementById('sb-competences-section')?.style.setProperty('display','block');
-    }
+  // Nombre completo con los 4 segmentos
+  const full     = getFullName(u) || u.id;
+  const initials = getInitials(u);
+  const avatarEl = document.getElementById('sb-avatar');
+  const nameEl   = document.getElementById('sb-name');
+  const subEl    = document.getElementById('sb-sub');
+  if (avatarEl) avatarEl.textContent = initials;
+  if (nameEl)   nameEl.textContent   = full;
+  if (subEl)    subEl.textContent    = isAdmin()
+    ? 'Administrador · UFPSO'
+    : (u.programId ? `Programa ${u.programId}` : 'Estudiante · UFPSO');
+
+  if (isAdmin()) {
+    // Admin: solo panel de administración, NO historial/rankings de estudiantes
+    document.getElementById('sb-admin-section')?.style.setProperty('display', 'block');
+    // Ocultar explícitamente las secciones de estudiante
+    document.getElementById('sb-student-only')?.style.setProperty('display', 'none');
+    document.getElementById('sb-student-account')?.style.setProperty('display', 'none');
+    document.getElementById('sb-competences-section')?.style.setProperty('display', 'none');
+  } else {
+    // Estudiante: sección de tests, IA, historial, rankings, competencias
+    document.getElementById('sb-student-only')?.style.setProperty('display', 'block');
+    document.getElementById('sb-student-account')?.style.setProperty('display', 'block');
+    document.getElementById('sb-competences-section')?.style.setProperty('display', 'block');
+    document.getElementById('sb-admin-section')?.style.setProperty('display', 'none');
   }
+}
 
   paintUser();
 

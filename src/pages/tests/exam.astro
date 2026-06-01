@@ -26,7 +26,10 @@ import { Icon } from 'astro-icon/components';
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <span id="timer-display" style="font-size:0.9375rem;font-weight:800;font-variant-numeric:tabular-nums">--:--</span>
         </div>
-        <button id="abandon-btn" title="Abandonar" style="width:34px;height:34px;border-radius:8px;background:transparent;border:1.5px solid var(--ui-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ui-text-3);transition:all 0.2s" onmouseover="this.style.borderColor='#DC2626';this.style.color='#DC2626';this.style.background='#FEF2F2'" onmouseout="this.style.borderColor='var(--ui-border)';this.style.color='var(--ui-text-3)';this.style.background='transparent'">
+        <button id="abandon-btn" title="Abandonar"
+          style="width:34px;height:34px;border-radius:8px;background:transparent;border:1.5px solid var(--ui-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ui-text-3);transition:all 0.2s"
+          onmouseover="this.style.borderColor='#DC2626';this.style.color='#DC2626';this.style.background='#FEF2F2'"
+          onmouseout="this.style.borderColor='var(--ui-border)';this.style.color='var(--ui-text-3)';this.style.background='transparent'">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -51,7 +54,8 @@ import { Icon } from 'astro-icon/components';
             <div style="height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;margin-bottom:1rem">
               <div id="sidebar-bar-fill" style="height:100%;background:linear-gradient(to right,var(--brand),#FF2D42);border-radius:3px;width:0%;transition:width 0.5s ease"></div>
             </div>
-            <button id="finish-btn" style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(212,18,36,0.28);display:flex;align-items:center;justify-content:center;gap:5px">
+            <button id="finish-btn"
+              style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(212,18,36,0.28);display:flex;align-items:center;justify-content:center;gap:5px">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               Finalizar simulacro
             </button>
@@ -61,13 +65,11 @@ import { Icon } from 'astro-icon/components';
 
       <!-- Main -->
       <main class="exam-main">
-        <!-- Loading -->
         <div id="exam-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;gap:1rem">
           <div style="width:44px;height:44px;border-radius:50%;border:3px solid rgba(212,18,36,0.15);border-top-color:#D41224;animation:spin 0.85s linear infinite"></div>
           <p style="font-size:0.875rem;color:var(--ui-text-3)">Cargando preguntas...</p>
         </div>
 
-        <!-- Carta de pregunta -->
         <div id="question-card" style="display:none;max-width:760px;margin:0 auto;width:100%">
           <!-- Progreso -->
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem">
@@ -83,8 +85,9 @@ import { Icon } from 'astro-icon/components';
             <span id="q-comp-chip"  style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
             <span id="q-diff-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
             <span id="q-answered-badge" style="display:none;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#D1FAE5;color:#059669">✓ Respondida</span>
-            <!-- Botón reportar duda (solo estudiantes) -->
-            <button id="doubt-btn" style="display:none;margin-left:auto;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;border:1.5px solid #FDE68A;background:#FEF3C7;color:#92400E;cursor:pointer;font-family:inherit">
+            <!-- Botón duda — siempre visible para estudiantes -->
+            <button id="doubt-btn"
+              style="display:none;margin-left:auto;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;border:1.5px solid #FDE68A;background:#FEF3C7;color:#92400E;cursor:pointer;font-family:inherit">
               ⚠ Reportar duda
             </button>
           </div>
@@ -97,10 +100,10 @@ import { Icon } from 'astro-icon/components';
           <!-- Opciones -->
           <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.25rem"></div>
 
-          <!-- Hint section (solo PRACTICE con IA disponible) -->
+          <!-- Hint section: solo en modo PRACTICE con IA -->
           <div id="hint-section" style="display:none;margin-bottom:1.125rem">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-              <span style="font-size:0.75rem;color:var(--ui-text-3);font-weight:600">💡 Pista IA:</span>
+              <span style="font-size:0.75rem;color:var(--ui-text-3);font-weight:600">💡 Ayuda IA:</span>
               <button class="hbtn" data-level="1" type="button">Pista 1</button>
               <button class="hbtn" data-level="2" type="button" disabled>Pista 2</button>
               <button class="hbtn" data-level="3" type="button" disabled>Pista 3</button>
@@ -112,26 +115,57 @@ import { Icon } from 'astro-icon/components';
             </div>
           </div>
 
-          <!-- Cambio de respuesta hint -->
           <div id="q-change-hint" style="display:none;padding:8px 12px;background:#FEF3C7;border-radius:8px;font-size:0.75rem;color:#92400E;margin-bottom:1rem;border:1px solid #FDE68A">
             💡 Puedes cambiar tu respuesta antes de pasar a la siguiente pregunta.
           </div>
 
           <!-- Navegación -->
           <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:0.25rem">
-            <button id="btn-prev" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:var(--ui-card);border:1.5px solid var(--ui-border);color:var(--ui-text-2);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s" disabled>
+            <button id="btn-prev"
+              style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:var(--ui-card);border:1.5px solid var(--ui-border);color:var(--ui-text-2);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s"
+              disabled>
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg> Anterior
             </button>
             <span style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1)">
               <span id="mobile-q-num">1</span>
               <span style="color:var(--ui-text-3);font-weight:400"> / <span id="mobile-q-total">0</span></span>
             </span>
-            <button id="btn-next" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;border:none;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(212,18,36,0.28);transition:all 0.15s">
+            <button id="btn-next"
+              style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;border:none;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(212,18,36,0.28);transition:all 0.15s">
               Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
             </button>
           </div>
         </div>
       </main>
+    </div>
+  </div>
+
+  <!-- ══ MODAL ADVERTENCIA ANTI-FRAUDE ══ -->
+  <div id="fraud-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+    <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:420px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;box-shadow:0 24px 60px rgba(0,0,0,0.3)">
+      <div id="fraud-icon" style="width:68px;height:68px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;background:#FEF3C7">
+        <svg width="32" height="32" fill="none" stroke="#D97706" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <p id="fraud-counter" style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.5rem">Advertencia 1 de 2</p>
+      <h3 id="fraud-title" style="font-size:1.125rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Salida de ventana detectada</h3>
+      <p id="fraud-desc" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.65"></p>
+      <button id="fraud-accept"
+        style="width:100%;padding:0.75rem;border-radius:11px;border:none;background:linear-gradient(135deg,#D97706,#B45309);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(217,119,6,0.3)">
+        Entiendo, volver al examen
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ MODAL EXAMEN ANULADO ══ -->
+  <div id="annulled-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9100;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+    <div style="background:var(--ui-card);border-radius:20px;padding:2.5rem 2rem;max-width:440px;width:calc(100%-2rem);text-align:center;box-shadow:0 24px 70px rgba(0,0,0,0.4)">
+      <div style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;background:#FEE2E2">
+        <svg width="40" height="40" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="12" x2="15" y2="12" style="transform:rotate(45deg);transform-origin:center"/></svg>
+      </div>
+      <h3 style="font-size:1.25rem;font-weight:900;color:#DC2626;margin:0 0 0.75rem">Examen anulado por plagio</h3>
+      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 0.75rem;line-height:1.65">Se detectaron 3 o más salidas de ventana durante el examen. El intento ha sido marcado como <strong>abandonado</strong> automáticamente.</p>
+      <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0 0 1.5rem">Si crees que esto fue un error, comunícate con tu administrador.</p>
+      <a href="/tests" style="display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Volver a tests</a>
     </div>
   </div>
 
@@ -143,13 +177,12 @@ import { Icon } from 'astro-icon/components';
         <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Revisa tus respuestas antes de finalizar.</p>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:1.25rem 1.75rem">
-        <div style="text-align:center;background:var(--ui-surface);border-radius:10px;padding:12px 8px"><p id="summary-total" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Total</p></div>
-        <div style="text-align:center;background:#D1FAE5;border-radius:10px;padding:12px 8px"><p id="summary-answered" style="font-size:1.5rem;font-weight:900;color:#059669;margin:0">0</p><p style="font-size:0.625rem;color:#059669;margin:0;text-transform:uppercase;letter-spacing:0.4px">Respondidas</p></div>
-        <div style="text-align:center;background:#FEF3C7;border-radius:10px;padding:12px 8px"><p id="summary-pending" style="font-size:1.5rem;font-weight:900;color:#D97706;margin:0">0</p><p style="font-size:0.625rem;color:#D97706;margin:0;text-transform:uppercase;letter-spacing:0.4px">Sin responder</p></div>
+        <div style="text-align:center;background:var(--ui-surface);border-radius:10px;padding:12px 8px"><p id="summary-total" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Total</p></div>
+        <div style="text-align:center;background:#D1FAE5;border-radius:10px;padding:12px 8px"><p id="summary-answered" style="font-size:1.5rem;font-weight:900;color:#059669;margin:0">0</p><p style="font-size:0.625rem;color:#059669;margin:0;text-transform:uppercase">Respondidas</p></div>
+        <div style="text-align:center;background:#FEF3C7;border-radius:10px;padding:12px 8px"><p id="summary-pending" style="font-size:1.5rem;font-weight:900;color:#D97706;margin:0">0</p><p style="font-size:0.625rem;color:#D97706;margin:0;text-transform:uppercase">Sin responder</p></div>
       </div>
-      <div id="summary-warnings" style="padding:0 1.75rem 1rem"></div>
       <div id="summary-alert" style="display:none;margin:0 1.75rem 1rem;padding:10px 14px;background:#FEF3C7;border-radius:10px;border:1px solid #FDE68A;font-size:0.875rem;color:#92400E">
-        ⚠️ Tienes preguntas sin responder.
+        ⚠️ Tienes preguntas sin responder. Serán marcadas como incorrectas.
       </div>
       <div style="padding:0 1.75rem 1.5rem;display:flex;gap:10px">
         <button id="summary-back" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">← Regresar</button>
@@ -164,7 +197,9 @@ import { Icon } from 'astro-icon/components';
       <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Reportar duda sobre esta pregunta</h3>
       <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 1rem;line-height:1.5">Un administrador revisará tu reporte. Puedes continuar con el test.</p>
       <div id="doubt-q-preview" style="background:var(--ui-surface);border-radius:8px;padding:10px 12px;margin-bottom:1rem;font-size:0.8125rem;color:var(--ui-text-2);border:1px solid var(--ui-border);max-height:80px;overflow:hidden;line-height:1.5"></div>
-      <textarea id="doubt-message" placeholder="Describe tu duda (opcional)..." style="width:100%;padding:10px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--ui-border)'"></textarea>
+      <textarea id="doubt-message" placeholder="Describe tu duda (opcional)..."
+        style="width:100%;padding:10px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s"
+        onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--ui-border)'"></textarea>
       <div id="doubt-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 12px;font-size:0.8125rem;color:#B91C1C;margin-top:0.75rem"></div>
       <div style="display:flex;gap:8px;margin-top:1rem">
         <button id="doubt-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
@@ -181,9 +216,9 @@ import { Icon } from 'astro-icon/components';
       <p id="result-score" style="font-size:4.5rem;font-weight:900;margin:0;line-height:1;letter-spacing:-3px;color:var(--brand)">0</p>
       <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">/ 100 puntos</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Correctas</p></div>
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-wrong"   style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Incorrectas</p></div>
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-time"    style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Minutos</p></div>
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Correctas</p></div>
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-wrong"   style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Incorrectas</p></div>
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-time"    style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Minutos</p></div>
       </div>
       <p id="result-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.65"></p>
       <div style="display:flex;gap:8px">
@@ -224,6 +259,10 @@ import { Icon } from 'astro-icon/components';
   .opt-body { flex:1;padding:0.9375rem 1rem;display:flex;align-items:center; }
   .opt-body-text { font-size:0.9375rem;color:var(--ui-text-2);line-height:1.65;margin:0;transition:color 0.18s; }
 
+  /* En modo EXAM/TIMED: texto no seleccionable */
+  .exam-noselect .exam-main,
+  .exam-noselect .exam-sidebar { user-select: none; -webkit-user-select: none; }
+
   .hbtn { padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;border:1.5px solid #BAE6FD;background:#F0F9FF;color:#0369A1;cursor:pointer;transition:all 0.15s;font-family:inherit; }
   .hbtn:hover:not(:disabled) { background:#0369A1;color:white;border-color:#0369A1; }
   .hbtn:disabled { opacity:0.35;cursor:not-allowed; }
@@ -237,7 +276,7 @@ import { Icon } from 'astro-icon/components';
   import { requireAuth, isStudent }   from '../../lib/auth';
   import { testsApi }                 from '../../lib/api/tests.api';
   import { triedsApi }                from '../../lib/api/trieds.api';
-  import { aiTriedsApi, aiHintApi }   from '../../lib/api/ai-trieds.api';
+  import { aiHintApi }                from '../../lib/api/ai-trieds.api';
   import { apiFetch }                 from '../../lib/api/client';
   import type { QuestionDto, OptionDto } from '../../lib/api/types';
   import { getCompStyle, fmtTimer, scoreColor } from '../../lib/utils';
@@ -249,46 +288,113 @@ import { Icon } from 'astro-icon/components';
   const triedId      = params.get('tried');
   const testId       = params.get('test');
   const competenceId = params.get('comp');
-  const testMode     = params.get('mode') ?? '';   // PRACTICE | EXAM | TIMED
+  const testMode     = params.get('mode') ?? 'PRACTICE';
 
   if (!triedId || !testId || !competenceId) {
     window.location.replace('/tests');
     throw new Error('Missing params');
   }
 
-  // ── Estado ───────────────────────────────────────────────────────────
-  let questions:    QuestionDto[] = [];
-  let answers:      Record<string, string> = {};
-  let currentIdx    = 0;
-  let startTime     = Date.now();
-  let timerInt:     ReturnType<typeof setInterval> | null = null;
-  let examFinished  = false;
-  let durationSecs  = 0;
-  let aiHintsAvail  = false;
-  let currentQuestionId = '';
+  // ── Estado ───────────────────────────────────────────────────────
+  let questions:   QuestionDto[] = [];
+  let answers:     Record<string, string> = {};
+  let currentIdx   = 0;
+  let startTime    = Date.now();
+  let timerInt:    ReturnType<typeof setInterval> | null = null;
+  let examFinished = false;
+  let durationSecs = 0;
+  let aiHintsAvail = false;
 
-  // Caché de orden de opciones (para que no cambie al navegar)
+  // ── ANTI-FRAUDE ──────────────────────────────────────────────────
+  let fraudViolations  = 0;
+  let fraudModalOpen   = false;
+  let fraudCooldown    = false; // evita doble-disparo
+
+  const IS_STRICT_MODE = testMode === 'EXAM' || testMode === 'TIMED';
+
+  // Caché de opciones aleatorias por pregunta (una vez mezcladas, no cambian)
   const optionOrderCache = new Map<string, OptionDto[]>();
-  // Caché de pistas
-  const hintCache = new Map<string, Map<number, string>>();
-  // IDs de preguntas presentadas (para el review)
-  let presentedQuestionIds: string[] = [];
+  const hintCache        = new Map<string, Map<number, string>>();
 
   const DIFF_LABEL: Record<string, string> = { B:'Básico · 1pt', M:'Medio · 3pts', A:'Alto · 5pts' };
   const DIFF_COLOR: Record<string, string> = { B:'#059669', M:'#D97706', A:'#D41224' };
   const DIFF_BG:    Record<string, string> = { B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
   const LETTERS = ['A','B','C','D','E','F'];
 
-  function renderText(el: HTMLElement, raw: string) {
-    el.innerHTML = '';
-    const lines = (raw || '').replace(/\\n/g, '\n').split('\n');
-    lines.forEach((line, i) => {
-      if (i > 0) el.appendChild(document.createElement('br'));
-      if (line.trim()) el.appendChild(document.createTextNode(line));
+  // ── Anti-fraude: detectar salida de ventana ──────────────────────
+  if (IS_STRICT_MODE) {
+    // Sin selección de texto
+    document.documentElement.classList.add('exam-noselect');
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && ['c','a','u','s','p'].includes(e.key.toLowerCase())) e.preventDefault();
+      if (e.key === 'F12') e.preventDefault();
+    });
+
+    // Solo detectar cuando el usuario VUELVE (visibilitychange: visible)
+    // con debounce para evitar doble disparo
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'hidden') return;
+      if (fraudCooldown || examFinished || fraudModalOpen) return;
+      fraudCooldown = true;
+      setTimeout(() => { fraudCooldown = false; }, 2000);
+      handleFraudViolation();
     });
   }
 
-  // Obtener opciones en orden aleatorio (cacheado por pregunta)
+  function handleFraudViolation() {
+    fraudViolations++;
+
+    if (fraudViolations >= 3) {
+      // ANULAR examen
+      annulExam();
+      return;
+    }
+
+    // Mostrar advertencia modal
+    fraudModalOpen = true;
+    const counterEl = document.getElementById('fraud-counter')!;
+    const titleEl   = document.getElementById('fraud-title')!;
+    const descEl    = document.getElementById('fraud-desc')!;
+    const iconEl    = document.getElementById('fraud-icon')!;
+
+    counterEl.textContent = `Advertencia ${fraudViolations} de 2`;
+
+    if (fraudViolations === 1) {
+      iconEl.style.background = '#FEF3C7';
+      iconEl.innerHTML = '<svg width="32" height="32" fill="none" stroke="#D97706" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      titleEl.textContent = '⚠ Primera advertencia';
+      descEl.textContent  = 'Se detectó que saliste de la ventana del examen. Esto queda registrado. En la tercera ocasión, el examen será anulado automáticamente por posible plagio.';
+      (document.getElementById('fraud-accept') as HTMLButtonElement).style.background = 'linear-gradient(135deg,#D97706,#B45309)';
+    } else {
+      iconEl.style.background = '#FEE2E2';
+      iconEl.innerHTML = '<svg width="32" height="32" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      titleEl.textContent = '🚨 Segunda advertencia — ÚLTIMA';
+      descEl.textContent  = 'Esta es tu segunda y última advertencia. Si vuelves a salir de la ventana, el examen será anulado inmediatamente y registrado como plagio.';
+      (document.getElementById('fraud-accept') as HTMLButtonElement).style.background = 'linear-gradient(135deg,#DC2626,#991B1B)';
+    }
+
+    (document.getElementById('fraud-modal') as HTMLElement).style.display = 'flex';
+  }
+
+  document.getElementById('fraud-accept')?.addEventListener('click', () => {
+    (document.getElementById('fraud-modal') as HTMLElement).style.display = 'none';
+    fraudModalOpen = false;
+  });
+
+  async function annulExam() {
+    examFinished = true;
+    if (timerInt) clearInterval(timerInt);
+    // Finalizar el intento en el backend
+    try {
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      await triedsApi.finish(triedId!, elapsed);
+    } catch {}
+    (document.getElementById('fraud-modal') as HTMLElement).style.display = 'none';
+    (document.getElementById('annulled-modal') as HTMLElement).style.display = 'flex';
+  }
+
+  // ── Opciones aleatorias (cacheadas) ───────────────────────────────
   function getShuffledOptions(q: QuestionDto): OptionDto[] {
     if (!optionOrderCache.has(q.questionId)) {
       const shuffled = [...(q.options ?? [])].sort(() => Math.random() - 0.5);
@@ -297,7 +403,7 @@ import { Icon } from 'astro-icon/components';
     return optionOrderCache.get(q.questionId)!;
   }
 
-  // ── Nav de preguntas ──────────────────────────────────────────────────
+  // ── Nav de preguntas ─────────────────────────────────────────────
   function buildQNav() {
     const nav = document.getElementById('q-nav')!;
     nav.innerHTML = '';
@@ -329,18 +435,15 @@ import { Icon } from 'astro-icon/components';
     if (mLbl)  mLbl.textContent  = `${answered} / ${total} respondidas`;
   }
 
-  // ── Renderizar pregunta ───────────────────────────────────────────────
+  // ── Renderizar pregunta ──────────────────────────────────────────
   function renderQuestion(idx: number) {
     currentIdx = idx;
-    const q = questions[idx];
+    const q    = questions[idx];
     if (!q) return;
-    currentQuestionId = q.questionId;
 
     const s = getCompStyle(competenceId!, '');
-    const numBadge = document.getElementById('q-number-badge');
-    if (numBadge) numBadge.textContent = `P${idx + 1}`;
-    const mobileNum = document.getElementById('mobile-q-num');
-    if (mobileNum) mobileNum.textContent = String(idx + 1);
+    (document.getElementById('q-number-badge')  as HTMLElement).textContent = `P${idx + 1}`;
+    (document.getElementById('mobile-q-num')    as HTMLElement).textContent = String(idx + 1);
 
     const chipEl = document.getElementById('q-comp-chip')!;
     chipEl.textContent = s.short;
@@ -358,62 +461,62 @@ import { Icon } from 'astro-icon/components';
       answeredBadge.style.display = 'none';   changeHint.style.display = 'none';
     }
 
-    const stmtEl = document.getElementById('q-statement')!;
-    renderText(stmtEl, q.statement);
+    // Botón duda — siempre visible para estudiantes
+    const doubtBtn = document.getElementById('doubt-btn')!;
+    doubtBtn.style.display = isStudent() ? 'inline' : 'none';
 
-    // Opciones en orden aleatorio (cacheado)
-    const optsEl      = document.getElementById('q-options')!;
-    optsEl.innerHTML  = '';
-    const shuffled    = getShuffledOptions(q);
+    // Enunciado
+    (document.getElementById('q-statement') as HTMLElement).textContent = q.statement;
+
+    // Opciones aleatorias (cacheadas para consistencia entre navegaciones)
+    const optsEl   = document.getElementById('q-options')!;
+    optsEl.innerHTML = '';
+    const shuffled   = getShuffledOptions(q);
     const selectedOpt = answers[q.questionId];
 
     shuffled.forEach((opt, i) => {
       const btn = document.createElement('button');
       btn.className = `exam-option${selectedOpt === opt.optionId ? ' selected' : ''}`;
       btn.style.animationDelay = `${i * 0.045}s`;
-      const letterCol = document.createElement('div');
+
+      const letterCol   = document.createElement('div');
       letterCol.className = 'opt-letter-col';
-      const letterBadge = document.createElement('span');
-      letterBadge.className = 'opt-letter-badge';
+      const letterBadge  = document.createElement('span');
+      letterBadge.className  = 'opt-letter-badge';
       letterBadge.textContent = LETTERS[i] ?? String(i + 1);
       letterCol.appendChild(letterBadge);
+
       const body = document.createElement('div');
       body.className = 'opt-body';
       const textP = document.createElement('p');
       textP.className = 'opt-body-text';
-      renderText(textP, opt.optionText);
+      textP.textContent = opt.optionText;
       body.appendChild(textP);
+
       btn.appendChild(letterCol);
       btn.appendChild(body);
       btn.addEventListener('click', () => selectAnswer(q.questionId, opt.optionId, idx));
       optsEl.appendChild(btn);
     });
 
-    // Pistas IA (solo PRACTICE con IA disponible)
+    // Pistas IA (solo PRACTICE con IA)
     const hintSection = document.getElementById('hint-section')!;
     if (aiHintsAvail && testMode === 'PRACTICE') {
       hintSection.style.display = 'block';
-      const qHints = hintCache.get(q.questionId) ?? new Map<number, string>();
-      const maxUsed = qHints.size;
-      document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
-        const lvl = Number(btn.dataset.level);
-        btn.disabled = lvl > maxUsed + 1;
+      const qHints  = hintCache.get(q.questionId) ?? new Map<number, string>();
+      document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(b => {
+        b.disabled = Number(b.dataset.level) > qHints.size + 1;
       });
       const hintBox = document.getElementById('hint-box')!;
-      const hintText = document.getElementById('hint-text')!;
       if (qHints.size > 0) {
-        const latestLvl = Math.max(...qHints.keys());
-        hintBox.style.display = 'block'; hintText.textContent = qHints.get(latestLvl)!;
+        hintBox.style.display = 'block';
+        (document.getElementById('hint-text') as HTMLElement).textContent = qHints.get(Math.max(...qHints.keys()))!;
       } else {
-        hintBox.style.display = 'none'; hintText.textContent = '';
+        hintBox.style.display = 'none';
       }
     } else {
       hintSection.style.display = 'none';
     }
-
-    // Botón reportar duda
-    const doubtBtn = document.getElementById('doubt-btn')!;
-    doubtBtn.style.display = isStudent() ? 'inline' : 'none';
 
     // Botones nav
     const prevBtn = document.getElementById('btn-prev') as HTMLButtonElement;
@@ -430,22 +533,22 @@ import { Icon } from 'astro-icon/components';
       nextBtn.style.boxShadow  = '0 3px 10px rgba(212,18,36,0.28)';
       nextBtn.innerHTML = `Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>`;
     }
+
     updateQNav();
   }
 
-  // ── Seleccionar respuesta ─────────────────────────────────────────────
+  // ── Seleccionar respuesta ────────────────────────────────────────
   async function selectAnswer(questionId: string, optionId: string, qIdx: number) {
     answers[questionId] = optionId;
-    const q = questions[qIdx];
+    const q        = questions[qIdx];
     const shuffled = getShuffledOptions(q);
-    const optsEl = document.getElementById('q-options')!;
+    const optsEl   = document.getElementById('q-options')!;
     optsEl.querySelectorAll<HTMLElement>('.exam-option').forEach((btn, i) => {
       if (shuffled[i]?.optionId === optionId) btn.classList.add('selected');
       else btn.classList.remove('selected');
     });
-    const answeredBadge = document.getElementById('q-answered-badge')!;
-    const changeHint    = document.getElementById('q-change-hint')!;
-    answeredBadge.style.display = 'inline'; changeHint.style.display = 'block';
+    (document.getElementById('q-answered-badge') as HTMLElement).style.display = 'inline';
+    (document.getElementById('q-change-hint')   as HTMLElement).style.display = 'block';
     updateQNav();
     try {
       await triedsApi.submitAnswer(triedId!, questionId, optionId);
@@ -454,31 +557,35 @@ import { Icon } from 'astro-icon/components';
     }
   }
 
-  // ── Pistas IA ─────────────────────────────────────────────────────────
+  // ── Pistas IA ────────────────────────────────────────────────────
   document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const q     = questions[currentIdx];
       if (!q) return;
-      const level = Number(btn.dataset.level);
-      const qHints    = hintCache.get(q.questionId) ?? new Map<number, string>();
-      const hintBox   = document.getElementById('hint-box')!;
-      const hintText  = document.getElementById('hint-text')!;
-      const loading   = document.getElementById('hint-loading')!;
+      const level  = Number(btn.dataset.level);
+      const qHints = hintCache.get(q.questionId) ?? new Map<number, string>();
+      const hintBox  = document.getElementById('hint-box')!;
+      const hintText = document.getElementById('hint-text')!;
+      const loading  = document.getElementById('hint-loading')!;
+
       if (qHints.has(level)) {
-        hintBox.style.display = 'block'; hintText.textContent = qHints.get(level)!;
+        hintBox.style.display = 'block';
+        hintText.textContent  = qHints.get(level)!;
         return;
       }
-      hintBox.style.display = 'block'; hintText.textContent = '';
-      loading.style.display = 'block'; btn.disabled = true;
+      hintBox.style.display  = 'block';
+      hintText.textContent   = '';
+      loading.style.display  = 'block';
+      btn.disabled = true;
       try {
         const res  = await aiHintApi.getHint(competenceId!, q.questionId, level);
         const text = res.data!.hint;
         qHints.set(level, text);
         hintCache.set(q.questionId, qHints);
         hintText.textContent = text;
-        const nextBtn = document.querySelector<HTMLButtonElement>(`.hbtn[data-level="${level + 1}"]`);
-        if (nextBtn && level < 3) nextBtn.disabled = false;
-      } catch (err: any) {
+        const next = document.querySelector<HTMLButtonElement>(`.hbtn[data-level="${level + 1}"]`);
+        if (next && level < 3) next.disabled = false;
+      } catch {
         hintText.textContent = 'No se pudo obtener la pista.';
       } finally {
         loading.style.display = 'none'; btn.disabled = false;
@@ -486,21 +593,23 @@ import { Icon } from 'astro-icon/components';
     });
   });
 
-  // ── Reportar duda ─────────────────────────────────────────────────────
+  // ── Reportar duda ─────────────────────────────────────────────────
   document.getElementById('doubt-btn')?.addEventListener('click', () => {
     const q = questions[currentIdx];
     if (!q) return;
     const preview = document.getElementById('doubt-q-preview')!;
     preview.textContent = q.statement.substring(0, 120) + (q.statement.length > 120 ? '...' : '');
-    (document.getElementById('doubt-message') as HTMLTextAreaElement).value = '';
-    (document.getElementById('doubt-error') as HTMLElement).style.display = 'none';
-    (document.getElementById('doubt-modal') as HTMLElement).style.display = 'flex';
+    (document.getElementById('doubt-message')  as HTMLTextAreaElement).value = '';
+    (document.getElementById('doubt-error')   as HTMLElement).style.display = 'none';
+    (document.getElementById('doubt-modal')   as HTMLElement).style.display = 'flex';
   });
-
   document.getElementById('doubt-cancel')?.addEventListener('click', () => {
     (document.getElementById('doubt-modal') as HTMLElement).style.display = 'none';
   });
-
+  document.getElementById('doubt-modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('doubt-modal'))
+      (document.getElementById('doubt-modal') as HTMLElement).style.display = 'none';
+  });
   document.getElementById('doubt-submit')?.addEventListener('click', async () => {
     const q       = questions[currentIdx];
     const message = (document.getElementById('doubt-message') as HTMLTextAreaElement).value.trim();
@@ -527,18 +636,7 @@ import { Icon } from 'astro-icon/components';
     }
   });
 
-  document.getElementById('doubt-modal')?.addEventListener('click', e => {
-    if (e.target === document.getElementById('doubt-modal'))
-      (document.getElementById('doubt-modal') as HTMLElement).style.display = 'none';
-  });
-
-  // ── Timer ─────────────────────────────────────────────────────────────
-  function updateTimer(secs: number) {
-    const el = document.getElementById('timer-display');
-    if (el) el.textContent = fmtTimer(secs);
-  }
-
-  // ── Nav ───────────────────────────────────────────────────────────────
+  // ── Navegación ────────────────────────────────────────────────────
   document.getElementById('btn-prev')?.addEventListener('click', () => {
     if (currentIdx > 0) renderQuestion(currentIdx - 1);
   });
@@ -551,7 +649,7 @@ import { Icon } from 'astro-icon/components';
     if (confirm('¿Seguro que quieres abandonar?')) finishExam(true);
   });
 
-  // ── Modal resumen ─────────────────────────────────────────────────────
+  // ── Modal resumen ────────────────────────────────────────────────
   function openSummaryModal() {
     const answered = Object.keys(answers).length;
     const total    = questions.length;
@@ -559,17 +657,8 @@ import { Icon } from 'astro-icon/components';
     (document.getElementById('summary-total')    as HTMLElement).textContent = String(total);
     (document.getElementById('summary-answered') as HTMLElement).textContent = String(answered);
     (document.getElementById('summary-pending')  as HTMLElement).textContent = String(pending);
-    (document.getElementById('summary-alert') as HTMLElement).style.display = pending > 0 ? 'block' : 'none';
-    const warningsEl = document.getElementById('summary-warnings')!;
-    warningsEl.innerHTML = '';
-    if (pending > 0) {
-      const unanswered = questions.map((q,i)=>({q,i})).filter(({q})=>!answers[q.questionId]);
-      const p = document.createElement('p');
-      p.style.cssText = 'font-size:0.75rem;color:var(--ui-text-3);padding:0 0 0.5rem';
-      p.textContent = `Sin responder: preguntas ${unanswered.map(({i})=>i+1).join(', ')}`;
-      warningsEl.appendChild(p);
-    }
-    (document.getElementById('summary-modal') as HTMLElement).style.display = 'flex';
+    (document.getElementById('summary-alert')   as HTMLElement).style.display = pending > 0 ? 'block' : 'none';
+    (document.getElementById('summary-modal')   as HTMLElement).style.display = 'flex';
   }
   document.getElementById('summary-back')?.addEventListener('click', () => {
     (document.getElementById('summary-modal') as HTMLElement).style.display = 'none';
@@ -579,7 +668,13 @@ import { Icon } from 'astro-icon/components';
     finishExam(false);
   });
 
-  // ── Finalizar ─────────────────────────────────────────────────────────
+  // ── Timer ────────────────────────────────────────────────────────
+  function updateTimer(secs: number) {
+    const el = document.getElementById('timer-display');
+    if (el) el.textContent = fmtTimer(secs);
+  }
+
+  // ── Finalizar ────────────────────────────────────────────────────
   async function finishExam(_timedOut = false) {
     if (examFinished) return;
     examFinished = true;
@@ -622,52 +717,28 @@ import { Icon } from 'astro-icon/components';
     }, 20);
   }
 
-  // ── Init ──────────────────────────────────────────────────────────────
+  // ── Init ─────────────────────────────────────────────────────────
   async function init() {
-    // Anti-fraude en modos EXAM y TIMED
-    if (testMode === 'EXAM' || testMode === 'TIMED') {
-      document.body.classList.add('exam-antifraud');
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('keydown', e => {
-        if ((e.ctrlKey && ['c','a','u','s'].includes(e.key.toLowerCase())) || e.key === 'F12')
-          e.preventDefault();
-      });
-      let tabWarnings = 0;
-      const showTabWarning = (count: number) => {
-        document.querySelector('.tab-warning-banner')?.remove();
-        const banner = document.createElement('div');
-        banner.className = 'tab-warning-banner';
-        banner.textContent = `Advertencia ${count}/3: No debes salir de la ventana del examen.`;
-        banner.style.background = count >= 3 ? '#DC2626' : '#D97706';
-        document.body.prepend(banner);
-        setTimeout(() => banner.remove(), 5000);
-      };
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') return;
-        tabWarnings++; showTabWarning(tabWarnings);
-      });
-      window.addEventListener('blur', () => { tabWarnings++; showTabWarning(tabWarnings); });
-    }
-
-    // Verificar disponibilidad de IA para hints en PRACTICE
+    // Verificar IA para pistas (solo PRACTICE)
     if (testMode === 'PRACTICE') {
       try {
-        const s = await aiTriedsApi.status();
+        const { aiTriedsApi: aiApi } = await import('../../lib/api/ai-trieds.api');
+        const s = await aiApi.status();
         aiHintsAvail = !!(s.data?.enabled && s.data?.reachable);
       } catch {}
     }
 
-    // Mode badge en header
-    const modeConfig: Record<string, {label:string;bg:string;color:string}> = {
-      PRACTICE: { label:'Práctica',     bg:'#D1FAE5', color:'#059669' },
-      EXAM:     { label:'Examen',       bg:'#DBEAFE', color:'#2563EB' },
+    // Mode badge
+    const modeConfig: Record<string, { label: string; bg: string; color: string }> = {
+      PRACTICE: { label:'Práctica', bg:'#D1FAE5', color:'#059669' },
+      EXAM:     { label:'Examen',   bg:'#DBEAFE', color:'#2563EB' },
       TIMED:    { label:'Cronometrado', bg:'#FEF3C7', color:'#D97706' },
     };
     const mc = modeConfig[testMode];
     if (mc) {
-      const modeBadge = document.getElementById('mode-badge')!;
-      modeBadge.textContent = mc.label;
-      modeBadge.style.cssText = `padding:2px 8px;border-radius:12px;font-size:0.625rem;font-weight:700;flex-shrink:0;display:inline;background:${mc.bg};color:${mc.color}`;
+      const mb = document.getElementById('mode-badge')!;
+      mb.textContent = mc.label;
+      mb.style.cssText = `padding:2px 8px;border-radius:12px;font-size:0.625rem;font-weight:700;flex-shrink:0;display:inline;background:${mc.bg};color:${mc.color}`;
     }
 
     try {
@@ -685,19 +756,17 @@ import { Icon } from 'astro-icon/components';
         return;
       }
 
-      // Guardar IDs de preguntas presentadas para el review
-      presentedQuestionIds = questions.map(q => q.questionId);
-      sessionStorage.setItem(`rp_exam_${triedId}`, JSON.stringify(presentedQuestionIds));
+      // Guardar IDs de preguntas presentadas
+      sessionStorage.setItem(`rp_exam_${triedId}`, JSON.stringify(questions.map(q => q.questionId)));
 
       durationSecs = test.durationSeconds;
 
-      // Header
       const s = getCompStyle(competenceId!, test.competenceName ?? '');
       const badgeEl = document.getElementById('exam-comp-badge')!;
       badgeEl.textContent = test.competenceName ?? competenceId!;
       badgeEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0`;
-      (document.getElementById('exam-name') as HTMLElement).textContent = test.testName;
-      (document.getElementById('mobile-q-total') as HTMLElement).textContent = String(questions.length);
+      (document.getElementById('exam-name')       as HTMLElement).textContent = test.testName;
+      (document.getElementById('mobile-q-total')  as HTMLElement).textContent = String(questions.length);
 
       // Timer
       let remaining = durationSecs;
@@ -714,8 +783,8 @@ import { Icon } from 'astro-icon/components';
       }, 1000);
 
       buildQNav();
-      (document.getElementById('exam-loading') as HTMLElement).style.display  = 'none';
-      (document.getElementById('question-card') as HTMLElement).style.display = 'block';
+      (document.getElementById('exam-loading')   as HTMLElement).style.display = 'none';
+      (document.getElementById('question-card')  as HTMLElement).style.display = 'block';
       renderQuestion(0);
 
     } catch (err: any) {

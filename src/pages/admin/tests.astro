@@ -502,27 +502,28 @@ import AppLayout from '../../layouts/AppLayout.astro';
     } catch { listEl.innerHTML = '<p style="color:#DC2626;text-align:center;padding:1rem;font-size:0.875rem">Error al cargar</p>'; }
   }
 
-  async function loadAvailableQuestions() {
-    const list = document.getElementById('assoc-question-list')!;
-    list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Cargando...</p>';
-    try {
-      // Cargar preguntas de la competencia del test (sin filtro extra)
-      const res = await competencesApi.getQuestions(assocCompId, 0, 200);
-      allAvailableQuestions = (res.data?.content ?? []).filter((q:any) => q.isActive !== false);
-      renderAvailableQuestions();
-    } catch { list.innerHTML = '<p style="color:#DC2626;text-align:center;padding:1.5rem;font-size:0.875rem">Error al cargar preguntas</p>'; }
+async function loadAvailableQuestions() {
+  const list = document.getElementById('assoc-question-list')!;
+  list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Cargando...</p>';
+  try {
+    // ← SIN filtro de competencia: ya viene fijo por la competencia del test
+    const res = await competencesApi.getQuestions(assocCompId, 0, 200);
+    allAvailableQuestions = (res.data?.content ?? []).filter((q: any) => q.isActive !== false);
+    renderAvailableQuestions();
+  } catch {
+    list.innerHTML = '<p style="color:#DC2626;text-align:center;padding:1.5rem;font-size:0.875rem">Error al cargar preguntas</p>';
   }
+}
 
-  function renderAvailableQuestions() {
-    const list   = document.getElementById('assoc-question-list')!;
-    const search = (document.getElementById('assoc-search') as HTMLInputElement).value.toLowerCase();
-    const diff   = (document.getElementById('assoc-filter-diff') as HTMLSelectElement).value;
-    const filtered = allAvailableQuestions.filter(q => {
-      const matchSearch = !search || (q.statement||'').toLowerCase().includes(search);
-      const matchDiff   = diff === 'ALL' || q.difficultyLevel === diff;
-      const notAssigned = !assignedQuestionIds.has(q.questionId);
-      return matchSearch && matchDiff && notAssigned;
-    });
+function renderAvailableQuestions() {
+  const list   = document.getElementById('assoc-question-list')!;
+  const search = (document.getElementById('assoc-search') as HTMLInputElement).value.toLowerCase();
+  // ← Quita el filtro diff de assoc-filter-diff, ya no existe en el modal
+  const filtered = allAvailableQuestions.filter(q => {
+    const matchSearch = !search || (q.statement || '').toLowerCase().includes(search);
+    const notAssigned = !assignedQuestionIds.has(q.questionId);
+    return matchSearch && notAssigned;
+  });
     if (!filtered.length) {
       list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">No hay preguntas disponibles para agregar.</p>';
       return;
