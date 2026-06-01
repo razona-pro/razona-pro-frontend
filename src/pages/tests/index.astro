@@ -176,7 +176,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
   let filterComp = 'ALL';
   let filterMode = 'ALL';
   let searchStr  = '';
-  let pendingStart: { testId: string; competenceId: string } | null = null;
+  let pendingStart: { testId: string; competenceId: string; testMode: string } | null = null;
 
   // ── Skeleton ──────────────────────────────────────────────────────
   function showSkeleton() {
@@ -317,6 +317,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
           <button class="test-start-btn"
             data-test-id="${t.testId}"
             data-comp-id="${t.competenceId}"
+            data-mode="${t.testMode}"
             data-name="${t.testName.replace(/"/g,'&quot;')}"
             data-dur="${durMin}"
             data-q="${t.questionsToPresent ?? '?'}">
@@ -330,7 +331,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
     // Listeners botones de inicio
     grid.querySelectorAll<HTMLButtonElement>('.test-start-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        pendingStart = { testId: btn.dataset.testId!, competenceId: btn.dataset.compId! };
+        pendingStart = {
+          testId: btn.dataset.testId!,
+          competenceId: btn.dataset.compId!,
+          testMode: btn.dataset.mode!
+        };
         const modal = document.getElementById('confirm-modal')!;
         document.getElementById('modal-title')!.textContent = `¿Iniciar "${btn.dataset.name}"?`;
         document.getElementById('modal-desc')!.textContent  = `Duración: ${btn.dataset.dur} min · ${btn.dataset.q} preguntas. Se registrará un nuevo intento en tu historial.`;
@@ -352,14 +357,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
   });
   document.getElementById('modal-confirm')?.addEventListener('click', async () => {
     if (!pendingStart) return;
+    const { testId, competenceId, testMode } = pendingStart;
     document.getElementById('confirm-modal')!.style.display = 'none';
-    const { testId, competenceId } = pendingStart;
     pendingStart = null;
     try {
       const res = await triedsApi.start(testId, competenceId);
       if (res.data) {
         toast.success('Intento iniciado');
-        window.location.href = `/tests/exam?tried=${res.data.triedId}&test=${testId}&comp=${competenceId}`;
+        // ✅ CORRECCIÓN: usar testMode guardado
+        window.location.href = `/tests/exam?tried=${res.data.triedId}&test=${testId}&comp=${competenceId}&mode=${testMode}`;
       }
     } catch (err: any) {
       toast.error('No se pudo iniciar', { description: err?.message ?? 'Inténtalo de nuevo.' });

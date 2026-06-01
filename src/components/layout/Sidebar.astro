@@ -327,24 +327,23 @@ if (u && !u.firstName) {
 }
 
 // ── Competencias dinámicas ────────────────────────────────────────
-const COMP_COLORS: Record<string, {
-[x: string]: any; color: string; bg: string 
-}> = {
-  'lectura':   { color: '#D41224', bg: '#FEE2E2' },
-  'cuantit':   { color: '#2563EB', bg: '#DBEAFE' },
-  'razon':     { color: '#2563EB', bg: '#DBEAFE' },
-  'ciudadan':  { color: '#059669', bg: '#D1FAE5' },
-  'escrit':    { color: '#7C3AED', bg: '#EDE9FE' },
-  'comunicac': { color: '#7C3AED', bg: '#EDE9FE' },
-  'ingl':      { color: '#D97706', bg: '#FEF3C7' },
+const COMP_COLORS: Record<string, { color: string; bg: string; key: string }> = {
+  'lectura':   { color: '#D41224', bg: '#FEE2E2', key: 'lc'  },
+  'cuantit':   { color: '#2563EB', bg: '#DBEAFE', key: 'rq'  },
+  'razon':     { color: '#2563EB', bg: '#DBEAFE', key: 'rq'  },
+  'ciudadan':  { color: '#059669', bg: '#D1FAE5', key: 'cc'  },
+  'escrit':    { color: '#7C3AED', bg: '#EDE9FE', key: 'ce'  },
+  'comunicac': { color: '#7C3AED', bg: '#EDE9FE', key: 'ce'  },
+  'ingl':      { color: '#D97706', bg: '#FEF3C7', key: 'en'  },
 };
 
-function getCompStyle(name: string, competenceName?: string) {
-  const n = name.toLowerCase();
+function getCompStyle(competenceId: string, competenceName?: string) {
+  // Buscar por nombre, no por ID (CPE001 no contiene ninguna keyword)
+  const n = (competenceName || competenceId).toLowerCase();
   for (const [kw, style] of Object.entries(COMP_COLORS)) {
     if (n.includes(kw)) return style;
   }
-  return { color: '#6B7280', bg: '#F3F4F6' };
+  return { color: '#6B7280', bg: '#F3F4F6', key: '' };
 }
 
 // Abreviaturas para el punto

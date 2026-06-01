@@ -56,9 +56,9 @@ export const aiTriedsApi = {
       { method: 'PUT' }
     ),
    nextQuestion: (aiTriedId: string) =>
-    apiFetch<AiQuestionDto>(`/api/ai-trieds/${aiTriedId}/next`, {
-      method: 'GET' // <-- Cámbialo a 'POST' si tu controlador en Spring Boot usa @PostMapping
-    }), 
+  apiFetch<AiQuestionDto>(`/api/ai-trieds/${aiTriedId}/next-question`, {
+    method: 'POST',
+  }),
 };
 
 // Pistas para preguntas del banco estático

@@ -320,6 +320,7 @@ declare global {
   document.getElementById('create-cancel')?.addEventListener('click',() => { createModal.style.display = 'none'; });
   createModal.addEventListener('click', e => { if (e.target === createModal) createModal.style.display = 'none'; });
 
+  // MODIFICADO: submit del formulario de creación
   document.getElementById('create-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const errEl  = document.getElementById('create-error')!;
@@ -341,11 +342,17 @@ declare global {
 
     submit.disabled = true; lblEl.textContent = 'Creando...';
     try {
-      await testsApi.create({ competenceId, testName, description, durationSeconds: durMin * 60, questionsToPresent, testMode });
-      toast.success('Test creado correctamente');
+      const res = await testsApi.create({
+        competenceId, testName, description,
+        durationSeconds: durMin * 60, questionsToPresent, testMode,
+      });
+      const t = res.data!;
+      toast.success('Test creado. Asocia preguntas a continuación.');
       createModal.style.display = 'none';
       (document.getElementById('create-form') as HTMLFormElement).reset();
-      page = 0; loadPage();
+      page = 0;
+      // ← Abrir modal de asociación con los datos del test recién creado
+      openAssocModal(t.testId, t.competenceId, t.testName);
     } catch (err: any) {
       errEl.textContent = err?.message ?? 'Error al crear test.';
       errEl.style.display = 'block';
@@ -369,157 +376,139 @@ declare global {
       deactivateModal.style.display = 'none';
     }
   });
-  // ── Asociar preguntas ──────────────────────────────────────────────────
-let assocTestId  = '';
-let assocSelected = new Set<string>();
-let allQuestions: any[] = [];
 
-function openAssocModal(testId: string, testName: string) {
-  assocTestId = testId;
-  assocSelected.clear();
-  document.getElementById('assoc-test-name')!.textContent = testName;
-  document.getElementById('assoc-modal')!.style.display   = 'flex';
-  document.getElementById('assoc-selected-count')!.textContent = '0 preguntas seleccionadas';
-  loadAssocQuestions();
-}
+  // ── Asociar preguntas (NUEVA VERSIÓN) ─────────────────────────────────────────
+  let assocTestId  = '';
+  let assocCompId  = '';          // ← NUEVO
+  let assocSelected = new Set<string>();
+  let allQuestions: any[] = [];
 
-async function loadAssocQuestions() {
-  const list = document.getElementById('assoc-question-list')!;
-  list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Cargando...</p>';
+  function openAssocModal(testId: string, compId: string, testName: string) {
+    assocTestId = testId;
+    assocCompId = compId;          // ← guardar competenceId
+    assocSelected.clear();
+    document.getElementById('assoc-test-name')!.textContent = testName;
+    document.getElementById('assoc-modal')!.style.display   = 'flex';
+    document.getElementById('assoc-selected-count')!.textContent = '0 preguntas seleccionadas';
+    loadAssocQuestions();
+  }
 
-  try {
-    // Cargar preguntas del banco (todas, para asociar)
-    const res = await fetch(`${apiBase}/api/questions?page=0&size=200`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('rp_token')}` }
-    });
-    const json = await res.json();
-    allQuestions = json.data?.content ?? json.data ?? [];
+  async function loadAssocQuestions() {
+    const list = document.getElementById('assoc-question-list')!;
+    list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Cargando...</p>';
 
-    // Cargar competencias para el filtro
-    const compRes = await fetch(`${apiBase}/api/competences?active=true`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('rp_token')}` }
-    });
-    const compJson = await compRes.json();
-    const comps    = compJson.data ?? [];
-    const compSel  = document.getElementById('assoc-filter-comp') as HTMLSelectElement;
-    compSel.innerHTML = '<option value="">Todas las competencias</option>';
-    comps.forEach((c: any) => {
+    try {
+      // Endpoint correcto: preguntas de la competencia del test
+      const token = localStorage.getItem('rp_token');
+      const res   = await fetch(
+        `${apiBase}/api/competences/${assocCompId}/questions?page=0&size=200`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const json = await res.json();
+      allQuestions = json.data?.content ?? [];
+
+      const compSel = document.getElementById('assoc-filter-comp') as HTMLSelectElement;
+      compSel.innerHTML = '<option value="">Todas las competencias</option>';
+      // Solo hay una competencia en contexto; la mostramos igualmente
       const opt = document.createElement('option');
-      opt.value = c.competenceId;
-      opt.textContent = c.competenceName;
+      opt.value = assocCompId;
+      opt.textContent = allQuestions[0]?.competenceName ?? assocCompId;
       compSel.appendChild(opt);
-    });
 
-    renderAssocList(allQuestions);
-  } catch (err) {
-    list.innerHTML = '<p style="color:#DC2626;text-align:center;padding:1.5rem;font-size:0.875rem">Error al cargar las preguntas</p>';
-  }
-}
-
-function renderAssocList(questions: any[]) {
-  const list = document.getElementById('assoc-question-list')!;
-  const search = (document.getElementById('assoc-search') as HTMLInputElement).value.toLowerCase();
-  const compFilter = (document.getElementById('assoc-filter-comp') as HTMLSelectElement).value;
-
-  const filtered = questions.filter(q => {
-    const matchComp   = !compFilter || q.competenceId === compFilter;
-    const matchSearch = !search || q.statement?.toLowerCase().includes(search);
-    return matchComp && matchSearch;
-  });
-
-  if (!filtered.length) {
-    list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">No se encontraron preguntas.</p>';
-    return;
+      renderAssocList(allQuestions);
+    } catch (err) {
+      list.innerHTML = '<p style="color:#DC2626;text-align:center;padding:1.5rem;font-size:0.875rem">Error al cargar las preguntas</p>';
+    }
   }
 
-  list.innerHTML = '';
-  filtered.forEach(q => {
-    const checked = assocSelected.has(q.questionId);
-    const row = document.createElement('label');
-    row.style.cssText = `display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid ${checked ? 'var(--brand)' : 'var(--ui-border)'};background:${checked ? 'rgba(212,18,36,0.04)' : 'var(--ui-surface)'};cursor:pointer;transition:all 0.15s`;
+  function renderAssocList(questions: any[]) {
+    const list = document.getElementById('assoc-question-list')!;
+    const search = (document.getElementById('assoc-search') as HTMLInputElement).value.toLowerCase();
+    const compFilter = (document.getElementById('assoc-filter-comp') as HTMLSelectElement).value;
 
-    const diffMap: Record<string, string> = { B: 'Básico', M: 'Medio', A: 'Alto' };
-    const diffColors: Record<string, string> = { B: '#059669', M: '#D97706', A: '#DC2626' };
-    const diff = q.difficultyLevel ?? 'M';
-
-    row.innerHTML = `
-      <input type="checkbox" data-qid="${q.questionId}" ${checked ? 'checked' : ''}
-        style="margin-top:3px;accent-color:var(--brand);width:15px;height:15px;flex-shrink:0" />
-      <div style="flex:1;min-width:0">
-        <p style="font-size:0.8125rem;color:var(--ui-text-1);margin:0 0 4px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
-          ${q.statement ?? 'Sin enunciado'}
-        </p>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(212,18,36,0.1);color:var(--brand)">${q.competenceName ?? ''}</span>
-          <span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:10px;color:${diffColors[diff]};background:${diffColors[diff]}1A">${diffMap[diff] ?? diff}</span>
-        </div>
-      </div>`;
-
-    row.querySelector('input')?.addEventListener('change', (e) => {
-      const chk = e.target as HTMLInputElement;
-      if (chk.checked) assocSelected.add(q.questionId);
-      else             assocSelected.delete(q.questionId);
-      row.style.borderColor = chk.checked ? 'var(--brand)' : 'var(--ui-border)';
-      row.style.background  = chk.checked ? 'rgba(212,18,36,0.04)' : 'var(--ui-surface)';
-      document.getElementById('assoc-selected-count')!.textContent =
-        `${assocSelected.size} pregunta(s) seleccionada(s)`;
+    const filtered = questions.filter(q => {
+      const matchComp   = !compFilter || q.competenceId === compFilter;
+      const matchSearch = !search || q.statement?.toLowerCase().includes(search);
+      return matchComp && matchSearch;
     });
 
-    list.appendChild(row);
-  });
-}
+    if (!filtered.length) {
+      list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">No se encontraron preguntas.</p>';
+      return;
+    }
 
-// Filtros en tiempo real
-document.getElementById('assoc-filter-comp')?.addEventListener('change', () => renderAssocList(allQuestions));
-document.getElementById('assoc-search')?.addEventListener('input',  () => renderAssocList(allQuestions));
+    list.innerHTML = '';
+    filtered.forEach(q => {
+      const checked = assocSelected.has(q.questionId);
+      const row = document.createElement('label');
+      row.style.cssText = `display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid ${checked ? 'var(--brand)' : 'var(--ui-border)'};background:${checked ? 'rgba(212,18,36,0.04)' : 'var(--ui-surface)'};cursor:pointer;transition:all 0.15s`;
 
-// Cerrar / omitir
-document.getElementById('assoc-close')?.addEventListener('click', () => {
-  document.getElementById('assoc-modal')!.style.display = 'none';
-});
-document.getElementById('assoc-skip')?.addEventListener('click', () => {
-  document.getElementById('assoc-modal')!.style.display = 'none';
-  toast.success('Test creado. Puedes asociar preguntas en cualquier momento.');
-});
+      const diffMap: Record<string, string> = { B: 'Básico', M: 'Medio', A: 'Alto' };
+      const diffColors: Record<string, string> = { B: '#059669', M: '#D97706', A: '#DC2626' };
+      const diff = q.difficultyLevel ?? 'M';
 
-// Guardar asociaciones
-document.getElementById('assoc-save')?.addEventListener('click', async () => {
-  if (!assocSelected.size) {
-    toast.error('Selecciona al menos una pregunta');
-    return;
+      row.innerHTML = `
+        <input type="checkbox" data-qid="${q.questionId}" ${checked ? 'checked' : ''}
+          style="margin-top:3px;accent-color:var(--brand);width:15px;height:15px;flex-shrink:0" />
+        <div style="flex:1;min-width:0">
+          <p style="font-size:0.8125rem;color:var(--ui-text-1);margin:0 0 4px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
+            ${q.statement ?? 'Sin enunciado'}
+          </p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(212,18,36,0.1);color:var(--brand)">${q.competenceName ?? ''}</span>
+            <span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:10px;color:${diffColors[diff]};background:${diffColors[diff]}1A">${diffMap[diff] ?? diff}</span>
+          </div>
+        </div>`;
+
+      row.querySelector('input')?.addEventListener('change', (e) => {
+        const chk = e.target as HTMLInputElement;
+        if (chk.checked) assocSelected.add(q.questionId);
+        else             assocSelected.delete(q.questionId);
+        row.style.borderColor = chk.checked ? 'var(--brand)' : 'var(--ui-border)';
+        row.style.background  = chk.checked ? 'rgba(212,18,36,0.04)' : 'var(--ui-surface)';
+        document.getElementById('assoc-selected-count')!.textContent =
+          `${assocSelected.size} pregunta(s) seleccionada(s)`;
+      });
+
+      list.appendChild(row);
+    });
   }
-  window.rpLoader?.show('Asociando preguntas...');
-  try {
-    await fetch(`${apiBase}/api/tests/${assocTestId}/questions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('rp_token')}`
-      },
-      body: JSON.stringify({ questionIds: [...assocSelected] })
-    });
-    window.rpLoader?.hide();
+
+  // Filtros en tiempo real
+  document.getElementById('assoc-filter-comp')?.addEventListener('change', () => renderAssocList(allQuestions));
+  document.getElementById('assoc-search')?.addEventListener('input',  () => renderAssocList(allQuestions));
+
+  // Cerrar / omitir
+  document.getElementById('assoc-close')?.addEventListener('click', () => {
     document.getElementById('assoc-modal')!.style.display = 'none';
-    toast.success(`${assocSelected.size} pregunta(s) asociadas al test.`);
-    // Recargar tabla de tests
-    loadPage();
-  } catch (err: any) {
-    window.rpLoader?.hide();
-    toast.error('Error al asociar preguntas', { description: err?.message });
-  }
-});
+    loadPage(); // Recargar la tabla al cerrar el modal
+  });
+  document.getElementById('assoc-skip')?.addEventListener('click', () => {
+    document.getElementById('assoc-modal')!.style.display = 'none';
+    toast.success('Test creado. Puedes asociar preguntas en cualquier momento.');
+    loadPage(); // Recargar la tabla para mostrar el nuevo test
+  });
 
-// ── Al crear test exitosamente, abrir modal de asociación ──────────────
-// Busca en tu handler de submit del modal de creación de test la línea
-// donde cierras el modal y recargas, y REEMPLÁZALA con esto:
-//
-//   closeCreateModal();
-//   openAssocModal(newTest.testId, newTest.testName);
-//
-// Ejemplo (adaptar según el nombre de tu función y el campo del response):
-// const created = await res.json();
-// const t = created.data;
-// openAssocModal(t.testId, t.testName);
+  // Guardar asociaciones (loop individual, endpoint real)
+  document.getElementById('assoc-save')?.addEventListener('click', async () => {
+    if (!assocSelected.size) {
+      toast.error('Selecciona al menos una pregunta');
+      return;
+    }
+    window.rpLoader?.show('Asociando preguntas...');
+    try {
+      for (const questionId of assocSelected) {
+        await testsApi.addQuestion(assocTestId, assocCompId, questionId);
+      }
+      window.rpLoader?.hide();
+      document.getElementById('assoc-modal')!.style.display = 'none';
+      toast.success(`${assocSelected.size} pregunta(s) asociadas al test.`);
+      loadPage(); // Recargar la tabla para reflejar cambios
+    } catch (err: any) {
+      window.rpLoader?.hide();
+      toast.error('Error al asociar preguntas', { description: err?.message });
+    }
+  });
 
   loadPage();
 </script>

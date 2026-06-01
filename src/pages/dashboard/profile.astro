@@ -162,168 +162,183 @@ import AppLayout from '../../layouts/AppLayout.astro';
     .app-content > div:last-child > div[style*="grid-template-columns:1fr 280px"] { grid-template-columns: 1fr !important; }
     .profile-card > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
   }
+  /* Añadir dentro del bloque <style> de profile.astro */
+.fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.875rem; width: 100%; }
+.fl { font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ui-text-3); }
+.fi {
+  padding: 8px 12px;
+  background: var(--ui-surface);
+  border: 1.5px solid var(--ui-border);
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--ui-text-1);
+  outline: none;
+  width: 100%;
+  appearance: none;
+}
+.fi[readonly] { cursor: default; opacity: 0.75; }
 </style>
 
 <script>
   import { requireAuth, isAdmin, logout, getToken, updateStoredUser } from '../../lib/auth';
-  import { studentsApi } from '../../lib/api/students.api';
-  import { programsApi } from '../../lib/api/programs.api';
-  import { adminsApi } from '../../lib/api/admins.api';
+import { studentsApi } from '../../lib/api/students.api';
+import { programsApi } from '../../lib/api/programs.api';
+import { adminsApi }   from '../../lib/api/admins.api';
 
-  let user;
-  try { user = requireAuth(); } catch { throw new Error('redirect'); }
+let user;
+try { user = requireAuth(); } catch { throw new Error('redirect'); }
 
-  // ── Pintar datos iniciales desde storage ──────────────────────────
-  const initials = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase();
-  const fullName  = user.firstSurname ? `${user.firstName} ${user.firstSurname}` : user.firstName;
-
-  const set = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-  document.getElementById('hero-avatar')!.textContent = initials;
-  set('hero-name',  fullName);
-  set('hero-email', user.email.toLowerCase()); // mostrar en minúsculas para legibilidad
-  set('hero-id',    `ID: ${user.id}`);
-  set('hero-type',  isAdmin() ? 'Administrador del sistema' : 'Estudiante');
-
-  const heroBadge = document.getElementById('hero-badge')!;
-  heroBadge.textContent = isAdmin() ? '⚙ Admin' : '🎓 Estudiante';
-
-  // Campos del formulario
-  const parts = [user.firstName, user.secondName, user.firstLastName, user.secondLastName].filter(Boolean).join(' ');
-  set('f-fullName', parts || '—');
-  set('f-email',        user.email.toLowerCase());
-  set('f-type',         isAdmin() ? 'Administrador' : 'Estudiante');
-  set('f-id',           user.id);
-
-  const idLabel = document.getElementById('f-id-label');
-  if (idLabel) idLabel.textContent = isAdmin() ? 'ID de administrador' : 'Código de estudiante';
-
-  // ── Programa académico ────────────────────────────────────────────
-  const programRow = document.getElementById('f-program-row')!;
-  if (user.programId) {
-    programRow.style.display = 'flex';
-    programRow.style.flexDirection = 'column';
-    set('hero-program', `Programa ${user.programId}`);
-    set('f-program', `Cargando...`);
-
-    programsApi.findById(user.programId)
-      .then(res => {
-        if (res.data) {
-          const name = `${res.data.programName} (${user.programId})`;
-          set('f-program',    name);
-          set('hero-program', name);
-        }
-      })
-      .catch(() => {
-        set('f-program',    user.programId ?? '—');
-        set('hero-program', `Programa ${user.programId}`);
-      });
+// set() actualiza inputs (.value) y el resto (.textContent)
+const set = (id: string, val: string) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    el.value = val;
   } else {
-    programRow.style.display = 'none';
+    el.textContent = val;
   }
+};
 
-  // ── JWT session info ──────────────────────────────────────────────
-  const token = getToken();
-  if (token) {
-    try {
-      const p   = JSON.parse(atob(token.split('.')[1]));
-      const fmt = (ts: number) => new Date(ts * 1000).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
-      set('jwt-iat', fmt(p.iat));
-      set('jwt-exp', fmt(p.exp));
+// ── Datos iniciales desde localStorage ───────────────────────────────
+const initials  = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase();
+const fullName  = user.firstSurname ? `${user.firstName} ${user.firstSurname}` : user.firstName;
 
-      const now     = Date.now();
-      const total   = (p.exp - p.iat) * 1000;
-      const remain  = Math.max(0, p.exp * 1000 - now);
-      const pct     = Math.min(100, (remain / total) * 100);
-      const fill    = document.getElementById('sess-fill')!;
-      const status  = document.getElementById('sess-status')!;
+document.getElementById('hero-avatar')!.textContent = initials;
+set('hero-name',   fullName);
+set('hero-email',  user.email.toLowerCase());
+set('hero-id',     `ID: ${user.id}`);
+set('hero-type',   isAdmin() ? 'Administrador del sistema' : 'Estudiante');
 
-      fill.style.width = `${pct}%`;
-      if (pct > 50) {
-        fill.style.background = '#22c55e';
-        status.textContent = 'Activa';
-        status.style.cssText = 'background:#D1FAE5;color:#059669;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
-      } else if (pct > 20) {
-        fill.style.background = '#f59e0b';
-        status.textContent = 'Por vencer';
-        status.style.cssText = 'background:#FEF3C7;color:#D97706;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
-      } else {
-        fill.style.background = '#ef4444';
-        status.textContent = 'Crítica';
-        status.style.cssText = 'background:#FEE2E2;color:#DC2626;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+const heroBadge = document.getElementById('hero-badge')!;
+heroBadge.textContent = isAdmin() ? '⚙ Admin' : '🎓 Estudiante';
+
+// Campo "Nombre completo" en el formulario
+set('f-fullName', fullName);
+set('f-email',    user.email.toLowerCase());
+set('f-type',     isAdmin() ? 'Administrador' : 'Estudiante');
+set('f-id',       user.id);
+
+const idLabel = document.getElementById('f-id-label');
+if (idLabel) idLabel.textContent = isAdmin() ? 'ID de administrador' : 'Código de estudiante';
+
+// ── Programa académico ────────────────────────────────────────────────
+const programRow = document.getElementById('f-program-row')!;
+if (user.programId) {
+  programRow.style.display = 'flex';
+  programRow.style.flexDirection = 'column';
+  set('hero-program', `Programa ${user.programId}`);
+  set('f-program', 'Cargando...');
+
+  programsApi.findById(user.programId)
+    .then(res => {
+      if (res.data) {
+        const name = `${res.data.programName} (${user.programId})`;
+        set('f-program',    name);
+        set('hero-program', name);
       }
+    })
+    .catch(() => {
+      set('f-program',    user.programId ?? '—');
+      set('hero-program', `Programa ${user.programId}`);
+    });
+} else {
+  programRow.style.display = 'none';
+}
 
-      const h = Math.floor(remain / 3_600_000);
-      const m = Math.floor((remain % 3_600_000) / 60_000);
-      set('jwt-remain', h > 0 ? `${h}h ${m}m` : `${m}m`);
-    } catch {}
-  }
+// ── JWT session info ──────────────────────────────────────────────────
+const token = getToken();
+if (token) {
+  try {
+    const p   = JSON.parse(atob(token.split('.')[1]));
+    const fmt = (ts: number) =>
+      new Date(ts * 1000).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+    set('jwt-iat', fmt(p.iat));
+    set('jwt-exp', fmt(p.exp));
 
-  // ── Logros ────────────────────────────────────────────────────────
-  const achievGrid = document.getElementById('achievements-grid')!;
-  const achievements = [
-    { emoji: '🥇', label: 'Primer simulacro', color: '#FEF3C7', border: '#FDE68A', textColor: '#92400E' },
-    { emoji: '🔥', label: 'Racha activa',      color: '#D1FAE5', border: '#A7F3D0', textColor: '#065F46' },
-    { emoji: '🎯', label: 'Puntaje perfecto',  color: '#EDE9FE', border: '#DDD6FE', textColor: '#4C1D95' },
-    { emoji: '🏆', label: 'Top 10 global',     color: '#F3F4F6', border: '#E5E7EB', textColor: '#9CA3AF', locked: true },
-  ];
-  achievements.forEach(a => {
-    const div = document.createElement('div');
-    div.style.cssText = `text-align:center;padding:10px 6px;background:${a.color};border-radius:11px;border:1px solid ${a.border};${(a as any).locked ? 'opacity:0.4;filter:grayscale(1)' : ''}`;
-    div.innerHTML = `<div style="font-size:1.375rem;margin-bottom:3px">${a.emoji}</div><p style="font-size:0.625rem;font-weight:700;color:${a.textColor};margin:0;line-height:1.3">${a.label}</p>`;
-    achievGrid.appendChild(div);
-  });
+    const now    = Date.now();
+    const total  = (p.exp - p.iat) * 1000;
+    const remain = Math.max(0, p.exp * 1000 - now);
+    const pct    = Math.min(100, (remain / total) * 100);
+    const fill   = document.getElementById('sess-fill')!;
+    const status = document.getElementById('sess-status')!;
 
-  // ── Logout buttons — disparan el modal del sidebar ────────────────
-  const openLogoutModal = () => {
-    const modal = document.getElementById('logout-modal');
-    if (modal) modal.style.display = 'flex';
-  };
+    fill.style.width = `${pct}%`;
+    if (pct > 50) {
+      fill.style.background = '#22c55e';
+      status.textContent    = 'Activa';
+      status.style.cssText  = 'background:#D1FAE5;color:#059669;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+    } else if (pct > 20) {
+      fill.style.background = '#f59e0b';
+      status.textContent    = 'Por vencer';
+      status.style.cssText  = 'background:#FEF3C7;color:#D97706;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+    } else {
+      fill.style.background = '#ef4444';
+      status.textContent    = 'Crítica';
+      status.style.cssText  = 'background:#FEE2E2;color:#DC2626;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
+    }
 
-  document.getElementById('logout-hero-btn')?.addEventListener('click', openLogoutModal);
-  document.getElementById('profile-logout-btn')?.addEventListener('click', openLogoutModal);
+    const h = Math.floor(remain / 3_600_000);
+    const m = Math.floor((remain % 3_600_000) / 60_000);
+    set('jwt-remain', h > 0 ? `${h}h ${m}m` : `${m}m`);
+  } catch {}
+}
 
-  if (isAdmin()) {
+// ── Logros ────────────────────────────────────────────────────────────
+const achievGrid = document.getElementById('achievements-grid')!;
+const achievements = [
+  { emoji: '🥇', label: 'Primer simulacro', color: '#FEF3C7', border: '#FDE68A', textColor: '#92400E' },
+  { emoji: '🔥', label: 'Racha activa',      color: '#D1FAE5', border: '#A7F3D0', textColor: '#065F46' },
+  { emoji: '🎯', label: 'Puntaje perfecto',  color: '#EDE9FE', border: '#DDD6FE', textColor: '#4C1D95' },
+  { emoji: '🏆', label: 'Top 10 global',     color: '#F3F4F6', border: '#E5E7EB', textColor: '#9CA3AF', locked: true },
+];
+achievements.forEach(a => {
+  const div = document.createElement('div');
+  div.style.cssText = `text-align:center;padding:10px 6px;background:${a.color};border-radius:11px;border:1px solid ${a.border};${(a as any).locked ? 'opacity:0.4;filter:grayscale(1)' : ''}`;
+  div.innerHTML = `<div style="font-size:1.375rem;margin-bottom:3px">${a.emoji}</div><p style="font-size:0.625rem;font-weight:700;color:${a.textColor};margin:0;line-height:1.3">${a.label}</p>`;
+  achievGrid.appendChild(div);
+});
+
+// ── Logout ────────────────────────────────────────────────────────────
+const openLogoutModal = () => {
+  const modal = document.getElementById('logout-modal');
+  if (modal) modal.style.display = 'flex';
+};
+document.getElementById('logout-hero-btn')?.addEventListener('click', openLogoutModal);
+document.getElementById('profile-logout-btn')?.addEventListener('click', openLogoutModal);
+
+// ── Cargar nombre real desde API ──────────────────────────────────────
+if (isAdmin()) {
   adminsApi.me().then(res => {
     if (!res.data) return;
-    const a = res.data;
-    updateStoredUser({
-      firstName:    a.firstName,
-      firstSurname: a.firstSurname,
-      email:        a.email,
-    });
+    const a    = res.data;
     const fn   = a.firstName;
     const ln   = a.firstSurname;
-    const ini  = ((fn[0] ?? '') + (ln[0] ?? '')).toUpperCase();
     const full = ln ? `${fn} ${ln}` : fn;
+    const ini  = ((fn[0] ?? '') + (ln[0] ?? '')).toUpperCase();
+    updateStoredUser({ firstName: fn, firstSurname: ln, email: a.email });
 
     document.getElementById('hero-avatar')!.textContent = ini;
-    set('hero-name',      full);
-    set('hero-email',     a.email.toLowerCase());
-    set('f-firstName',    fn);
-    set('f-firstSurname', ln);
-    set('f-email',        a.email.toLowerCase());
+    set('hero-name',  full);
+    set('hero-email', a.email.toLowerCase());
+    set('f-fullName', full);
+    set('f-email',    a.email.toLowerCase());
   }).catch(() => {});
 } else {
   studentsApi.me().then(res => {
     if (!res.data) return;
-    const s = res.data;
-    updateStoredUser({
-      firstName:    s.firstName,
-      firstSurname: s.firstSurname,
-      email:        s.email,
-    });
+    const s    = res.data;
     const fn   = s.firstName;
     const ln   = s.firstSurname;
-    const ini  = ((fn[0] ?? '') + (ln[0] ?? '')).toUpperCase();
     const full = ln ? `${fn} ${ln}` : fn;
+    const ini  = ((fn[0] ?? '') + (ln[0] ?? '')).toUpperCase();
+    updateStoredUser({ firstName: fn, firstSurname: ln, email: s.email });
 
     document.getElementById('hero-avatar')!.textContent = ini;
-    set('hero-name',      full);
-    set('hero-email',     s.email.toLowerCase());
-    set('f-firstName',    fn);
-    set('f-firstSurname', ln);
-    set('f-email',        s.email.toLowerCase());
+    set('hero-name',  full);
+    set('hero-email', s.email.toLowerCase());
+    set('f-fullName', full);
+    set('f-email',    s.email.toLowerCase());
   }).catch(() => {});
 }
 </script>

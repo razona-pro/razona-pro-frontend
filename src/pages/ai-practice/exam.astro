@@ -270,6 +270,7 @@ import { Icon } from 'astro-icon/components';
   const compId    = params.get('comp')  ?? '';
   const totalQ    = parseInt(params.get('total') ?? '0') || 0;
   const isResume  = params.get('resume') === '1';
+  const testMode  = params.get('mode') ?? '';   // ← modo obtenido desde la URL
 
   if (!aiTriedId) { window.location.replace('/ai-practice'); throw new Error(); }
 
@@ -701,59 +702,58 @@ import { Icon } from 'astro-icon/components';
         } catch {
           window.location.href = '/ai-practice';
         }
-        // ── Anti-fraude ────────────────────────────────────────────────────────
-const testMode = (window as any).__examMode ?? '';   // asignado al cargar el test
-const isAntifraud = testMode === 'EXAM' || testMode === 'TIMED';
-
-if (isAntifraud) {
-  // Aplicar clase CSS que bloquea selección de texto e imágenes
-  document.body.classList.add('exam-antifraud');
-
-  // Bloquear menú contextual
-  document.addEventListener('contextmenu', e => e.preventDefault());
-
-  // Bloquear Ctrl+C / Ctrl+A / F12
-  document.addEventListener('keydown', e => {
-    const blocked = (e.ctrlKey && ['c','a','u','s'].includes(e.key.toLowerCase()))
-                    || e.key === 'F12';
-    if (blocked) e.preventDefault();
-  });
-
-  let tabWarnings = 0;
-  const MAX_WARNINGS = 3;
-
-  // Detectar cambio de pestaña / ventana
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') return;
-    tabWarnings++;
-    showTabWarning(tabWarnings);
-  });
-
-  window.addEventListener('blur', () => {
-    tabWarnings++;
-    showTabWarning(tabWarnings);
-  });
-
-  function showTabWarning(count: number) {
-    // Quitar banner anterior
-    document.querySelector('.tab-warning-banner')?.remove();
-    const banner = document.createElement('div');
-    banner.className = 'tab-warning-banner';
-    if (count >= MAX_WARNINGS) {
-      banner.textContent = `Aviso ${count}: Salir de la pantalla del examen puede invalidar tu intento. Esta es tu última advertencia.`;
-      banner.style.background = '#DC2626';
-    } else {
-      banner.textContent = `Advertencia ${count}/${MAX_WARNINGS}: No debes salir de la ventana del examen.`;
-    }
-    document.body.prepend(banner);
-    setTimeout(() => banner.remove(), 5000);
-  }
-}
       }
     } catch (err: any) {
       document.getElementById('loading-msg')!.textContent =
         'Error al cargar la sesión. Redirigiendo...';
       setTimeout(() => window.location.href = '/ai-practice', 2000);
+    }
+
+    // ── Anti‑fraude (ubicado al nivel superior de init, después de renderizar la primera pregunta) ──
+    const isAntifraud = testMode === 'EXAM' || testMode === 'TIMED';
+
+    if (isAntifraud && !examFinished) {
+      // Añadir clase CSS que bloquea selección de texto e imágenes
+      document.body.classList.add('exam-antifraud');
+
+      // Bloquear menú contextual
+      document.addEventListener('contextmenu', e => e.preventDefault());
+
+      // Bloquear Ctrl+C / Ctrl+A / F12 / Ctrl+U / Ctrl+S
+      document.addEventListener('keydown', e => {
+        const blocked = (e.ctrlKey && ['c','a','u','s'].includes(e.key.toLowerCase()))
+                        || e.key === 'F12';
+        if (blocked) e.preventDefault();
+      });
+
+      let tabWarnings = 0;
+      const MAX_WARNINGS = 3;
+
+      const showTabWarning = (count: number) => {
+        document.querySelector('.tab-warning-banner')?.remove();
+        const banner = document.createElement('div');
+        banner.className = 'tab-warning-banner';
+        if (count >= MAX_WARNINGS) {
+          banner.textContent = `Aviso ${count}: Salir de la pantalla del examen puede invalidar tu intento. Esta es tu última advertencia.`;
+          banner.style.background = '#DC2626';
+        } else {
+          banner.textContent = `Advertencia ${count}/${MAX_WARNINGS}: No debes salir de la ventana del examen.`;
+          banner.style.background = '#D97706';
+        }
+        document.body.prepend(banner);
+        setTimeout(() => banner.remove(), 5000);
+      };
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') return;
+        tabWarnings++;
+        showTabWarning(tabWarnings);
+      });
+
+      window.addEventListener('blur', () => {
+        tabWarnings++;
+        showTabWarning(tabWarnings);
+      });
     }
   }
 
