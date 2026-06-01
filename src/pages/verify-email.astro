@@ -12,7 +12,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <!-- Loading -->
         <div id="s-loading" style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
           <div style="width:64px;height:64px;border-radius:50%;border:4px solid rgba(212,18,36,0.15);border-top-color:#D41224;animation:spin 1s linear infinite;"></div>
-          <p style="font-family:'Poppins',sans-serif;color:#6B7280;font-weight:500;margin:0;">Verificando tu correo...</p>
+          <p style="font-family:var(--font-sans);color:#6B7280;font-weight:500;margin:0;">Verificando tu correo...</p>
         </div>
 
         <!-- Success -->
@@ -20,9 +20,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div style="width:64px;height:64px;border-radius:50%;background:#D1FAE5;display:flex;align-items:center;justify-content:center;">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <h1 style="font-family:'Poppins',sans-serif;font-size:1.25rem;font-weight:800;color:#1A1A1A;margin:0;">¡Correo verificado!</h1>
-          <p style="font-family:'Poppins',sans-serif;font-size:0.875rem;color:#6B7280;margin:0;">Tu cuenta está activa. Ya puedes iniciar sesión.</p>
-          <a href="/auth" style="margin-top:0.5rem;display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.75rem;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-family:'Poppins',sans-serif;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(212,18,36,0.3);">
+          <h1 style="font-family:var(--font-sans);font-size:1.25rem;font-weight:800;color:#1A1A1A;margin:0;">¡Correo verificado!</h1>
+          <p style="font-family:var(--font-sans);font-size:0.875rem;color:#6B7280;margin:0;">Tu cuenta está activa. Ya puedes iniciar sesión.</p>
+          <a href="/auth" style="margin-top:0.5rem;display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.75rem;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-family:var(--font-sans);font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(212,18,36,0.3);">
             Ir a iniciar sesión
           </a>
         </div>
@@ -32,9 +32,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div style="width:64px;height:64px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center;">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </div>
-          <h1 style="font-family:'Poppins',sans-serif;font-size:1.25rem;font-weight:800;color:#1A1A1A;margin:0;">Enlace inválido</h1>
-          <p id="s-error-msg" style="font-family:'Poppins',sans-serif;font-size:0.875rem;color:#6B7280;margin:0;">El enlace expiró o ya fue utilizado.</p>
-          <a href="/auth?tab=register" style="margin-top:0.5rem;display:inline-flex;padding:0.75rem 1.75rem;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-family:'Poppins',sans-serif;font-weight:700;text-decoration:none;">
+          <h1 style="font-family:var(--font-sans);font-size:1.25rem;font-weight:800;color:#1A1A1A;margin:0;">Enlace inválido</h1>
+          <p id="s-error-msg" style="font-family:var(--font-sans);font-size:0.875rem;color:#6B7280;margin:0;">El enlace expiró o ya fue utilizado.</p>
+          <a href="/auth?tab=register" style="margin-top:0.5rem;display:inline-flex;padding:0.75rem 1.75rem;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-family:var(--font-sans);font-weight:700;text-decoration:none;">
             Volver al registro
           </a>
         </div>

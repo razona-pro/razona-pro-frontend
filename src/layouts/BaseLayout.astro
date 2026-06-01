@@ -25,6 +25,8 @@ const {
       (function () {
         try {
           var p = JSON.parse(localStorage.getItem('rp-a11y') || '{}');
+          // Migrar: 'legible' y 'lora' → 'default' (Lora es la predeterminada)
+          if (p.font === 'legible' || p.font === 'lora') { p.font = 'default'; localStorage.setItem('rp-a11y', JSON.stringify(p)); }
           var h = document.documentElement;
           if (p.fs) h.setAttribute('data-fs', p.fs);
           var modes = { dark: 'dark', 'high-contrast': 'high-contrast', inverted: 'contrast-inverted', 'contrast-light': 'contrast-light', 'contrast-dark': 'contrast-dark' };
@@ -33,8 +35,11 @@ const {
           if (p.lh) h.setAttribute('data-lh', p.lh);
           if (p.font && p.font !== 'default') {
             h.setAttribute('data-font', p.font);
-            var urls = { dyslexia: 'https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700&display=swap', legible: 'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&display=swap' };
-            if (urls[p.font]) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = urls[p.font]; document.head.appendChild(l); }
+            if (p.font === 'dyslexia') {
+              var l = document.createElement('link'); l.rel = 'stylesheet';
+              l.href = 'https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700&display=swap';
+              document.head.appendChild(l);
+            }
           }
           if (p.align && p.align !== 'left') h.setAttribute('data-align', p.align);
           if (p.cursor === 'large') h.classList.add('cursor-large');

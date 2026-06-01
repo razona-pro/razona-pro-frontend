@@ -3,276 +3,293 @@ import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
 <AppLayout title="Mi perfil" currentPage="profile">
-
-  <!-- Modals de logout y sesión expirada vienen del Sidebar -->
-
-  <div style="margin-bottom:1.25rem">
-    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
-      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Mi perfil</span>
-    </div>
-    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Mi Perfil</h1>
-    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Información de tu cuenta y progreso.</p>
-  </div>
-
-  <!-- Hero card — usando tokens del tema, no colores hardcodeados oscuros -->
-  <div style="background:linear-gradient(135deg,var(--brand),var(--brand-dark));border-radius:18px;padding:0;overflow:hidden;position:relative;margin-bottom:1rem">
-    <div style="position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.08);pointer-events:none"></div>
-    <div style="padding:1.5rem 1.75rem;position:relative;display:flex;align-items:flex-start;gap:1.25rem;flex-wrap:wrap">
-      <div style="position:relative;flex-shrink:0">
-        <div id="hero-avatar" style="width:68px;height:68px;border-radius:17px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.5rem;box-shadow:0 8px 24px rgba(0,0,0,0.2)">?</div>
-        <div style="position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;border-radius:50%;background:#22c55e;border:2.5px solid var(--brand)"></div>
-      </div>
-      <div style="flex:1;min-width:160px">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:5px">
-          <h2 id="hero-name" style="color:white;font-weight:900;font-size:1.25rem;margin:0;letter-spacing:-0.4px">Cargando...</h2>
-          <span id="hero-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3)"></span>
-        </div>
-        <p id="hero-email" style="color:rgba(255,255,255,0.7);font-size:0.8125rem;margin:0 0 2px"></p>
-        <p id="hero-program" style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:0;text-transform:uppercase;letter-spacing:0.5px"></p>
-      </div>
-    </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.12);padding:10px 28px;display:flex;gap:20px;flex-wrap:wrap">
-      <span id="hero-id"   style="color:rgba(255,255,255,0.45);font-size:0.75rem;font-family:monospace"></span>
-      <span id="hero-type" style="color:rgba(255,255,255,0.45);font-size:0.75rem"></span>
-      <span style="color:rgba(255,255,255,0.45);font-size:0.75rem;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%"></span>Sesión activa</span>
-    </div>
-  </div>
-
-  <!-- Profile grid -->
-  <div style="display:grid;grid-template-columns:1fr ;gap:14px">
-    <div style="display:flex;flex-direction:column;gap:14px">
-
-      <!-- Información de cuenta -->
-      <div class="profile-card">
-        <h2 class="card-title" style="margin-bottom:1rem">Información de cuenta</h2>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="fg">
-  <label class="fl">Nombre completo</label>
-  <input type="text" class="fi" id="f-fullName" readonly
-    style="background:var(--ui-surface);cursor:default"
-    title="El nombre se actualiza desde la administración" />
-</div>
-          <div class="info-row" style="grid-column:1/-1">
-            <span class="info-label">Correo electrónico</span>
-            <p id="f-email" class="info-val" style="font-size:0.8125rem"></p>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Tipo de usuario</span>
-            <p id="f-type" class="info-val"></p>
-          </div>
-          <div class="info-row">
-            <span class="info-label" id="f-id-label">Código</span>
-            <p id="f-id" class="info-val" style="font-family:monospace;font-size:0.8125rem"></p>
-          </div>
-          <div class="info-row" id="f-program-row" style="grid-column:1/-1">
-            <span class="info-label">Programa académico</span>
-            <p id="f-program" class="info-val"></p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sesión activa -->
-      <div class="profile-card">
-        <h2 class="card-title" style="margin-bottom:0.875rem">Estado de sesión</h2>
-        <div style="background:var(--ui-surface);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px;border:1px solid var(--ui-border)">
-          <div style="width:36px;height:36px;background:#D1FAE5;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="16" height="16" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <div style="flex:1">
-            <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0 0 1px">Autenticación verificada</p>
-            <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">Tu sesión está activa y segura</p>
-          </div>
-          <span id="sess-status" style="font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0"></span>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div class="info-row"><span class="info-label">Inició</span><p id="jwt-iat" class="info-val" style="font-size:0.8125rem"></p></div>
-          <div class="info-row"><span class="info-label">Expira</span><p id="jwt-exp" class="info-val" style="font-size:0.8125rem"></p></div>
-        </div>
-        <div>
-          <div style="display:flex;justify-content:space-between;font-size:0.6875rem;color:var(--ui-text-3);margin-bottom:5px">
-            <span>Tiempo restante</span>
-            <span id="jwt-remain"></span>
-          </div>
-          <div style="height:7px;background:var(--ui-surface);border-radius:4px;overflow:hidden;border:1px solid var(--ui-border)">
-            <div id="sess-fill" style="height:100%;border-radius:4px;width:0%;transition:width 1s ease"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:14px">
-    </div>
-  </div>
-</AppLayout>
-
 <style>
-  .profile-card { background: var(--ui-card); border-radius: 15px; padding: 1.25rem; border: 1px solid var(--ui-border); }
-  .card-title   { font-size: 0.9375rem; font-weight: 800; color: var(--ui-text-1); margin: 0; }
-  .info-row     { display: flex; flex-direction: column; gap: 3px; }
-  .info-label   { font-size: 0.625rem; font-weight: 700; color: var(--ui-text-3); text-transform: uppercase; letter-spacing: 0.5px; }
-  .info-val     { font-size: 0.9375rem; font-weight: 600; color: var(--ui-text-1); padding: 7px 10px; background: var(--ui-surface); border-radius: 8px; border: 1px solid var(--ui-border); margin: 0; word-break: break-word; }
-  .quick-link {
-    display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 9px;
-    background: var(--ui-surface); border: 1px solid var(--ui-border);
-    color: var(--ui-text-1); text-decoration: none; font-size: 0.8125rem; font-weight: 500;
-    transition: all 0.15s; font-family: inherit; text-align: left; width: 100%;
-  }
-  .quick-link:hover { border-color: var(--brand); color: var(--brand); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
 
-  @media (max-width: 768px) {
-    .app-content > div:last-child > div[style*="grid-template-columns:1fr 280px"] { grid-template-columns: 1fr !important; }
-    .profile-card > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .pro-wrap { display:flex;flex-direction:column;gap:1rem;animation:fadeUp 0.4s ease both; }
+
+  /* ── Hero card ───────────────────────────────────── */
+  .hero-card {
+    background:var(--ui-card);border-radius:20px;border:1px solid var(--ui-border);
+    overflow:hidden;position:relative;
   }
-  /* Añadir dentro del bloque <style> de profile.astro */
-.fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.875rem; width: 100%; }
-.fl { font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ui-text-3); }
-.fi {
-  padding: 8px 12px;
-  background: var(--ui-surface);
-  border: 1.5px solid var(--ui-border);
-  border-radius: 9px;
-  font-family: inherit;
-  font-size: 0.875rem;
-  color: var(--ui-text-1);
-  outline: none;
-  width: 100%;
-  appearance: none;
-}
-.fi[readonly] { cursor: default; opacity: 0.75; }
+  .hero-banner {
+    height:100px;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-dark) 60%,#6B1318 100%);
+    position:relative;overflow:hidden;
+  }
+  .hero-banner::before {
+    content:'';position:absolute;right:-60px;top:-60px;
+    width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.07);
+  }
+  .hero-banner::after {
+    content:'';position:absolute;left:40%;bottom:-40px;
+    width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.04);
+  }
+  .hero-body {
+    padding:0 1.75rem 1.5rem;
+    display:flex;align-items:flex-end;gap:1.25rem;flex-wrap:wrap;
+  }
+  .hero-avatar-wrap { margin-top:-36px;position:relative;flex-shrink:0; }
+  .hero-avatar {
+    width:72px;height:72px;border-radius:18px;
+    background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+    border:3px solid var(--ui-card);
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-weight:900;font-size:1.5rem;
+    font-family:var(--font-ui);
+    box-shadow:0 6px 20px rgba(0,0,0,0.15);
+  }
+  .hero-online {
+    position:absolute;bottom:0;right:0;
+    width:16px;height:16px;border-radius:50%;background:#22c55e;
+    border:2.5px solid var(--ui-card);
+  }
+  .hero-info { flex:1;min-width:180px;padding-top:0.75rem; }
+  .hero-name {
+    font-size:1.25rem;font-weight:900;color:var(--ui-text-1);
+    margin:0 0 4px;letter-spacing:-0.4px;line-height:1.2;
+  }
+  .hero-meta {
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .hero-role {
+    display:inline-flex;align-items:center;gap:5px;
+    padding:3px 10px;border-radius:20px;
+    font-size:0.6875rem;font-weight:700;
+    font-family:var(--font-ui);
+  }
+  .hero-email {
+    font-size:0.8125rem;color:var(--ui-text-3);
+    font-family:var(--font-ui);
+  }
+
+  /* ── Info list ───────────────────────────────────── */
+  .info-card {
+    background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);
+    overflow:hidden;
+  }
+  .info-section-title {
+    padding:0.875rem 1.25rem;
+    font-size:0.625rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.08em;color:var(--ui-text-3);
+    border-bottom:1px solid var(--ui-border);
+    font-family:var(--font-ui);
+    background:var(--ui-surface);
+  }
+  .info-row {
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0.875rem 1.25rem;border-bottom:1px solid var(--ui-border);gap:12px;
+  }
+  .info-row:last-child { border-bottom:none; }
+  .info-key {
+    font-size:0.8125rem;font-weight:500;color:var(--ui-text-3);
+    font-family:var(--font-ui);flex-shrink:0;min-width:120px;
+  }
+  .info-val {
+    font-size:0.875rem;font-weight:600;color:var(--ui-text-1);
+    text-align:right;word-break:break-all;
+  }
+  .info-mono {
+    font-family:var(--font-mono);
+    background:var(--ui-surface);padding:2px 8px;border-radius:6px;
+    border:1px solid var(--ui-border);font-size:0.8125rem;
+  }
+
+
+  /* ── Sesión ──────────────────────────────────────── */
+  .sess-bar-wrap { height:5px;background:var(--ui-border);border-radius:3px;overflow:hidden;margin-top:6px; }
+  .sess-bar      { height:100%;border-radius:3px;transition:width 1s; }
+
+  /* ── Grid dos columnas ───────────────────────────── */
+  .pro-grid { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+  @media(max-width:720px){ .pro-grid{ grid-template-columns:1fr; } }
 </style>
 
-<script>import { requireAuth, isAdmin, getToken, updateStoredUser, getFullName } from '../../lib/auth';
+<div class="pro-wrap">
+
+  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <div class="hero-card">
+    <div class="hero-banner"></div>
+    <div class="hero-body">
+      <div class="hero-avatar-wrap">
+        <div class="hero-avatar" id="hero-av">?</div>
+        <div class="hero-online"></div>
+      </div>
+      <div class="hero-info">
+        <h1 class="hero-name" id="hero-name">Cargando...</h1>
+        <div class="hero-meta">
+          <span class="hero-role" id="hero-role" style="background:rgba(212,18,36,0.1);color:var(--brand)"></span>
+          <span class="hero-email" id="hero-email"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Grid de info ──────────────────────────────────────── -->
+  <div class="pro-grid">
+
+    <!-- Columna 1: Datos de la cuenta -->
+    <div class="info-card">
+      <p class="info-section-title">Cuenta</p>
+
+      <div class="info-row">
+        <span class="info-key">Nombre</span>
+        <span class="info-val" id="d-name">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Correo</span>
+        <span class="info-val" id="d-email" style="font-size:0.8125rem">—</span>
+      </div>
+      <div class="info-row" id="row-phone" style="display:none">
+        <span class="info-key">Teléfono</span>
+        <span class="info-val info-mono" id="d-phone">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key" id="lbl-code">Código</span>
+        <span class="info-val info-mono" id="d-code">—</span>
+      </div>
+      <div class="info-row" id="row-program" style="display:none">
+        <span class="info-key">Programa</span>
+        <span class="info-val" id="d-program" style="text-align:right;font-family:var(--font-ui);font-size:0.8125rem">—</span>
+      </div>
+      <div class="info-row" id="row-lastlogin" style="display:none">
+        <span class="info-key">Último acceso</span>
+        <span class="info-val" id="d-lastlogin" style="font-size:0.8125rem">—</span>
+      </div>
+    </div>
+
+    <!-- Columna 2: Estado + Sesión -->
+    <div style="display:flex;flex-direction:column;gap:1rem">
+
+
+      <!-- Sesión JWT -->
+      <div class="info-card">
+        <p class="info-section-title">Sesión actual</p>
+        <div class="info-row">
+          <span class="info-key">Estado</span>
+          <span id="sess-badge"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Inició</span>
+          <span class="info-val" id="jwt-iat" style="font-size:0.8125rem">—</span>
+        </div>
+        <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div style="display:flex;justify-content:space-between;width:100%">
+            <span class="info-key">Tiempo restante</span>
+            <span id="jwt-remain" style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);font-family:var(--font-ui)">—</span>
+          </div>
+          <div class="sess-bar-wrap" style="width:100%">
+            <div class="sess-bar" id="sess-fill"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</AppLayout>
+
+<script>
+import { requireAuth, isAdmin, getToken, updateStoredUser, getFullName } from '../../lib/auth';
 import { studentsApi } from '../../lib/api/students.api';
 import { programsApi } from '../../lib/api/programs.api';
 import { adminsApi }   from '../../lib/api/admins.api';
 
-let user;
+let user: any;
 try { user = requireAuth(); } catch { throw new Error('redirect'); }
 
-const set = (id: string, val: string) => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) el.value = val;
-  else el.textContent = val;
-};
+// ── Helpers ───────────────────────────────────────────────────────
+const el  = (id: string) => document.getElementById(id);
+const set = (id: string, val: string) => { const e = el(id); if (e) e.textContent = val; };
+const show = (id: string, d = 'flex') => { const e = el(id); if (e) e.style.display = d; };
 
-// Nombre completo inicial desde localStorage (puede tener solo firstName+firstSurname al inicio)
-const initFull     = getFullName(user) || user.id;
-const initInitials = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase() || user.id.slice(0,2).toUpperCase();
 
-document.getElementById('hero-avatar')!.textContent = initInitials;
-set('hero-name',   initFull);
-set('hero-email',  user.email.toLowerCase());
-set('hero-id',     `ID: ${user.id}`);
-set('hero-type',   isAdmin() ? 'Administrador del sistema' : 'Estudiante');
+const fmt = (ts: number) =>
+  new Date(ts * 1000).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
 
-const heroBadge = document.getElementById('hero-badge')!;
-heroBadge.textContent = isAdmin() ? '⚙ Admin' : '🎓 Estudiante';
+// ── Iniciales desde caché ─────────────────────────────────────────
+const ini0 = ((user.firstName?.[0] ?? '') + (user.firstSurname?.[0] ?? '')).toUpperCase() || user.id.slice(0,2).toUpperCase();
+set('hero-av',   ini0);
+set('hero-name', getFullName(user) || user.id);
+set('hero-email', user.email?.toLowerCase() ?? '');
+set('d-email',   user.email?.toLowerCase() ?? '—');
+set('d-code',    user.id);
+set('d-name',    getFullName(user) || user.id);
+el('hero-role')!.textContent = isAdmin() ? '⚙ Administrador' : '🎓 Estudiante';
+el('lbl-code')!.textContent  = isAdmin() ? 'ID administrador' : 'Código estudiante';
 
-set('f-fullName', initFull);
-set('f-email',    user.email.toLowerCase());
-set('f-type',     isAdmin() ? 'Administrador' : 'Estudiante');
-set('f-id',       user.id);
-
-const idLabel = document.getElementById('f-id-label');
-if (idLabel) idLabel.textContent = isAdmin() ? 'ID de administrador' : 'Código de estudiante';
-
-// Programa
-const programRow = document.getElementById('f-program-row')!;
-if (user.programId) {
-  programRow.style.display = 'flex';
-  programRow.style.flexDirection = 'column';
-  set('hero-program', `Programa ${user.programId}`);
-  set('f-program', 'Cargando...');
-  programsApi.findById(user.programId)
-    .then(res => {
-      if (res.data) {
-        const name = `${res.data.programName} (${user.programId})`;
-        set('f-program', name);
-        set('hero-program', name);
-      }
-    })
-    .catch(() => {
-      set('f-program', user.programId ?? '—');
-    });
-} else {
-  programRow.style.display = 'none';
-}
-
-// JWT session info
+// ── JWT ──────────────────────────────────────────────────────────
 const token = getToken();
 if (token) {
   try {
-    const p   = JSON.parse(atob(token.split('.')[1]));
-    const fmt = (ts: number) =>
-      new Date(ts * 1000).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
-    set('jwt-iat', fmt(p.iat));
-    set('jwt-exp', fmt(p.exp));
+    const p      = JSON.parse(atob(token.split('.')[1]));
     const now    = Date.now();
     const total  = (p.exp - p.iat) * 1000;
     const remain = Math.max(0, p.exp * 1000 - now);
     const pct    = Math.min(100, (remain / total) * 100);
-    const fill   = document.getElementById('sess-fill')!;
-    const status = document.getElementById('sess-status')!;
-    fill.style.width = `${pct}%`;
-    if (pct > 50) {
-      fill.style.background = '#22c55e';
-      status.textContent   = 'Activa';
-      status.style.cssText = 'background:#D1FAE5;color:#059669;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
-    } else if (pct > 20) {
-      fill.style.background = '#f59e0b';
-      status.textContent   = 'Por vencer';
-      status.style.cssText = 'background:#FEF3C7;color:#D97706;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
-    } else {
-      fill.style.background = '#ef4444';
-      status.textContent   = 'Crítica';
-      status.style.cssText = 'background:#FEE2E2;color:#DC2626;font-size:0.6875rem;padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0';
-    }
+    set('jwt-iat', fmt(p.iat));
     const h = Math.floor(remain / 3_600_000);
     const m = Math.floor((remain % 3_600_000) / 60_000);
     set('jwt-remain', h > 0 ? `${h}h ${m}m` : `${m}m`);
+    const fill = el('sess-fill')!;
+    fill.style.width = `${pct}%`;
+    const [color, label, cls] = pct > 50
+      ? ['#22c55e', 'Activa',      'chip-yes']
+      : pct > 20
+      ? ['#f59e0b', 'Por vencer',  'chip-warn']
+      : ['#ef4444', 'Por expirar', 'chip-no'];
+    fill.style.background = color;
+    el('sess-badge')!.innerHTML = `<span class="${cls}">${label}</span>`;
   } catch {}
 }
 
-// ── Cargar nombre COMPLETO desde API (incluye secondName y secondSurname) ──
+// ── Cargar desde API ─────────────────────────────────────────────
 if (isAdmin()) {
+  show('row-lastlogin', 'flex');
   adminsApi.me().then(res => {
     if (!res.data) return;
     const a = res.data;
-    // Usar los 4 segmentos del nombre
-    const parts  = [a.firstName, a.secondName, a.firstSurname, a.secondSurname].filter(Boolean);
-    const full   = parts.join(' ');
-    const ini    = ((a.firstName?.[0] ?? '') + (a.firstSurname?.[0] ?? '')).toUpperCase();
-    updateStoredUser({
-      firstName: a.firstName, secondName: a.secondName,
-      firstSurname: a.firstSurname, secondSurname: a.secondSurname,
-      email: a.email
-    });
-    document.getElementById('hero-avatar')!.textContent = ini;
-    set('hero-name',  full);
-    set('hero-email', a.email.toLowerCase());
-    set('f-fullName', full);
-    set('f-email',    a.email.toLowerCase());
+    const parts = [a.firstName, a.secondName, a.firstSurname, a.secondSurname].filter(Boolean);
+    const full  = parts.join(' ');
+    const ini   = ((a.firstName?.[0] ?? '') + (a.firstSurname?.[0] ?? '')).toUpperCase();
+    updateStoredUser({ firstName: a.firstName, secondName: a.secondName,
+      firstSurname: a.firstSurname, secondSurname: a.secondSurname, email: a.email });
+    set('hero-av',   ini);
+    set('hero-name', full);
+    set('hero-email', a.email?.toLowerCase() ?? '');
+    set('d-name',    full);
+    set('d-email',   a.email?.toLowerCase() ?? '—');
+    set('d-code',    a.adminId ?? user.id);
+    if (a.phone) { set('d-phone', a.phone); show('row-phone', 'flex'); }
+    if (a.lastLoginAt) { try { set('d-lastlogin', fmtDate(a.lastLoginAt)); } catch {} }
+    else set('d-lastlogin', 'Primer acceso');
   }).catch(() => {});
 } else {
   studentsApi.me().then(res => {
     if (!res.data) return;
     const s = res.data;
-    // Usar los 4 segmentos del nombre
     const parts = [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean);
     const full  = parts.join(' ');
     const ini   = ((s.firstName?.[0] ?? '') + (s.firstSurname?.[0] ?? '')).toUpperCase();
-    updateStoredUser({
-      firstName: s.firstName, secondName: s.secondName,
-      firstSurname: s.firstSurname, secondSurname: s.secondSurname,
-      email: s.email
-    });
-    document.getElementById('hero-avatar')!.textContent = ini;
-    set('hero-name',  full);
-    set('hero-email', s.email.toLowerCase());
-    set('f-fullName', full);
-    set('f-email',    s.email.toLowerCase());
+    updateStoredUser({ firstName: s.firstName, secondName: s.secondName,
+      firstSurname: s.firstSurname, secondSurname: s.secondSurname, email: s.email });
+    set('hero-av',   ini);
+    set('hero-name', full);
+    set('hero-email', s.email?.toLowerCase() ?? '');
+    set('d-name',    full);
+    set('d-email',   s.email?.toLowerCase() ?? '—');
+    set('d-code',    s.studentId ?? user.id);
+    if (s.phone) { set('d-phone', s.phone); show('row-phone', 'flex'); }
+    if (s.programId) {
+      show('row-program', 'flex');
+      set('d-program', `${s.programId}: Cargando...`);
+      programsApi.findById(s.programId).then(pr => {
+        if (pr.data) set('d-program', `${pr.data.programId}: ${pr.data.programName}`);
+        else         set('d-program', s.programId!);
+      }).catch(() => set('d-program', s.programId!));
+    }
   }).catch(() => {});
 }
 </script>

@@ -1,8 +1,8 @@
 ---
-import AppLayout from '../../layouts/AppLayout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
-<AppLayout title="Administradores" currentPage="admin-admins">
+<AdminLayout title="Administradores" currentPage="admin-admins">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
@@ -36,6 +36,22 @@ import AppLayout from '../../layouts/AppLayout.astro';
     </div>
   </div>
 
+  <!-- Filtros -->
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+    <div style="position:relative;flex:1;min-width:200px;max-width:340px">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ui-text-3);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-admin" type="text" placeholder="Buscar por nombre, ID, correo..."
+        style="width:100%;padding:9px 14px 9px 34px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:11px;font-size:0.8125rem;color:var(--ui-text-1);font-family:inherit;outline:none"
+        onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--ui-border)'">
+    </div>
+    <select id="filter-status" style="padding:7px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none">
+      <option value="">Todos los estados</option>
+      <option value="active">Activos</option>
+      <option value="inactive">Inactivos</option>
+    </select>
+    <span id="count-label" style="font-size:0.8125rem;color:var(--ui-text-3);margin-left:auto"></span>
+  </div>
+
   <!-- Tabla -->
   <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
     <div style="overflow-x:auto">
@@ -64,7 +80,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
       </div>
     </div>
   </div>
-</AppLayout>
+</AdminLayout>
 
 <!-- Modal crear admin -->
 <div id="create-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
@@ -122,8 +138,6 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
 <style>
   @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
-  .th { padding:10px 14px;text-align:left;font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap }
-  .td { padding:10px 14px;font-size:0.875rem;color:var(--ui-text-1);border-top:1px solid var(--ui-border) }
   .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
   .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
   .page-btn:disabled { opacity:0.4;cursor:not-allowed }
@@ -155,9 +169,12 @@ import AppLayout from '../../layouts/AppLayout.astro';
   } catch { throw new Error('redirect'); }
 
   const currentUser = getUser();
-  let page = 0;
-  const SIZE = 15;
-  let totalPages = 1;
+  let page        = 0;
+  const SIZE      = 20;
+  let totalPages  = 1;
+  let searchStr   = '';
+  let filterStatus = '';
+  let debounce: ReturnType<typeof setTimeout>;
   let pendingToggleId  = '';
   let pendingActivate  = false;
   let allAdmins: AdminDto[] = [];
@@ -169,7 +186,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
   async function loadPage() {
     try {
-      const res = await adminsApi.findAll(page, SIZE);
+      const res = await adminsApi.findAll(page, SIZE, searchStr || undefined, filterStatus || undefined);
       if (!res.data) return;
       allAdmins  = res.data.content;
       totalPages = res.data.totalPages;
@@ -180,7 +197,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
       (document.getElementById('stat-total') as HTMLElement).textContent    = String(total);
       (document.getElementById('stat-active') as HTMLElement).textContent   = String(active);
       (document.getElementById('stat-inactive') as HTMLElement).textContent = String(inactive);
-      (document.getElementById('page-info') as HTMLElement).textContent     = `Pág. ${page + 1} de ${totalPages || 1}`;
+      (document.getElementById('count-label') as HTMLElement).textContent   = `${total} admin(s)`;
+      (document.getElementById('page-info') as HTMLElement).textContent     = `Pág. ${page + 1} de ${totalPages || 1} · ${total}`;
       (document.getElementById('btn-prev') as HTMLButtonElement).disabled   = page === 0;
       (document.getElementById('btn-next') as HTMLButtonElement).disabled   = page >= totalPages - 1;
 
@@ -189,6 +207,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
       toast.error('Error al cargar admins', { description: err?.message });
     }
   }
+
+  function triggerLoad() { page = 0; clearTimeout(debounce); debounce = setTimeout(loadPage, 300); }
 
   function renderTable() {
     const tbody = document.getElementById('admins-tbody')!;
@@ -267,7 +287,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
     });
   }
 
-  // Paginación
+  document.getElementById('search-admin')?.addEventListener('input', e => {
+    searchStr = (e.target as HTMLInputElement).value.trim();
+    triggerLoad();
+  });
+  document.getElementById('filter-status')?.addEventListener('change', e => {
+    filterStatus = (e.target as HTMLSelectElement).value;
+    triggerLoad();
+  });
+
   document.getElementById('btn-prev')?.addEventListener('click', () => { if (page > 0) { page--; loadPage(); } });
   document.getElementById('btn-next')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadPage(); } });
 

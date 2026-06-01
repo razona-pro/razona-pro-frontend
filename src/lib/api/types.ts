@@ -91,6 +91,7 @@ export interface TestDto {
   questionsToPresent?: number;
   testMode: 'PRACTICE' | 'EXAM' | 'TIMED';
   isActive: boolean;
+  difficultyBreakdown?: { B?: number; M?: number; A?: number };
 }
 
 // ── Trieds ────────────────────────────────────────────────────────

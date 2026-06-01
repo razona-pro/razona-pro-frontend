@@ -1,0 +1,446 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+---
+
+<BaseLayout title="Términos y Condiciones" description="Términos y Condiciones de uso de la plataforma RazonaPro — UFPSO">
+
+<style>
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+
+  .page-wrap {
+    min-height: 100vh;
+    background: var(--ui-bg);
+    font-family: var(--font-sans);
+  }
+
+  .top-bar {
+    background: var(--ui-card);
+    border-bottom: 1px solid var(--ui-border);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(8px);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg,#D41224,#9B1F24);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-name {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--ui-text-1);
+    letter-spacing: -0.3px;
+  }
+  .logo-name span { color: #D41224; }
+
+  .hero {
+    background: linear-gradient(135deg, rgba(212,18,36,0.04) 0%, transparent 60%);
+    border-bottom: 1px solid var(--ui-border);
+    padding: 4rem 1.5rem 3rem;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: rgba(212,18,36,0.08);
+    border-radius: 20px;
+    color: #D41224;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 900;
+    color: var(--ui-text-1);
+    margin: 0 0 0.75rem;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+  }
+  .hero p {
+    font-size: 1rem;
+    color: var(--ui-text-2);
+    margin: 0 auto;
+    max-width: 560px;
+    line-height: 1.65;
+  }
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8125rem;
+    color: var(--ui-text-3);
+  }
+
+  .content-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  /* TOC */
+  .toc {
+    background: var(--ui-card);
+    border: 1px solid var(--ui-border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    border-left: 4px solid #D41224;
+  }
+  .toc-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ui-text-3);
+    margin: 0 0 0.75rem;
+  }
+  .toc ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 1.5rem;
+  }
+  .toc a {
+    color: var(--ui-text-2);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .toc a:hover { color: #D41224; }
+
+  /* Secciones */
+  .section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .section:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    background: #D41224;
+    color: white;
+    border-radius: 7px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    margin-bottom: 0.625rem;
+    flex-shrink: 0;
+  }
+  .section h2 {
+    font-size: 1.1875rem;
+    font-weight: 800;
+    color: var(--ui-text-1);
+    margin: 0 0 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    line-height: 1.3;
+    scroll-margin-top: 80px;
+  }
+  .section p {
+    color: var(--ui-text-2);
+    line-height: 1.75;
+    margin: 0 0 0.875rem;
+    font-size: 0.9375rem;
+  }
+  .section p:last-child { margin-bottom: 0; }
+  .section ul, .section ol {
+    color: var(--ui-text-2);
+    padding-left: 1.5rem;
+    line-height: 1.75;
+    font-size: 0.9375rem;
+    margin: 0 0 0.875rem;
+  }
+  .section li { margin-bottom: 0.375rem; }
+
+  /* Highlight box */
+  .highlight {
+    background: rgba(212,18,36,0.05);
+    border: 1px solid rgba(212,18,36,0.18);
+    border-radius: 10px;
+    padding: 1rem 1.125rem;
+    margin: 1rem 0;
+  }
+  .highlight p { color: var(--ui-text-1) !important; margin: 0 !important; font-size: 0.9rem !important; }
+
+  .warning {
+    background: #FEF3C7;
+    border: 1px solid #FDE68A;
+    border-radius: 10px;
+    padding: 1rem 1.125rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .warning p { color: #92400E !important; margin: 0 !important; font-size: 0.875rem !important; }
+
+  /* Footer */
+  .page-footer {
+    background: var(--ui-card);
+    border-top: 1px solid var(--ui-border);
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .page-footer p { color: var(--ui-text-3); font-size: 0.8125rem; margin: 0; }
+  .page-footer a { color: #D41224; text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .toc ol { grid-template-columns: 1fr; }
+    .hero { padding: 2.5rem 1rem 2rem; }
+    .content-wrap { padding: 2rem 1rem 4rem; }
+  }
+</style>
+
+<div class="page-wrap">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <a href="/" class="logo">
+      <div class="logo-icon">
+        <Icon name="tabler:brain" size={20} class="text-white"/>
+      </div>
+      <span class="logo-name">Razona<span>Pro</span></span>
+    </a>
+    <a href="/auth" style="padding:8px 18px;border-radius:9px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-size:0.8125rem;font-weight:700;text-decoration:none;box-shadow:0 3px 10px rgba(212,18,36,0.3)">
+      Ir a la plataforma
+    </a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      Documento legal
+    </div>
+    <h1>Términos y Condiciones de uso</h1>
+    <p>Al acceder y utilizar la plataforma RazonaPro, usted acepta cumplir con los siguientes términos. Léalos detenidamente antes de registrarse.</p>
+    <div class="hero-meta">
+      <span class="meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Última actualización: 1 de junio de 2026
+      </span>
+      <span class="meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+        UFPSO · Ocaña, Colombia
+      </span>
+      <span class="meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Tiempo de lectura: ~8 minutos
+      </span>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-wrap">
+
+    <!-- TOC -->
+    <div class="toc">
+      <p class="toc-title">Contenido</p>
+      <ol>
+        <li><a href="#definiciones">Definiciones</a></li>
+        <li><a href="#uso-plataforma">Uso de la plataforma</a></li>
+        <li><a href="#cuenta">Registro y cuenta</a></li>
+        <li><a href="#conducta">Conducta del usuario</a></li>
+        <li><a href="#propiedad">Propiedad intelectual</a></li>
+        <li><a href="#privacidad">Privacidad y datos</a></li>
+        <li><a href="#ia">Módulo de IA</a></li>
+        <li><a href="#responsabilidad">Limitación de responsabilidad</a></li>
+        <li><a href="#modificaciones">Modificaciones</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ol>
+    </div>
+
+    <!-- 1 -->
+    <div class="section" id="definiciones">
+      <h2><span class="section-number">1</span>Definiciones</h2>
+      <p>Para efectos de los presentes Términos y Condiciones, se entiende por:</p>
+      <ul>
+        <li><strong>«Plataforma»</strong>: El sistema web RazonaPro, disponible en el dominio institucional de la UFPSO, destinado a la preparación para las pruebas Saber Pro.</li>
+        <li><strong>«Usuario» o «Estudiante»</strong>: Toda persona que se registre y acceda a la Plataforma con credenciales de estudiante.</li>
+        <li><strong>«Administrador»</strong>: Personal autorizado por la UFPSO con privilegios de gestión de contenidos y usuarios en la Plataforma.</li>
+        <li><strong>«Contenido»</strong>: Preguntas, tests, explicaciones, sesiones de IA adaptativa y cualquier otro material educativo disponible en la Plataforma.</li>
+        <li><strong>«IA»</strong>: El módulo de práctica adaptativa basado en inteligencia artificial que genera preguntas personalizadas según el desempeño del usuario.</li>
+      </ul>
+    </div>
+
+    <!-- 2 -->
+    <div class="section" id="uso-plataforma">
+      <h2><span class="section-number">2</span>Uso de la plataforma</h2>
+      <p>RazonaPro es una herramienta educativa desarrollada bajo el marco institucional de la Universidad Francisco de Paula Santander Ocaña (UFPSO), destinada exclusivamente a la preparación académica de sus estudiantes para las pruebas Saber Pro del ICFES.</p>
+      <div class="highlight">
+        <p>🎯 El acceso a la Plataforma es <strong>gratuito</strong> para los estudiantes activos de la UFPSO. No existe ningún cobro por el uso de las funcionalidades estándar.</p>
+      </div>
+      <p>El uso de la Plataforma está permitido únicamente para:</p>
+      <ul>
+        <li>Preparación personal para las pruebas Saber Pro.</li>
+        <li>Prácticas de competencias académicas evaluadas por el ICFES.</li>
+        <li>Consulta de resultados y estadísticas de rendimiento personal.</li>
+        <li>Interacción con el módulo de práctica adaptativa basado en IA.</li>
+      </ul>
+      <p>Queda expresamente prohibido el uso de la Plataforma para fines distintos a los académicos descritos, incluyendo cualquier actividad comercial, recopilación masiva de datos o ingeniería inversa.</p>
+    </div>
+
+    <!-- 3 -->
+    <div class="section" id="cuenta">
+      <h2><span class="section-number">3</span>Registro y cuenta de usuario</h2>
+      <p>Para acceder a las funciones completas de la Plataforma, el usuario debe registrarse proporcionando información veraz, completa y actualizada. En particular:</p>
+      <ul>
+        <li>El <strong>código estudiantil</strong> debe coincidir exactamente con el asignado por la UFPSO.</li>
+        <li>El <strong>correo electrónico</strong> debe ser válido y accesible, ya que se utilizará para verificación y comunicaciones.</li>
+        <li>El usuario es el único responsable de mantener la confidencialidad de su contraseña y de cualquier actividad que ocurra bajo su cuenta.</li>
+      </ul>
+      <div class="warning">
+        <svg width="18" height="18" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <p>El registro con información falsa o la suplantación de identidad puede resultar en la suspensión inmediata de la cuenta y el reporte a las autoridades académicas competentes de la UFPSO.</p>
+      </div>
+      <p>La UFPSO se reserva el derecho de desactivar cuentas que no cumplan con los requisitos de elegibilidad académica o que sean reportadas por uso indebido.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="section" id="conducta">
+      <h2><span class="section-number">4</span>Conducta del usuario</h2>
+      <p>El usuario se compromete a utilizar la Plataforma de manera ética y responsable. Está <strong>expresamente prohibido</strong>:</p>
+      <ul>
+        <li>Compartir las credenciales de acceso con terceros.</li>
+        <li>Intentar acceder a cuentas de otros usuarios o funciones administrativas sin autorización.</li>
+        <li>Publicar, distribuir o reproducir el Contenido de la Plataforma sin autorización expresa de la UFPSO.</li>
+        <li>Utilizar herramientas automatizadas (bots, scripts, scrapers) para interactuar con la Plataforma.</li>
+        <li>Realizar cualquier acción que perjudique el funcionamiento normal de la Plataforma o afecte negativamente la experiencia de otros usuarios.</li>
+        <li>Intentar vulnerar los sistemas de seguridad o acceder a datos que no le corresponden.</li>
+        <li>Reportar dudas o informes con contenido ofensivo, inapropiado o irrelevante.</li>
+      </ul>
+      <p>El incumplimiento de estas normas podrá resultar en la suspensión temporal o definitiva del acceso a la Plataforma.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="section" id="propiedad">
+      <h2><span class="section-number">5</span>Propiedad intelectual</h2>
+      <p>Todo el Contenido disponible en RazonaPro, incluyendo pero no limitado a preguntas, explicaciones, diseño visual, código fuente y material generado por IA, es propiedad de la <strong>Universidad Francisco de Paula Santander Ocaña</strong> o de sus respectivos autores autorizados, y está protegido por las leyes colombianas e internacionales de propiedad intelectual.</p>
+      <p>Se otorga al usuario una <strong>licencia limitada, personal, no transferible y no exclusiva</strong> para acceder y utilizar el Contenido exclusivamente con fines de preparación académica personal.</p>
+      <p>Esta licencia no incluye el derecho a:</p>
+      <ul>
+        <li>Copiar, modificar o distribuir el Contenido.</li>
+        <li>Crear obras derivadas basadas en el Contenido.</li>
+        <li>Utilizar el Contenido con fines comerciales.</li>
+        <li>Publicar el Contenido en otras plataformas o medios.</li>
+      </ul>
+    </div>
+
+    <!-- 6 -->
+    <div class="section" id="privacidad">
+      <h2><span class="section-number">6</span>Privacidad y tratamiento de datos</h2>
+      <p>La UFPSO, en su calidad de responsable del tratamiento de datos personales, recopila y procesa la siguiente información para el funcionamiento de la Plataforma:</p>
+      <ul>
+        <li><strong>Datos de identificación</strong>: Nombre completo, código estudiantil, correo electrónico, teléfono y programa académico.</li>
+        <li><strong>Datos de uso</strong>: Resultados de tests, respuestas a preguntas, tiempo de sesión e historial de intentos.</li>
+        <li><strong>Datos técnicos</strong>: Información básica del dispositivo y sesión para garantizar la seguridad de la cuenta.</li>
+      </ul>
+      <div class="highlight">
+        <p>🔒 Sus datos se utilizan <strong>exclusivamente</strong> para personalizar su experiencia de aprendizaje, generar estadísticas académicas institucionales y mejorar el sistema de práctica adaptativa. <strong>No compartimos datos con terceros con fines comerciales.</strong></p>
+      </div>
+      <p>El tratamiento de datos personales se realiza en cumplimiento de la <strong>Ley 1581 de 2012</strong> (Habeas Data) y el <strong>Decreto 1377 de 2013</strong> de la República de Colombia. Usted tiene derecho a conocer, actualizar, rectificar y suprimir sus datos personales, así como a revocar la autorización otorgada.</p>
+      <p>Para ejercer estos derechos, contacte al área de sistemas de la UFPSO a través de los canales institucionales.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="section" id="ia">
+      <h2><span class="section-number">7</span>Módulo de inteligencia artificial</h2>
+      <p>RazonaPro incluye un sistema de práctica adaptativa basado en inteligencia artificial (IA) que genera preguntas personalizadas según el rendimiento del usuario. Al utilizar este módulo, el usuario debe tener en cuenta:</p>
+      <ul>
+        <li>Las preguntas generadas por IA son <strong>complementarias</strong> al banco de preguntas institucional y no reemplazan el estudio formal.</li>
+        <li>El contenido generado por IA puede contener <strong>imprecisiones ocasionales</strong>. Se recomienda contrastar la información con fuentes académicas verificadas.</li>
+        <li>La IA no está diseñada para reemplazar la orientación de docentes o tutores académicos.</li>
+        <li>Las interacciones con el módulo de IA pueden ser revisadas por los administradores para mejorar la calidad del sistema.</li>
+        <li>El acceso al módulo de IA puede ser suspendido temporalmente por mantenimiento o limitaciones técnicas sin previo aviso.</li>
+      </ul>
+      <p>La UFPSO no garantiza que el contenido generado por IA sea siempre preciso, completo o actualizado, y no asume responsabilidad por decisiones académicas tomadas basándose únicamente en dicho contenido.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="section" id="responsabilidad">
+      <h2><span class="section-number">8</span>Limitación de responsabilidad</h2>
+      <p>La Plataforma se ofrece <strong>«tal como está»</strong> y <strong>«según disponibilidad»</strong>. La UFPSO no garantiza que el servicio sea ininterrumpido, libre de errores o que cumpla con las expectativas específicas de cada usuario en cuanto a resultados académicos.</p>
+      <p>La UFPSO no será responsable por:</p>
+      <ul>
+        <li>Pérdidas de datos causadas por fallos técnicos imprevistos.</li>
+        <li>Interrupciones del servicio por mantenimiento programado o emergencias técnicas.</li>
+        <li>Resultados en las pruebas Saber Pro, ya que dependen de múltiples factores individuales.</li>
+        <li>Decisiones académicas tomadas por el usuario basándose en estadísticas o contenido de la Plataforma.</li>
+        <li>Acceso no autorizado causado por negligencia del usuario en el manejo de sus credenciales.</li>
+      </ul>
+      <div class="warning">
+        <svg width="18" height="18" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <p>RazonaPro es una herramienta de apoyo académico. Los resultados en la plataforma no son equivalentes a los resultados en el examen Saber Pro real. Consulte siempre las guías oficiales del ICFES.</p>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="section" id="modificaciones">
+      <h2><span class="section-number">9</span>Modificaciones a los términos</h2>
+      <p>La UFPSO se reserva el derecho de modificar estos Términos y Condiciones en cualquier momento. Los cambios entrarán en vigor <strong>inmediatamente después de su publicación</strong> en la Plataforma.</p>
+      <p>Se notificará a los usuarios registrados sobre cambios significativos mediante:</p>
+      <ul>
+        <li>Notificación dentro de la Plataforma al iniciar sesión.</li>
+        <li>Correo electrónico al email registrado en la cuenta.</li>
+      </ul>
+      <p>El uso continuado de la Plataforma después de la publicación de los cambios constituye la aceptación de los nuevos términos. Si el usuario no está de acuerdo con los nuevos términos, debe dejar de usar la Plataforma y solicitar la eliminación de su cuenta.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="section" id="contacto">
+      <h2><span class="section-number">10</span>Contacto y soporte</h2>
+      <p>Para consultas relacionadas con estos Términos y Condiciones, el manejo de datos personales, o cualquier aspecto del funcionamiento de la Plataforma, puede comunicarse a través de:</p>
+      <ul>
+        <li><strong>Institución</strong>: Universidad Francisco de Paula Santander Ocaña</li>
+        <li><strong>Facultad</strong>: Facultad de Ingenierías</li>
+        <li><strong>Correo institucional</strong>: sistemas@ufpso.edu.co</li>
+        <li><strong>Dirección</strong>: Vía Acolsure, Sede El Algodonal, Ocaña, Norte de Santander</li>
+      </ul>
+      <p>Para reportes de dudas sobre el contenido de la Plataforma, utilice el módulo de <em>Reportar duda</em> disponible durante la práctica de tests o sesiones de IA. Un administrador revisará su reporte en el menor tiempo posible.</p>
+      <div class="highlight">
+        <p>Al registrarse y usar la Plataforma, usted confirma haber leído, comprendido y aceptado íntegramente estos Términos y Condiciones, así como la Política de Privacidad de datos personales de la UFPSO.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    <p>© 2026 RazonaPro · Universidad Francisco de Paula Santander Ocaña · <a href="/auth">Iniciar sesión</a></p>
+  </div>
+</div>
+
+</BaseLayout>

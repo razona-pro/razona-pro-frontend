@@ -1,4 +1,4 @@
-/*
+﻿/*
  * ═══════════════════════════════════════════════════════════════
  *  RazonaPro — Design System Global CSS
  *  Single source of truth: fonts, tokens, themes, a11y, utilities
@@ -13,15 +13,15 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-/* ── 1. Poppins — cargado UNA VEZ ───────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+/* ── 1. Fuentes — Poppins (predeterminada) + Lora (legible) ─ */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 /* ── 2. Tailwind ─────────────────────────────────────────── */
 @import "tailwindcss";
 
 /* ── 3. Tailwind theme tokens ────────────────────────────── */
 :root {
-  --font-family-sans: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-family-sans: 'Lora', Georgia, serif;
   --color-brand:       #D41224;
   --color-brand-dark:  #9B1F24;
   --color-brand-light: #D94F54;
@@ -67,7 +67,11 @@
   --sidebar-active-bg:  rgba(212, 18, 36, 0.08);
   --sidebar-active-txt: #D41224;
 
-  --font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Lora', Georgia, serif;
+  /* Fuente sans-serif para UI compacto (tablas, inputs, badges) */
+  --font-ui: 'Poppins', system-ui, -apple-system, sans-serif;
+  /* Fuente monoespaciada para IDs, código, etc. */
+  --font-mono: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -193,7 +197,7 @@ html.contrast-dark {
    10. ESCALAS DE TAMAÑO DE TEXTO (5 niveles desde 14px)
        html[data-fs] controla la raíz; rem/em escalan solos.
 ═══════════════════════════════════════════════════════════════ */
-html                          { font-size: 14px; }
+html                          { font-size: 16px; } /* base para rem — 15px en body vía CSS */
 html[data-fs="pequeno"]       { font-size: 14px; }
 html[data-fs="normal"]        { font-size: 16px; }
 html[data-fs="grande"]        { font-size: 18px; }
@@ -213,27 +217,25 @@ html[data-ls="extra-amplio"]  * { letter-spacing: 0.20em; }
 ═══════════════════════════════════════════════════════════════ */
 html[data-lh="1"]    body { line-height: 1;    }
 html[data-lh="1.5"]  body { line-height: 1.5;  }
+html[data-lh="1.6"]  body { line-height: 1.6;  }
 html[data-lh="1.75"] body { line-height: 1.75; }
 html[data-lh="2"]    body { line-height: 2;    }
 
 /* ═══════════════════════════════════════════════════════════════
-   13. FUENTE APTA PARA DISLEXIA / LEGIBLE
-   Lexend Deca  → diseñada para dislexia, muy distinta de Poppins
-   Lora         → serif elegante, máxima legibilidad en texto largo
+   13. FUENTES DE ACCESIBILIDAD — redefinen AMBAS variables CSS
+   Al cambiar --font-sans y --font-ui, TODOS los elementos del
+   sistema heredan el nuevo font sin necesidad de !important.
 ═══════════════════════════════════════════════════════════════ */
-html[data-font="dyslexia"] body,
-html[data-font="dyslexia"] body *,
-html[data-font="dyslexia"] input,
-html[data-font="dyslexia"] button,
-html[data-font="dyslexia"] select,
-html[data-font="dyslexia"] textarea { font-family: 'Lexend Deca', sans-serif !important; }
-
-html[data-font="legible"] body,
-html[data-font="legible"] body *,
-html[data-font="legible"] input,
-html[data-font="legible"] button,
-html[data-font="legible"] select,
-html[data-font="legible"] textarea { font-family: 'Lora', serif !important; }
+html[data-font="poppins"] {
+  --font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-ui:   'Poppins', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Poppins', system-ui, sans-serif;
+}
+html[data-font="dyslexia"] {
+  --font-sans: 'Lexend Deca', sans-serif;
+  --font-ui:   'Lexend Deca', sans-serif;
+  --font-mono: 'Lexend Deca', sans-serif;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    14. ALINEACIÓN DE TEXTO
@@ -318,7 +320,7 @@ html {
 
 body {
   font-family:             var(--font-sans);
-  font-size:               1rem;
+  font-size:               0.9375rem; /* Lora: 15px base equivale a ~16px Poppins visualmente */
   line-height:             1.6;
   background:              var(--ui-bg);
   color:                   var(--ui-text-1);
@@ -326,6 +328,63 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition:              background-color 0.25s ease, color 0.25s ease;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   20b. UI COMPACTO — tablas, inputs, labels, badges, sidebar
+   Usan var(--font-ui) que por defecto es Poppins.
+   Cuando accesibilidad cambia --font-ui, TODO el sistema se
+   actualiza automáticamente sin !important.
+═══════════════════════════════════════════════════════════════ */
+
+/* Tablas — reset limpio, sin overflow agresivo */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  box-sizing: border-box;
+}
+table th, table td {
+  font-family: var(--font-ui);
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+/* Clases globales .th y .td usadas en todos los admin pages */
+.th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--ui-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  background: var(--ui-surface);
+}
+.td {
+  padding: 11px 16px;
+  font-size: 0.8125rem;
+  color: var(--ui-text-1);
+  border-top: 1px solid var(--ui-border);
+  vertical-align: middle;
+  font-family: var(--font-ui);
+}
+.td-text { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-wrap { white-space: normal; word-break: break-word; }
+
+/* Inputs, selects, botones */
+input, select, textarea, button,
+label, .field-lbl, .field-inp,
+.page-btn, .action-btn {
+  font-family: var(--font-ui);
+  box-sizing: border-box;
+}
+
+/* Sidebar */
+#rp-sidebar, #rp-sidebar * { font-family: var(--font-sans); }
+
+/* Widget accesibilidad */
+#rp-a11y-root, #rp-a11y-root * { font-family: var(--font-ui); }
 
 /* ═══════════════════════════════════════════════════════════════
    21. DARK / CONTRAST-DARK / HIGH-CONTRAST — Overrides componentes

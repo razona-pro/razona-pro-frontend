@@ -1,8 +1,8 @@
 ---
-import AppLayout from '../../layouts/AppLayout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
-<AppLayout title="Competencias" currentPage="admin-competences">
+<AdminLayout title="Competencias" currentPage="admin-competences">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
@@ -38,7 +38,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
   <!-- Grid de competencias -->
   <div id="comp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
-</AppLayout>
+</AdminLayout>
 
 <!-- Modal crear/editar -->
 <div id="form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">

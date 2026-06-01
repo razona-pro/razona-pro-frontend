@@ -70,9 +70,9 @@ class ToastManager {
            color:${s.iconColor};display:flex;align-items:center;
            justify-content:center;flex-shrink:0;">${ICONS[type]}</div>
       <div style="flex:1;min-width:0;padding-top:1px;">
-        <p style="font-family:'Poppins',sans-serif;font-size:0.875rem;font-weight:600;
+        <p style="font-family:var(--font-ui);font-size:0.875rem;font-weight:600;
              color:#1A1A1A;margin:0 0 ${description ? '2px' : '0'};line-height:1.3;">${message}</p>
-        ${description ? `<p style="font-family:'Poppins',sans-serif;font-size:0.75rem;color:#6B7280;margin:0;line-height:1.5;">${description}</p>` : ''}
+        ${description ? `<p style="font-family:var(--font-ui);font-size:0.75rem;color:#6B7280;margin:0;line-height:1.5;">${description}</p>` : ''}
       </div>
       <button style="background:none;border:none;cursor:pointer;color:#A3A3A3;padding:2px;
               flex-shrink:0;line-height:1;font-size:16px;" aria-label="Cerrar">×</button>

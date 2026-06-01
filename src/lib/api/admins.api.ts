@@ -4,8 +4,12 @@ import type { AdminDto, PagedResponse } from './types';
 export const adminsApi = {
   me: () => apiFetch<AdminDto>('/api/admins/me'),
 
-  findAll: (page = 0, size = 20) =>
-    apiFetch<PagedResponse<AdminDto>>(`/api/admins?page=${page}&size=${size}`),
+  findAll: (page = 0, size = 20, search?: string, status?: string) => {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+    return apiFetch<PagedResponse<AdminDto>>(`/api/admins?${params}`);
+  },
 
   findById: (id: string) =>
     apiFetch<AdminDto>(`/api/admins/${id}`),

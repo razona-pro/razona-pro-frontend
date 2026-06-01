@@ -1,8 +1,8 @@
 ---
-import AppLayout from '../../layouts/AppLayout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
-<AppLayout title="Gestión de Tests" currentPage="admin-tests">
+<AdminLayout title="Gestión de Tests" currentPage="admin-tests">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none">Dashboard</a>
@@ -68,7 +68,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
       </div>
     </div>
   </div>
-</AppLayout>
+</AdminLayout>
 
 <!-- Modal crear/editar test -->
 <div id="form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
@@ -186,8 +186,6 @@ import AppLayout from '../../layouts/AppLayout.astro';
 <style>
   @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
   @keyframes cardIn  { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
-  .th { padding:10px 14px;text-align:left;font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap }
-  .td { padding:10px 14px;font-size:0.875rem;color:var(--ui-text-1);border-top:1px solid var(--ui-border) }
   .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
   .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
   .page-btn:disabled { opacity:0.4;cursor:not-allowed }
@@ -518,11 +516,12 @@ async function loadAvailableQuestions() {
 function renderAvailableQuestions() {
   const list   = document.getElementById('assoc-question-list')!;
   const search = (document.getElementById('assoc-search') as HTMLInputElement).value.toLowerCase();
-  // ← Quita el filtro diff de assoc-filter-diff, ya no existe en el modal
+  const diff   = (document.getElementById('assoc-filter-diff') as HTMLSelectElement)?.value ?? 'ALL';
   const filtered = allAvailableQuestions.filter(q => {
     const matchSearch = !search || (q.statement || '').toLowerCase().includes(search);
+    const matchDiff   = diff === 'ALL' || q.difficultyLevel === diff;
     const notAssigned = !assignedQuestionIds.has(q.questionId);
-    return matchSearch && notAssigned;
+    return matchSearch && matchDiff && notAssigned;
   });
     if (!filtered.length) {
       list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">No hay preguntas disponibles para agregar.</p>';

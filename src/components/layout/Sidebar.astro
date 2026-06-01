@@ -27,6 +27,8 @@ const adminNav = [
   { href: '/admin/programs',    icon: 'tabler:school',           label: 'Programas',       page: 'admin-programs' },
   { href: '/admin/rankings',    icon: 'tabler:award',            label: 'Rankings',        page: 'admin-rankings' },
   { href: '/admin/doubts',      icon: 'tabler:message-question', label: 'Dudas',           page: 'admin-doubts' },
+  { href: '/admin/stats',       icon: 'tabler:chart-bar',        label: 'Estadísticas',    page: 'admin-stats' },
+  { href: '/admin/ai',          icon: 'tabler:robot',            label: 'Sesiones IA',     page: 'admin-ai' },
 ];
 ---
 
@@ -37,10 +39,10 @@ const adminNav = [
       <svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
     </div>
     <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Cerrar sesión?</h3>
-    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55">Se cerrará tu sesión en todos los dispositivos activos.</p>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55">Se cerrará tu sesión actual en la plataforma.</p>
     <div style="display:flex;gap:8px">
       <button id="logout-cancel" style="flex:1;padding:0.625rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
-      <button id="logout-confirm" style="flex:1;padding:0.625rem;border-radius:10px;border:none;background:linear-gradient(135deg,#DC2626,#991B1B);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(220,38,38,0.3)">Cerrar sesión</button>
+      <button id="logout-confirm" style="flex:1;padding:0.625rem;border-radius:10px;border:none;background:linear-gradient(135deg,#DC2626,#991B1B);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(220,38,38,0.3)">Salir</button>
     </div>
   </div>
 </div>
@@ -318,8 +320,7 @@ const adminNav = [
   logoutCancel?.addEventListener('click', () => { logoutModal.style.display='none'; });
   logoutConfirm?.addEventListener('click', () => {
     logoutModal.style.display='none';
-    (window as any).rpLoader?.show('Cerrando sesión...');
-    setTimeout(() => logout(), 400);
+    logout();
   });
   logoutModal?.addEventListener('click', e => { if (e.target===logoutModal) logoutModal.style.display='none'; });
 

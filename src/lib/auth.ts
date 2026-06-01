@@ -84,6 +84,8 @@ export function getInitials(user: StoredUser): string {
 }
 
 export function logout(): void {
+  // Flag to prevent session-watcher from showing "expired" modal on intentional logout
+  if (typeof window !== 'undefined') (window as any).__rpIntentionalLogout = true;
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
   try {
@@ -117,16 +119,21 @@ export function initSessionWatcher(onExpired: () => void): () => void {
   let bc: BroadcastChannel | null = null;
   try {
     bc = new BroadcastChannel(LOGOUT_EVENT);
-    bc.onmessage = (e) => { if (e.data?.type === 'logout') onExpired(); };
+    bc.onmessage = (e) => {
+      if (e.data?.type === 'logout') {
+        // Otra pestaña hizo logout — redirigir silenciosamente sin mostrar modal de expirado
+        window.location.href = '/auth';
+      }
+    };
   } catch {}
 
   const onStorage = (e: StorageEvent) => {
-    if (e.key === TOKEN_KEY && !e.newValue) onExpired();
+    if (e.key === TOKEN_KEY && !e.newValue && !(window as any).__rpIntentionalLogout) onExpired();
   };
   window.addEventListener('storage', onStorage);
 
   const interval = setInterval(() => {
-    if (!isAuthenticated()) onExpired();
+    if (!isAuthenticated() && !(window as any).__rpIntentionalLogout) onExpired();
   }, 30_000);
 
   return () => {

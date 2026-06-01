@@ -79,9 +79,9 @@
       <section class="rp-section">
         <p class="rp-label">Fuente</p>
         <div class="rp-col" role="group">
-          <button class="rp-opt rp-opt-full rp-default" data-font="default" type="button">Poppins (predeterminada)</button>
+          <button class="rp-opt rp-opt-full rp-default" data-font="default" type="button">Lora (predeterminada)</button>
+          <button class="rp-opt rp-opt-full" data-font="poppins" type="button">Poppins — compacta, sans-serif</button>
           <button class="rp-opt rp-opt-full" data-font="dyslexia" type="button">Lexend — apta para dislexia</button>
-          <button class="rp-opt rp-opt-full" data-font="legible" type="button">Lora — legible y elegante</button>
         </div>
       </section>
 
@@ -289,11 +289,16 @@ const DEFAULTS: Prefs = {
 
 const FONT_URLS: Record<string, string> = {
   dyslexia: 'https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap',
-  legible:  'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,700;1,400&display=swap',
+  // Lora y Poppins ya están en global.css — no duplicar
 };
 
 function load(): Prefs {
-  try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }; }
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}');
+    // Migrar valores viejos: 'legible' → 'default' (Lora), 'lora' → 'default'
+    if (saved.font === 'legible' || saved.font === 'lora') saved.font = 'default';
+    return { ...DEFAULTS, ...saved };
+  }
   catch { return { ...DEFAULTS }; }
 }
 function save(p: Prefs) { localStorage.setItem(KEY, JSON.stringify(p)); }

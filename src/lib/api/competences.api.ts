@@ -20,6 +20,11 @@ export const competencesApi = {
     competenceId: string,
     q: { statement: string; explanation?: string; source?: string; difficultyLevel: string; options: { optionText: string; isCorrect: boolean }[] }
   ) => apiFetch<QuestionDto>(`/api/competences/${competenceId}/questions`, { method: 'POST', body: JSON.stringify(q) }),
+  updateQuestion: (
+    competenceId: string, questionId: string,
+    q: { statement: string; explanation?: string; source?: string; difficultyLevel: string }
+  ) => apiFetch<QuestionDto>(`/api/competences/${competenceId}/questions/${questionId}`,
+        { method: 'PUT', body: JSON.stringify(q) }),
   activateQuestion: (competenceId: string, questionId: string) =>
     apiFetch<QuestionDto>(`/api/competences/${competenceId}/questions/${questionId}/activate`, { method: 'PUT' }),
   deactivateQuestion: (competenceId: string, questionId: string) =>

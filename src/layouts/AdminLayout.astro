@@ -1,0 +1,35 @@
+---
+/**
+ * AdminLayout — wrapper de AppLayout con protección de ruta centralizada.
+ * Todas las páginas /admin/* deben usar este layout en vez de AppLayout.
+ * El guard client-side redirige a /auth si no está autenticado,
+ * o a /dashboard si está autenticado pero no es admin.
+ */
+import AppLayout from './AppLayout.astro';
+
+interface Props {
+  title: string;
+  currentPage: string;
+}
+const { title, currentPage } = Astro.props;
+---
+
+<AppLayout {title} {currentPage}>
+  <slot />
+</AppLayout>
+
+<!-- Guard de ruta: se ejecuta antes de cualquier script de la página -->
+<script>
+  import { isAuthenticated, isAdmin } from '../lib/auth';
+
+  (function guardAdmin() {
+    if (!isAuthenticated()) {
+      window.location.replace('/auth');
+      throw new Error('unauthenticated');
+    }
+    if (!isAdmin()) {
+      window.location.replace('/dashboard');
+      throw new Error('unauthorized');
+    }
+  })();
+</script>

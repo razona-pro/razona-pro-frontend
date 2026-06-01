@@ -1,0 +1,136 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Sesiones IA" currentPage="admin-ai">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Sesiones IA</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Sesiones de práctica IA</h1>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Historial de sesiones de práctica adaptativa con IA generadas en la plataforma.</p>
+      </div>
+      <!-- Estado del módulo IA -->
+      <div id="ai-status-chip" style="padding:8px 14px;border-radius:12px;font-size:0.8125rem;font-weight:700;background:var(--ui-surface);border:1.5px solid var(--ui-border);color:var(--ui-text-3)">
+        Verificando módulo IA...
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats rápidas -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem">
+    <div class="stat-card" style="border-left-color:#6366F1">
+      <p class="sc-lbl">Total sesiones</p>
+      <p id="n-total" class="sc-val" style="color:#6366F1">—</p>
+    </div>
+    <div class="stat-card" style="border-left-color:#059669">
+      <p class="sc-lbl">Finalizadas</p>
+      <p id="n-finished" class="sc-val" style="color:#059669">—</p>
+    </div>
+    <div class="stat-card" style="border-left-color:#D97706">
+      <p class="sc-lbl">En progreso</p>
+      <p id="n-inprogress" class="sc-val" style="color:#D97706">—</p>
+    </div>
+    <div class="stat-card" style="border-left-color:#D41224">
+      <p class="sc-lbl">Abandonadas</p>
+      <p id="n-abandoned" class="sc-val" style="color:#D41224">—</p>
+    </div>
+  </div>
+
+  <!-- Info del módulo IA -->
+  <div id="ai-module-info" style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);padding:1.5rem;margin-bottom:1.25rem;display:none">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
+      <div style="width:44px;height:44px;border-radius:12px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="22" height="22" fill="none" stroke="#6366F1" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+        </svg>
+      </div>
+      <div>
+        <p style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0">Módulo de práctica IA</p>
+        <p id="ai-provider" style="font-size:0.8125rem;color:var(--ui-text-3);margin:2px 0 0">—</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+      <div class="info-row"><span class="info-label">Estado</span><p id="ai-enabled" class="info-val">—</p></div>
+      <div class="info-row"><span class="info-label">Preguntas por sesión</span><p id="ai-maxq" class="info-val">—</p></div>
+      <div class="info-row"><span class="info-label">Modelo IA</span><p id="ai-model" class="info-val">—</p></div>
+      <div class="info-row"><span class="info-label">Proveedor</span><p id="ai-prov2" class="info-val">—</p></div>
+    </div>
+  </div>
+
+  <!-- Tabla de sesiones (últimas) -->
+  <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--ui-border)">
+      <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Actividad reciente (sesiones de estudiantes)</p>
+      <p style="font-size:0.75rem;color:var(--ui-text-3);margin:2px 0 0">Las sesiones son personales — el admin puede monitorear el volumen global.</p>
+    </div>
+    <div style="padding:2rem;text-align:center;color:var(--ui-text-3)">
+      <div style="width:48px;height:48px;border-radius:50%;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem">
+        <svg width="22" height="22" fill="none" stroke="#6366F1" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+        </svg>
+      </div>
+      <p style="font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Resumen de sesiones IA cargado arriba</p>
+      <p style="font-size:0.875rem">Los datos agregados de sesiones están en las tarjetas de estadísticas.<br>El detalle individual de cada sesión es accesible por el estudiante en su historial.</p>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .stat-card { background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid; }
+  .sc-lbl { font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px }
+  .sc-val { font-size:1.75rem;font-weight:900;margin:0;line-height:1 }
+  .info-row  { display:flex;flex-direction:column;gap:3px }
+  .info-label { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ui-text-3) }
+  .info-val  { font-size:0.875rem;font-weight:600;color:var(--ui-text-1);background:var(--ui-surface);border-radius:7px;padding:5px 9px;border:1px solid var(--ui-border);margin:0 }
+</style>
+
+<script>
+  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { apiFetch }             from '../../lib/api/client';
+  import { toast }                from '../../lib/toast';
+
+
+  interface AiStatus {
+    enabled: boolean; provider?: string; model?: string;
+    adaptiveMode?: boolean; maxQuestionsPerSession?: number;
+  }
+
+  async function load() {
+    // Estado del módulo IA
+    try {
+      const res = await apiFetch<AiStatus>('/api/ai-trieds/status');
+      const s   = res.data!;
+      const chip = document.getElementById('ai-status-chip')!;
+      chip.textContent = s.enabled ? '✓ Módulo IA activo' : '✕ Módulo IA desactivado';
+      chip.style.cssText += s.enabled
+        ? ';background:#D1FAE5;border-color:#A7F3D0;color:#059669'
+        : ';background:#FEE2E2;border-color:#FECACA;color:#DC2626';
+
+      document.getElementById('ai-enabled')!.textContent  = s.enabled ? '✓ Activo' : '✕ Inactivo';
+      document.getElementById('ai-provider')!.textContent = s.provider ?? 'No especificado';
+      document.getElementById('ai-prov2')!.textContent    = s.provider ?? '—';
+      document.getElementById('ai-maxq')!.textContent     = String(s.maxQuestionsPerSession ?? '—');
+      document.getElementById('ai-model')!.textContent    = s.model ?? '—';
+      document.getElementById('ai-module-info')!.style.display = 'block';
+    } catch {}
+
+    // Stats de overview para extraer sesiones IA
+    try {
+      const res = await apiFetch<any>('/api/stats/admin/overview');
+      const d   = res.data!;
+      document.getElementById('n-total')!.textContent     = String(d.totalAiSessions ?? '—');
+      // Las siguientes son aproximaciones usando el overview (no hay endpoint específico por estado de IA)
+      document.getElementById('n-finished')!.textContent  = '—';
+      document.getElementById('n-inprogress')!.textContent = '—';
+      document.getElementById('n-abandoned')!.textContent = '—';
+    } catch (err: any) {
+      toast.error('Error al cargar stats IA', { description: err?.message });
+    }
+  }
+
+  load();
+</script>

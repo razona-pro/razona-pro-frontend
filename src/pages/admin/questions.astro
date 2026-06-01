@@ -1,8 +1,8 @@
 ---
-import AppLayout from '../../layouts/AppLayout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
-<AppLayout title="Banco de Preguntas" currentPage="admin-questions">
+<AdminLayout title="Banco de Preguntas" currentPage="admin-questions">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
@@ -23,13 +23,18 @@ import AppLayout from '../../layouts/AppLayout.astro';
   <!-- Selector de competencia y filtros -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
     <select id="filter-comp" style="padding:7px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none;min-width:220px">
-      <option value="">— Selecciona una competencia —</option>
+      <option value="">Todas las competencias</option>
     </select>
     <select id="filter-diff" style="padding:7px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none">
       <option value="ALL">Todas las dificultades</option>
       <option value="B">Básico</option>
       <option value="M">Medio</option>
       <option value="A">Alto</option>
+    </select>
+    <select id="filter-status" style="padding:7px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none">
+      <option value="ALL">Todos los estados</option>
+      <option value="active">Activas</option>
+      <option value="inactive">Inactivas</option>
     </select>
     <span id="count-label" style="font-size:0.8125rem;color:var(--ui-text-3);margin-left:auto"></span>
   </div>
@@ -50,7 +55,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
           </tr>
         </thead>
         <tbody id="questions-tbody">
-          <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Selecciona una competencia para ver las preguntas.</td></tr>
+          <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando preguntas...</td></tr>
         </tbody>
       </table>
     </div>
@@ -62,7 +67,51 @@ import AppLayout from '../../layouts/AppLayout.astro';
       </div>
     </div>
   </div>
-</AppLayout>
+</AdminLayout>
+
+<!-- Modal editar pregunta -->
+<div id="edit-q-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:560px;width:calc(100% - 2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h2 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Editar pregunta</h2>
+      <button id="eq-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);font-size:1.25rem;line-height:1;font-family:inherit">×</button>
+    </div>
+    <div id="eq-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:1rem"></div>
+    <input type="hidden" id="eq-comp" /><input type="hidden" id="eq-qid" />
+    <form id="eq-form" novalidate>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1rem">
+        <div class="field-grp">
+          <label class="field-lbl">Enunciado *</label>
+          <textarea id="eq-stmt" class="field-inp" rows="4" maxlength="2000" required style="resize:vertical"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field-grp">
+            <label class="field-lbl">Dificultad *</label>
+            <select id="eq-diff" class="field-inp">
+              <option value="B">Básico (1 pt)</option>
+              <option value="M">Medio (3 pts)</option>
+              <option value="A">Alto (5 pts)</option>
+            </select>
+          </div>
+          <div class="field-grp">
+            <label class="field-lbl">Fuente</label>
+            <input id="eq-src" type="text" class="field-inp" placeholder="Ej: ICFES 2024" maxlength="50" />
+          </div>
+        </div>
+        <div class="field-grp">
+          <label class="field-lbl">Explicación / Retroalimentación</label>
+          <textarea id="eq-exp" class="field-inp" rows="2" maxlength="2000" style="resize:vertical"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="eq-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+        <button type="submit" id="eq-submit" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
+          <span id="eq-label">Guardar cambios</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- Modal crear pregunta -->
 <div id="create-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;align-items:center;justify-content:flex-start;justify-content:center;backdrop-filter:blur(4px)">
@@ -126,8 +175,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
 <style>
   @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
-  .th { padding:10px 14px;text-align:left;font-size:0.6875rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap }
-  .td { padding:10px 14px;font-size:0.875rem;color:var(--ui-text-1);border-top:1px solid var(--ui-border) }
+  @keyframes spin    { to{transform:rotate(360deg)} }
   .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
   .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
   .page-btn:disabled { opacity:0.4;cursor:not-allowed }
@@ -140,6 +188,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 <script>
   import { requireAuth, isAdmin } from '../../lib/auth';
   import { competencesApi }  from '../../lib/api/competences.api';
+  import { apiFetch }        from '../../lib/api/client';
   import { toast }           from '../../lib/toast';
   import type { QuestionDto } from '../../lib/api/types';
 
@@ -152,17 +201,17 @@ import AppLayout from '../../layouts/AppLayout.astro';
   const DIFF_COLOR: Record<string, string> = { B:'#059669', M:'#D97706', A:'#DC2626' };
   const DIFF_BG:    Record<string, string> = { B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
 
-  let page = 0;
-  const SIZE = 20;
+  let page       = 0;
+  const SIZE     = 20;
   let totalPages = 1;
-  let currentComp = '';
-  let allQuestions: QuestionDto[] = [];
-  let competencesLoaded: { competenceId: string; competenceName: string }[] = [];
+  let currentComp  = '';
+  let currentDiff  = 'ALL';
+  let currentStatus = 'ALL';
+  let debounce: ReturnType<typeof setTimeout>;
 
-  // Cargar competencias
+  // Cargar competencias para ambos selectores
   competencesApi.findAll(false).then(res => {
     if (!res.data) return;
-    competencesLoaded = res.data;
     const filterSel = document.getElementById('filter-comp') as HTMLSelectElement;
     const formSel   = document.getElementById('c-comp')      as HTMLSelectElement;
     res.data.forEach(c => {
@@ -173,51 +222,78 @@ import AppLayout from '../../layouts/AppLayout.astro';
         sel.appendChild(opt);
       });
     });
-  }).catch(() => {});
+    // Cargar todas las preguntas al iniciar
+    loadQuestions();
+  }).catch(() => { loadQuestions(); });
 
   async function loadQuestions() {
-    if (!currentComp) return;
-    try {
-      const res = await competencesApi.getQuestions(currentComp, page, SIZE);
-      if (!res.data) return;
-      allQuestions = res.data.content;
-      totalPages   = res.data.totalPages;
-      (document.getElementById('page-info') as HTMLElement).textContent = `Pág. ${page + 1} de ${totalPages || 1} — ${res.data.totalElements} preguntas`;
-      (document.getElementById('btn-prev') as HTMLButtonElement).disabled = page === 0;
-      (document.getElementById('btn-next') as HTMLButtonElement).disabled = page >= totalPages - 1;
-      applyFilters();
-    } catch (err: any) {
-      toast.error('Error al cargar preguntas', { description: err?.message });
-    }
-  }
+    const tbody = document.getElementById('questions-tbody')!;
+    tbody.innerHTML = `<tr><td colspan="7" style="padding:1.5rem;text-align:center;color:var(--ui-text-3)">
+      <div style="display:inline-flex;align-items:center;gap:8px"><div style="width:14px;height:14px;border:2px solid var(--brand);border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite"></div> Cargando...</div>
+    </td></tr>`;
 
-  function applyFilters() {
-    const diff = (document.getElementById('filter-diff') as HTMLSelectElement).value;
-    const filtered = allQuestions.filter(q => diff === 'ALL' || q.difficultyLevel === diff);
-    (document.getElementById('count-label') as HTMLElement).textContent = `${filtered.length} pregunta(s)`;
-    renderTable(filtered);
+    try {
+      const params = new URLSearchParams({ page: String(page), size: String(SIZE) });
+      if (currentComp)             params.set('competenceId', currentComp);
+      if (currentDiff !== 'ALL')   params.set('difficulty',   currentDiff);
+      if (currentStatus !== 'ALL') params.set('status',       currentStatus);
+      const res = await apiFetch<any>(`/api/questions?${params}`);
+      if (!res.data) { renderTable([]); return; }
+      const { content, totalPages: tp, totalElements: te } = res.data;
+      totalPages = tp;
+      (document.getElementById('page-info') as HTMLElement).textContent =
+        `Pág. ${page + 1} de ${tp || 1} · ${te} pregunta(s)`;
+      (document.getElementById('count-label') as HTMLElement).textContent = `${te} resultado(s)`;
+      (document.getElementById('btn-prev') as HTMLButtonElement).disabled = page === 0;
+      (document.getElementById('btn-next') as HTMLButtonElement).disabled = page >= tp - 1;
+      renderTable(content);
+    } catch (err: any) {
+      const tbody = document.getElementById('questions-tbody')!;
+      tbody.innerHTML = `<tr><td colspan="7" style="padding:2rem;text-align:center;color:#DC2626">
+        <p style="margin:0;font-weight:700">Error al cargar</p>
+        <p style="margin:4px 0 0;font-size:0.8125rem">${err?.message ?? 'Reinicia el servidor backend y recarga la página'}</p>
+      </td></tr>`;
+    }
   }
 
   function renderTable(questions: QuestionDto[]) {
     const tbody = document.getElementById('questions-tbody')!;
     tbody.innerHTML = '';
     if (!questions.length) {
-      tbody.innerHTML = `<tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--ui-text-3)">${currentComp ? 'Sin preguntas con estos filtros.' : 'Selecciona una competencia.'}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="padding:2.5rem;text-align:center">
+        <p style="font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin preguntas</p>
+        <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0">Prueba cambiando los filtros o selecciona otra competencia.</p>
+      </td></tr>`;
       return;
     }
-    questions.forEach(q => {
-      const stmt = q.statement.length > 80 ? q.statement.substring(0, 80) + '…' : q.statement;
+    questions.forEach((q: QuestionDto) => {
+      const stmt = q.statement.length > 90 ? q.statement.substring(0, 90) + '…' : q.statement;
       const opts = q.options?.length ?? '—';
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="td"><code style="background:var(--ui-surface);padding:2px 7px;border-radius:5px;font-size:0.75rem;font-family:monospace">${q.questionId}</code></td>
-        <td class="td" style="max-width:280px;font-size:0.8125rem;line-height:1.4" title="${q.statement}">${stmt}</td>
+        <td class="td">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <code style="background:var(--ui-surface);padding:2px 7px;border-radius:5px;font-size:0.75rem;font-family:monospace;color:var(--brand);border:1px solid var(--ui-border)">${q.questionId}</code>
+            <span style="font-size:0.625rem;color:var(--ui-text-3)">${q.competenceId}</span>
+          </div>
+        </td>
+        <td class="td" style="max-width:300px;font-size:0.8125rem;line-height:1.45;color:var(--ui-text-1)" title="${q.statement.replace(/"/g,'&quot;')}">${stmt}</td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'}">${DIFF_LABEL[q.difficultyLevel]??q.difficultyLevel}</span></td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-3)">${q.source ?? '—'}</td>
-        <td class="td" style="text-align:center;font-size:0.875rem;font-weight:600">${opts}</td>
+        <td class="td" style="text-align:center;font-weight:700">${opts}</td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${q.isActive?'#D1FAE5':'#FEE2E2'};color:${q.isActive?'#059669':'#DC2626'}">${q.isActive?'Activa':'Inactiva'}</span></td>
-        <td class="td">
-          ${q.isActive ? `<button class="btn-deact" data-comp="${q.competenceId}" data-q="${q.questionId}" style="padding:4px 10px;border-radius:7px;border:1.5px solid #FECACA;background:#FEF2F2;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Desactivar</button>` : ''}
+        <td class="td" style="white-space:nowrap">
+          <div style="display:flex;gap:5px;flex-wrap:nowrap">
+            <button class="btn-edit" data-comp="${q.competenceId}" data-q="${q.questionId}"
+              data-stmt="${q.statement.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
+              data-diff="${q.difficultyLevel}" data-src="${q.source??''}"
+              data-exp="${(q.explanation??'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
+              style="padding:4px 10px;border-radius:7px;border:1.5px solid var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Editar</button>
+            ${q.isActive
+              ? `<button class="btn-deact" data-comp="${q.competenceId}" data-q="${q.questionId}" style="padding:4px 10px;border-radius:7px;border:1.5px solid #FECACA;background:#FEF2F2;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Desactivar</button>`
+              : `<button class="btn-act"  data-comp="${q.competenceId}" data-q="${q.questionId}" style="padding:4px 10px;border-radius:7px;border:1.5px solid #A7F3D0;background:#D1FAE5;color:#059669;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Activar</button>`
+            }
+          </div>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -225,23 +301,59 @@ import AppLayout from '../../layouts/AppLayout.astro';
     document.querySelectorAll<HTMLButtonElement>('.btn-deact').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!confirm('¿Desactivar esta pregunta?')) return;
+        btn.disabled = true; btn.textContent = '...';
         try {
           await competencesApi.deactivateQuestion(btn.dataset.comp!, btn.dataset.q!);
           toast.success('Pregunta desactivada');
           loadQuestions();
         } catch (err: any) {
           toast.error('Error', { description: err?.message });
+          btn.disabled = false; btn.textContent = 'Desactivar';
         }
+      });
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.btn-act').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Activar esta pregunta?')) return;
+        btn.disabled = true; btn.textContent = '...';
+        try {
+          await competencesApi.activateQuestion(btn.dataset.comp!, btn.dataset.q!);
+          toast.success('Pregunta activada');
+          loadQuestions();
+        } catch (err: any) {
+          toast.error('Error', { description: err?.message });
+          btn.disabled = false; btn.textContent = 'Activar';
+        }
+      });
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const editModal = document.getElementById('edit-q-modal')!;
+        (document.getElementById('eq-comp') as HTMLInputElement).value  = btn.dataset.comp!;
+        (document.getElementById('eq-qid')  as HTMLInputElement).value  = btn.dataset.q!;
+        (document.getElementById('eq-stmt') as HTMLTextAreaElement).value = btn.dataset.stmt ?? '';
+        (document.getElementById('eq-diff') as HTMLSelectElement).value  = btn.dataset.diff ?? 'M';
+        (document.getElementById('eq-src')  as HTMLInputElement).value   = btn.dataset.src  ?? '';
+        (document.getElementById('eq-exp')  as HTMLTextAreaElement).value = btn.dataset.exp  ?? '';
+        (document.getElementById('eq-error') as HTMLElement).style.display = 'none';
+        editModal.style.display = 'flex';
       });
     });
   }
 
-  // Events
+  function triggerLoad() { page = 0; clearTimeout(debounce); debounce = setTimeout(loadQuestions, 300); }
+
   document.getElementById('filter-comp')?.addEventListener('change', (e) => {
-    currentComp = (e.target as HTMLSelectElement).value;
-    page = 0; loadQuestions();
+    currentComp = (e.target as HTMLSelectElement).value; triggerLoad();
   });
-  document.getElementById('filter-diff')?.addEventListener('change', applyFilters);
+  document.getElementById('filter-diff')?.addEventListener('change', (e) => {
+    currentDiff = (e.target as HTMLSelectElement).value; triggerLoad();
+  });
+  document.getElementById('filter-status')?.addEventListener('change', (e) => {
+    currentStatus = (e.target as HTMLSelectElement).value; triggerLoad();
+  });
   document.getElementById('btn-prev')?.addEventListener('click', () => { if (page > 0) { page--; loadQuestions(); } });
   document.getElementById('btn-next')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadQuestions(); } });
 
