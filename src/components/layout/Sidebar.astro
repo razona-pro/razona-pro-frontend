@@ -457,7 +457,14 @@ logoutCancel?.addEventListener('click', () => {
 });
 logoutConfirm?.addEventListener('click', () => {
   logoutModal.style.display = 'none';
-  logout();
+  // Mostrar loader antes de redirigir
+  if ((window as any).rpLoader) {
+    (window as any).rpLoader.show('Cerrando sesión...');
+  }
+  // Pequeño delay para que se vea el loader
+  setTimeout(() => {
+    logout();
+  }, 400);
 });
 logoutModal?.addEventListener('click', (e) => {
   if (e.target === logoutModal) logoutModal.style.display = 'none';

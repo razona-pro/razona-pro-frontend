@@ -73,39 +73,16 @@ import AppLayout from '../../layouts/AppLayout.astro';
       <h2 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Nuevo administrador</h2>
       <button id="modal-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);padding:4px;font-size:1.25rem;line-height:1">×</button>
     </div>
-
     <div id="create-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:1rem"></div>
-
     <form id="create-form" novalidate>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div class="field-grp">
-          <label class="field-lbl">Primer nombre *</label>
-          <input id="c-fname" type="text" class="field-inp" placeholder="Ej: Juan" maxlength="15" required />
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Segundo nombre</label>
-          <input id="c-mname" type="text" class="field-inp" placeholder="Opcional" maxlength="15" />
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Primer apellido *</label>
-          <input id="c-lname1" type="text" class="field-inp" placeholder="Ej: Pérez" maxlength="15" required />
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Segundo apellido</label>
-          <input id="c-lname2" type="text" class="field-inp" placeholder="Opcional" maxlength="15" />
-        </div>
-        <div class="field-grp" style="grid-column:1/-1">
-          <label class="field-lbl">Correo electrónico *</label>
-          <input id="c-email" type="email" class="field-inp" placeholder="correo@dominio.com" maxlength="50" required />
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Teléfono *</label>
-          <input id="c-phone" type="tel" class="field-inp" placeholder="+573001234567" required />
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Contraseña *</label>
-          <input id="c-password" type="password" class="field-inp" placeholder="Mín. 8 caracteres" required />
-        </div>
+        <div class="field-grp"><label class="field-lbl">Primer nombre *</label><input id="c-fname" type="text" class="field-inp" placeholder="Ej: Juan" maxlength="15" required /></div>
+        <div class="field-grp"><label class="field-lbl">Segundo nombre</label><input id="c-mname" type="text" class="field-inp" placeholder="Opcional" maxlength="15" /></div>
+        <div class="field-grp"><label class="field-lbl">Primer apellido *</label><input id="c-lname1" type="text" class="field-inp" placeholder="Ej: Pérez" maxlength="15" required /></div>
+        <div class="field-grp"><label class="field-lbl">Segundo apellido</label><input id="c-lname2" type="text" class="field-inp" placeholder="Opcional" maxlength="15" /></div>
+        <div class="field-grp" style="grid-column:1/-1"><label class="field-lbl">Correo electrónico *</label><input id="c-email" type="email" class="field-inp" placeholder="correo@dominio.com" maxlength="50" required /></div>
+        <div class="field-grp"><label class="field-lbl">Teléfono *</label><input id="c-phone" type="tel" class="field-inp" placeholder="+573001234567" required /></div>
+        <div class="field-grp"><label class="field-lbl">Contraseña *</label><input id="c-password" type="password" class="field-inp" placeholder="Mín. 8 caracteres" required /></div>
       </div>
       <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0 0 1rem">* La contraseña debe tener mayúscula, minúscula y número.</p>
       <div style="display:flex;gap:8px">
@@ -118,18 +95,28 @@ import AppLayout from '../../layouts/AppLayout.astro';
   </div>
 </div>
 
-<!-- Modal desactivar admin -->
-<div id="deactivate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+<!-- Modal toggle estado admin -->
+<div id="toggle-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:360px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
-    <div style="width:52px;height:52px;border-radius:14px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
-      <svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-    </div>
-    <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Desactivar administrador?</h3>
-    <p id="deactivate-desc" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55"></p>
+    <div id="toggle-icon-wrap" style="width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem"></div>
+    <h3 id="toggle-title" style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem"></h3>
+    <p id="toggle-desc" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55"></p>
     <div style="display:flex;gap:8px">
-      <button id="deactivate-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
-      <button id="deactivate-confirm" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#DC2626,#991B1B);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Desactivar</button>
+      <button id="toggle-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+      <button id="toggle-confirm" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Confirmar</button>
     </div>
+  </div>
+</div>
+
+<!-- Modal: no puede desactivarse a sí mismo -->
+<div id="self-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:360px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="width:52px;height:52px;border-radius:14px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <svg width="24" height="24" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Acción no permitida</h3>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55">No puedes desactivar tu propia cuenta de administrador.</p>
+    <button id="self-ok" style="width:100%;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Entendido</button>
   </div>
 </div>
 
@@ -148,7 +135,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 </style>
 
 <script>
-  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { requireAuth, isAdmin, getUser } from '../../lib/auth';
   import { adminsApi } from '../../lib/api/admins.api';
   import { toast } from '../../lib/toast';
   import type { AdminDto } from '../../lib/api/types';
@@ -158,10 +145,12 @@ import AppLayout from '../../layouts/AppLayout.astro';
     if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
   } catch { throw new Error('redirect'); }
 
+  const currentUser = getUser();
   let page = 0;
   const SIZE = 15;
   let totalPages = 1;
-  let pendingDeactivateId = '';
+  let pendingToggleId  = '';
+  let pendingActivate  = false;
   let allAdmins: AdminDto[] = [];
 
   function fmtDate(iso?: string) {
@@ -173,18 +162,18 @@ import AppLayout from '../../layouts/AppLayout.astro';
     try {
       const res = await adminsApi.findAll(page, SIZE);
       if (!res.data) return;
-      allAdmins   = res.data.content;
-      totalPages  = res.data.totalPages;
-      const total = res.data.totalElements;
-      const active  = allAdmins.filter(a => a.isActive).length;
+      allAdmins  = res.data.content;
+      totalPages = res.data.totalPages;
+      const total    = res.data.totalElements;
+      const active   = allAdmins.filter(a => a.isActive).length;
       const inactive = allAdmins.filter(a => !a.isActive).length;
 
-      (document.getElementById('stat-total') as HTMLElement).textContent   = String(total);
-      (document.getElementById('stat-active') as HTMLElement).textContent  = String(active);
+      (document.getElementById('stat-total') as HTMLElement).textContent    = String(total);
+      (document.getElementById('stat-active') as HTMLElement).textContent   = String(active);
       (document.getElementById('stat-inactive') as HTMLElement).textContent = String(inactive);
-      (document.getElementById('page-info') as HTMLElement).textContent = `Pág. ${page + 1} de ${totalPages || 1}`;
-      (document.getElementById('btn-prev') as HTMLButtonElement).disabled = page === 0;
-      (document.getElementById('btn-next') as HTMLButtonElement).disabled = page >= totalPages - 1;
+      (document.getElementById('page-info') as HTMLElement).textContent     = `Pág. ${page + 1} de ${totalPages || 1}`;
+      (document.getElementById('btn-prev') as HTMLButtonElement).disabled   = page === 0;
+      (document.getElementById('btn-next') as HTMLButtonElement).disabled   = page >= totalPages - 1;
 
       renderTable();
     } catch (err: any) {
@@ -201,42 +190,108 @@ import AppLayout from '../../layouts/AppLayout.astro';
     }
     allAdmins.forEach(a => {
       const fullName = [a.firstName, a.secondName, a.firstSurname, a.secondSurname].filter(Boolean).join(' ');
-      const tr = document.createElement('tr');
+      const isMe     = currentUser?.id === a.adminId;
+      const tr       = document.createElement('tr');
       tr.innerHTML = `
         <td class="td"><code style="background:var(--ui-surface);padding:2px 7px;border-radius:5px;font-size:0.8125rem;font-family:monospace">${a.adminId}</code></td>
-        <td class="td" style="font-weight:600">${fullName}</td>
+        <td class="td" style="font-weight:600">${fullName}${isMe ? ' <span style="font-size:0.625rem;background:#EDE9FE;color:#6366F1;padding:2px 7px;border-radius:10px;font-weight:700">Tú</span>' : ''}</td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${(a.email ?? '').toLowerCase()}</td>
         <td class="td" style="font-size:0.8125rem;font-family:monospace">${a.phone ?? '—'}</td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-3)">${fmtDate(a.lastLoginAt)}</td>
         <td class="td">
-          <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${a.isActive ? '#D1FAE5' : '#FEE2E2'};color:${a.isActive ? '#059669' : '#DC2626'}">
+          <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${a.isActive?'#D1FAE5':'#FEE2E2'};color:${a.isActive?'#059669':'#DC2626'}">
             ${a.isActive ? 'Activo' : 'Inactivo'}
           </span>
         </td>
         <td class="td">
           <div style="display:flex;gap:5px">
-            ${a.isActive ? `<button class="action-btn btn-deactivate" data-id="${a.adminId}" data-name="${fullName}" style="border-color:#FECACA;background:#FEF2F2;color:#DC2626">Desactivar</button>` : ''}
+            ${isMe
+              ? `<span style="font-size:0.75rem;color:var(--ui-text-3);padding:4px 10px;background:var(--ui-surface);border-radius:7px;border:1.5px solid var(--ui-border)">Mi cuenta</span>`
+              : `<button class="action-btn btn-toggle"
+                  data-id="${a.adminId}" data-name="${fullName}" data-active="${a.isActive}"
+                  style="border-color:${a.isActive?'#FECACA':'#A7F3D0'};background:${a.isActive?'#FEF2F2':'#D1FAE5'};color:${a.isActive?'#DC2626':'#059669'}">
+                  ${a.isActive ? 'Desactivar' : 'Activar'}
+                </button>`
+            }
           </div>
         </td>`;
       tbody.appendChild(tr);
     });
 
-    // Deactivate buttons
-    document.querySelectorAll<HTMLButtonElement>('.btn-deactivate').forEach(btn => {
+    document.querySelectorAll<HTMLButtonElement>('.btn-toggle').forEach(btn => {
       btn.addEventListener('click', () => {
-        pendingDeactivateId = btn.dataset.id!;
-        (document.getElementById('deactivate-desc') as HTMLElement).textContent =
-          `Se desactivará la cuenta del administrador "${btn.dataset.name}". Esta acción puede revertirse editando el admin.`;
-        (document.getElementById('deactivate-modal') as HTMLElement).style.display = 'flex';
+        const isActive = btn.dataset.active === 'true';
+        const name     = btn.dataset.name!;
+        const id       = btn.dataset.id!;
+
+        // Doble check: no desactivarse a sí mismo
+        if (!isActive === false && currentUser?.id === id) {
+          (document.getElementById('self-modal') as HTMLElement).style.display = 'flex';
+          return;
+        }
+
+        pendingToggleId  = id;
+        pendingActivate  = !isActive;
+
+        const iconWrap = document.getElementById('toggle-icon-wrap')!;
+        const title    = document.getElementById('toggle-title')!;
+        const desc     = document.getElementById('toggle-desc')!;
+        const confirm  = document.getElementById('toggle-confirm') as HTMLButtonElement;
+
+        if (isActive) {
+          iconWrap.style.background = '#FEE2E2';
+          iconWrap.innerHTML = '<svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+          title.textContent = '¿Desactivar administrador?';
+          desc.textContent  = `Se desactivará la cuenta de "${name}". No podrá iniciar sesión hasta que sea reactivada.`;
+          confirm.style.background = 'linear-gradient(135deg,#DC2626,#991B1B)';
+          confirm.style.boxShadow  = '0 3px 12px rgba(220,38,38,0.3)';
+        } else {
+          iconWrap.style.background = '#D1FAE5';
+          iconWrap.innerHTML = '<svg width="24" height="24" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+          title.textContent = '¿Activar administrador?';
+          desc.textContent  = `Se reactivará la cuenta de "${name}". Podrá volver a iniciar sesión.`;
+          confirm.style.background = 'linear-gradient(135deg,#059669,#047857)';
+          confirm.style.boxShadow  = '0 3px 12px rgba(5,150,105,0.3)';
+        }
+        (document.getElementById('toggle-modal') as HTMLElement).style.display = 'flex';
       });
     });
   }
 
-  // Pagination
+  // Paginación
   document.getElementById('btn-prev')?.addEventListener('click', () => { if (page > 0) { page--; loadPage(); } });
   document.getElementById('btn-next')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadPage(); } });
 
-  // ── Create modal ──────────────────────────────────────────────────
+  // Self modal
+  document.getElementById('self-ok')?.addEventListener('click', () => {
+    (document.getElementById('self-modal') as HTMLElement).style.display = 'none';
+  });
+
+  // Toggle modal
+  const toggleModal = document.getElementById('toggle-modal')!;
+  document.getElementById('toggle-cancel')?.addEventListener('click', () => { toggleModal.style.display = 'none'; });
+  toggleModal.addEventListener('click', e => { if (e.target === toggleModal) toggleModal.style.display = 'none'; });
+
+  document.getElementById('toggle-confirm')?.addEventListener('click', async () => {
+    toggleModal.style.display = 'none';
+    window.rpLoader?.show(pendingActivate ? 'Activando administrador...' : 'Desactivando administrador...');
+    try {
+      if (pendingActivate) {
+        await adminsApi.update(pendingToggleId, { isActive: true });
+        toast.success('Administrador activado');
+      } else {
+        await adminsApi.deactivate(pendingToggleId);
+        toast.success('Administrador desactivado');
+      }
+      loadPage();
+    } catch (err: any) {
+      toast.error('Error', { description: err?.message });
+    } finally {
+      window.rpLoader?.hide();
+    }
+  });
+
+  // ── Create modal ──────────────────────────────────────────────────────
   const createModal = document.getElementById('create-modal')!;
   const openCreate  = () => { createModal.style.display = 'flex'; };
   const closeCreate = () => { createModal.style.display = 'none'; };
@@ -244,7 +299,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
   document.getElementById('btn-new-admin')?.addEventListener('click', openCreate);
   document.getElementById('modal-close')?.addEventListener('click', closeCreate);
   document.getElementById('create-cancel')?.addEventListener('click', closeCreate);
-  createModal.addEventListener('click', (e) => { if (e.target === createModal) closeCreate(); });
+  createModal.addEventListener('click', e => { if (e.target === createModal) closeCreate(); });
 
   document.getElementById('create-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -253,20 +308,21 @@ import AppLayout from '../../layouts/AppLayout.astro';
     const submit = document.getElementById('create-submit') as HTMLButtonElement;
     errEl.style.display = 'none';
 
-    const firstName    = (document.getElementById('c-fname') as HTMLInputElement).value.trim();
-    const secondName   = (document.getElementById('c-mname') as HTMLInputElement).value.trim() || undefined;
-    const firstSurname = (document.getElementById('c-lname1') as HTMLInputElement).value.trim();
-    const secondSurname = (document.getElementById('c-lname2') as HTMLInputElement).value.trim() || undefined;
-    const email        = (document.getElementById('c-email') as HTMLInputElement).value.trim();
-    const phone        = (document.getElementById('c-phone') as HTMLInputElement).value.trim();
-    const password     = (document.getElementById('c-password') as HTMLInputElement).value;
+    const firstName     = (document.getElementById('c-fname')    as HTMLInputElement).value.trim();
+    const secondName    = (document.getElementById('c-mname')    as HTMLInputElement).value.trim() || undefined;
+    const firstSurname  = (document.getElementById('c-lname1')   as HTMLInputElement).value.trim();
+    const secondSurname = (document.getElementById('c-lname2')   as HTMLInputElement).value.trim() || undefined;
+    const email         = (document.getElementById('c-email')    as HTMLInputElement).value.trim();
+    const phone         = (document.getElementById('c-phone')    as HTMLInputElement).value.trim();
+    const password      = (document.getElementById('c-password') as HTMLInputElement).value;
 
     if (!firstName || !firstSurname || !email || !phone || !password) {
-      errEl.textContent = 'Completa todos los campos obligatorios.';
+      errEl.textContent   = 'Completa todos los campos obligatorios.';
       errEl.style.display = 'block'; return;
     }
 
     submit.disabled = true; lblEl.textContent = 'Creando...';
+    window.rpLoader?.show('Creando administrador...');
     try {
       await adminsApi.create({ firstName, secondName, firstSurname, secondSurname, email, phone, password });
       toast.success('Administrador creado correctamente');
@@ -275,28 +331,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
       page = 0; loadPage();
     } catch (err: any) {
       const msgs = err?.errors ? Object.values(err.errors as Record<string, string>).join(' ') : err?.message;
-      errEl.textContent = msgs ?? 'Error al crear administrador.';
+      errEl.textContent   = msgs ?? 'Error al crear administrador.';
       errEl.style.display = 'block';
     } finally {
       submit.disabled = false; lblEl.textContent = 'Crear administrador';
-    }
-  });
-
-  // ── Deactivate modal ──────────────────────────────────────────────
-  const deactivateModal = document.getElementById('deactivate-modal')!;
-  document.getElementById('deactivate-cancel')?.addEventListener('click', () => { deactivateModal.style.display = 'none'; });
-  deactivateModal.addEventListener('click', (e) => { if (e.target === deactivateModal) deactivateModal.style.display = 'none'; });
-
-  document.getElementById('deactivate-confirm')?.addEventListener('click', async () => {
-    if (!pendingDeactivateId) return;
-    try {
-      await adminsApi.deactivate(pendingDeactivateId);
-      toast.success('Administrador desactivado');
-      deactivateModal.style.display = 'none';
-      loadPage();
-    } catch (err: any) {
-      toast.error('Error al desactivar', { description: err?.message });
-      deactivateModal.style.display = 'none';
+      window.rpLoader?.hide();
     }
   });
 
