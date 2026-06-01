@@ -4,7 +4,6 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 ---
 
 <AppLayout title="Revisión del simulacro" currentPage="history">
-  <!-- Breadcrumb -->
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:8px;flex-wrap:wrap">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
@@ -25,24 +24,17 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     </div>
   </div>
 
-  <!-- Stats resumen -->
-  <div id="stats-row" style="display:none;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem">
-    <div class="stat-chip" style="border-left-color:#059669">
-      <span class="stat-chip-label">Correctas</span>
-      <p id="stat-correct" class="stat-chip-val" style="color:#059669">—</p>
-    </div>
-    <div class="stat-chip" style="border-left-color:#DC2626">
-      <span class="stat-chip-label">Incorrectas</span>
-      <p id="stat-wrong" class="stat-chip-val" style="color:#DC2626">—</p>
-    </div>
-    <div class="stat-chip" style="border-left-color:#D97706">
-      <span class="stat-chip-label">Sin responder</span>
-      <p id="stat-skipped" class="stat-chip-val" style="color:#D97706">—</p>
-    </div>
-    <div class="stat-chip" style="border-left-color:#2563EB">
-      <span class="stat-chip-label">Tiempo</span>
-      <p id="stat-time" class="stat-chip-val" style="color:#2563EB">—</p>
-    </div>
+  <!-- Aviso de preguntas filtradas -->
+  <div id="filter-notice" style="display:none;padding:10px 14px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;font-size:0.8125rem;color:#1D4ED8;margin-bottom:1rem">
+    ℹ️ Mostrando solo las <strong id="filter-count">0</strong> preguntas que se te presentaron (el test tiene más en el banco).
+  </div>
+
+  <!-- Stats -->
+  <div id="stats-row" style="display:none;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem">
+    <div class="stat-chip" style="border-left-color:#059669"><span class="stat-chip-label">Correctas</span><p id="stat-correct" class="stat-chip-val" style="color:#059669">—</p></div>
+    <div class="stat-chip" style="border-left-color:#DC2626"><span class="stat-chip-label">Incorrectas</span><p id="stat-wrong" class="stat-chip-val" style="color:#DC2626">—</p></div>
+    <div class="stat-chip" style="border-left-color:#D97706"><span class="stat-chip-label">Sin responder</span><p id="stat-skipped" class="stat-chip-val" style="color:#D97706">—</p></div>
+    <div class="stat-chip" style="border-left-color:#2563EB"><span class="stat-chip-label">Tiempo</span><p id="stat-time" class="stat-chip-val" style="color:#2563EB">—</p></div>
   </div>
 
   <!-- Filtros -->
@@ -59,97 +51,46 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     <p style="font-size:0.875rem;color:var(--ui-text-3)">Cargando revisión...</p>
   </div>
 
-  <!-- Lista de preguntas -->
   <div id="questions-list" style="display:flex;flex-direction:column;gap:1.25rem"></div>
 
-  <!-- Botones finales -->
-  <div id="bottom-actions" style="display:none;margin-top:2rem;display:flex;gap:10px;flex-wrap:wrap">
+  <div id="bottom-actions" style="display:none;margin-top:2rem;gap:10px;flex-wrap:wrap">
     <a href="/tests" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Hacer otro test</a>
-    <a href="/dashboard/history" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Ver historial completo</a>
+    <a href="/dashboard/history" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Ver historial</a>
   </div>
 </AppLayout>
 
 <style is:global>
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
   @keyframes fadeIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
-
-  .stat-chip {
-    background: var(--ui-card); border-radius: 12px; padding: 12px 14px;
-    border: 1px solid var(--ui-border); border-left: 3px solid;
-  }
-  .stat-chip-label { font-size: 0.625rem; font-weight: 700; color: var(--ui-text-3); text-transform: uppercase; letter-spacing: 0.5px; display: block; }
-  .stat-chip-val   { font-size: 1.5rem; font-weight: 900; margin: 4px 0 0; line-height: 1; }
-
-  /* Filtros */
-  .rfilt {
-    padding: 6px 16px; border-radius: 20px; font-size: 0.8125rem; font-weight: 600;
-    border: 1.5px solid var(--ui-border); background: var(--ui-card);
-    color: var(--ui-text-2); cursor: pointer; transition: all 0.15s; font-family: inherit;
-  }
-  .rfilt:hover  { border-color: var(--brand); color: var(--brand); }
-  .rfilt.active { background: var(--brand); color: white; border-color: var(--brand); }
-
-  /* Tarjeta de pregunta */
-  .question-review-card {
-    background: var(--ui-card); border-radius: 16px;
-    border: 1px solid var(--ui-border); overflow: hidden;
-    animation: fadeIn 0.3s ease both;
-  }
-  .question-review-card.correct { border-color: #A7F3D0; }
-  .question-review-card.wrong   { border-color: #FECACA; }
-  .question-review-card.skipped { border-color: #FDE68A; }
-  .question-review-card[data-hidden="true"] { display: none; }
-
-  /* Stripe de color izquierdo */
-  .q-stripe { height: 4px; }
-  .q-stripe.correct { background: linear-gradient(to right, #059669, #34D399); }
-  .q-stripe.wrong   { background: linear-gradient(to right, #DC2626, #F87171); }
-  .q-stripe.skipped { background: linear-gradient(to right, #D97706, #FBBF24); }
-
-  /* Opción de review */
-  .review-option {
-    display: flex; align-items: stretch;
-    border-radius: 10px; border: 1.5px solid var(--ui-border);
-    overflow: hidden; margin-bottom: 6px;
-    background: var(--ui-card);
-  }
-  .review-option.is-correct-answer { border-color: #059669; background: #F0FDF4; }
-  .review-option.was-selected-wrong { border-color: #DC2626; background: #FEF2F2; }
-  .review-option.was-selected-correct { border-color: #059669; background: #F0FDF4; }
-
-  .ropt-marker {
-    width: 44px; min-width: 44px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.9375rem; flex-shrink: 0;
-  }
-  .review-option.is-correct-answer .ropt-marker { background: #D1FAE5; }
-  .review-option.was-selected-wrong .ropt-marker { background: #FEE2E2; }
-  .review-option.was-selected-correct .ropt-marker { background: #D1FAE5; }
-
-  .ropt-text {
-    flex: 1; padding: 0.75rem 1rem;
-    font-size: 0.875rem; line-height: 1.65;
-    color: var(--ui-text-2);
-  }
+  .stat-chip { background:var(--ui-card);border-radius:12px;padding:12px 14px;border:1px solid var(--ui-border);border-left:3px solid; }
+  .stat-chip-label { font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;display:block; }
+  .stat-chip-val   { font-size:1.5rem;font-weight:900;margin:4px 0 0;line-height:1; }
+  .rfilt { padding:6px 16px;border-radius:20px;font-size:0.8125rem;font-weight:600;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-2);cursor:pointer;transition:all 0.15s;font-family:inherit; }
+  .rfilt:hover  { border-color:var(--brand);color:var(--brand); }
+  .rfilt.active { background:var(--brand);color:white;border-color:var(--brand); }
+  .question-review-card { background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden;animation:fadeIn 0.3s ease both; }
+  .question-review-card.correct { border-color:#A7F3D0; }
+  .question-review-card.wrong   { border-color:#FECACA; }
+  .question-review-card.skipped { border-color:#FDE68A; }
+  .q-stripe { height:4px; }
+  .q-stripe.correct { background:linear-gradient(to right,#059669,#34D399); }
+  .q-stripe.wrong   { background:linear-gradient(to right,#DC2626,#F87171); }
+  .q-stripe.skipped { background:linear-gradient(to right,#D97706,#FBBF24); }
+  .review-option { display:flex;align-items:stretch;border-radius:10px;border:1.5px solid var(--ui-border);overflow:hidden;margin-bottom:6px;background:var(--ui-card); }
+  .review-option.is-correct-answer  { border-color:#059669;background:#F0FDF4; }
+  .review-option.was-selected-wrong { border-color:#DC2626;background:#FEF2F2; }
+  .review-option.was-selected-correct { border-color:#059669;background:#F0FDF4; }
+  .ropt-marker { width:44px;min-width:44px;display:flex;align-items:center;justify-content:center;font-size:0.9375rem;flex-shrink:0; }
+  .review-option.is-correct-answer .ropt-marker  { background:#D1FAE5; }
+  .review-option.was-selected-wrong .ropt-marker { background:#FEE2E2; }
+  .review-option.was-selected-correct .ropt-marker { background:#D1FAE5; }
+  .ropt-text { flex:1;padding:0.75rem 1rem;font-size:0.875rem;line-height:1.65;color:var(--ui-text-2); }
   .review-option.is-correct-answer .ropt-text,
-  .review-option.was-selected-correct .ropt-text { color: var(--ui-text-1); font-weight: 600; }
-  .review-option.was-selected-wrong .ropt-text  { color: var(--ui-text-1); }
-
-  /* Explicación */
-  .q-explanation {
-    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
-    border-radius: 10px; padding: 14px 16px; margin-top: 12px;
-    border: 1px solid #BFDBFE;
-  }
-  .q-explanation-title {
-    font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.07em; color: #2563EB; margin: 0 0 6px;
-  }
-  .q-explanation-text { font-size: 0.875rem; color: #1E40AF; line-height: 1.7; margin: 0; }
-
-  @media (max-width: 640px) {
-    #stats-row { grid-template-columns: 1fr 1fr !important; }
-  }
+  .review-option.was-selected-correct .ropt-text { color:var(--ui-text-1);font-weight:600; }
+  .q-explanation { background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:10px;padding:14px 16px;margin-top:12px;border:1px solid #BFDBFE; }
+  .q-explanation-title { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#2563EB;margin:0 0 6px; }
+  .q-explanation-text  { font-size:0.875rem;color:#1E40AF;line-height:1.7;margin:0; }
+  @media(max-width:640px) { #stats-row { grid-template-columns:1fr 1fr!important; } }
 </style>
 
 <script>
@@ -161,7 +102,6 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 
   try { requireAuth(); } catch { throw new Error('redirect'); }
 
-  // Extraer triedId de la URL: /tests/review/TRD1234567
   const pathParts = window.location.pathname.split('/');
   const triedId   = pathParts[pathParts.length - 1];
 
@@ -170,12 +110,13 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     throw new Error('No triedId');
   }
 
-  const DIFF_LABEL: Record<string, string> = { B: 'Básico', M: 'Medio', A: 'Alto' };
-  const DIFF_COLOR: Record<string, string> = { B: '#059669', M: '#D97706', A: '#D41224' };
-  const DIFF_BG:    Record<string, string> = { B: '#D1FAE5', M: '#FEF3C7', A: '#FEE2E2' };
-  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const DIFF_LABEL: Record<string, string> = { B:'Básico', M:'Medio', A:'Alto' };
+  const DIFF_COLOR: Record<string, string> = { B:'#059669', M:'#D97706', A:'#D41224' };
+  const DIFF_BG:    Record<string, string> = { B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
+  const LETTERS = ['A','B','C','D','E','F'];
 
   let reviewData: TriedReviewDto | null = null;
+  let questionsToShow: QuestionReview[] = [];
   let currentFilter = 'all';
 
   function renderText(el: HTMLElement, raw: string) {
@@ -197,7 +138,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     const list = document.getElementById('questions-list')!;
     list.innerHTML = '';
 
-    const filtered = reviewData.questions.filter(q => {
+    const filtered = questionsToShow.filter(q => {
       const s = questionStatus(q);
       return filter === 'all' || filter === s;
     });
@@ -208,39 +149,26 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     }
 
     filtered.forEach((q, idx) => {
-      const status = questionStatus(q);
+      const status      = questionStatus(q);
       const statusIcon  = status === 'correct' ? '✓' : status === 'wrong' ? '✗' : '○';
       const statusLabel = status === 'correct' ? 'Correcta' : status === 'wrong' ? 'Incorrecta' : 'Sin responder';
       const statusColor = status === 'correct' ? '#059669' : status === 'wrong' ? '#DC2626' : '#D97706';
       const statusBg    = status === 'correct' ? '#D1FAE5' : status === 'wrong' ? '#FEE2E2' : '#FEF3C7';
 
+      // Número real en el subset presentado
+      const realIdx = questionsToShow.indexOf(q);
+
       const card = document.createElement('div');
       card.className = `question-review-card ${status}`;
       card.style.animationDelay = `${idx * 0.04}s`;
 
-      // Encontrar el índice real en el array completo
-      const realIdx = reviewData!.questions.indexOf(q);
-
       let optionsHtml = '';
       (q.options || []).forEach((opt, oi) => {
-        let cls = '';
-        let marker = LETTERS[oi] ?? String(oi + 1);
-        if (opt.isCorrect && opt.wasSelected) {
-          cls = 'was-selected-correct';
-          marker = '✓';
-        } else if (opt.isCorrect && !opt.wasSelected) {
-          cls = 'is-correct-answer';
-          marker = '✓';
-        } else if (!opt.isCorrect && opt.wasSelected) {
-          cls = 'was-selected-wrong';
-          marker = '✗';
-        }
-
-        optionsHtml += `
-          <div class="review-option ${cls}">
-            <div class="ropt-marker">${marker}</div>
-            <div class="ropt-text">${opt.optionText}</div>
-          </div>`;
+        let cls = ''; let marker = LETTERS[oi] ?? String(oi + 1);
+        if (opt.isCorrect && opt.wasSelected)  { cls = 'was-selected-correct'; marker = '✓'; }
+        else if (opt.isCorrect)                 { cls = 'is-correct-answer';   marker = '✓'; }
+        else if (!opt.isCorrect && opt.wasSelected) { cls = 'was-selected-wrong'; marker = '✗'; }
+        optionsHtml += `<div class="review-option ${cls}"><div class="ropt-marker">${marker}</div><div class="ropt-text">${opt.optionText}</div></div>`;
       });
 
       const explanationHtml = q.explanation ? `
@@ -249,40 +177,22 @@ import AppLayout from '../../../layouts/AppLayout.astro';
           <p class="q-explanation-text">${q.explanation}</p>
         </div>` : '';
 
-      const sourceHtml = q.source ? `
-        <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:8px 0 0">
-          📚 Fuente: ${q.source}
-        </p>` : '';
-
       card.innerHTML = `
         <div class="q-stripe ${status}"></div>
         <div style="padding:1.25rem 1.375rem">
-          <!-- Cabecera -->
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-            <span style="font-size:0.6875rem;font-weight:800;color:var(--brand);background:var(--brand-pale);padding:3px 10px;border-radius:20px;border:1.5px solid rgba(212,18,36,0.2)">
-              P${realIdx + 1}
-            </span>
-            <span style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'}">
-              ${DIFF_LABEL[q.difficultyLevel] ?? q.difficultyLevel}
-            </span>
-            <span style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${statusBg};color:${statusColor}">
-              ${statusIcon} ${statusLabel}
-            </span>
+            <span style="font-size:0.6875rem;font-weight:800;color:var(--brand);background:var(--brand-pale);padding:3px 10px;border-radius:20px;border:1.5px solid rgba(212,18,36,0.2)">P${realIdx + 1}</span>
+            <span style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'}">${DIFF_LABEL[q.difficultyLevel]??q.difficultyLevel}</span>
+            <span style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${statusBg};color:${statusColor}">${statusIcon} ${statusLabel}</span>
           </div>
-
-          <!-- Enunciado -->
-          <div id="stmt-${realIdx}" style="font-size:0.9375rem;color:var(--ui-text-1);line-height:1.85;margin-bottom:1rem;font-weight:500;padding:14px 16px;background:var(--ui-surface);border-radius:10px;border:1px solid var(--ui-border)"></div>
-
-          <!-- Opciones -->
-          <div style="margin-bottom:4px">${optionsHtml}</div>
-
+          <div id="stmt-${triedId}-${realIdx}" style="font-size:0.9375rem;color:var(--ui-text-1);line-height:1.85;margin-bottom:1rem;font-weight:500;padding:14px 16px;background:var(--ui-surface);border-radius:10px;border:1px solid var(--ui-border)"></div>
+          <div>${optionsHtml}</div>
           ${explanationHtml}
-          ${sourceHtml}
+          ${q.source ? `<p style="font-size:0.6875rem;color:var(--ui-text-3);margin:8px 0 0">📚 Fuente: ${q.source}</p>` : ''}
         </div>`;
 
-      // Renderizar enunciado con saltos de línea
       list.appendChild(card);
-      const stmtEl = document.getElementById(`stmt-${realIdx}`);
+      const stmtEl = document.getElementById(`stmt-${triedId}-${realIdx}`);
       if (stmtEl) renderText(stmtEl, q.statement);
     });
   }
@@ -297,18 +207,35 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     });
   });
 
-  // Cargar review
   async function loadReview() {
     try {
       const res = await triedsApi.getReview(triedId);
       if (!res.data) throw new Error('Sin datos');
       reviewData = res.data;
 
-      const r = reviewData;
+      // Obtener IDs de preguntas presentadas desde sessionStorage
+      let presentedIds: string[] | null = null;
+      try {
+        const stored = sessionStorage.getItem(`rp_exam_${triedId}`);
+        if (stored) presentedIds = JSON.parse(stored);
+      } catch {}
 
-      // Subtitle
-      const subtitleEl = document.getElementById('review-subtitle');
-      if (subtitleEl) subtitleEl.textContent = r.testName ?? r.testId;
+      // Filtrar preguntas a las que fueron presentadas
+      if (presentedIds && presentedIds.length > 0) {
+        questionsToShow = reviewData.questions.filter(q => presentedIds!.includes(q.questionId));
+        // Si el filtro redujo la cantidad, mostrar aviso
+        if (questionsToShow.length < reviewData.questions.length) {
+          const notice = document.getElementById('filter-notice')!;
+          notice.style.display = 'block';
+          (document.getElementById('filter-count') as HTMLElement).textContent = String(questionsToShow.length);
+        }
+      } else {
+        // Sin sessionStorage, mostrar solo las respondidas o todas
+        questionsToShow = reviewData.questions;
+      }
+
+      const r = reviewData;
+      (document.getElementById('review-subtitle') as HTMLElement).textContent = r.testName ?? r.testId;
 
       // Score chip
       const scoreChip = document.getElementById('score-chip')!;
@@ -317,38 +244,31 @@ import AppLayout from '../../../layouts/AppLayout.astro';
       scoreVal.textContent = r.score ? r.score.toFixed(0) : '—';
       scoreVal.style.color = sc;
       scoreChip.style.borderColor = sc + '44';
-      scoreChip.style.display     = 'block';
+      scoreChip.style.display = 'block';
 
-      // Stats
-      const correct  = r.questions.filter(q => q.answeredCorrectly && q.selectedOptionId).length;
-      const wrong    = r.questions.filter(q => !q.answeredCorrectly && q.selectedOptionId).length;
-      const skipped  = r.questions.filter(q => !q.selectedOptionId).length;
-      const timeFmt  = r.timeSpentSeconds ? fmtDuration(r.timeSpentSeconds) : '—';
+      // Stats sobre las preguntas mostradas
+      const correct = questionsToShow.filter(q => q.answeredCorrectly && q.selectedOptionId).length;
+      const wrong   = questionsToShow.filter(q => !q.answeredCorrectly && q.selectedOptionId).length;
+      const skipped = questionsToShow.filter(q => !q.selectedOptionId).length;
+      const timeFmt = r.timeSpentSeconds ? fmtDuration(r.timeSpentSeconds) : '—';
 
       (document.getElementById('stat-correct') as HTMLElement).textContent  = String(correct);
-      (document.getElementById('stat-wrong') as HTMLElement).textContent    = String(wrong);
+      (document.getElementById('stat-wrong')   as HTMLElement).textContent  = String(wrong);
       (document.getElementById('stat-skipped') as HTMLElement).textContent  = String(skipped);
-      (document.getElementById('stat-time') as HTMLElement).textContent     = timeFmt;
+      (document.getElementById('stat-time')    as HTMLElement).textContent  = timeFmt;
 
-      const statsRow = document.getElementById('stats-row');
-      if (statsRow) statsRow.style.display = 'grid';
+      const statsRow = document.getElementById('stats-row')!;
+      statsRow.style.display = 'grid';
 
-      document.getElementById('review-loading')!.style.display  = 'none';
-      document.getElementById('bottom-actions')!.style.display  = 'flex';
+      (document.getElementById('review-loading')  as HTMLElement).style.display = 'none';
+      (document.getElementById('bottom-actions')  as HTMLElement).style.display = 'flex';
 
       renderQuestions('all');
 
     } catch (err: any) {
-      document.getElementById('review-loading')!.style.display = 'none';
+      (document.getElementById('review-loading') as HTMLElement).style.display = 'none';
       const list = document.getElementById('questions-list')!;
-      list.innerHTML = `
-        <div style="text-align:center;padding:3rem;color:var(--ui-text-3)">
-          <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 8px">
-            No se pudo cargar la revisión
-          </p>
-          <p style="font-size:0.875rem;margin:0 0 16px">${err?.message ?? 'Error desconocido'}</p>
-          <a href="/dashboard/history" style="color:var(--brand);font-weight:600;text-decoration:none">← Volver al historial</a>
-        </div>`;
+      list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--ui-text-3)"><p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 8px">No se pudo cargar la revisión</p><p style="font-size:0.875rem;margin:0 0 16px">${err?.message ?? 'Error desconocido'}</p><a href="/dashboard/history" style="color:var(--brand);font-weight:600;text-decoration:none">← Volver al historial</a></div>`;
       toast.error('Error al cargar review', { description: err?.message });
     }
   }

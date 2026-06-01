@@ -3,557 +3,576 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
 ---
 
-<BaseLayout title="Práctica IA adaptativa">
-<div class="exam-shell">
+<BaseLayout title="Práctica con IA">
+  <div class="exam-shell">
 
-  <!-- HEADER -->
-  <header class="exam-header">
-    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-      <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#6366F1,#4F46E5);display:flex;align-items:center;justify-content:center;color:white">
-        <Icon name="tabler:brain" size={16} />
-      </div>
-      <span style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1)">Razona<strong style="color:#6366F1">Pro</strong> IA</span>
-    </div>
-
-    <div style="flex:1;padding:0 0.75rem;display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden">
-      <span id="hdr-comp" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0;background:#EDE9FE;color:#6366F1">Cargando...</span>
-      <div style="flex:1;height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;border:1px solid var(--ui-border)">
-        <div id="hdr-progress-bar" style="height:100%;background:linear-gradient(to right,#6366F1,#818CF8);border-radius:3px;width:0%;transition:width 0.5s ease"></div>
-      </div>
-      <span id="hdr-progress" style="font-size:0.75rem;font-weight:600;color:var(--ui-text-3);white-space:nowrap;flex-shrink:0">0 / 0</span>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-      <div style="text-align:right">
-        <p id="hdr-pts" style="font-size:0.75rem;font-weight:800;color:#6366F1;margin:0;line-height:1">0 pts</p>
-        <p id="hdr-max-pts" style="font-size:0.5625rem;color:var(--ui-text-3);margin:0">de 0 posibles</p>
-      </div>
-      <button id="abandon-btn" style="padding:5px 12px;border-radius:8px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-3);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s" onmouseover="this.style.borderColor='#DC2626';this.style.color='#DC2626'" onmouseout="this.style.borderColor='var(--ui-border)';this.style.color='var(--ui-text-3)'">
-        Abandonar
-      </button>
-    </div>
-  </header>
-
-  <div class="exam-body">
-
-    <!-- SIDEBAR -->
-    <aside class="exam-sidebar">
-      <div style="padding:1rem 0.875rem;display:flex;flex-direction:column;gap:1rem;height:100%">
-        <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0">Progreso</p>
-        <div id="q-nav" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px"></div>
-
-        <!-- Leyenda -->
-        <div style="display:flex;flex-direction:column;gap:5px">
-          <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:#D1FAE5;border:1.5px solid #059669;flex-shrink:0"></span>Correcta</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:#FEE2E2;border:1.5px solid #DC2626;flex-shrink:0"></span>Incorrecta</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:#6366F1;flex-shrink:0"></span>Actual</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:var(--ui-surface);border:1.5px solid var(--ui-border);flex-shrink:0"></span>Pendiente</div>
+    <!-- HEADER -->
+    <header class="exam-header">
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#7C3AED,#5B21B6);display:flex;align-items:center;justify-content:center;color:white">
+          <Icon name="tabler:robot" size={16} />
         </div>
+        <span style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1)">Práctica <strong style="color:#7C3AED">Adaptativa IA</strong></span>
+      </div>
 
-        <!-- Nivel de habilidad estimado -->
-        <div style="background:var(--ui-surface);border-radius:10px;padding:10px 12px;border:1px solid var(--ui-border)">
-          <p style="font-size:0.5625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0 0 6px">Nivel estimado</p>
-          <div style="height:6px;background:var(--ui-border);border-radius:3px;overflow:hidden;margin-bottom:5px">
-            <div id="theta-bar" style="height:100%;background:linear-gradient(to right,#6366F1,#818CF8);width:50%;border-radius:3px;transition:width 0.7s ease"></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:0.5625rem;color:var(--ui-text-3)">
-            <span>Básico</span><span id="theta-label" style="font-weight:700;color:#6366F1">Medio</span><span>Avanzado</span>
-          </div>
+      <div style="flex:1;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;padding:0 0.75rem">
+        <span id="ai-comp-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0;background:#EDE9FE;color:#7C3AED">...</span>
+        <span id="ai-session-label" style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Sesión adaptativa</span>
+        <span id="theta-badge" style="display:none;padding:2px 8px;border-radius:12px;font-size:0.625rem;font-weight:700;background:#EDE9FE;color:#7C3AED;flex-shrink:0"></span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:10px;font-size:0.8125rem;color:var(--ui-text-2)">
+          <Icon name="tabler:brain" size={13} />
+          <span id="q-count-label">0 / ?</span>
         </div>
+        <button id="finish-btn-header" title="Finalizar sesión" style="width:34px;height:34px;border-radius:8px;background:transparent;border:1.5px solid var(--ui-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ui-text-3);transition:all 0.2s" onmouseover="this.style.borderColor='#7C3AED';this.style.color='#7C3AED';this.style.background='#EDE9FE'" onmouseout="this.style.borderColor='var(--ui-border)';this.style.color='var(--ui-text-3)';this.style.background='transparent'">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      </div>
+    </header>
 
-        <div style="margin-top:auto">
-          <button id="finish-btn" style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(212,18,36,0.28);display:flex;align-items:center;justify-content:center;gap:5px">
+    <!-- BODY -->
+    <div class="exam-body">
+      <!-- Sidebar -->
+      <aside class="exam-sidebar">
+        <div style="padding:1rem 0.875rem;display:flex;flex-direction:column;gap:1rem;height:100%">
+          <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0">Progreso IRT</p>
+
+          <!-- Theta gauge -->
+          <div style="background:var(--ui-surface);border-radius:12px;padding:12px;border:1px solid var(--ui-border)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-size:0.625rem;color:var(--ui-text-3);font-weight:600">Nivel estimado (θ)</span>
+              <span id="theta-val" style="font-size:0.75rem;font-weight:800;color:#7C3AED">-</span>
+            </div>
+            <div style="height:6px;background:var(--ui-border);border-radius:3px;overflow:hidden">
+              <div id="theta-bar" style="height:100%;background:linear-gradient(to right,#7C3AED,#A78BFA);border-radius:3px;width:50%;transition:width 0.8s ease"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:0.5rem;color:var(--ui-text-3)">Básico</span>
+              <span style="font-size:0.5rem;color:var(--ui-text-3)">Avanzado</span>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem">
+              <span style="color:var(--ui-text-3)">Correctas</span>
+              <span id="stat-correct" style="font-weight:700;color:#059669">0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem">
+              <span style="color:var(--ui-text-3)">Incorrectas</span>
+              <span id="stat-wrong" style="font-weight:700;color:#DC2626">0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem">
+              <span style="color:var(--ui-text-3)">Dificultad actual</span>
+              <span id="stat-diff" style="font-weight:700;color:#7C3AED">-</span>
+            </div>
+          </div>
+
+          <!-- IA badge -->
+          <div style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE);border-radius:10px;padding:10px 12px;border:1px solid #C4B5FD;margin-top:auto">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              <svg width="12" height="12" fill="#7C3AED" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 14.93V17a1 1 0 01-2 0v-.07A8.001 8.001 0 014.07 11H4a1 1 0 010-2h.07A8.001 8.001 0 0111 4.07V4a1 1 0 012 0v.07A8.001 8.001 0 0119.93 11H20a1 1 0 010 2h-.07A8.001 8.001 0 0113 16.93z"/></svg>
+              <span style="font-size:0.625rem;font-weight:700;color:#6D28D9;text-transform:uppercase;letter-spacing:0.05em">Adaptativo IRT</span>
+            </div>
+            <p style="font-size:0.6875rem;color:#5B21B6;margin:0;line-height:1.4">La dificultad se ajusta según tu desempeño en tiempo real.</p>
+          </div>
+
+          <button id="finish-btn-sidebar" style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(124,58,237,0.28);display:flex;align-items:center;justify-content:center;gap:5px">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Finalizar práctica
+            Finalizar sesión
           </button>
         </div>
-      </div>
-    </aside>
+      </aside>
 
-    <!-- MAIN -->
-    <main class="exam-main">
-
-      <!-- Generando pregunta -->
-      <div id="exam-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:1rem">
-        <div style="width:52px;height:52px;border-radius:50%;border:3.5px solid rgba(99,102,241,0.15);border-top-color:#6366F1;animation:spin 0.85s linear infinite"></div>
-        <div style="text-align:center">
-          <p style="font-size:0.9375rem;font-weight:600;color:var(--ui-text-1);margin:0 0 4px" id="loading-msg">Iniciando sesión...</p>
-          <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0">La IA está preparando tu siguiente pregunta</p>
-        </div>
-      </div>
-
-      <!-- Carta de pregunta -->
-      <div id="question-card" style="display:none;max-width:760px;margin:0 auto;width:100%">
-
-        <!-- Cabecera -->
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-          <span id="q-num-badge" style="font-size:0.6875rem;font-weight:800;color:#6366F1;background:#EDE9FE;border:1.5px solid rgba(99,102,241,0.2);padding:3px 10px;border-radius:20px">P1</span>
-          <span id="q-diff-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
-          <span id="q-pts-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:rgba(99,102,241,0.1);color:#6366F1"></span>
-          <span id="q-adapt-badge" style="display:none;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#FEF3C7;color:#92400E"></span>
+      <!-- Main -->
+      <main class="exam-main">
+        <!-- Loading inicial -->
+        <div id="ai-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:1rem">
+          <div style="width:52px;height:52px;border-radius:50%;border:3px solid rgba(124,58,237,0.15);border-top-color:#7C3AED;animation:spin 0.85s linear infinite"></div>
+          <p style="font-size:0.875rem;color:var(--ui-text-3)">Iniciando sesión adaptativa...</p>
         </div>
 
-        <!-- Enunciado -->
-        <div style="background:var(--ui-card);border-radius:14px;padding:1.5rem 1.625rem;border:1px solid var(--ui-border);margin-bottom:1rem">
-          <p id="q-statement" style="font-size:1rem;font-weight:500;color:var(--ui-text-1);line-height:1.85;margin:0"></p>
-        </div>
-
-        <!-- Opciones -->
-        <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.125rem"></div>
-
-        <!-- Pistas -->
-        <div id="hint-section" style="margin-bottom:1.125rem">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-            <span style="font-size:0.75rem;color:var(--ui-text-3);font-weight:600">¿Necesitas una pista?</span>
-            <button class="hbtn" data-level="1" type="button">Pista 1</button>
-            <button class="hbtn" data-level="2" type="button" disabled>Pista 2</button>
-            <button class="hbtn" data-level="3" type="button" disabled>Pista 3</button>
+        <!-- Error estado IA -->
+        <div id="ai-unavailable" style="display:none;text-align:center;padding:4rem 2rem">
+          <div style="width:64px;height:64px;border-radius:16px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+            <svg width="28" height="28" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
-          <div id="hint-box" style="display:none;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 14px">
-            <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0369A1;margin:0 0 5px">Pista de orientación</p>
-            <p id="hint-text" style="font-size:0.875rem;color:#0C4A6E;margin:0;line-height:1.65"></p>
-            <div id="hint-loading" style="display:none;font-size:0.8125rem;color:#0369A1">Generando pista...</div>
-          </div>
+          <h2 style="font-size:1.125rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">IA no disponible</h2>
+          <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.6">El servicio de práctica adaptativa no está disponible en este momento.</p>
+          <a href="/tests" style="padding:0.6875rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Ver tests estáticos</a>
         </div>
 
-        <!-- Feedback tras responder -->
-        <div id="feedback-box" style="display:none;border-radius:12px;padding:1.125rem 1.25rem;margin-bottom:1.125rem">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <span id="fb-icon" style="font-size:1.375rem"></span>
-            <span id="fb-title" style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1)"></span>
-            <span id="fb-pts" style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(99,102,241,0.1);color:#6366F1;margin-left:auto"></span>
+        <!-- Carta de pregunta -->
+        <div id="question-card" style="display:none;max-width:760px;margin:0 auto;width:100%">
+          <!-- Progreso -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem">
+            <div style="flex:1;height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;border:1px solid var(--ui-border)">
+              <div id="q-progress-fill" style="height:100%;border-radius:3px;background:linear-gradient(to right,#7C3AED,#A78BFA);width:0%;transition:width 0.5s ease"></div>
+            </div>
+            <span id="q-progress-label" style="font-size:0.75rem;font-weight:600;color:var(--ui-text-3);white-space:nowrap;flex-shrink:0">Pregunta 1</span>
           </div>
-          <p id="fb-explanation" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 12px;line-height:1.65"></p>
-          <!-- Botón siguiente -->
-          <button id="btn-next-question" style="width:100%;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(99,102,241,0.28);display:flex;align-items:center;justify-content:center;gap:8px">
-            <span id="btn-next-label">Siguiente pregunta</span>
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" id="btn-next-arrow"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
+
+          <!-- Cabecera -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+            <span id="q-number-badge" style="font-size:0.6875rem;font-weight:800;color:#7C3AED;background:#EDE9FE;border:1.5px solid #C4B5FD;padding:3px 10px;border-radius:20px">P1</span>
+            <span id="q-comp-chip" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
+            <span id="q-diff-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
+            <span id="q-answered-badge" style="display:none;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#D1FAE5;color:#059669">✓ Respondida</span>
+            <!-- Botón reportar duda (solo estudiantes) -->
+            <button id="ai-doubt-btn" style="display:none;margin-left:auto;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;border:1.5px solid #FDE68A;background:#FEF3C7;color:#92400E;cursor:pointer;font-family:inherit">
+              ⚠ Reportar duda
+            </button>
+          </div>
+
+          <!-- Enunciado -->
+          <div style="background:var(--ui-card);border-radius:14px;padding:1.5rem 1.625rem;border:1px solid var(--ui-border);margin-bottom:1rem">
+            <div id="q-statement" style="font-size:1rem;font-weight:500;color:var(--ui-text-1);line-height:1.85;margin:0"></div>
+          </div>
+
+          <!-- Opciones -->
+          <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.25rem"></div>
+
+          <!-- Pistas IA -->
+          <div id="hint-section" style="margin-bottom:1.125rem">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+              <span style="font-size:0.75rem;color:var(--ui-text-3);font-weight:600">💡 Pista IA:</span>
+              <button class="hbtn" data-level="1" type="button">Pista 1</button>
+              <button class="hbtn" data-level="2" type="button" disabled>Pista 2</button>
+              <button class="hbtn" data-level="3" type="button" disabled>Pista 3</button>
+            </div>
+            <div id="hint-box" style="display:none;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 14px">
+              <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0369A1;margin:0 0 5px">Orientación (no revela la respuesta)</p>
+              <p id="hint-text" style="font-size:0.875rem;color:#0C4A6E;margin:0;line-height:1.65"></p>
+              <div id="hint-loading" style="display:none;font-size:0.8125rem;color:#0369A1">Generando pista...</div>
+            </div>
+          </div>
+
+          <!-- Resultado de respuesta -->
+          <div id="answer-result" style="display:none;border-radius:12px;padding:14px 16px;margin-bottom:1rem;border:1px solid">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span id="result-icon" style="font-size:1.125rem"></span>
+              <span id="result-label" style="font-size:0.875rem;font-weight:700"></span>
+            </div>
+            <div id="result-explanation" style="display:none;font-size:0.8125rem;line-height:1.6;margin-top:6px"></div>
+          </div>
+
+          <!-- Navegación -->
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:0.25rem">
+            <div style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-3)">
+              <span id="answered-count">0</span> respondidas
+            </div>
+            <button id="btn-next" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.375rem;border-radius:9px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:white;border:none;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(124,58,237,0.28);transition:all 0.15s;opacity:0.4" disabled>
+              Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
         </div>
-
-      </div>
-    </main>
-  </div>
-</div>
-
-<!-- Resultados finales -->
-<div id="results-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
-  <div style="background:var(--ui-card);border-radius:24px;padding:2.5rem 2rem;max-width:460px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.4s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.25)">
-    <div id="result-icon" style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;font-size:2.5rem"></div>
-    <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.25rem">Puntuación final</p>
-    <p id="result-score" style="font-size:4.5rem;font-weight:900;margin:0;line-height:1;letter-spacing:-3px;color:#6366F1">0</p>
-    <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 0.5rem">/ 100 puntos</p>
-    <p id="result-pts-detail" style="font-size:0.8125rem;font-weight:600;color:#6366F1;margin:0 0 1.5rem;background:#EDE9FE;padding:6px 14px;border-radius:20px;display:inline-block"></p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
-      <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-        <p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p>
-        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Correctas</p>
-      </div>
-      <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-        <p id="res-wrong" style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p>
-        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Incorrectas</p>
-      </div>
-      <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-        <p id="res-max-diff" style="font-size:1.625rem;font-weight:900;color:#6366F1;margin:0 0 2px">—</p>
-        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Nivel máx.</p>
-      </div>
-    </div>
-    <p id="result-msg" style="font-size:0.9375rem;color:var(--ui-text-2);margin:0 0 1.75rem;line-height:1.65"></p>
-    <div style="display:flex;gap:8px">
-      <button id="result-new" style="flex:1;padding:0.75rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;cursor:pointer">Nueva sesión</button>
-      <a href="/dashboard" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:10px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:white;text-decoration:none;font-weight:700">Ir al panel</a>
+      </main>
     </div>
   </div>
-</div>
 
+  <!-- Modal reportar duda (AI) -->
+  <div id="ai-doubt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:350;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+    <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:440px;width:calc(100%-2rem);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+      <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Reportar duda sobre esta pregunta</h3>
+      <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 1rem;line-height:1.5">Un administrador revisará tu reporte. Puedes continuar con la práctica.</p>
+      <div id="ai-doubt-preview" style="background:var(--ui-surface);border-radius:8px;padding:10px 12px;margin-bottom:1rem;font-size:0.8125rem;color:var(--ui-text-2);border:1px solid var(--ui-border);max-height:80px;overflow:hidden;line-height:1.5"></div>
+      <textarea id="ai-doubt-message" placeholder="Describe tu duda (opcional)..." style="width:100%;padding:10px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='#7C3AED'" onblur="this.style.borderColor='var(--ui-border)'"></textarea>
+      <div id="ai-doubt-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 12px;font-size:0.8125rem;color:#B91C1C;margin-top:0.75rem"></div>
+      <div style="display:flex;gap:8px;margin-top:1rem">
+        <button id="ai-doubt-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+        <button id="ai-doubt-submit" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#D97706,#B45309);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Enviar reporte</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal finalizar sesión -->
+  <div id="finish-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+    <div style="background:var(--ui-card);border-radius:20px;padding:0;max-width:440px;width:calc(100%-2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.35s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+      <div style="padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid var(--ui-border)">
+        <h3 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0 0 4px">Finalizar práctica</h3>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">¿Deseas terminar la sesión adaptativa?</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:1.25rem 1.75rem">
+        <div style="text-align:center;background:#D1FAE5;border-radius:10px;padding:12px 8px"><p id="finish-modal-correct" style="font-size:1.5rem;font-weight:900;color:#059669;margin:0">0</p><p style="font-size:0.625rem;color:#059669;margin:0;text-transform:uppercase">Correctas</p></div>
+        <div style="text-align:center;background:#FEE2E2;border-radius:10px;padding:12px 8px"><p id="finish-modal-wrong" style="font-size:1.5rem;font-weight:900;color:#DC2626;margin:0">0</p><p style="font-size:0.625rem;color:#DC2626;margin:0;text-transform:uppercase">Incorrectas</p></div>
+      </div>
+      <div style="padding:0 1.75rem 1.5rem;display:flex;gap:10px">
+        <button id="finish-modal-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Continuar</button>
+        <button id="finish-modal-confirm" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Finalizar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay resultados finales -->
+  <div id="results-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+    <div style="background:var(--ui-card);border-radius:24px;padding:2.5rem 2rem;max-width:440px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.4s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.25)">
+      <div id="result-icon-wrap" style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;background:#EDE9FE">
+        <svg width="38" height="38" fill="none" stroke="#7C3AED" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.25rem">Nivel estimado (θ final)</p>
+      <p id="result-theta" style="font-size:3rem;font-weight:900;margin:0;line-height:1;letter-spacing:-2px;color:#7C3AED">-</p>
+      <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">escala IRT</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Correctas</p></div>
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-wrong"   style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Incorrectas</p></div>
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-total"  style="font-size:1.625rem;font-weight:900;color:#7C3AED;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Total</p></div>
+      </div>
+      <p id="result-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.65"></p>
+      <div style="display:flex;gap:8px">
+        <a href="/ai-practice" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Nueva sesión</a>
+        <a href="/dashboard" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Dashboard</a>
+      </div>
+    </div>
+  </div>
 </BaseLayout>
 
 <style is:global>
   @keyframes spin    { to { transform: rotate(360deg); } }
   @keyframes modalIn { from{opacity:0;transform:scale(0.9) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)} }
-  @keyframes optIn   { from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)} }
+  @keyframes optSlide { from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)} }
+  @keyframes selectPop { 0%{transform:scale(1)}40%{transform:scale(0.97)}100%{transform:scale(1)} }
+  @keyframes resultSlide { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
 
-  .exam-shell {
-    display:flex; flex-direction:column;
-    height:100dvh; overflow:hidden;
-    background:var(--ui-bg-alt); font-family:'Poppins',sans-serif;
-  }
-  .exam-header {
-    display:flex; align-items:center;
-    padding:0 1.25rem; height:56px;
-    background:var(--ui-card); border-bottom:1px solid var(--ui-border);
-    flex-shrink:0; gap:0.75rem; z-index:20;
-  }
-  .exam-body { display:flex; flex:1; overflow:hidden; }
-  .exam-sidebar {
-    width:204px; min-width:204px;
-    background:var(--ui-card); border-right:1px solid var(--ui-border);
-    overflow-y:auto; flex-shrink:0;
-  }
-  .exam-main { flex:1; overflow-y:auto; padding:1.5rem 1.25rem; }
+  .exam-shell { display:flex;flex-direction:column;height:100dvh;overflow:hidden;background:var(--ui-bg-alt);font-family:'Poppins',sans-serif; }
+  .exam-header { display:flex;align-items:center;padding:0 1.25rem;height:56px;background:var(--ui-card);border-bottom:1px solid var(--ui-border);flex-shrink:0;gap:0.5rem;z-index:20; }
+  .exam-body { display:flex;flex:1;overflow:hidden; }
+  .exam-sidebar { width:200px;min-width:200px;background:var(--ui-card);border-right:1px solid var(--ui-border);overflow-y:auto;flex-shrink:0; }
+  .exam-main { flex:1;overflow-y:auto;padding:1.5rem 1.25rem; }
 
-  .qnav-item {
-    width:100%; aspect-ratio:1/1; border-radius:6px;
-    border:1.5px solid var(--ui-border);
-    background:var(--ui-surface); color:var(--ui-text-3);
-    font-size:0.625rem; font-weight:700; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    font-family:inherit; transition:all 0.15s;
-  }
-  .qnav-item.current  { background:#6366F1; border-color:#6366F1; color:white; }
-  .qnav-item.correct  { background:#D1FAE5; border-color:#059669; color:#059669; }
-  .qnav-item.wrong    { background:#FEE2E2; border-color:#DC2626; color:#DC2626; }
-  .qnav-item.pending  { background:var(--ui-surface); border-color:var(--ui-border); color:var(--ui-text-3); cursor:default; }
+  .exam-option { display:flex;align-items:stretch;width:100%;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:12px;cursor:pointer;transition:border-color 0.18s,background 0.18s,transform 0.18s,box-shadow 0.18s;text-align:left;font-family:inherit;overflow:hidden;animation:optSlide 0.25s ease both; }
+  .exam-option:hover:not(.selected):not(.locked) { border-color:#7C3AED;background:rgba(124,58,237,0.03);transform:translateX(3px);box-shadow:0 3px 12px rgba(124,58,237,0.08); }
+  .exam-option.selected { border-color:#7C3AED;background:rgba(124,58,237,0.05);animation:selectPop 0.25s ease; }
+  .exam-option.selected .opt-letter-col { background:#7C3AED;border-right-color:rgba(124,58,237,0.3); }
+  .exam-option.selected .opt-letter-badge { background:rgba(255,255,255,0.25);border-color:transparent;color:white;font-weight:900; }
+  .exam-option.selected .opt-body-text { color:var(--ui-text-1);font-weight:600; }
+  .exam-option.locked { cursor:default;opacity:0.85; }
+  .exam-option.correct-answer { border-color:#059669!important;background:#F0FDF4!important; }
+  .exam-option.correct-answer .opt-letter-col { background:#059669!important; }
+  .exam-option.wrong-answer { border-color:#DC2626!important;background:#FEF2F2!important; }
+  .exam-option.wrong-answer .opt-letter-col { background:#DC2626!important; }
+  .opt-letter-col { width:52px;min-width:52px;display:flex;align-items:center;justify-content:center;background:var(--ui-surface);border-right:1.5px solid var(--ui-border);transition:background 0.18s,border-color 0.18s;flex-shrink:0; }
+  .opt-letter-badge { width:28px;height:28px;border-radius:7px;border:1.5px solid var(--ui-border-2);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:var(--ui-text-2);background:var(--ui-card);transition:all 0.18s; }
+  .opt-body { flex:1;padding:0.9375rem 1rem;display:flex;align-items:center; }
+  .opt-body-text { font-size:0.9375rem;color:var(--ui-text-2);line-height:1.65;margin:0;transition:color 0.18s; }
 
-  .ai-opt {
-    display:flex; align-items:stretch; width:100%;
-    background:var(--ui-card); border:1.5px solid var(--ui-border);
-    border-radius:12px; cursor:pointer;
-    transition:border-color 0.18s, background 0.18s, transform 0.18s;
-    text-align:left; font-family:inherit; overflow:hidden;
-    animation:optIn 0.2s ease both;
-  }
-  .ai-opt:hover:not(:disabled):not(.correct):not(.wrong) {
-    border-color:#6366F1; background:rgba(99,102,241,0.03); transform:translateX(3px);
-  }
-  .ai-opt:disabled { cursor:not-allowed; }
-  .ai-opt.correct  { border-color:#059669 !important; background:#F0FDF4 !important; }
-  .ai-opt.wrong    { border-color:#DC2626 !important; background:#FEF2F2 !important; }
+  .hbtn { padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;border:1.5px solid #BAE6FD;background:#F0F9FF;color:#0369A1;cursor:pointer;transition:all 0.15s;font-family:inherit; }
+  .hbtn:hover:not(:disabled) { background:#0369A1;color:white;border-color:#0369A1; }
+  .hbtn:disabled { opacity:0.35;cursor:not-allowed; }
 
-  .opt-letter {
-    width:52px; min-width:52px;
-    display:flex; align-items:center; justify-content:center;
-    background:var(--ui-surface); border-right:1.5px solid var(--ui-border);
-    flex-shrink:0; transition:all 0.18s;
-  }
-  .ai-opt.correct .opt-letter { background:#059669; border-color:#059669; }
-  .ai-opt.wrong   .opt-letter { background:#DC2626; border-color:#DC2626; }
-
-  .opt-badge {
-    width:28px; height:28px; border-radius:7px;
-    border:1.5px solid var(--ui-border-2);
-    display:flex; align-items:center; justify-content:center;
-    font-size:0.75rem; font-weight:800; color:var(--ui-text-2);
-    background:var(--ui-card); transition:all 0.18s;
-  }
-  .ai-opt.correct .opt-badge,
-  .ai-opt.wrong   .opt-badge { background:rgba(255,255,255,0.25); border-color:transparent; color:white; }
-
-  .opt-body { flex:1; padding:0.9375rem 1rem; display:flex; align-items:center; }
-  .opt-text { font-size:0.9375rem; color:var(--ui-text-2); line-height:1.65; margin:0; }
-
-  .hbtn {
-    padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:600;
-    border:1.5px solid #BAE6FD; background:#F0F9FF; color:#0369A1;
-    cursor:pointer; transition:all 0.15s; font-family:inherit;
-  }
-  .hbtn:hover:not(:disabled) { background:#0369A1; color:white; border-color:#0369A1; }
-  .hbtn:disabled { opacity:0.35; cursor:not-allowed; }
-
-  @media (max-width:768px) {
-    .exam-sidebar { display:none; }
-    .exam-main    { padding:1rem; }
-  }
+  @media(max-width:768px) { .exam-sidebar{display:none;} .exam-main{padding:1rem;} }
 </style>
+
 <script>
-  import { requireAuth }    from '../../lib/auth';
-  import { aiTriedsApi }    from '../../lib/api/ai-trieds.api';
-  import { competencesApi } from '../../lib/api/competences.api';
-  import type { AiQuestionDto, AiAnswerResultDto } from '../../lib/api/types';
-  import { scoreColor } from '../../lib/utils';
-  import { toast }      from '../../lib/toast';
+  import { requireAuth, isStudent }      from '../../lib/auth';
+  import { aiTriedsApi, aiHintApi }      from '../../lib/api/ai-trieds.api';
+  import { apiFetch }                    from '../../lib/api/client';
+  import { getCompStyle }                from '../../lib/utils';
+  import { toast }                       from '../../lib/toast';
 
   try { requireAuth(); } catch { throw new Error('redirect'); }
 
-  const params    = new URLSearchParams(window.location.search);
-  const aiTriedId = params.get('tried') ?? '';
-  const compId    = params.get('comp')  ?? '';
-  const totalQ    = parseInt(params.get('total') ?? '0') || 0;
-  const isResume  = params.get('resume') === '1';
-  const testMode  = params.get('mode') ?? '';   // ← modo obtenido desde la URL
+  const params       = new URLSearchParams(window.location.search);
+  const competenceId = params.get('comp') ?? '';
+  const sessionId    = params.get('session') ?? '';   // aiTriedId si viene de reanudación
 
-  if (!aiTriedId) { window.location.replace('/ai-practice'); throw new Error(); }
-
-  const LETTERS = ['A','B','C','D','E','F'];
-
-  function diffColor(d: number) {
-    if (d <= 3)  return { bg:'#D1FAE5', color:'#059669' };
-    if (d <= 6)  return { bg:'#FEF3C7', color:'#D97706' };
-    if (d <= 8)  return { bg:'#FEE2E2', color:'#DC2626' };
-    return { bg:'#F3E8FF', color:'#7C3AED' };
+  if (!competenceId) {
+    window.location.replace('/ai-practice');
+    throw new Error('Missing comp');
   }
 
-  // ── Estado ────────────────────────────────────────────────────────────
-  let currentQuestion: AiQuestionDto | null = null;
-  let questionIndex   = 0;
-  let totalAnswered   = 0;
-  let earnedPoints    = 0;
-  let maxPoints       = 0;
-  let maxDiffReached  = 0;
-  let examFinished    = false;
-  let generatingNext  = false;
-  const startTime     = Date.now();
+  // ── Estado ────────────────────────────────────────────────────────────────
+  let aiTriedId      = sessionId;
+  let currentQ: any  = null;     // AiQuestionDto
+  let answeredCount  = 0;
+  let correctCount   = 0;
+  let wrongCount     = 0;
+  let currentTheta   = 0;
+  let sessionFinished = false;
+  let answerLocked    = false;
 
-  // Caché de pistas: questionId → Map<level, text>
   const hintCache = new Map<string, Map<number, string>>();
 
-  // ── Sidebar nav ───────────────────────────────────────────────────────
-  type NavState = 'pending' | 'current' | 'correct' | 'wrong';
-  const navStates: NavState[] = [];
+  const DIFF_LABEL: Record<string,string> = { EASY:'Básico', MEDIUM:'Medio', HARD:'Alto', B:'Básico', M:'Medio', A:'Alto' };
+  const DIFF_COLOR: Record<string,string> = { EASY:'#059669', MEDIUM:'#D97706', HARD:'#D41224', B:'#059669', M:'#D97706', A:'#D41224' };
+  const DIFF_BG:    Record<string,string> = { EASY:'#D1FAE5', MEDIUM:'#FEF3C7', HARD:'#FEE2E2', B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
+  const LETTERS = ['A','B','C','D','E','F'];
 
-  function buildNav(total: number) {
-    const nav = document.getElementById('q-nav')!;
-    nav.innerHTML = '';
-    for (let i = 0; i < total; i++) {
-      navStates.push('pending');
-      const btn = document.createElement('button');
-      btn.className   = 'qnav-item pending';
-      btn.textContent = String(i + 1);
-      btn.disabled    = true;
-      nav.appendChild(btn);
-    }
-  }
-
-  function updateNav(idx: number, state: NavState) {
-    if (idx >= navStates.length) return;
-    navStates[idx] = state;
-    document.querySelectorAll<HTMLButtonElement>('.qnav-item').forEach((item, i) => {
-      item.className = 'qnav-item ' + navStates[i];
+  // ── Utilidades ────────────────────────────────────────────────────────────
+  function renderText(el: HTMLElement, raw: string) {
+    el.innerHTML = '';
+    const lines = (raw || '').replace(/\\n/g, '\n').split('\n');
+    lines.forEach((line, i) => {
+      if (i > 0) el.appendChild(document.createElement('br'));
+      if (line.trim()) el.appendChild(document.createTextNode(line));
     });
   }
 
-  function updateHeader() {
-    const n = totalQ || navStates.length || 10;
-    const prog = document.getElementById('hdr-progress');
-    const bar  = document.getElementById('hdr-progress-bar');
-    const pts  = document.getElementById('hdr-pts');
-    const maxP = document.getElementById('hdr-max-pts');
-    if (prog) prog.textContent = `${totalAnswered} / ${n}`;
-    if (bar)  bar.style.width  = `${(totalAnswered / n) * 100}%`;
-    if (pts)  pts.textContent  = `${earnedPoints} pts`;
-    if (maxP) maxP.textContent = `de ${maxPoints} posibles`;
+  function updateSidebarStats(theta: number) {
+    currentTheta = theta;
+    const thetaVal = document.getElementById('theta-val')!;
+    const thetaBar = document.getElementById('theta-bar')!;
+    const thetaBadge = document.getElementById('theta-badge')!;
+    thetaVal.textContent = theta.toFixed(2);
+    thetaBadge.textContent = `θ = ${theta.toFixed(2)}`;
+    thetaBadge.style.display = 'inline';
+    // theta típicamente en [-3, 3], normalizar a [0, 100]
+    const pct = Math.min(100, Math.max(0, ((theta + 3) / 6) * 100));
+    thetaBar.style.width = `${pct}%`;
+    (document.getElementById('stat-correct')  as HTMLElement).textContent = String(correctCount);
+    (document.getElementById('stat-wrong')    as HTMLElement).textContent = String(wrongCount);
+    (document.getElementById('answered-count') as HTMLElement).textContent = String(answeredCount);
   }
 
-  function updateThetaBar(diff: number) {
-    const bar   = document.getElementById('theta-bar');
-    const label = document.getElementById('theta-label');
-    const pct   = ((diff - 1) / 9) * 100;
-    if (bar)   bar.style.width  = `${pct}%`;
-    if (label) {
-      if      (diff <= 3) label.textContent = `Básico (Nv.${diff})`;
-      else if (diff <= 6) label.textContent = `Medio (Nv.${diff})`;
-      else if (diff <= 8) label.textContent = `Alto (Nv.${diff})`;
-      else                label.textContent = `Experto (Nv.${diff})`;
-    }
-  }
+  // ── Renderizar pregunta ───────────────────────────────────────────────────
+  function renderQuestion(q: any) {
+    currentQ = q;
+    answerLocked = false;
 
-  // ── Renderizar pregunta ───────────────────────────────────────────────
-  function renderQuestion(q: AiQuestionDto, isFirst = false) {
-    currentQuestion = q;
-    questionIndex   = (q.questionNumber ?? 1) - 1;
+    // Número y badges
+    const numBadge = document.getElementById('q-number-badge')!;
+    numBadge.textContent = `P${answeredCount + 1}`;
 
-    document.getElementById('exam-loading')!.style.display  = 'none';
-    document.getElementById('question-card')!.style.display = 'block';
-    document.getElementById('feedback-box')!.style.display  = 'none';
-    document.getElementById('hint-section')!.style.display  = 'block';
+    const labelEl = document.getElementById('q-progress-label')!;
+    labelEl.textContent = `Pregunta ${answeredCount + 1}`;
 
-    const numBadge   = document.getElementById('q-num-badge')!;
-    const diffBadge  = document.getElementById('q-diff-badge')!;
-    const ptsBadge   = document.getElementById('q-pts-badge')!;
-    const adaptBadge = document.getElementById('q-adapt-badge')!;
+    // Progreso (basado en answered, max 30)
+    const pct = Math.min(100, (answeredCount / 30) * 100);
+    (document.getElementById('q-progress-fill') as HTMLElement).style.width = `${pct}%`;
+    (document.getElementById('q-count-label') as HTMLElement).textContent = `${answeredCount} / ?`;
 
-    numBadge.textContent = `Pregunta ${q.questionNumber}`;
-    const dc = diffColor(q.difficultyLevel);
-    diffBadge.textContent = `Nivel ${q.difficultyLevel}/10`;
-    diffBadge.style.cssText = `background:${dc.bg};color:${dc.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
-    ptsBadge.textContent  = `+${q.difficultyLevel} pts posibles`;
+    // Competencia chip
+    const s = getCompStyle(competenceId, '');
+    const chipEl = document.getElementById('q-comp-chip')!;
+    chipEl.textContent = s.short || competenceId;
+    chipEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
 
-    if (!isFirst && q.questionNumber > 1) {
-      adaptBadge.style.display = 'inline';
-      adaptBadge.textContent   = q.difficultyLevel > 5 ? 'Nivel subió' : q.difficultyLevel < 5 ? 'Nivel bajó' : 'Nivel estable';
-    } else {
-      adaptBadge.style.display = 'none';
-    }
+    // Dificultad
+    const diff = q.difficultyLevel ?? q.difficulty ?? 'MEDIUM';
+    const diffEl = document.getElementById('q-diff-badge')!;
+    diffEl.textContent = DIFF_LABEL[diff] ?? diff;
+    diffEl.style.cssText = `background:${DIFF_BG[diff]??'#F3F4F6'};color:${DIFF_COLOR[diff]??'#6B7280'};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
+    (document.getElementById('stat-diff') as HTMLElement).textContent = DIFF_LABEL[diff] ?? diff;
 
-    document.getElementById('q-statement')!.textContent = q.statement;
+    // Respondida badge
+    (document.getElementById('q-answered-badge') as HTMLElement).style.display = 'none';
 
-    renderOptions(q);
+    // Duda btn
+    const doubtBtn = document.getElementById('ai-doubt-btn')!;
+    doubtBtn.style.display = isStudent() ? 'inline' : 'none';
 
-    // Restaurar pistas desde caché
-    const qHints = hintCache.get(q.aiQuestionId) ?? new Map<number, string>();
-    const maxUsed = q.hintsUsed ?? 0;
-    document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
-      const lvl    = Number(btn.dataset.level);
-      btn.disabled = lvl > maxUsed + 1;
-    });
-    const hintBox  = document.getElementById('hint-box')!;
-    const hintText = document.getElementById('hint-text')!;
-    if (qHints.size > 0) {
-      const latestLevel = Math.max(...qHints.keys());
-      hintBox.style.display = 'block';
-      hintText.textContent  = qHints.get(latestLevel) ?? '';
-    } else {
-      hintBox.style.display = 'none';
-      hintText.textContent  = '';
-    }
+    // Enunciado
+    const stmtEl = document.getElementById('q-statement')!;
+    renderText(stmtEl, q.statement ?? q.questionText ?? '');
 
-    updateNav(questionIndex, 'current');
-    updateThetaBar(q.difficultyLevel);
-  }
-
-  function renderOptions(q: AiQuestionDto) {
+    // Opciones (con shuffle cacheado)
     const optsEl = document.getElementById('q-options')!;
     optsEl.innerHTML = '';
-    q.options.forEach((opt, i) => {
+    const rawOpts: any[] = q.options ?? [];
+
+    // Mezclar opciones (cache por aiQuestionId)
+    const cacheKey = q.aiQuestionId ?? q.questionId ?? String(answeredCount);
+    if (!hintCache.has(`opts_${cacheKey}`)) {
+      const shuffled = [...rawOpts].sort(() => Math.random() - 0.5);
+      hintCache.set(`opts_${cacheKey}`, shuffled as any);
+    }
+    const shuffled: any[] = hintCache.get(`opts_${cacheKey}`) as any ?? rawOpts;
+
+    shuffled.forEach((opt: any, i: number) => {
       const btn = document.createElement('button');
-      btn.className = 'ai-opt';
-      btn.style.animationDelay = `${i * 0.05}s`;
-      btn.innerHTML = `
-        <div class="opt-letter"><span class="opt-badge">${LETTERS[i]}</span></div>
-        <div class="opt-body"><p class="opt-text">${opt.text}</p></div>`;
-      btn.addEventListener('click', () => submitAnswer(q, i));
+      btn.className = 'exam-option';
+      btn.style.animationDelay = `${i * 0.045}s`;
+      btn.dataset.optionId = opt.optionId ?? opt.id ?? String(i);
+
+      const letterCol = document.createElement('div');
+      letterCol.className = 'opt-letter-col';
+      const letterBadge = document.createElement('span');
+      letterBadge.className = 'opt-letter-badge';
+      letterBadge.textContent = LETTERS[i] ?? String(i + 1);
+      letterCol.appendChild(letterBadge);
+
+      const body = document.createElement('div');
+      body.className = 'opt-body';
+      const textP = document.createElement('p');
+      textP.className = 'opt-body-text';
+      renderText(textP, opt.optionText ?? opt.text ?? '');
+      body.appendChild(textP);
+
+      btn.appendChild(letterCol);
+      btn.appendChild(body);
+      btn.addEventListener('click', () => selectAnswer(opt, btn, shuffled));
       optsEl.appendChild(btn);
     });
+
+    // Reset hints
+    resetHints();
+
+    // Reset result
+    (document.getElementById('answer-result') as HTMLElement).style.display = 'none';
+
+    // Next btn disabled hasta que responda
+    const nextBtn = document.getElementById('btn-next') as HTMLButtonElement;
+    nextBtn.disabled = true;
+    nextBtn.style.opacity = '0.4';
+
+    // Mostrar card
+    (document.getElementById('ai-loading') as HTMLElement).style.display = 'none';
+    (document.getElementById('question-card') as HTMLElement).style.display = 'block';
   }
 
-  // ── Responder ─────────────────────────────────────────────────────────
-  async function submitAnswer(q: AiQuestionDto, selectedIndex: number) {
-    document.querySelectorAll<HTMLButtonElement>('.ai-opt').forEach((b, i) => {
-      b.disabled = true;
-      if (i === selectedIndex) b.style.borderColor = '#6366F1';
+  // ── Seleccionar respuesta ─────────────────────────────────────────────────
+  async function selectAnswer(opt: any, clickedBtn: HTMLButtonElement, shuffled: any[]) {
+    if (answerLocked) return;
+    answerLocked = true;
+
+    // Visual: seleccionar
+    document.querySelectorAll<HTMLElement>('.exam-option').forEach(b => {
+      b.classList.remove('selected');
+      b.classList.add('locked');
     });
-    document.getElementById('hint-section')!.style.display = 'none';
+    clickedBtn.classList.add('selected');
+
+    answeredCount++;
+    (document.getElementById('q-answered-badge') as HTMLElement).style.display = 'inline';
+    updateSidebarStats(currentTheta);
+
+    const nextBtn = document.getElementById('btn-next') as HTMLButtonElement;
 
     try {
-      const res = await aiTriedsApi.submitAnswer(aiTriedId, q.aiQuestionId, selectedIndex);
-      const fb  = res.data!;
+      const optionId = opt.optionId ?? opt.id;
+      const res = await aiTriedsApi.submitAnswer(aiTriedId, currentQ.aiQuestionId ?? currentQ.questionId, optionId);
+      const data = res.data;
 
-      totalAnswered = fb.totalAnswered;
-      if (fb.earnedPoints != null) earnedPoints = fb.earnedPoints;
-      if (fb.maxPoints    != null) maxPoints    = fb.maxPoints;
-      if (q.difficultyLevel > maxDiffReached)  maxDiffReached = q.difficultyLevel;
+      const isCorrect = data?.correct ?? data?.isCorrect ?? false;
+      const newTheta  = data?.theta   ?? data?.newTheta  ?? currentTheta;
 
-      document.querySelectorAll<HTMLButtonElement>('.ai-opt').forEach((btn, i) => {
-        if (i === fb.correctIndex)                    btn.classList.add('correct');
-        else if (i === fb.selectedIndex && !fb.isCorrect) btn.classList.add('wrong');
-      });
+      if (isCorrect) correctCount++; else wrongCount++;
+      updateSidebarStats(newTheta);
 
-      showFeedback(fb, q.difficultyLevel);
-      updateNav(questionIndex, fb.isCorrect ? 'correct' : 'wrong');
-      updateHeader();
-      if (fb.nextDifficulty) updateThetaBar(fb.nextDifficulty);
+      // Mostrar resultado
+      const resultEl = document.getElementById('answer-result')!;
+      const resultIcon  = document.getElementById('result-icon')!;
+      const resultLabel = document.getElementById('result-label')!;
+      const resultExp   = document.getElementById('result-explanation')!;
 
-      if (fb.finished) {
-        examFinished = true;
-        const nextBtn   = document.getElementById('btn-next-question') as HTMLButtonElement;
-        const nextLabel = document.getElementById('btn-next-label')!;
-        nextLabel.textContent    = 'Ver resultados';
-        nextBtn.style.background = 'linear-gradient(135deg,var(--brand),var(--brand-dark))';
-        nextBtn.onclick = () =>
-          showResults(fb.finalScore ?? 0, fb.correctAnswers, fb.totalAnswered, maxDiffReached,
-                      earnedPoints, maxPoints);
+      if (isCorrect) {
+        resultEl.style.cssText = 'display:block;border-radius:12px;padding:14px 16px;margin-bottom:1rem;border:1.5px solid #059669;background:#F0FDF4;animation:resultSlide 0.3s ease';
+        resultIcon.textContent = '✓';
+        resultLabel.textContent = '¡Correcto!';
+        resultLabel.style.color = '#059669';
+        clickedBtn.classList.add('correct-answer');
+      } else {
+        resultEl.style.cssText = 'display:block;border-radius:12px;padding:14px 16px;margin-bottom:1rem;border:1.5px solid #DC2626;background:#FEF2F2;animation:resultSlide 0.3s ease';
+        resultIcon.textContent = '✗';
+        resultLabel.textContent = 'Incorrecto';
+        resultLabel.style.color = '#DC2626';
+        clickedBtn.classList.add('wrong-answer');
+
+        // Mostrar correcta
+        const correctOptId = data?.correctOptionId;
+        if (correctOptId) {
+          document.querySelectorAll<HTMLElement>('.exam-option').forEach(b => {
+            if (b.dataset.optionId === correctOptId) b.classList.add('correct-answer');
+          });
+        }
       }
+
+      // Explicación si viene
+      const explanation = data?.explanation ?? data?.feedback;
+      if (explanation) {
+        resultExp.style.display = 'block';
+        resultExp.style.color = isCorrect ? '#065F46' : '#7F1D1D';
+        renderText(resultExp as HTMLElement, explanation);
+      } else {
+        resultExp.style.display = 'none';
+      }
+
+      // ¿Sesión terminada?
+      if (data?.sessionComplete || data?.finished) {
+        nextBtn.textContent = 'Ver resultados';
+        nextBtn.style.background = 'linear-gradient(135deg,#059669,#047857)';
+        nextBtn.addEventListener('click', () => showResults(data), { once: true });
+      } else {
+        nextBtn.innerHTML = `Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>`;
+      }
+
+      nextBtn.disabled = false;
+      nextBtn.style.opacity = '1';
+
     } catch (err: any) {
-      document.querySelectorAll<HTMLButtonElement>('.ai-opt').forEach(b => {
-        b.disabled = false; b.style.borderColor = '';
-      });
-      document.getElementById('hint-section')!.style.display = 'block';
       toast.error('Error al enviar respuesta', { description: err?.message });
+      answerLocked = false;
+      document.querySelectorAll<HTMLElement>('.exam-option').forEach(b => b.classList.remove('locked'));
+      clickedBtn.classList.remove('selected');
+      answeredCount--;
+      nextBtn.disabled = true;
+      nextBtn.style.opacity = '0.4';
     }
   }
 
-  // ── Feedback ──────────────────────────────────────────────────────────
-  function showFeedback(fb: AiAnswerResultDto, diff: number) {
-    const box     = document.getElementById('feedback-box')!;
-    const icon    = document.getElementById('fb-icon')!;
-    const title   = document.getElementById('fb-title')!;
-    const expEl   = document.getElementById('fb-explanation')!;
-    const ptsEl   = document.getElementById('fb-pts')!;
-    const nextBtn = document.getElementById('btn-next-question') as HTMLButtonElement;
-    const nextLbl = document.getElementById('btn-next-label')!;
-
-    box.style.display    = 'block';
-    box.style.background = fb.isCorrect ? '#F0FDF4' : '#FEF2F2';
-    box.style.border     = `1px solid ${fb.isCorrect ? '#A7F3D0' : '#FECACA'}`;
-
-    icon.style.cssText = `font-size:1rem;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:${fb.isCorrect ? '#059669' : '#DC2626'};color:white;font-weight:900;flex-shrink:0`;
-    icon.innerHTML     = fb.isCorrect
-      ? `<svg width="14" height="14" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`
-      : `<svg width="14" height="14" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-
-    title.textContent = fb.isCorrect ? 'Respuesta correcta' : 'Respuesta incorrecta';
-    ptsEl.textContent = fb.isCorrect ? `+${diff} puntos` : '0 puntos';
-    expEl.textContent = fb.explanation
-      || (fb.isCorrect
-          ? 'Bien razonado. Seleccionaste la opción correcta.'
-          : 'Revisa el concepto. La siguiente pregunta ajustará la dificultad.');
-
-    if (!fb.finished) {
-      nextLbl.textContent    = `Siguiente pregunta (Nv. ${fb.nextDifficulty ?? '—'})`;
-      nextBtn.style.background = 'linear-gradient(135deg,#6366F1,#4F46E5)';
-      nextBtn.onclick          = loadNextQuestion;
-    }
-  }
-
-  // ── Siguiente pregunta ────────────────────────────────────────────────
+  // ── Siguiente pregunta ────────────────────────────────────────────────────
   async function loadNextQuestion() {
-    if (generatingNext || examFinished) return;
-    generatingNext = true;
-
-    document.getElementById('question-card')!.style.display = 'none';
-    document.getElementById('exam-loading')!.style.display  = 'flex';
-    document.getElementById('loading-msg')!.textContent =
-      'La IA está ajustando la dificultad para ti...';
-
+    (document.getElementById('question-card') as HTMLElement).style.display = 'none';
+    (document.getElementById('ai-loading') as HTMLElement).style.display = 'flex';
     try {
       const res = await aiTriedsApi.nextQuestion(aiTriedId);
-      renderQuestion(res.data!, false);
+      if (!res.data) throw new Error('Sin pregunta');
+      renderQuestion(res.data);
     } catch (err: any) {
-      document.getElementById('exam-loading')!.style.display  = 'none';
-      document.getElementById('question-card')!.style.display = 'block';
-      toast.error('Error al cargar pregunta', { description: err?.message });
-    } finally {
-      generatingNext = false;
+      toast.error('Error al obtener siguiente pregunta', { description: err?.message });
+      (document.getElementById('ai-loading') as HTMLElement).style.display = 'none';
+      (document.getElementById('question-card') as HTMLElement).style.display = 'block';
     }
   }
 
-  // ── Pistas ────────────────────────────────────────────────────────────
+  document.getElementById('btn-next')?.addEventListener('click', async () => {
+    if (sessionFinished) return;
+    await loadNextQuestion();
+  });
+
+  // ── Pistas IA ─────────────────────────────────────────────────────────────
+  function resetHints() {
+    document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
+      btn.disabled = Number(btn.dataset.level) > 1;
+    });
+    (document.getElementById('hint-box') as HTMLElement).style.display = 'none';
+    (document.getElementById('hint-text') as HTMLElement).textContent = '';
+  }
+
   document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const q = currentQuestion;
-      if (!q) return;
+      if (!currentQ) return;
       const level = Number(btn.dataset.level);
-
-      const qHints   = hintCache.get(q.aiQuestionId) ?? new Map<number, string>();
+      const qKey  = currentQ.aiQuestionId ?? currentQ.questionId ?? '';
+      const qHints = hintCache.get(`hint_${qKey}`) ?? new Map<number, string>();
       const hintBox  = document.getElementById('hint-box')!;
       const hintText = document.getElementById('hint-text')!;
       const loading  = document.getElementById('hint-loading')!;
 
-      // Usar caché si ya existe
       if (qHints.has(level)) {
         hintBox.style.display = 'block';
         hintText.textContent  = qHints.get(level)!;
         return;
       }
 
-      hintBox.style.display  = 'block';
-      hintText.textContent   = '';
-      loading.style.display  = 'block';
-      btn.disabled           = true;
+      hintBox.style.display = 'block';
+      hintText.textContent  = '';
+      loading.style.display = 'block';
+      btn.disabled = true;
 
       try {
-        const res   = await aiTriedsApi.getHint(aiTriedId, q.aiQuestionId, level);
-        const text  = res.data!.hint;
+        // Para práctica IA usamos el hint por competenceId + questionId estático
+        // Si es pregunta IA generada, llama al endpoint de AI hints
+        const res  = await aiHintApi.getHint(competenceId, qKey, level);
+        const text = res.data?.hint ?? 'Sin pista disponible';
         qHints.set(level, text);
-        hintCache.set(q.aiQuestionId, qHints);
+        hintCache.set(`hint_${qKey}`, qHints);
         hintText.textContent = text;
-
-        // Habilitar siguiente nivel de pista
-        const nextHintBtn = document.querySelector<HTMLButtonElement>(`.hbtn[data-level="${level + 1}"]`);
-        if (nextHintBtn && level < 3) nextHintBtn.disabled = false;
-      } catch (err: any) {
-        hintText.textContent = 'No se pudo obtener la pista en este momento.';
-        toast.error('Error de pista', { description: err?.message });
+        const next = document.querySelector<HTMLButtonElement>(`.hbtn[data-level="${level + 1}"]`);
+        if (next && level < 3) next.disabled = false;
+      } catch {
+        hintText.textContent = 'No se pudo obtener la pista.';
       } finally {
         loading.style.display = 'none';
         btn.disabled = false;
@@ -561,199 +580,141 @@ import { Icon } from 'astro-icon/components';
     });
   });
 
-  // ── Finalizar ─────────────────────────────────────────────────────────
-  document.getElementById('finish-btn')?.addEventListener('click', async () => {
-    if (examFinished) return;
-    const ok = confirm('¿Deseas finalizar la sesión con las preguntas respondidas hasta ahora?');
-    if (!ok) return;
+  // ── Reportar duda ─────────────────────────────────────────────────────────
+  document.getElementById('ai-doubt-btn')?.addEventListener('click', () => {
+    if (!currentQ) return;
+    const preview = document.getElementById('ai-doubt-preview')!;
+    const stmt = currentQ.statement ?? currentQ.questionText ?? '';
+    preview.textContent = stmt.substring(0, 120) + (stmt.length > 120 ? '...' : '');
+    (document.getElementById('ai-doubt-message') as HTMLTextAreaElement).value = '';
+    (document.getElementById('ai-doubt-error') as HTMLElement).style.display = 'none';
+    (document.getElementById('ai-doubt-modal') as HTMLElement).style.display = 'flex';
+  });
 
-    window.rpLoader?.show('Finalizando sesión...');
+  document.getElementById('ai-doubt-cancel')?.addEventListener('click', () => {
+    (document.getElementById('ai-doubt-modal') as HTMLElement).style.display = 'none';
+  });
+
+  document.getElementById('ai-doubt-modal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('ai-doubt-modal'))
+      (document.getElementById('ai-doubt-modal') as HTMLElement).style.display = 'none';
+  });
+
+  document.getElementById('ai-doubt-submit')?.addEventListener('click', async () => {
+    if (!currentQ) return;
+    const message = (document.getElementById('ai-doubt-message') as HTMLTextAreaElement).value.trim();
+    const errEl   = document.getElementById('ai-doubt-error')!;
+    const btn     = document.getElementById('ai-doubt-submit') as HTMLButtonElement;
+    errEl.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Enviando...';
     try {
-      const elapsed = Math.round((Date.now() - startTime) / 1000);
-      const res = await aiTriedsApi.finish(aiTriedId, elapsed);
-      const tried = res.data!;
-      examFinished = true;
-      window.rpLoader?.hide();
-      showResults(
-        tried.score ?? 0, tried.correctAnswers ?? 0,
-        tried.totalAnswered ?? totalAnswered,
-        maxDiffReached, earnedPoints, maxPoints
-      );
+      await apiFetch('/api/doubts', {
+        method: 'POST',
+        body: JSON.stringify({
+          source:       'AI',
+          aiQuestionId: currentQ.aiQuestionId ?? currentQ.questionId,
+          message:      message || undefined,
+        }),
+      });
+      toast.success('Duda reportada', { description: 'Un admin la revisará.' });
+      (document.getElementById('ai-doubt-modal') as HTMLElement).style.display = 'none';
     } catch (err: any) {
-      window.rpLoader?.hide();
-      toast.error('Error al finalizar', { description: err?.message });
+      errEl.textContent = err?.message ?? 'Error al enviar';
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Enviar reporte';
     }
   });
 
-  // ── Abandonar ─────────────────────────────────────────────────────────
-  document.getElementById('abandon-btn')?.addEventListener('click', () => {
-    if (examFinished) { window.location.href = '/ai-practice'; return; }
-    const ok = confirm('¿Abandonar la sesión? El progreso actual no se guardará como sesión completada.');
-    if (ok) window.location.href = '/ai-practice';
-  });
-
-  // ── Resultados ────────────────────────────────────────────────────────
-  function showResults(
-    score: number, correct: number, answered: number,
-    maxDiff: number, earned = 0, maxPts = 0
-  ) {
-    examFinished = true;
-    document.getElementById('results-overlay')!.style.display = 'flex';
-
-    const pct = Math.round(score);
-    const sc  = scoreColor(pct);
-
-    const icon = document.getElementById('result-icon')!;
-    if (pct >= 80) {
-      icon.style.background = '#D1FAE5';
-      icon.innerHTML = `<svg width="36" height="36" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-    } else if (pct >= 50) {
-      icon.style.background = '#FEF3C7';
-      icon.innerHTML = `<svg width="36" height="36" fill="none" stroke="#D97706" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 9v4"/><circle cx="12" cy="16" r="1" fill="#D97706"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`;
-    } else {
-      icon.style.background = '#FEE2E2';
-      icon.innerHTML = `<svg width="36" height="36" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-    }
-
-    const scoreEl = document.getElementById('result-score')!;
-    scoreEl.textContent = String(pct);
-    scoreEl.style.color = sc;
-
-    const detail = document.getElementById('result-pts-detail')!;
-    detail.textContent = maxPts > 0
-      ? `${earned} de ${maxPts} puntos posibles`
-      : `${correct} respuestas correctas de ${answered}`;
-
-    (document.getElementById('res-correct')  as HTMLElement).textContent = String(correct);
-    (document.getElementById('res-wrong')    as HTMLElement).textContent = String(answered - correct);
-    (document.getElementById('res-max-diff') as HTMLElement).textContent = maxDiff ? `${maxDiff}/10` : '—';
-
-    const msgs: Record<string, string> = {
-      high:   'Excelente desempeño. Tu dominio del tema es sólido. Continúa practicando para mantener y superar este nivel.',
-      medium: 'Buen esfuerzo. Hay aspectos por reforzar. Revisa las preguntas incorrectas y vuelve a practicar.',
-      low:    'Sigue adelante. Con práctica constante mejorarás. Estudia los temas base de esta competencia.',
-    };
-    const key = pct >= 75 ? 'high' : pct >= 45 ? 'medium' : 'low';
-    (document.getElementById('result-msg') as HTMLElement).textContent = msgs[key];
-
-    document.getElementById('result-new')?.addEventListener('click', () => {
-      window.location.href = '/ai-practice';
-    });
+  // ── Finalizar sesión ──────────────────────────────────────────────────────
+  function openFinishModal() {
+    (document.getElementById('finish-modal-correct') as HTMLElement).textContent = String(correctCount);
+    (document.getElementById('finish-modal-wrong')   as HTMLElement).textContent = String(wrongCount);
+    (document.getElementById('finish-modal') as HTMLElement).style.display = 'flex';
   }
 
-  // ── Nueva sesión ──────────────────────────────────────────────────────
-  document.getElementById('result-new')?.addEventListener('click', () => {
-    window.location.href = '/ai-practice';
+  document.getElementById('finish-btn-header')?.addEventListener('click', openFinishModal);
+  document.getElementById('finish-btn-sidebar')?.addEventListener('click', openFinishModal);
+  document.getElementById('finish-modal-cancel')?.addEventListener('click', () => {
+    (document.getElementById('finish-modal') as HTMLElement).style.display = 'none';
+  });
+  document.getElementById('finish-modal-confirm')?.addEventListener('click', async () => {
+    (document.getElementById('finish-modal') as HTMLElement).style.display = 'none';
+    await finishSession();
   });
 
-  // ── Inicialización ────────────────────────────────────────────────────
-  async function init() {
-    const n = totalQ || 10;
-    buildNav(n);
-    updateHeader();
-
-    // Cargar nombre de competencia en badge del header
-    if (compId) {
-      competencesApi.findAll(true).then(res => {
-        const comp = (res.data ?? []).find((c: any) => c.competenceId === compId);
-        const badge = document.getElementById('hdr-comp');
-        if (badge && comp) badge.textContent = comp.competenceName;
-      }).catch(() => {});
-    }
-
-    // Cargar preguntas existentes (sesión nueva o reanudada)
+  async function finishSession() {
+    if (sessionFinished) return;
+    sessionFinished = true;
+    window.rpLoader?.show('Calculando resultados...');
     try {
-      const res       = await aiTriedsApi.listQuestions(aiTriedId);
-      const questions = res.data ?? [];
+      const res = await aiTriedsApi.finish(aiTriedId);
+      showResults(res.data);
+    } catch {
+      showResults(null);
+    } finally {
+      window.rpLoader?.hide();
+    }
+  }
 
-      if (!questions.length) {
-        // No debería pasar (start() siempre genera la primera), pero por si acaso
-        document.getElementById('loading-msg')!.textContent = 'Cargando primera pregunta...';
+  function showResults(data: any) {
+    const theta = data?.finalTheta ?? data?.theta ?? currentTheta;
+    const total = data?.totalQuestions ?? answeredCount;
+    const correct = data?.correctAnswers ?? correctCount;
+    const wrong   = total - correct;
+
+    (document.getElementById('result-theta') as HTMLElement).textContent = theta.toFixed(2);
+    (document.getElementById('res-correct')  as HTMLElement).textContent = String(correct);
+    (document.getElementById('res-wrong')    as HTMLElement).textContent = String(wrong);
+    (document.getElementById('res-total')    as HTMLElement).textContent = String(total);
+
+    const pct = total > 0 ? (correct / total) * 100 : 0;
+    (document.getElementById('result-msg') as HTMLElement).textContent = pct >= 70
+      ? '¡Excelente desempeño! Tu nivel ha mejorado significativamente.'
+      : pct >= 50
+      ? '¡Buen trabajo! Sigue practicando para mejorar tu nivel.'
+      : '¡Ánimo! La práctica constante es clave para mejorar.';
+
+    (document.getElementById('results-overlay') as HTMLElement).style.display = 'flex';
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  async function init() {
+    // Pintar competencia en header
+    const s = getCompStyle(competenceId, '');
+    const badgeEl = document.getElementById('ai-comp-badge')!;
+    badgeEl.textContent = s.short || competenceId;
+    badgeEl.style.cssText = `padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0;background:${s.bg};color:${s.color}`;
+
+    try {
+      // Verificar disponibilidad del servicio IA
+      const statusRes = await aiTriedsApi.status();
+      if (!statusRes.data?.enabled || !statusRes.data?.reachable) {
+        (document.getElementById('ai-loading')     as HTMLElement).style.display = 'none';
+        (document.getElementById('ai-unavailable') as HTMLElement).style.display = 'block';
         return;
       }
 
-      // Reconstruir estado desde preguntas ya respondidas
-      questions.forEach((q: AiQuestionDto) => {
-        const idx = (q.questionNumber ?? 1) - 1;
-        if (q.selectedIndex != null) {
-          totalAnswered++;
-          const pts = q.difficultyLevel ?? 5;
-          maxPoints += pts;
-          if (q.isCorrect) earnedPoints += pts;
-          if ((q.difficultyLevel ?? 0) > maxDiffReached) maxDiffReached = q.difficultyLevel ?? 0;
-          updateNav(idx, q.isCorrect ? 'correct' : 'wrong');
-        }
-      });
-      updateHeader();
-
-      // Buscar la primera pregunta sin responder
-      const unanswered = questions.find((q: AiQuestionDto) => q.selectedIndex == null);
-      if (unanswered) {
-        renderQuestion(unanswered, questions.length === 1);
-      } else {
-        // Todas respondidas → mostrar resultados (sesión finalizada reanudada)
-        try {
-          const tried = await aiTriedsApi.findById(aiTriedId);
-          const t     = tried.data!;
-          examFinished = true;
-          showResults(t.score ?? 0, t.correctAnswers ?? 0,
-                      t.totalAnswered ?? questions.length,
-                      maxDiffReached, earnedPoints, maxPoints);
-        } catch {
-          window.location.href = '/ai-practice';
+      // Iniciar sesión si no viene un sessionId
+      if (!aiTriedId) {
+        const startRes = await aiTriedsApi.start(competenceId);
+        if (!startRes.data) throw new Error('No se pudo iniciar la sesión');
+        aiTriedId = startRes.data.aiTriedId ?? startRes.data.sessionId ?? startRes.data.id;
+        if (startRes.data.firstQuestion) {
+          renderQuestion(startRes.data.firstQuestion);
+          return;
         }
       }
+
+      // Cargar primera pregunta
+      const qRes = await aiTriedsApi.nextQuestion(aiTriedId);
+      if (!qRes.data) throw new Error('Sin pregunta disponible');
+      renderQuestion(qRes.data);
+
     } catch (err: any) {
-      document.getElementById('loading-msg')!.textContent =
-        'Error al cargar la sesión. Redirigiendo...';
-      setTimeout(() => window.location.href = '/ai-practice', 2000);
-    }
-
-    // ── Anti‑fraude (ubicado al nivel superior de init, después de renderizar la primera pregunta) ──
-    const isAntifraud = testMode === 'EXAM' || testMode === 'TIMED';
-
-    if (isAntifraud && !examFinished) {
-      // Añadir clase CSS que bloquea selección de texto e imágenes
-      document.body.classList.add('exam-antifraud');
-
-      // Bloquear menú contextual
-      document.addEventListener('contextmenu', e => e.preventDefault());
-
-      // Bloquear Ctrl+C / Ctrl+A / F12 / Ctrl+U / Ctrl+S
-      document.addEventListener('keydown', e => {
-        const blocked = (e.ctrlKey && ['c','a','u','s'].includes(e.key.toLowerCase()))
-                        || e.key === 'F12';
-        if (blocked) e.preventDefault();
-      });
-
-      let tabWarnings = 0;
-      const MAX_WARNINGS = 3;
-
-      const showTabWarning = (count: number) => {
-        document.querySelector('.tab-warning-banner')?.remove();
-        const banner = document.createElement('div');
-        banner.className = 'tab-warning-banner';
-        if (count >= MAX_WARNINGS) {
-          banner.textContent = `Aviso ${count}: Salir de la pantalla del examen puede invalidar tu intento. Esta es tu última advertencia.`;
-          banner.style.background = '#DC2626';
-        } else {
-          banner.textContent = `Advertencia ${count}/${MAX_WARNINGS}: No debes salir de la ventana del examen.`;
-          banner.style.background = '#D97706';
-        }
-        document.body.prepend(banner);
-        setTimeout(() => banner.remove(), 5000);
-      };
-
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') return;
-        tabWarnings++;
-        showTabWarning(tabWarnings);
-      });
-
-      window.addEventListener('blur', () => {
-        tabWarnings++;
-        showTabWarning(tabWarnings);
-      });
+      toast.error('Error al iniciar la práctica IA', { description: err?.message });
+      (document.getElementById('ai-loading')     as HTMLElement).style.display = 'none';
+      (document.getElementById('ai-unavailable') as HTMLElement).style.display = 'block';
     }
   }
 

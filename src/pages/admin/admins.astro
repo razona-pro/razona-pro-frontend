@@ -140,6 +140,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
   import { toast } from '../../lib/toast';
   import type { AdminDto } from '../../lib/api/types';
 
+  declare global {
+  interface Window {
+    rpLoader?: {
+      show: (message?: string) => void;
+      hide: () => void;
+    };
+  }
+}
+
   try {
     requireAuth();
     if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }

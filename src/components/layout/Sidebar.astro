@@ -1,45 +1,40 @@
 ---
 import { Icon } from 'astro-icon/components';
 
-interface Props {
-  currentPage?: string;
-}
+interface Props { currentPage?: string; }
 const { currentPage = 'dashboard' } = Astro.props;
 
 const mainNav = [
   { href: '/dashboard', icon: 'tabler:home', label: 'Inicio', page: 'dashboard' },
 ];
-
-const studentNav = [
+const studentOnlyNav = [
   { href: '/tests',       icon: 'tabler:clipboard-list', label: 'Tests',           page: 'tests' },
   { href: '/ai-practice', icon: 'tabler:robot',          label: 'Práctica con IA', page: 'ai-practice' },
 ];
-
-const accountNav = [
-  { href: '/dashboard/history',  icon: 'tabler:history',      label: 'Mi historial', page: 'history' },
-  { href: '/dashboard/rankings', icon: 'tabler:trophy',       label: 'Rankings',    page: 'rankings' },
-  { href: '/dashboard/profile',  icon: 'tabler:user-circle',  label: 'Mi perfil',   page: 'profile' },
+const studentAccountNav = [
+  { href: '/dashboard/history',  icon: 'tabler:history', label: 'Mi historial', page: 'history' },
+  { href: '/dashboard/rankings', icon: 'tabler:trophy',  label: 'Rankings',     page: 'rankings' },
 ];
-
+const sharedAccountNav = [
+  { href: '/dashboard/profile', icon: 'tabler:user-circle', label: 'Mi perfil', page: 'profile' },
+];
 const adminNav = [
-  { href: '/admin/students',    icon: 'tabler:users',            label: 'Estudiantes',   page: 'admin-students' },
-  { href: '/admin/tests',       icon: 'tabler:file-description', label: 'Tests',         page: 'admin-tests' },
-  { href: '/admin/questions',   icon: 'tabler:list-check',       label: 'Preguntas',     page: 'admin-questions' },
-  { href: '/admin/competences', icon: 'tabler:brain',            label: 'Competencias',  page: 'admin-competences' }, // ← NUEVO
+  { href: '/admin/students',    icon: 'tabler:users',            label: 'Estudiantes',     page: 'admin-students' },
+  { href: '/admin/tests',       icon: 'tabler:file-description', label: 'Tests',           page: 'admin-tests' },
+  { href: '/admin/questions',   icon: 'tabler:list-check',       label: 'Preguntas',       page: 'admin-questions' },
+  { href: '/admin/competences', icon: 'tabler:brain',            label: 'Competencias',    page: 'admin-competences' },
   { href: '/admin/admins',      icon: 'tabler:shield-check',     label: 'Administradores', page: 'admin-admins' },
-  { href: '/admin/programs',    icon: 'tabler:school',           label: 'Programas',     page: 'admin-programs' },
-  { href: '/admin/rankings',    icon: 'tabler:award',            label: 'Rankings',      page: 'admin-rankings' },
-  { href: '/admin/doubts',      icon: 'tabler:message-question', label: 'Dudas',         page: 'admin-doubts' },
+  { href: '/admin/programs',    icon: 'tabler:school',           label: 'Programas',       page: 'admin-programs' },
+  { href: '/admin/rankings',    icon: 'tabler:award',            label: 'Rankings',        page: 'admin-rankings' },
+  { href: '/admin/doubts',      icon: 'tabler:message-question', label: 'Dudas',           page: 'admin-doubts' },
 ];
 ---
 
-<!-- Modal de confirmación de logout -->
+<!-- Modal logout -->
 <div id="logout-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:var(--ui-card);border-radius:18px;padding:2rem 1.75rem;max-width:340px;width:calc(100%-2rem);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
     <div style="width:52px;height:52px;border-radius:14px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
-      <svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round">
-        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
-      </svg>
+      <svg width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
     </div>
     <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">¿Cerrar sesión?</h3>
     <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55">Se cerrará tu sesión en todos los dispositivos activos.</p>
@@ -50,16 +45,14 @@ const adminNav = [
   </div>
 </div>
 
-<!-- Token expirado modal -->
+<!-- Session expired -->
 <div id="session-expired-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--ui-card);border-radius:18px;padding:2rem 1.75rem;max-width:360px;width:calc(100%-2rem);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
     <div style="width:52px;height:52px;border-radius:14px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
-      <svg width="24" height="24" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
+      <svg width="24" height="24" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
     <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Sesión expirada</h3>
-    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55">Tu sesión ha expirado o fue cerrada en otro dispositivo. Por favor inicia sesión nuevamente.</p>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.25rem;line-height:1.55">Tu sesión ha expirado. Por favor inicia sesión nuevamente.</p>
     <a href="/auth" style="display:flex;align-items:center;justify-content:center;padding:0.625rem;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-weight:700;font-size:0.875rem;text-decoration:none">Ir al login</a>
   </div>
 </div>
@@ -67,9 +60,7 @@ const adminNav = [
 <aside id="rp-sidebar">
   <!-- Logo -->
   <div class="sb-logo">
-    <div class="sb-logo-icon">
-      <Icon name="tabler:brain" size={20} />
-    </div>
+    <div class="sb-logo-icon"><Icon name="tabler:brain" size={20} /></div>
     <div>
       <p class="sb-logo-name">Razona<span>Pro</span></p>
       <p class="sb-logo-sub">Saber Pro · UFPSO</p>
@@ -89,53 +80,67 @@ const adminNav = [
   </div>
 
   <!-- Nav -->
-<nav class="sb-nav">
-  <span class="sb-section">Principal</span>
-  {mainNav.map(item => (
-    <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
-      <Icon name={item.icon} size={16} />
-      {item.label}
-    </a>
-  ))}
-
-  <!-- Solo estudiantes -->
-  <div id="sb-student-nav" style="display:none">
-    {studentNav.map(item => (
+  <nav class="sb-nav">
+    <span class="sb-section">Principal</span>
+    {mainNav.map(item => (
       <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
         <Icon name={item.icon} size={16} />
         {item.label}
       </a>
     ))}
-  </div>
 
-  <!-- Competencias: solo estudiantes -->
-  <div id="sb-competences-section" style="display:none">
-    <span class="sb-section">Competencias</span>
-    <div id="sb-competences-list">
-      <div class="sb-skeleton"></div>
-      <div class="sb-skeleton" style="width:75%"></div>
-      <div class="sb-skeleton" style="width:85%"></div>
+    <!-- Solo estudiantes: Tests, IA -->
+    <div id="sb-student-only" style="display:none">
+      {studentOnlyNav.map(item => (
+        <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
+          <Icon name={item.icon} size={16} />
+          {item.label}
+        </a>
+      ))}
     </div>
-  </div>
 
-  <span class="sb-section">Mi cuenta</span>
-  {accountNav.map(item => (
-    <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
-      <Icon name={item.icon} size={16} />
-      {item.label}
-    </a>
-  ))}
+    <!-- Competencias: solo estudiantes -->
+    <div id="sb-competences-section" style="display:none">
+      <span class="sb-section">Competencias</span>
+      <div id="sb-competences-list">
+        <div class="sb-skeleton"></div>
+        <div class="sb-skeleton" style="width:75%"></div>
+        <div class="sb-skeleton" style="width:85%"></div>
+      </div>
+    </div>
 
-  <div id="sb-admin-section" style="display:none">
-    <span class="sb-section" style="color:rgba(212,18,36,0.5)">Administración</span>
-    {adminNav.map(item => (
+    <!-- Mi cuenta -->
+    <span class="sb-section">Mi cuenta</span>
+
+    <!-- Historial y Rankings: solo estudiantes -->
+    <div id="sb-student-account" style="display:none">
+      {studentAccountNav.map(item => (
+        <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
+          <Icon name={item.icon} size={16} />
+          {item.label}
+        </a>
+      ))}
+    </div>
+
+    <!-- Perfil: todos -->
+    {sharedAccountNav.map(item => (
       <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
         <Icon name={item.icon} size={16} />
         {item.label}
       </a>
     ))}
-  </div>
-</nav>
+
+    <!-- Admin -->
+    <div id="sb-admin-section" style="display:none">
+      <span class="sb-section" style="color:rgba(212,18,36,0.5)">Administración</span>
+      {adminNav.map(item => (
+        <a href={item.href} class:list={['sb-item', currentPage === item.page && 'active']}>
+          <Icon name={item.icon} size={16} />
+          {item.label}
+        </a>
+      ))}
+    </div>
+  </nav>
 
   <!-- Logout -->
   <div class="sb-footer">
@@ -147,7 +152,7 @@ const adminNav = [
 </aside>
 
 <style>
-  @keyframes modalIn { from { opacity:0; transform:scale(0.92) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
   @keyframes shimmer { 0%{background-position:-400px 0}100%{background-position:400px 0} }
 
   .sb-skeleton {
@@ -155,336 +160,173 @@ const adminNav = [
     background: linear-gradient(90deg, var(--sidebar-hover-bg) 25%, var(--sidebar-border) 50%, var(--sidebar-hover-bg) 75%);
     background-size: 800px 100%; animation: shimmer 1.5s infinite;
   }
-
   #rp-sidebar {
-    width: 244px; min-width: 244px;
-    background: var(--sidebar-bg);
-    display: flex; flex-direction: column;
-    overflow-y: auto; overflow-x: hidden;
-    border-right: 1px solid var(--sidebar-border);
-    flex-shrink: 0;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.1) transparent;
+    width: 244px; min-width: 244px; background: var(--sidebar-bg);
+    display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+    border-right: 1px solid var(--sidebar-border); flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 100;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
   }
-
   @media (max-width: 1023px) {
-    #rp-sidebar {
-      position: fixed; top: 0; left: 0; bottom: 0;
-      transform: translateX(-260px); box-shadow: none;
-    }
-    #rp-sidebar.open {
-      transform: translateX(0);
-      box-shadow: 8px 0 40px rgba(0,0,0,0.25);
-    }
+    #rp-sidebar { position: fixed; top:0; left:0; bottom:0; transform: translateX(-260px); box-shadow: none; }
+    #rp-sidebar.open { transform: translateX(0); box-shadow: 8px 0 40px rgba(0,0,0,0.25); }
   }
-
-  .sb-logo {
-    display: flex; align-items: center; gap: 0.625rem;
-    padding: 1.25rem 1rem 1rem;
-    border-bottom: 1px solid var(--sidebar-border);
-  }
-  .sb-logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, #D41224, #9B1F24);
-    border-radius: 9px; display: flex; align-items: center; justify-content: center;
-    color: white; box-shadow: 0 4px 12px rgba(212,18,36,0.35); flex-shrink: 0;
-  }
-  .sb-logo-name {
-    color: var(--sidebar-hover-txt); font-weight: 900; font-size: 0.9375rem;
-    letter-spacing: -0.4px; margin: 0; line-height: 1.1;
-  }
-  .sb-logo-name span { color: #D41224; }
-  .sb-logo-sub {
-    color: var(--sidebar-text); font-size: 0.625rem; margin: 0;
-    letter-spacing: 0.9px; text-transform: uppercase; opacity: 0.5;
-  }
-
-  .sb-user {
-    display: flex; align-items: center; gap: 0.625rem;
-    padding: 0.875rem 1rem;
-    border-bottom: 1px solid var(--sidebar-border);
-  }
-  .sb-avatar {
-    width: 38px; height: 38px; border-radius: 10px;
-    background: linear-gradient(135deg, #D41224, #9B1F24);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 900; font-size: 0.875rem; flex-shrink: 0;
-  }
-  .sb-user-info { flex: 1; min-width: 0; }
-  .sb-user-name {
-    color: var(--sidebar-hover-txt); font-weight: 700; font-size: 0.8125rem;
-    margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .sb-user-sub { color: var(--sidebar-text); font-size: 0.6875rem; margin: 0; opacity: 0.5; }
-  .sb-settings {
-    color: var(--sidebar-text); opacity: 0.4; text-decoration: none;
-    padding: 0.25rem; flex-shrink: 0; transition: opacity 0.2s;
-    display: flex; align-items: center;
-  }
-  .sb-settings:hover { opacity: 0.8; }
-
-  .sb-nav { padding: 0.625rem; flex: 1; }
-  .sb-section {
-    display: block; color: var(--sidebar-text); font-size: 0.625rem; font-weight: 700;
-    letter-spacing: 0.9px; text-transform: uppercase;
-    padding: 0 0.625rem; margin: 0.875rem 0 0.3125rem; opacity: 0.35;
-  }
-
-  .sb-item {
-    display: flex; align-items: center; gap: 0.5625rem;
-    padding: 0.5625rem 0.625rem;
-    color: var(--sidebar-text); font-size: 0.875rem; font-weight: 500;
-    border-radius: 9px; text-decoration: none;
-    transition: all 0.15s; cursor: pointer; margin-bottom: 1px;
-    border: none; background: none; width: 100%;
-    text-align: left; font-family: inherit;
-  }
-  .sb-item:hover  { background: var(--sidebar-hover-bg); color: var(--sidebar-hover-txt); }
-  .sb-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-txt); font-weight: 600; }
-
-  .sb-comp { padding-left: 0.625rem; }
-  .sb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-
-  .sb-footer { padding: 0.625rem; border-top: 1px solid var(--sidebar-border); }
-  .sb-logout { color: rgba(239, 68, 68, 0.6) !important; }
-  .sb-logout:hover { background: rgba(212,18,36,0.08) !important; color: rgba(239,68,68,0.9) !important; }
+  .sb-logo { display:flex;align-items:center;gap:0.625rem;padding:1.25rem 1rem 1rem;border-bottom:1px solid var(--sidebar-border); }
+  .sb-logo-icon { width:36px;height:36px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:9px;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 4px 12px rgba(212,18,36,0.35);flex-shrink:0; }
+  .sb-logo-name { color:var(--sidebar-hover-txt);font-weight:900;font-size:0.9375rem;letter-spacing:-0.4px;margin:0;line-height:1.1; }
+  .sb-logo-name span { color:#D41224; }
+  .sb-logo-sub { color:var(--sidebar-text);font-size:0.625rem;margin:0;letter-spacing:0.9px;text-transform:uppercase;opacity:0.5; }
+  .sb-user { display:flex;align-items:center;gap:0.625rem;padding:0.875rem 1rem;border-bottom:1px solid var(--sidebar-border); }
+  .sb-avatar { width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:0.875rem;flex-shrink:0; }
+  .sb-user-info { flex:1;min-width:0; }
+  .sb-user-name { color:var(--sidebar-hover-txt);font-weight:700;font-size:0.8125rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .sb-user-sub  { color:var(--sidebar-text);font-size:0.6875rem;margin:0;opacity:0.5; }
+  .sb-settings  { color:var(--sidebar-text);opacity:0.4;text-decoration:none;padding:0.25rem;flex-shrink:0;transition:opacity 0.2s;display:flex;align-items:center; }
+  .sb-settings:hover { opacity:0.8; }
+  .sb-nav { padding:0.625rem;flex:1; }
+  .sb-section { display:block;color:var(--sidebar-text);font-size:0.625rem;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;padding:0 0.625rem;margin:0.875rem 0 0.3125rem;opacity:0.35; }
+  .sb-item { display:flex;align-items:center;gap:0.5625rem;padding:0.5625rem 0.625rem;color:var(--sidebar-text);font-size:0.875rem;font-weight:500;border-radius:9px;text-decoration:none;transition:all 0.15s;cursor:pointer;margin-bottom:1px;border:none;background:none;width:100%;text-align:left;font-family:inherit; }
+  .sb-item:hover  { background:var(--sidebar-hover-bg);color:var(--sidebar-hover-txt); }
+  .sb-item.active { background:var(--sidebar-active-bg);color:var(--sidebar-active-txt);font-weight:600; }
+  .sb-footer { padding:0.625rem;border-top:1px solid var(--sidebar-border); }
+  .sb-logout { color:rgba(239,68,68,0.6)!important; }
+  .sb-logout:hover { background:rgba(212,18,36,0.08)!important;color:rgba(239,68,68,0.9)!important; }
 </style>
 
 <script>
-  import { getUser, isAdmin, logout, initSessionWatcher, updateStoredUser } from '../../lib/auth';
-import { competencesApi } from '../../lib/api/competences.api';
-import { studentsApi }    from '../../lib/api/students.api';
-import { adminsApi }      from '../../lib/api/admins.api';
+  import { getUser, isAdmin, logout, initSessionWatcher, updateStoredUser, getFullName, getInitials } from '../../lib/auth';
+  import { competencesApi } from '../../lib/api/competences.api';
+  import { studentsApi }    from '../../lib/api/students.api';
+  import { adminsApi }      from '../../lib/api/admins.api';
 
-// ── Datos del usuario ─────────────────────────────────────────────
-const user = getUser();
+  // ── Pintar usuario ──────────────────────────────────────────────
+  function paintUser() {
+    const u = getUser();
+    if (!u) return;
+    const full     = getFullName(u) || u.id;
+    const initials = getInitials(u) || u.id.slice(0,2).toUpperCase();
+    const avatarEl = document.getElementById('sb-avatar');
+    const nameEl   = document.getElementById('sb-name');
+    const subEl    = document.getElementById('sb-sub');
+    if (avatarEl) avatarEl.textContent = initials;
+    if (nameEl)   nameEl.textContent   = full;
+    if (subEl)    subEl.textContent    = isAdmin()
+      ? 'Administrador · UFPSO'
+      : (u.programId ? `Programa ${u.programId}` : 'Estudiante · UFPSO');
 
-function paintUser() {
-  const u = getUser();
-  if (!u) return;
-
-  // Si firstName está vacío mostramos el ID como fallback temporal
-  const firstName  = u.firstName  || '';
-  const firstSurname = u.firstSurname || '';
-  const hasName    = firstName.length > 0;
-  const displayName = hasName
-    ? (firstSurname ? `${firstName} ${firstSurname}` : firstName)
-    : u.id; // fallback: mostrar ID mientras carga
-
-  const initials = hasName
-    ? ((firstName[0] ?? '') + (firstSurname[0] ?? firstName[1] ?? '')).toUpperCase()
-    : u.id.slice(0, 2).toUpperCase();
-
-  const avatarEl = document.getElementById('sb-avatar');
-  const nameEl   = document.getElementById('sb-name');
-  const subEl    = document.getElementById('sb-sub');
-
-  if (avatarEl) avatarEl.textContent = initials;
-  if (nameEl)   nameEl.textContent   = displayName;
-  if (subEl)    subEl.textContent    = isAdmin()
-    ? 'Administrador · UFPSO'
-    : (u.programId ?? 'Estudiante · UFPSO');
-
-  if (isAdmin()) {
-    document.getElementById('sb-admin-section')?.style.setProperty('display', 'block');
-    // Admin NO ve secciones de estudiante
-  } else {
-    document.getElementById('sb-student-nav')?.style.setProperty('display', 'block');
-    document.getElementById('sb-competences-section')?.style.setProperty('display', 'block');
-  }
-}
-
-paintUser();
-
-// Cargar nombre real desde la API si está vacío
-const u = getUser();
-if (u && !u.firstName) {
-  if (isAdmin()) {
-    adminsApi.me().then(res => {
-      if (res.data) {
-        updateStoredUser({
-          firstName:    res.data.firstName,
-          firstSurname: res.data.firstSurname,
-          email:        res.data.email,
-        });
-        paintUser();
-      }
-    }).catch(() => {});
-  } else {
-    studentsApi.me().then(res => {
-      if (res.data) {
-        updateStoredUser({
-          firstName:    res.data.firstName,
-          firstSurname: res.data.firstSurname,
-          email:        res.data.email,
-        });
-        paintUser();
-      }
-    }).catch(() => {});
-  }
-}
-
-// ── Competencias dinámicas ────────────────────────────────────────
-const COMP_COLORS: Record<string, { color: string; bg: string; key: string }> = {
-  'lectura':   { color: '#D41224', bg: '#FEE2E2', key: 'lc'  },
-  'cuantit':   { color: '#2563EB', bg: '#DBEAFE', key: 'rq'  },
-  'razon':     { color: '#2563EB', bg: '#DBEAFE', key: 'rq'  },
-  'ciudadan':  { color: '#059669', bg: '#D1FAE5', key: 'cc'  },
-  'escrit':    { color: '#7C3AED', bg: '#EDE9FE', key: 'ce'  },
-  'comunicac': { color: '#7C3AED', bg: '#EDE9FE', key: 'ce'  },
-  'ingl':      { color: '#D97706', bg: '#FEF3C7', key: 'en'  },
-};
-
-function getCompStyle(competenceId: string, competenceName?: string) {
-  // Buscar por nombre, no por ID (CPE001 no contiene ninguna keyword)
-  const n = (competenceName || competenceId).toLowerCase();
-  for (const [kw, style] of Object.entries(COMP_COLORS)) {
-    if (n.includes(kw)) return style;
-  }
-  return { color: '#6B7280', bg: '#F3F4F6', key: '' };
-}
-
-// Abreviaturas para el punto
-function getShort(name: string): string {
-  const n = name.toLowerCase();
-  if (n.includes('lectura'))   return 'LC';
-  if (n.includes('cuantit') || n.includes('razon')) return 'RC';
-  if (n.includes('ciudadan'))  return 'CC';
-  if (n.includes('escrit') || n.includes('comunicac')) return 'CE';
-  if (n.includes('ingl'))      return 'IN';
-  return name.slice(0, 2).toUpperCase();
-}
-if (!isAdmin()) {
-competencesApi.findAll(true).then(res => {
-  const listEl = document.getElementById('sb-competences-list');
-  if (!listEl || !res.data?.length) return;
-  listEl.innerHTML = '';
- 
-  res.data.forEach(comp => {
-    const s = getCompStyle(comp.competenceId, comp.competenceName);
- 
-    // ← CAMBIO CLAVE: usar ruta dinámica /tests/<key> en vez de /tests?c=<key>
-    const href = s.key ? `/tests/${s.key}` : `/tests`;
- 
-    const a = document.createElement('a');
-    a.href = href;
- 
-    a.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 10px;
-      color: var(--sidebar-text);
-      font-size: 0.875rem;
-      font-weight: 500;
-      border-radius: 9px;
-      text-decoration: none;
-      transition: all 0.15s;
-      cursor: pointer;
-      margin-bottom: 1px;
-      width: 100%;
-    `;
- 
-    // Resaltar si estamos en esa ruta
-    if (window.location.pathname === href || window.location.pathname.startsWith(href + '/')) {
-      a.style.background = 'var(--sidebar-active-bg)';
-      a.style.color      = 'var(--sidebar-active-txt)';
-      a.style.fontWeight = '600';
+    if (isAdmin()) {
+      document.getElementById('sb-admin-section')?.style.setProperty('display','block');
+    } else {
+      document.getElementById('sb-student-only')?.style.setProperty('display','block');
+      document.getElementById('sb-student-account')?.style.setProperty('display','block');
+      document.getElementById('sb-competences-section')?.style.setProperty('display','block');
     }
- 
-    // Punto de color
-    const dot = document.createElement('span');
-    dot.style.cssText = `
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: ${s.color};
-      flex-shrink: 0;
-      display: inline-block;
-    `;
- 
-    const label = document.createElement('span');
-    label.textContent = comp.competenceName;
-    label.style.cssText = `
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: 0.8125rem;
-    `;
- 
-    a.appendChild(dot);
-    a.appendChild(label);
- 
-    a.addEventListener('mouseenter', () => {
-      if (window.location.pathname !== href) {
-        a.style.background = 'var(--sidebar-hover-bg)';
-        a.style.color      = 'var(--sidebar-hover-txt)';
-      }
-    });
-    a.addEventListener('mouseleave', () => {
-      if (window.location.pathname !== href) {
-        a.style.background = '';
-        a.style.color      = 'var(--sidebar-text)';
-      }
-    });
- 
-    listEl.appendChild(a);
-  });
-}).catch(() => {
-  const listEl = document.getElementById('sb-competences-list');
-    if (listEl) listEl.innerHTML =
-      '<p style="font-size:0.75rem;color:var(--ui-text-text);padding:0 0.625rem;opacity:0.5">No disponible</p>';
-  });
-} else {
-  // Admin: oculta la sección completamente
-  const listEl = document.getElementById('sb-competences-list');
-  if (listEl) listEl.closest('span.sb-section')?.remove();
-  if (listEl) listEl.remove();
-}
-
-// ── Logout con modal ──────────────────────────────────────────────
-const logoutModal   = document.getElementById('logout-modal')!;
-const logoutCancel  = document.getElementById('logout-cancel')!;
-const logoutConfirm = document.getElementById('logout-confirm')!;
-
-document.getElementById('sb-logout')?.addEventListener('click', () => {
-  logoutModal.style.display = 'flex';
-});
-logoutCancel?.addEventListener('click', () => {
-  logoutModal.style.display = 'none';
-});
-logoutConfirm?.addEventListener('click', () => {
-  logoutModal.style.display = 'none';
-  // Mostrar loader antes de redirigir
-  if ((window as any).rpLoader) {
-    (window as any).rpLoader.show('Cerrando sesión...');
   }
-  // Pequeño delay para que se vea el loader
-  setTimeout(() => {
-    logout();
-  }, 400);
-});
-logoutModal?.addEventListener('click', (e) => {
-  if (e.target === logoutModal) logoutModal.style.display = 'none';
-});
 
-// ── Session watcher ───────────────────────────────────────────────
-const expiredModal = document.getElementById('session-expired-modal')!;
-initSessionWatcher(() => {
-  expiredModal.style.display = 'flex';
-});
+  paintUser();
 
-// ── Sidebar mobile ────────────────────────────────────────────────
-(window as any).__closeSidebar = () => {
-  document.getElementById('rp-sidebar')?.classList.remove('open');
-  document.getElementById('sidebar-overlay')?.classList.remove('visible');
-  document.body.style.overflow = '';
-};
-(window as any).__openSidebar = () => {
-  document.getElementById('rp-sidebar')?.classList.add('open');
-  document.getElementById('sidebar-overlay')?.classList.add('visible');
-  document.body.style.overflow = 'hidden';
-};
+  // Escuchar actualización de datos de usuario
+  window.addEventListener('rp:user-updated', () => paintUser());
+
+  // ── Cargar nombre real desde API ──────────────────────────────
+  const u = getUser();
+  if (u && !u.firstName) {
+    if (isAdmin()) {
+      adminsApi.me().then(res => {
+        if (res.data) {
+          updateStoredUser({
+            firstName: res.data.firstName, secondName: res.data.secondName,
+            firstSurname: res.data.firstSurname, secondSurname: res.data.secondSurname,
+            email: res.data.email,
+          });
+          paintUser();
+        }
+      }).catch(() => {});
+    } else {
+      studentsApi.me().then(res => {
+        if (res.data) {
+          updateStoredUser({
+            firstName: res.data.firstName, secondName: res.data.secondName,
+            firstSurname: res.data.firstSurname, secondSurname: res.data.secondSurname,
+            email: res.data.email,
+          });
+          paintUser();
+        }
+      }).catch(() => {});
+    }
+  }
+
+  // ── Competencias dinámicas (solo estudiantes) ─────────────────
+  if (!isAdmin()) {
+    const COMP_KEYWORDS: [string, { color: string; key: string }][] = [
+      ['lectura',   { color: '#D41224', key: 'lc' }],
+      ['cuantit',   { color: '#2563EB', key: 'rq' }],
+      ['razon',     { color: '#2563EB', key: 'rq' }],
+      ['ciudadan',  { color: '#059669', key: 'cc' }],
+      ['escrit',    { color: '#7C3AED', key: 'ce' }],
+      ['comunicac', { color: '#7C3AED', key: 'ce' }],
+      ['ingl',      { color: '#D97706', key: 'en' }],
+    ];
+    function getCompColor(name: string) {
+      const n = name.toLowerCase();
+      for (const [kw, s] of COMP_KEYWORDS) { if (n.includes(kw)) return s; }
+      return { color: '#6B7280', key: '' };
+    }
+
+    competencesApi.findAll(true).then(res => {
+      const listEl = document.getElementById('sb-competences-list');
+      if (!listEl || !res.data?.length) return;
+      listEl.innerHTML = '';
+      res.data.forEach(comp => {
+        const s    = getCompColor(comp.competenceName);
+        const href = s.key ? `/tests/${s.key}` : '/tests';
+        const a    = document.createElement('a');
+        a.href = href;
+        const isActive = window.location.pathname.startsWith(href);
+        a.style.cssText = `display:flex;align-items:center;gap:9px;padding:9px 10px;color:var(--sidebar-text);font-size:0.8125rem;font-weight:500;border-radius:9px;text-decoration:none;transition:all 0.15s;cursor:pointer;margin-bottom:1px;width:100%;${isActive ? 'background:var(--sidebar-active-bg);color:var(--sidebar-active-txt);font-weight:600;' : ''}`;
+        const dot = document.createElement('span');
+        dot.style.cssText = `width:7px;height:7px;border-radius:50%;background:${s.color};flex-shrink:0;display:inline-block;`;
+        const label = document.createElement('span');
+        label.textContent = comp.competenceName;
+        label.style.cssText = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:0.8125rem;';
+        a.appendChild(dot); a.appendChild(label);
+        a.addEventListener('mouseenter', () => { if (!isActive) { a.style.background='var(--sidebar-hover-bg)'; a.style.color='var(--sidebar-hover-txt)'; } });
+        a.addEventListener('mouseleave', () => { if (!isActive) { a.style.background=''; a.style.color='var(--sidebar-text)'; } });
+        listEl.appendChild(a);
+      });
+    }).catch(() => {
+      const listEl = document.getElementById('sb-competences-list');
+      if (listEl) listEl.innerHTML = '<p style="font-size:0.75rem;color:var(--ui-text-3);padding:0 0.625rem;opacity:0.5">No disponible</p>';
+    });
+  }
+
+  // ── Logout con modal ──────────────────────────────────────────
+  const logoutModal  = document.getElementById('logout-modal')!;
+  const logoutCancel = document.getElementById('logout-cancel')!;
+  const logoutConfirm = document.getElementById('logout-confirm')!;
+
+  document.getElementById('sb-logout')?.addEventListener('click', () => { logoutModal.style.display='flex'; });
+  logoutCancel?.addEventListener('click', () => { logoutModal.style.display='none'; });
+  logoutConfirm?.addEventListener('click', () => {
+    logoutModal.style.display='none';
+    (window as any).rpLoader?.show('Cerrando sesión...');
+    setTimeout(() => logout(), 400);
+  });
+  logoutModal?.addEventListener('click', e => { if (e.target===logoutModal) logoutModal.style.display='none'; });
+
+  // ── Session watcher ───────────────────────────────────────────
+  const expiredModal = document.getElementById('session-expired-modal')!;
+  initSessionWatcher(() => { expiredModal.style.display='flex'; });
+
+  // ── Mobile sidebar ────────────────────────────────────────────
+  (window as any).__closeSidebar = () => {
+    document.getElementById('rp-sidebar')?.classList.remove('open');
+    document.getElementById('sidebar-overlay')?.classList.remove('visible');
+    document.body.style.overflow = '';
+  };
+  (window as any).__openSidebar = () => {
+    document.getElementById('rp-sidebar')?.classList.add('open');
+    document.getElementById('sidebar-overlay')?.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  };
 </script>

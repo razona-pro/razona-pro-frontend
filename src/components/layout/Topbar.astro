@@ -1,50 +1,45 @@
 ---
 import { Icon } from 'astro-icon/components';
-
-interface Props {
-  currentPage?: string;
-}
+interface Props { currentPage?: string; }
 const { currentPage = '' } = Astro.props;
 ---
 
+<!-- Panel de notificaciones -->
+<div id="notif-panel" style="display:none;position:fixed;top:64px;right:1rem;width:340px;max-height:480px;background:var(--ui-card);border:1px solid var(--ui-border);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.15);z-index:200;overflow:hidden;animation:slideNotif 0.2s ease both">
+  <div style="padding:0.875rem 1rem;border-bottom:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between">
+    <h3 style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Notificaciones</h3>
+    <button id="notif-read-all" style="font-size:0.6875rem;font-weight:700;color:var(--brand);background:none;border:none;cursor:pointer;font-family:inherit">Marcar todo leído</button>
+  </div>
+  <div id="notif-list" style="overflow-y:auto;max-height:360px;padding:0.5rem"></div>
+  <div style="padding:0.625rem 1rem;border-top:1px solid var(--ui-border);text-align:center">
+    <span style="font-size:0.75rem;color:var(--ui-text-3)">Las notificaciones se eliminan automáticamente</span>
+  </div>
+</div>
+
 <header class="topbar">
   <!-- Hamburger -->
-  <button
-    class="topbar-hamburger"
-    onclick="window.__openSidebar && window.__openSidebar()"
-    aria-label="Abrir menú"
-  >
+  <button class="topbar-hamburger" onclick="window.__openSidebar && window.__openSidebar()" aria-label="Abrir menú">
     <Icon name="tabler:menu-2" size={18} />
   </button>
 
   <!-- Mobile logo -->
   <a href="/dashboard" class="topbar-mobile-logo">
-    <div class="topbar-logo-icon">
-      <Icon name="tabler:brain" size={16} />
-    </div>
+    <div class="topbar-logo-icon"><Icon name="tabler:brain" size={16} /></div>
     <span>Razona<strong>Pro</strong></span>
   </a>
 
   <!-- Search -->
   <div class="topbar-search" id="topbar-search">
     <Icon name="tabler:search" size={15} class="search-icon" />
-    <input
-      type="text"
-      id="global-search"
-      placeholder="Buscar tests, competencias..."
-      autocomplete="off"
-    />
+    <input type="text" id="global-search" placeholder="Buscar tests, competencias..." autocomplete="off" />
   </div>
 
   <!-- Right -->
   <div class="topbar-right">
-    <!-- Notifications placeholder -->
     <button class="topbar-icon-btn" id="notif-btn" title="Notificaciones" aria-label="Notificaciones">
       <Icon name="tabler:bell" size={17} />
-      <span class="notif-dot"></span>
+      <span class="notif-dot" id="notif-dot" style="display:none"></span>
     </button>
-
-    <!-- User chip -->
     <a href="/dashboard/profile" class="topbar-user" id="topbar-user">
       <div class="topbar-avatar" id="tb-avatar">?</div>
       <span class="topbar-name" id="tb-name">...</span>
@@ -54,153 +49,145 @@ const { currentPage = '' } = Astro.props;
 </header>
 
 <style>
-  .topbar {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1.5rem;
-    background: var(--ui-card);
-    border-bottom: 1px solid var(--ui-border);
-    flex-shrink: 0;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-
-  .topbar-hamburger {
-    display: none;
-    width: 38px; height: 38px;
-    background: var(--ui-surface);
-    border: 1.5px solid var(--ui-border);
-    border-radius: 10px;
-    align-items: center; justify-content: center;
-    cursor: pointer; color: var(--ui-text-2);
-    transition: all 0.2s; flex-shrink: 0;
-  }
-  .topbar-hamburger:hover { border-color: var(--brand); color: var(--brand); }
-
-  .topbar-mobile-logo {
-    display: none;
-    align-items: center; gap: 0.5rem;
-    text-decoration: none; flex-shrink: 0;
-    color: var(--ui-text-1); font-size: 0.9375rem;
-    font-weight: 700;
-  }
-  .topbar-mobile-logo strong { color: var(--brand); }
-  .topbar-logo-icon {
-    width: 30px; height: 30px;
-    background: linear-gradient(135deg, #D41224, #9B1F24);
-    border-radius: 8px; display: flex;
-    align-items: center; justify-content: center;
-    color: white;
-  }
-
-  .topbar-search {
-    flex: 1; max-width: 420px;
-    position: relative; display: flex; align-items: center;
-  }
-  .search-icon {
-    position: absolute; left: 0.8125rem;
-    color: var(--ui-text-3); pointer-events: none;
-  }
-  .topbar-search input {
-    width: 100%;
-    padding: 0.5625rem 1rem 0.5625rem 2.375rem;
-    background: var(--ui-surface);
-    border: 1.5px solid var(--ui-border);
-    border-radius: 12px;
-    font-size: 0.8125rem; color: var(--ui-text-1);
-    font-family: inherit; outline: none;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .topbar-search input::placeholder { color: var(--ui-text-3); }
-  .topbar-search input:focus {
-    border-color: var(--brand);
-    background: var(--ui-card);
-    box-shadow: 0 0 0 3px rgba(212,18,36,0.1);
-  }
-
-  .topbar-right {
-    margin-left: auto; display: flex; align-items: center; gap: 0.5rem;
-  }
-
-  .topbar-icon-btn {
-    width: 38px; height: 38px;
-    background: var(--ui-surface); border: 1.5px solid var(--ui-border);
-    border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: var(--ui-text-2);
-    position: relative; flex-shrink: 0; transition: all 0.2s;
-  }
-  .topbar-icon-btn:hover { border-color: var(--brand); color: var(--brand); }
-  .notif-dot {
-    position: absolute; top: 7px; right: 7px;
-    width: 7px; height: 7px;
-    background: var(--brand); border-radius: 50%;
-    border: 1.5px solid var(--ui-card);
-  }
-
-  .topbar-user {
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.3125rem 0.75rem 0.3125rem 0.3125rem;
-    background: var(--ui-surface); border: 1.5px solid var(--ui-border);
-    border-radius: 10px; text-decoration: none;
-    transition: border-color 0.2s; cursor: pointer;
-  }
-  .topbar-user:hover { border-color: var(--brand); }
-
-  .topbar-avatar {
-    width: 28px; height: 28px; border-radius: 7px;
-    background: linear-gradient(135deg, #D41224, #9B1F24);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 900; font-size: 0.6875rem;
-  }
-  .topbar-name {
-    font-size: 0.8125rem; font-weight: 700;
-    color: var(--ui-text-1); white-space: nowrap;
-  }
-  .topbar-badge {
-    font-size: 0.625rem; padding: 2px 8px;
-    border-radius: 20px; font-weight: 700; white-space: nowrap;
-  }
-
-  @media (max-width: 1023px) {
-    .topbar-hamburger { display: flex; }
-  }
-  @media (max-width: 768px) {
-    .topbar { padding: 0.75rem 1rem; }
-    .topbar-mobile-logo { display: flex; }
-    .topbar-search { display: none; }
-    .topbar-name, .topbar-badge { display: none; }
-  }
+  @keyframes slideNotif { from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)} }
+  .topbar { display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1.5rem;background:var(--ui-card);border-bottom:1px solid var(--ui-border);flex-shrink:0;position:sticky;top:0;z-index:50; }
+  .topbar-hamburger { display:none;width:38px;height:38px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:10px;align-items:center;justify-content:center;cursor:pointer;color:var(--ui-text-2);transition:all 0.2s;flex-shrink:0; }
+  .topbar-hamburger:hover { border-color:var(--brand);color:var(--brand); }
+  .topbar-mobile-logo { display:none;align-items:center;gap:0.5rem;text-decoration:none;flex-shrink:0;color:var(--ui-text-1);font-size:0.9375rem;font-weight:700; }
+  .topbar-mobile-logo strong { color:var(--brand); }
+  .topbar-logo-icon { width:30px;height:30px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white; }
+  .topbar-search { flex:1;max-width:420px;position:relative;display:flex;align-items:center; }
+  .search-icon { position:absolute;left:0.8125rem;color:var(--ui-text-3);pointer-events:none; }
+  .topbar-search input { width:100%;padding:0.5625rem 1rem 0.5625rem 2.375rem;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:12px;font-size:0.8125rem;color:var(--ui-text-1);font-family:inherit;outline:none;transition:border-color 0.2s,background 0.2s; }
+  .topbar-search input::placeholder { color:var(--ui-text-3); }
+  .topbar-search input:focus { border-color:var(--brand);background:var(--ui-card);box-shadow:0 0 0 3px rgba(212,18,36,0.1); }
+  .topbar-right { margin-left:auto;display:flex;align-items:center;gap:0.5rem; }
+  .topbar-icon-btn { width:38px;height:38px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ui-text-2);position:relative;flex-shrink:0;transition:all 0.2s; }
+  .topbar-icon-btn:hover { border-color:var(--brand);color:var(--brand); }
+  .notif-dot { position:absolute;top:7px;right:7px;width:8px;height:8px;background:var(--brand);border-radius:50%;border:1.5px solid var(--ui-card); }
+  .notif-count { position:absolute;top:5px;right:5px;min-width:16px;height:16px;background:var(--brand);border-radius:8px;border:1.5px solid var(--ui-card);font-size:9px;font-weight:800;color:white;display:flex;align-items:center;justify-content:center;padding:0 3px; }
+  .topbar-user { display:flex;align-items:center;gap:0.5rem;padding:0.3125rem 0.75rem 0.3125rem 0.3125rem;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:10px;text-decoration:none;transition:border-color 0.2s;cursor:pointer; }
+  .topbar-user:hover { border-color:var(--brand); }
+  .topbar-avatar { width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:0.6875rem; }
+  .topbar-name  { font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);white-space:nowrap; }
+  .topbar-badge { font-size:0.625rem;padding:2px 8px;border-radius:20px;font-weight:700;white-space:nowrap; }
+  @media(max-width:1023px) { .topbar-hamburger { display:flex; } }
+  @media(max-width:768px)  { .topbar{padding:0.75rem 1rem;} .topbar-mobile-logo{display:flex;} .topbar-search{display:none;} .topbar-name,.topbar-badge{display:none;} }
 </style>
 
 <script>
-  import { getUser, isAdmin } from '../../lib/auth';
+  import { getUser, isAdmin, getFullName, getInitials, updateStoredUser } from '../../lib/auth';
+  import { apiFetch } from '../../lib/api/client';
 
-  const user = getUser();
-  if (user) {
-    const initials = ((user.firstName[0] ?? '') + (user.firstSurname[0] ?? '')).toUpperCase();
-    // Nombre completo: "Juan Pérez"
-    const fullName = user.firstSurname
-      ? `${user.firstName} ${user.firstSurname}`
-      : user.firstName;
-
+  // ── Pintar usuario ──────────────────────────────────────────────
+  function paintTopbarUser() {
+    const user = getUser();
+    if (!user) return;
+    const initials = getInitials(user);
+    const fullName  = getFullName(user) || user.id;
     const avatarEl = document.getElementById('tb-avatar');
     const nameEl   = document.getElementById('tb-name');
-    const badgeEl  = document.getElementById('tb-badge') as HTMLElement;
-
+    const badgeEl  = document.getElementById('tb-badge') as HTMLElement | null;
     if (avatarEl) avatarEl.textContent = initials;
-    if (nameEl)   nameEl.textContent = fullName;   // <-- nombre completo
+    if (nameEl)   nameEl.textContent   = fullName;
     if (badgeEl) {
       if (isAdmin()) {
         badgeEl.textContent = 'Admin';
-        badgeEl.style.background = '#FEE2E2';
-        badgeEl.style.color = '#D41224';
+        badgeEl.style.background = '#FEE2E2'; badgeEl.style.color = '#D41224';
       } else {
         badgeEl.textContent = 'Estudiante';
-        badgeEl.style.background = 'var(--brand-pale)';
-        badgeEl.style.color = 'var(--brand)';
+        badgeEl.style.background = 'var(--brand-pale)'; badgeEl.style.color = 'var(--brand)';
       }
     }
   }
+  paintTopbarUser();
+
+  // Escuchar actualización de datos desde Sidebar
+  window.addEventListener('rp:user-updated', () => paintTopbarUser());
+
+  // ── Cargar contador de notificaciones ──────────────────────────
+  async function loadNotifCount() {
+    try {
+      const res = await apiFetch<{count: number}>('/api/notifications/unread-count');
+      const count  = res.data?.count ?? 0;
+      const dot    = document.getElementById('notif-dot')!;
+      const notifBtn = document.getElementById('notif-btn')!;
+      // Eliminar badge previo
+      notifBtn.querySelector('.notif-count')?.remove();
+      if (count > 0) {
+        dot.style.display = 'none';
+        const badge = document.createElement('span');
+        badge.className = 'notif-count';
+        badge.textContent = count > 9 ? '9+' : String(count);
+        notifBtn.appendChild(badge);
+      } else {
+        dot.style.display = 'none';
+      }
+    } catch {}
+  }
+  loadNotifCount();
+
+  // ── Panel de notificaciones ────────────────────────────────────
+  const panel    = document.getElementById('notif-panel')!;
+  const notifBtn = document.getElementById('notif-btn')!;
+
+  async function loadNotifications() {
+    const list = document.getElementById('notif-list')!;
+    list.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--ui-text-3);font-size:0.8125rem">Cargando...</div>';
+    try {
+      const res = await apiFetch<any>('/api/notifications?page=0&size=10');
+      const items: any[] = res.data?.content ?? [];
+      list.innerHTML = '';
+      if (!items.length) {
+        list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--ui-text-3);font-size:0.8125rem">Sin notificaciones</div>';
+        return;
+      }
+      items.forEach((n: any) => {
+        const div = document.createElement('div');
+        div.style.cssText = `display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;cursor:default;transition:background 0.15s;${!n.isRead ? 'background:rgba(212,18,36,0.04);' : ''}`;
+        div.onmouseenter = () => div.style.background = 'var(--ui-surface)';
+        div.onmouseleave = () => div.style.background = n.isRead ? '' : 'rgba(212,18,36,0.04)';
+        const dot = !n.isRead ? '<span style="width:7px;height:7px;border-radius:50%;background:var(--brand);flex-shrink:0;margin-top:5px"></span>' : '<span style="width:7px;height:7px;flex-shrink:0"></span>';
+        const date = new Date(n.createdAt).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' });
+        div.innerHTML = `${dot}<div style="flex:1;min-width:0"><p style="font-size:0.8125rem;font-weight:${n.isRead?'500':'700'};color:var(--ui-text-1);margin:0 0 2px">${n.title}</p><p style="font-size:0.6875rem;color:var(--ui-text-2);margin:0 0 2px;line-height:1.4">${n.body ?? ''}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">${date}</p></div>`;
+        if (!n.isRead) {
+          div.style.cursor = 'pointer';
+          div.addEventListener('click', async () => {
+            try {
+              await apiFetch(`/api/notifications/${n.notificationId}/read`, { method: 'PUT' });
+              div.style.background = '';
+              div.querySelector('span')!.style.background = 'transparent';
+              loadNotifCount();
+            } catch {}
+          });
+        }
+        list.appendChild(div);
+      });
+    } catch {
+      list.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--ui-text-3);font-size:0.8125rem">Error al cargar</div>';
+    }
+  }
+
+  let panelOpen = false;
+  notifBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    panelOpen = !panelOpen;
+    panel.style.display = panelOpen ? 'block' : 'none';
+    if (panelOpen) loadNotifications();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (panelOpen && !panel.contains(e.target as Node) && e.target !== notifBtn) {
+      panelOpen = false;
+      panel.style.display = 'none';
+    }
+  });
+
+  document.getElementById('notif-read-all')?.addEventListener('click', async () => {
+    try {
+      await apiFetch('/api/notifications/read-all', { method: 'PUT' });
+      loadNotifications();
+      loadNotifCount();
+    } catch {}
+  });
 </script>

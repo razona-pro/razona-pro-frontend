@@ -18,6 +18,7 @@ import { Icon } from 'astro-icon/components';
       <div style="flex:1;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;padding:0 0.75rem">
         <span id="exam-comp-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0;background:#FEE2E2;color:#D41224">...</span>
         <span id="exam-name" style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cargando...</span>
+        <span id="mode-badge" style="display:none;padding:2px 8px;border-radius:12px;font-size:0.625rem;font-weight:700;flex-shrink:0"></span>
       </div>
 
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -31,22 +32,17 @@ import { Icon } from 'astro-icon/components';
       </div>
     </header>
 
-    <!-- BODY -->
     <div class="exam-body">
-
-      <!-- Sidebar navegador -->
+      <!-- Sidebar -->
       <aside class="exam-sidebar">
         <div style="padding:1rem 0.875rem;display:flex;flex-direction:column;gap:1rem;height:100%">
           <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0">Preguntas</p>
-
           <div id="q-nav" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px"></div>
-
           <div style="display:flex;flex-direction:column;gap:4px">
             <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:#D1FAE5;border:1.5px solid #059669;flex-shrink:0"></span>Respondida</div>
             <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:var(--brand);flex-shrink:0"></span>Actual</div>
             <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:var(--ui-surface);border:1.5px solid var(--ui-border);flex-shrink:0"></span>Sin responder</div>
           </div>
-
           <div style="margin-top:auto">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <span style="font-size:0.625rem;font-weight:600;color:var(--ui-text-3)">Respondidas</span>
@@ -55,7 +51,7 @@ import { Icon } from 'astro-icon/components';
             <div style="height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;margin-bottom:1rem">
               <div id="sidebar-bar-fill" style="height:100%;background:linear-gradient(to right,var(--brand),#FF2D42);border-radius:3px;width:0%;transition:width 0.5s ease"></div>
             </div>
-            <button id="finish-btn" style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(212,18,36,0.28);display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.2s">
+            <button id="finish-btn" style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(212,18,36,0.28);display:flex;align-items:center;justify-content:center;gap:5px">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               Finalizar simulacro
             </button>
@@ -73,8 +69,7 @@ import { Icon } from 'astro-icon/components';
 
         <!-- Carta de pregunta -->
         <div id="question-card" style="display:none;max-width:760px;margin:0 auto;width:100%">
-
-          <!-- Barra de progreso -->
+          <!-- Progreso -->
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem">
             <div style="flex:1;height:5px;background:var(--ui-surface);border-radius:3px;overflow:hidden;border:1px solid var(--ui-border)">
               <div id="q-progress-fill" style="height:100%;border-radius:3px;background:linear-gradient(to right,var(--brand),#FF2D42);width:0%;transition:width 0.5s ease"></div>
@@ -82,13 +77,16 @@ import { Icon } from 'astro-icon/components';
             <span id="q-progress-label" style="font-size:0.75rem;font-weight:600;color:var(--ui-text-3);white-space:nowrap;flex-shrink:0">0 / 0</span>
           </div>
 
-          <!-- Cabecera de pregunta -->
+          <!-- Cabecera -->
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
             <span id="q-number-badge" style="font-size:0.6875rem;font-weight:800;color:var(--brand);background:var(--brand-pale);border:1.5px solid rgba(212,18,36,0.2);padding:3px 10px;border-radius:20px">P1</span>
-            <span id="q-comp-chip" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
+            <span id="q-comp-chip"  style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
             <span id="q-diff-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
-            <!-- Indicador de si ya respondió -->
             <span id="q-answered-badge" style="display:none;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#D1FAE5;color:#059669">✓ Respondida</span>
+            <!-- Botón reportar duda (solo estudiantes) -->
+            <button id="doubt-btn" style="display:none;margin-left:auto;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;border:1.5px solid #FDE68A;background:#FEF3C7;color:#92400E;cursor:pointer;font-family:inherit">
+              ⚠ Reportar duda
+            </button>
           </div>
 
           <!-- Enunciado -->
@@ -99,7 +97,22 @@ import { Icon } from 'astro-icon/components';
           <!-- Opciones -->
           <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.25rem"></div>
 
-          <!-- Nota: puedes cambiar tu respuesta antes de pasar -->
+          <!-- Hint section (solo PRACTICE con IA disponible) -->
+          <div id="hint-section" style="display:none;margin-bottom:1.125rem">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+              <span style="font-size:0.75rem;color:var(--ui-text-3);font-weight:600">💡 Pista IA:</span>
+              <button class="hbtn" data-level="1" type="button">Pista 1</button>
+              <button class="hbtn" data-level="2" type="button" disabled>Pista 2</button>
+              <button class="hbtn" data-level="3" type="button" disabled>Pista 3</button>
+            </div>
+            <div id="hint-box" style="display:none;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 14px">
+              <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0369A1;margin:0 0 5px">Orientación (no revela la respuesta)</p>
+              <p id="hint-text" style="font-size:0.875rem;color:#0C4A6E;margin:0;line-height:1.65"></p>
+              <div id="hint-loading" style="display:none;font-size:0.8125rem;color:#0369A1">Generando pista...</div>
+            </div>
+          </div>
+
+          <!-- Cambio de respuesta hint -->
           <div id="q-change-hint" style="display:none;padding:8px 12px;background:#FEF3C7;border-radius:8px;font-size:0.75rem;color:#92400E;margin-bottom:1rem;border:1px solid #FDE68A">
             💡 Puedes cambiar tu respuesta antes de pasar a la siguiente pregunta.
           </div>
@@ -107,18 +120,14 @@ import { Icon } from 'astro-icon/components';
           <!-- Navegación -->
           <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:0.25rem">
             <button id="btn-prev" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:var(--ui-card);border:1.5px solid var(--ui-border);color:var(--ui-text-2);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s" disabled>
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
-              Anterior
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg> Anterior
             </button>
-
             <span style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1)">
               <span id="mobile-q-num">1</span>
               <span style="color:var(--ui-text-3);font-weight:400"> / <span id="mobile-q-total">0</span></span>
             </span>
-
             <button id="btn-next" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1.125rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;border:none;font-family:inherit;font-size:0.8125rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(212,18,36,0.28);transition:all 0.15s">
-              Siguiente
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+              Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
             </button>
           </div>
         </div>
@@ -126,72 +135,60 @@ import { Icon } from 'astro-icon/components';
     </div>
   </div>
 
-  <!-- Modal resumen antes de finalizar -->
+  <!-- Modal resumen -->
   <div id="summary-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
-    <div style="background:var(--ui-card);border-radius:20px;padding:0;max-width:480px;width:calc(100% - 2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.35s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
-      <!-- Header -->
+    <div style="background:var(--ui-card);border-radius:20px;padding:0;max-width:480px;width:calc(100%-2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.35s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
       <div style="padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid var(--ui-border)">
         <h3 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0 0 4px">Resumen del simulacro</h3>
         <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Revisa tus respuestas antes de finalizar.</p>
       </div>
-
-      <!-- Stats rápidas -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:1.25rem 1.75rem">
-        <div style="text-align:center;background:var(--ui-surface);border-radius:10px;padding:12px 8px">
-          <p id="summary-total" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0">0</p>
-          <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Total</p>
-        </div>
-        <div style="text-align:center;background:#D1FAE5;border-radius:10px;padding:12px 8px">
-          <p id="summary-answered" style="font-size:1.5rem;font-weight:900;color:#059669;margin:0">0</p>
-          <p style="font-size:0.625rem;color:#059669;margin:0;text-transform:uppercase;letter-spacing:0.4px">Respondidas</p>
-        </div>
-        <div style="text-align:center;background:#FEF3C7;border-radius:10px;padding:12px 8px">
-          <p id="summary-pending" style="font-size:1.5rem;font-weight:900;color:#D97706;margin:0">0</p>
-          <p style="font-size:0.625rem;color:#D97706;margin:0;text-transform:uppercase;letter-spacing:0.4px">Sin responder</p>
-        </div>
+        <div style="text-align:center;background:var(--ui-surface);border-radius:10px;padding:12px 8px"><p id="summary-total" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Total</p></div>
+        <div style="text-align:center;background:#D1FAE5;border-radius:10px;padding:12px 8px"><p id="summary-answered" style="font-size:1.5rem;font-weight:900;color:#059669;margin:0">0</p><p style="font-size:0.625rem;color:#059669;margin:0;text-transform:uppercase;letter-spacing:0.4px">Respondidas</p></div>
+        <div style="text-align:center;background:#FEF3C7;border-radius:10px;padding:12px 8px"><p id="summary-pending" style="font-size:1.5rem;font-weight:900;color:#D97706;margin:0">0</p><p style="font-size:0.625rem;color:#D97706;margin:0;text-transform:uppercase;letter-spacing:0.4px">Sin responder</p></div>
       </div>
-
-      <!-- Lista de preguntas sin responder (si hay) -->
       <div id="summary-warnings" style="padding:0 1.75rem 1rem"></div>
-
-      <!-- Alerta si hay sin responder -->
       <div id="summary-alert" style="display:none;margin:0 1.75rem 1rem;padding:10px 14px;background:#FEF3C7;border-radius:10px;border:1px solid #FDE68A;font-size:0.875rem;color:#92400E">
-        ⚠️ Tienes preguntas sin responder. Puedes regresar a responderlas o finalizar con las que respondiste.
+        ⚠️ Tienes preguntas sin responder.
       </div>
-
-      <!-- Acciones -->
       <div style="padding:0 1.75rem 1.5rem;display:flex;gap:10px">
-        <button id="summary-back" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">← Regresar al test</button>
+        <button id="summary-back" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">← Regresar</button>
         <button id="summary-confirm" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)">Finalizar definitivamente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal reportar duda -->
+  <div id="doubt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:350;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+    <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:440px;width:calc(100%-2rem);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+      <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Reportar duda sobre esta pregunta</h3>
+      <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 1rem;line-height:1.5">Un administrador revisará tu reporte. Puedes continuar con el test.</p>
+      <div id="doubt-q-preview" style="background:var(--ui-surface);border-radius:8px;padding:10px 12px;margin-bottom:1rem;font-size:0.8125rem;color:var(--ui-text-2);border:1px solid var(--ui-border);max-height:80px;overflow:hidden;line-height:1.5"></div>
+      <textarea id="doubt-message" placeholder="Describe tu duda (opcional)..." style="width:100%;padding:10px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--ui-border)'"></textarea>
+      <div id="doubt-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 12px;font-size:0.8125rem;color:#B91C1C;margin-top:0.75rem"></div>
+      <div style="display:flex;gap:8px;margin-top:1rem">
+        <button id="doubt-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+        <button id="doubt-submit" style="flex:1;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,#D97706,#B45309);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Enviar reporte</button>
       </div>
     </div>
   </div>
 
   <!-- Resultados finales -->
   <div id="results-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
-    <div style="background:var(--ui-card);border-radius:24px;padding:2.5rem 2rem;max-width:440px;width:calc(100% - 2rem);text-align:center;animation:modalIn 0.4s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.25)">
+    <div style="background:var(--ui-card);border-radius:24px;padding:2.5rem 2rem;max-width:440px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.4s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.25)">
       <div id="result-icon-wrap" style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center"></div>
       <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.25rem">Tu puntaje</p>
       <p id="result-score" style="font-size:4.5rem;font-weight:900;margin:0;line-height:1;letter-spacing:-3px;color:var(--brand)">0</p>
       <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">/ 100 puntos</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-          <p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p>
-          <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Correctas</p>
-        </div>
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-          <p id="res-wrong" style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p>
-          <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Incorrectas</p>
-        </div>
-        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)">
-          <p id="res-time" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 2px">0</p>
-          <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Minutos</p>
-        </div>
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Correctas</p></div>
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-wrong"   style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Incorrectas</p></div>
+        <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-time"    style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Minutos</p></div>
       </div>
       <p id="result-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.65"></p>
       <div style="display:flex;gap:8px">
-        <a href="/tests" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem;transition:all 0.15s">Otro test</a>
-        <a id="btn-review" href="#" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem;box-shadow:0 3px 12px rgba(212,18,36,0.28)">Ver revisión</a>
+        <a href="/tests" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Otro test</a>
+        <a id="btn-review" href="#" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Ver revisión</a>
       </div>
       <a href="/dashboard" style="display:block;margin-top:10px;font-size:0.8125rem;color:var(--ui-text-3);text-decoration:none">Ir al dashboard →</a>
     </div>
@@ -205,100 +202,44 @@ import { Icon } from 'astro-icon/components';
   @keyframes selectPop { 0%{transform:scale(1)}40%{transform:scale(0.97)}100%{transform:scale(1)} }
   @keyframes timerPulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.03)} }
 
-  .exam-shell {
-    display: flex; flex-direction: column;
-    height: 100dvh; overflow: hidden;
-    background: var(--ui-bg-alt); font-family: 'Poppins', sans-serif;
-  }
-  .exam-header {
-    display: flex; align-items: center;
-    padding: 0 1.25rem; height: 56px;
-    background: var(--ui-card); border-bottom: 1px solid var(--ui-border);
-    flex-shrink: 0; gap: 0.5rem; z-index: 20;
-  }
-  .exam-body { display: flex; flex: 1; overflow: hidden; }
-  .exam-sidebar {
-    width: 200px; min-width: 200px;
-    background: var(--ui-card); border-right: 1px solid var(--ui-border);
-    overflow-y: auto; flex-shrink: 0;
-  }
-  .exam-main { flex: 1; overflow-y: auto; padding: 1.5rem 1.25rem; }
+  .exam-shell { display:flex;flex-direction:column;height:100dvh;overflow:hidden;background:var(--ui-bg-alt);font-family:'Poppins',sans-serif; }
+  .exam-header { display:flex;align-items:center;padding:0 1.25rem;height:56px;background:var(--ui-card);border-bottom:1px solid var(--ui-border);flex-shrink:0;gap:0.5rem;z-index:20; }
+  .exam-body { display:flex;flex:1;overflow:hidden; }
+  .exam-sidebar { width:200px;min-width:200px;background:var(--ui-card);border-right:1px solid var(--ui-border);overflow-y:auto;flex-shrink:0; }
+  .exam-main { flex:1;overflow-y:auto;padding:1.5rem 1.25rem; }
 
-  .q-nav-item {
-    width: 100%; aspect-ratio: 1/1; border-radius: 6px;
-    border: 1.5px solid var(--ui-border);
-    background: var(--ui-surface); color: var(--ui-text-3);
-    font-size: 0.625rem; font-weight: 700; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-family: inherit; transition: all 0.15s;
-  }
-  .q-nav-item:hover    { border-color: var(--brand); color: var(--brand); }
-  .q-nav-item.current  { background: var(--brand); border-color: var(--brand); color: white; }
-  .q-nav-item.answered { background: #D1FAE5; border-color: #059669; color: #059669; }
+  .q-nav-item { width:100%;aspect-ratio:1/1;border-radius:6px;border:1.5px solid var(--ui-border);background:var(--ui-surface);color:var(--ui-text-3);font-size:0.625rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all 0.15s; }
+  .q-nav-item:hover    { border-color:var(--brand);color:var(--brand); }
+  .q-nav-item.current  { background:var(--brand);border-color:var(--brand);color:white; }
+  .q-nav-item.answered { background:#D1FAE5;border-color:#059669;color:#059669; }
 
-  /* Opción de respuesta */
-  .exam-option {
-    display: flex; align-items: stretch; width: 100%;
-    background: var(--ui-card); border: 1.5px solid var(--ui-border);
-    border-radius: 12px; cursor: pointer;
-    transition: border-color 0.18s, background 0.18s, transform 0.18s, box-shadow 0.18s;
-    text-align: left; font-family: inherit; overflow: hidden;
-    animation: optSlide 0.25s ease both;
-  }
-  .exam-option:hover:not(.selected) {
-    border-color: var(--brand);
-    background: rgba(212,18,36,0.03);
-    transform: translateX(3px);
-    box-shadow: 0 3px 12px rgba(212,18,36,0.08);
-  }
-  /* Seleccionada */
-  .exam-option.selected {
-    border-color: var(--brand);
-    background: rgba(212,18,36,0.05);
-    animation: selectPop 0.25s ease;
-  }
-  .exam-option.selected .opt-letter-col {
-    background: var(--brand); border-right-color: rgba(212,18,36,0.3);
-  }
-  .exam-option.selected .opt-letter-badge {
-    background: rgba(255,255,255,0.25); border-color: transparent; color: white; font-weight: 900;
-  }
-  .exam-option.selected .opt-body-text {
-    color: var(--ui-text-1); font-weight: 600;
-  }
+  .exam-option { display:flex;align-items:stretch;width:100%;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:12px;cursor:pointer;transition:border-color 0.18s,background 0.18s,transform 0.18s,box-shadow 0.18s;text-align:left;font-family:inherit;overflow:hidden;animation:optSlide 0.25s ease both; }
+  .exam-option:hover:not(.selected) { border-color:var(--brand);background:rgba(212,18,36,0.03);transform:translateX(3px);box-shadow:0 3px 12px rgba(212,18,36,0.08); }
+  .exam-option.selected { border-color:var(--brand);background:rgba(212,18,36,0.05);animation:selectPop 0.25s ease; }
+  .exam-option.selected .opt-letter-col { background:var(--brand);border-right-color:rgba(212,18,36,0.3); }
+  .exam-option.selected .opt-letter-badge { background:rgba(255,255,255,0.25);border-color:transparent;color:white;font-weight:900; }
+  .exam-option.selected .opt-body-text { color:var(--ui-text-1);font-weight:600; }
+  .opt-letter-col { width:52px;min-width:52px;display:flex;align-items:center;justify-content:center;background:var(--ui-surface);border-right:1.5px solid var(--ui-border);transition:background 0.18s,border-color 0.18s;flex-shrink:0; }
+  .opt-letter-badge { width:28px;height:28px;border-radius:7px;border:1.5px solid var(--ui-border-2);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:var(--ui-text-2);background:var(--ui-card);transition:all 0.18s; }
+  .opt-body { flex:1;padding:0.9375rem 1rem;display:flex;align-items:center; }
+  .opt-body-text { font-size:0.9375rem;color:var(--ui-text-2);line-height:1.65;margin:0;transition:color 0.18s; }
 
-  .opt-letter-col {
-    width: 52px; min-width: 52px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--ui-surface); border-right: 1.5px solid var(--ui-border);
-    transition: background 0.18s, border-color 0.18s; flex-shrink: 0;
-  }
-  .opt-letter-badge {
-    width: 28px; height: 28px; border-radius: 7px;
-    border: 1.5px solid var(--ui-border-2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem; font-weight: 800; color: var(--ui-text-2);
-    background: var(--ui-card); transition: all 0.18s;
-  }
-  .opt-body { flex: 1; padding: 0.9375rem 1rem; display: flex; align-items: center; }
-  .opt-body-text { font-size: 0.9375rem; color: var(--ui-text-2); line-height: 1.65; margin: 0; transition: color 0.18s; }
+  .hbtn { padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;border:1.5px solid #BAE6FD;background:#F0F9FF;color:#0369A1;cursor:pointer;transition:all 0.15s;font-family:inherit; }
+  .hbtn:hover:not(:disabled) { background:#0369A1;color:white;border-color:#0369A1; }
+  .hbtn:disabled { opacity:0.35;cursor:not-allowed; }
 
-  .timer-danger {
-    background: #FEE2E2 !important; border-color: #FECACA !important; color: #DC2626 !important;
-    animation: timerPulse 1s ease-in-out infinite;
-  }
+  .timer-danger { background:#FEE2E2!important;border-color:#FECACA!important;color:#DC2626!important;animation:timerPulse 1s ease-in-out infinite; }
 
-  @media (max-width: 768px) {
-    .exam-sidebar { display: none; }
-    .exam-main    { padding: 1rem; }
-  }
+  @media(max-width:768px) { .exam-sidebar{display:none;} .exam-main{padding:1rem;} }
 </style>
 
 <script>
-  import { requireAuth }  from '../../lib/auth';
-  import { testsApi }     from '../../lib/api/tests.api';
-  import { triedsApi }    from '../../lib/api/trieds.api';
-  import type { QuestionDto } from '../../lib/api/types';
+  import { requireAuth, isStudent }   from '../../lib/auth';
+  import { testsApi }                 from '../../lib/api/tests.api';
+  import { triedsApi }                from '../../lib/api/trieds.api';
+  import { aiTriedsApi, aiHintApi }   from '../../lib/api/ai-trieds.api';
+  import { apiFetch }                 from '../../lib/api/client';
+  import type { QuestionDto, OptionDto } from '../../lib/api/types';
   import { getCompStyle, fmtTimer, scoreColor } from '../../lib/utils';
   import { toast } from '../../lib/toast';
 
@@ -308,98 +249,55 @@ import { Icon } from 'astro-icon/components';
   const triedId      = params.get('tried');
   const testId       = params.get('test');
   const competenceId = params.get('comp');
+  const testMode     = params.get('mode') ?? '';   // PRACTICE | EXAM | TIMED
 
   if (!triedId || !testId || !competenceId) {
     window.location.replace('/tests');
     throw new Error('Missing params');
   }
 
-  // Estado del examen
+  // ── Estado ───────────────────────────────────────────────────────────
   let questions:    QuestionDto[] = [];
-  // answers: Map questionId -> optionId (solo lo que el estudiante ha seleccionado en esta sesión)
   let answers:      Record<string, string> = {};
-  // submittedAnswers: las que ya se enviaron al backend
-  let submitted:    Set<string> = new Set();
   let currentIdx    = 0;
   let startTime     = Date.now();
   let timerInt:     ReturnType<typeof setInterval> | null = null;
   let examFinished  = false;
   let durationSecs  = 0;
+  let aiHintsAvail  = false;
+  let currentQuestionId = '';
 
-  const DIFF_LABEL: Record<string, string> = { B: 'Básico · 1pt', M: 'Medio · 3pts', A: 'Alto · 5pts' };
-  const DIFF_COLOR: Record<string, string> = { B: '#059669', M: '#D97706', A: '#D41224' };
-  const DIFF_BG:    Record<string, string> = { B: '#D1FAE5', M: '#FEF3C7', A: '#FEE2E2' };
-  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+  // Caché de orden de opciones (para que no cambie al navegar)
+  const optionOrderCache = new Map<string, OptionDto[]>();
+  // Caché de pistas
+  const hintCache = new Map<string, Map<number, string>>();
+  // IDs de preguntas presentadas (para el review)
+  let presentedQuestionIds: string[] = [];
+
+  const DIFF_LABEL: Record<string, string> = { B:'Básico · 1pt', M:'Medio · 3pts', A:'Alto · 5pts' };
+  const DIFF_COLOR: Record<string, string> = { B:'#059669', M:'#D97706', A:'#D41224' };
+  const DIFF_BG:    Record<string, string> = { B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
+  const LETTERS = ['A','B','C','D','E','F'];
 
   function renderText(el: HTMLElement, raw: string) {
     el.innerHTML = '';
-    const lines = raw.replace(/\\n/g, '\n').split('\n');
+    const lines = (raw || '').replace(/\\n/g, '\n').split('\n');
     lines.forEach((line, i) => {
       if (i > 0) el.appendChild(document.createElement('br'));
       if (line.trim()) el.appendChild(document.createTextNode(line));
     });
   }
 
-  async function init() {
-    try {
-      const [testRes, questionsRes] = await Promise.all([
-        testsApi.findById(testId!, competenceId!),
-        testsApi.getQuestions(testId!, competenceId!),
-      ]);
-
-      const test = testRes.data;
-      questions  = questionsRes.data ?? [];
-
-      if (!test || questions.length === 0) {
-        toast.error('Error al cargar el test');
-        window.location.replace('/tests');
-        return;
-      }
-
-      durationSecs = test.durationSeconds;
-
-      // Header
-      const s = getCompStyle(competenceId!, test.competenceName ?? '');
-      const badgeEl = document.getElementById('exam-comp-badge')!;
-      const nameEl  = document.getElementById('exam-name')!;
-      badgeEl.textContent = test.competenceName ?? competenceId!;
-      badgeEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0`;
-      nameEl.textContent = test.testName;
-
-      const mobileTotal = document.getElementById('mobile-q-total');
-      if (mobileTotal) mobileTotal.textContent = String(questions.length);
-
-      // Timer
-      let remaining = durationSecs;
-      updateTimer(remaining);
-      timerInt = setInterval(() => {
-        remaining--;
-        updateTimer(remaining);
-        if (remaining <= 60) document.getElementById('timer-wrap')?.classList.add('timer-danger');
-        if (remaining <= 0) {
-          clearInterval(timerInt!);
-          toast.warning('¡Tiempo agotado!');
-          finishExam(true);
-        }
-      }, 1000);
-
-      buildQNav();
-      document.getElementById('exam-loading')!.style.display = 'none';
-      document.getElementById('question-card')!.style.display = 'block';
-      renderQuestion(0);
-
-    } catch (err: any) {
-      toast.error('Error al cargar el simulacro', { description: err?.message });
-      window.location.replace('/tests');
+  // Obtener opciones en orden aleatorio (cacheado por pregunta)
+  function getShuffledOptions(q: QuestionDto): OptionDto[] {
+    if (!optionOrderCache.has(q.questionId)) {
+      const shuffled = [...(q.options ?? [])].sort(() => Math.random() - 0.5);
+      optionOrderCache.set(q.questionId, shuffled);
     }
+    return optionOrderCache.get(q.questionId)!;
   }
 
-  function updateTimer(secs: number) {
-    const el = document.getElementById('timer-display');
-    if (el) el.textContent = fmtTimer(secs);
-  }
-
-  // ── Navegador de preguntas ────────────────────────────────────────────
+  // ── Nav de preguntas ──────────────────────────────────────────────────
   function buildQNav() {
     const nav = document.getElementById('q-nav')!;
     nav.innerHTML = '';
@@ -418,11 +316,9 @@ import { Icon } from 'astro-icon/components';
       if (i === currentIdx) btn.classList.add('current');
       else if (answers[questions[i].questionId]) btn.classList.add('answered');
     });
-
     const answered = Object.keys(answers).length;
     const total    = questions.length;
     const pct      = total > 0 ? Math.round((answered / total) * 100) : 0;
-
     const sBar  = document.getElementById('sidebar-bar-fill');
     const sPct  = document.getElementById('sidebar-pct');
     const mFill = document.getElementById('q-progress-fill');
@@ -438,12 +334,11 @@ import { Icon } from 'astro-icon/components';
     currentIdx = idx;
     const q = questions[idx];
     if (!q) return;
+    currentQuestionId = q.questionId;
 
     const s = getCompStyle(competenceId!, '');
-
     const numBadge = document.getElementById('q-number-badge');
     if (numBadge) numBadge.textContent = `P${idx + 1}`;
-
     const mobileNum = document.getElementById('mobile-q-num');
     if (mobileNum) mobileNum.textContent = String(idx + 1);
 
@@ -455,167 +350,236 @@ import { Icon } from 'astro-icon/components';
     diffEl.textContent = DIFF_LABEL[q.difficultyLevel] ?? q.difficultyLevel;
     diffEl.style.cssText = `background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
 
-    // Badge "ya respondida"
     const answeredBadge = document.getElementById('q-answered-badge')!;
     const changeHint    = document.getElementById('q-change-hint')!;
     if (answers[q.questionId]) {
-      answeredBadge.style.display = 'inline';
-      changeHint.style.display    = 'block';
+      answeredBadge.style.display = 'inline'; changeHint.style.display = 'block';
     } else {
-      answeredBadge.style.display = 'none';
-      changeHint.style.display    = 'none';
+      answeredBadge.style.display = 'none';   changeHint.style.display = 'none';
     }
 
     const stmtEl = document.getElementById('q-statement')!;
     renderText(stmtEl, q.statement);
 
-    // Opciones — SIEMPRE habilitadas para permitir cambio de respuesta
-    const optsEl = document.getElementById('q-options')!;
-    optsEl.innerHTML = '';
+    // Opciones en orden aleatorio (cacheado)
+    const optsEl      = document.getElementById('q-options')!;
+    optsEl.innerHTML  = '';
+    const shuffled    = getShuffledOptions(q);
     const selectedOpt = answers[q.questionId];
 
-    (q.options ?? []).forEach((opt, i) => {
+    shuffled.forEach((opt, i) => {
       const btn = document.createElement('button');
       btn.className = `exam-option${selectedOpt === opt.optionId ? ' selected' : ''}`;
       btn.style.animationDelay = `${i * 0.045}s`;
-      // NO disabled — siempre pueden cambiar mientras el test está en progreso
-
       const letterCol = document.createElement('div');
       letterCol.className = 'opt-letter-col';
       const letterBadge = document.createElement('span');
       letterBadge.className = 'opt-letter-badge';
       letterBadge.textContent = LETTERS[i] ?? String(i + 1);
       letterCol.appendChild(letterBadge);
-
       const body = document.createElement('div');
       body.className = 'opt-body';
       const textP = document.createElement('p');
       textP.className = 'opt-body-text';
       renderText(textP, opt.optionText);
       body.appendChild(textP);
-
       btn.appendChild(letterCol);
       btn.appendChild(body);
       btn.addEventListener('click', () => selectAnswer(q.questionId, opt.optionId, idx));
       optsEl.appendChild(btn);
     });
 
-    // Botones de navegación
+    // Pistas IA (solo PRACTICE con IA disponible)
+    const hintSection = document.getElementById('hint-section')!;
+    if (aiHintsAvail && testMode === 'PRACTICE') {
+      hintSection.style.display = 'block';
+      const qHints = hintCache.get(q.questionId) ?? new Map<number, string>();
+      const maxUsed = qHints.size;
+      document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
+        const lvl = Number(btn.dataset.level);
+        btn.disabled = lvl > maxUsed + 1;
+      });
+      const hintBox = document.getElementById('hint-box')!;
+      const hintText = document.getElementById('hint-text')!;
+      if (qHints.size > 0) {
+        const latestLvl = Math.max(...qHints.keys());
+        hintBox.style.display = 'block'; hintText.textContent = qHints.get(latestLvl)!;
+      } else {
+        hintBox.style.display = 'none'; hintText.textContent = '';
+      }
+    } else {
+      hintSection.style.display = 'none';
+    }
+
+    // Botón reportar duda
+    const doubtBtn = document.getElementById('doubt-btn')!;
+    doubtBtn.style.display = isStudent() ? 'inline' : 'none';
+
+    // Botones nav
     const prevBtn = document.getElementById('btn-prev') as HTMLButtonElement;
     const nextBtn = document.getElementById('btn-next') as HTMLButtonElement;
     prevBtn.disabled = idx === 0;
     prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
-
     const isLast = idx === questions.length - 1;
     if (isLast) {
-      nextBtn.style.background = 'linear-gradient(135deg, #059669, #047857)';
+      nextBtn.style.background = 'linear-gradient(135deg,#059669,#047857)';
       nextBtn.style.boxShadow  = '0 3px 10px rgba(5,150,105,0.28)';
-      nextBtn.innerHTML = `
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Finalizar`;
+      nextBtn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Finalizar`;
     } else {
-      nextBtn.style.background = 'linear-gradient(135deg, var(--brand), var(--brand-dark))';
+      nextBtn.style.background = 'linear-gradient(135deg,var(--brand),var(--brand-dark))';
       nextBtn.style.boxShadow  = '0 3px 10px rgba(212,18,36,0.28)';
-      nextBtn.innerHTML = `Siguiente
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>`;
+      nextBtn.innerHTML = `Siguiente <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>`;
     }
-
     updateQNav();
   }
 
-  // ── Seleccionar respuesta — envía al backend ──────────────────────────
+  // ── Seleccionar respuesta ─────────────────────────────────────────────
   async function selectAnswer(questionId: string, optionId: string, qIdx: number) {
-    // Actualizar estado local inmediatamente (UX instantánea)
     answers[questionId] = optionId;
-
-    // Re-renderizar opciones para mostrar la seleccionada
     const q = questions[qIdx];
+    const shuffled = getShuffledOptions(q);
     const optsEl = document.getElementById('q-options')!;
     optsEl.querySelectorAll<HTMLElement>('.exam-option').forEach((btn, i) => {
-      const opt = q.options?.[i];
-      if (opt?.optionId === optionId) btn.classList.add('selected');
+      if (shuffled[i]?.optionId === optionId) btn.classList.add('selected');
       else btn.classList.remove('selected');
     });
-
-    // Mostrar badge y hint
     const answeredBadge = document.getElementById('q-answered-badge')!;
     const changeHint    = document.getElementById('q-change-hint')!;
-    answeredBadge.style.display = 'inline';
-    changeHint.style.display    = 'block';
-
+    answeredBadge.style.display = 'inline'; changeHint.style.display = 'block';
     updateQNav();
-
-    // Enviar al backend (puede ser UPDATE si ya respondió)
     try {
       await triedsApi.submitAnswer(triedId!, questionId, optionId);
-      submitted.add(questionId);
     } catch (err: any) {
       toast.error('Error al guardar respuesta', { description: err?.message });
     }
   }
 
-  // ── Navegación ────────────────────────────────────────────────────────
-  document.getElementById('btn-prev')?.addEventListener('click', () => {
-    if (currentIdx > 0) renderQuestion(currentIdx - 1);
+  // ── Pistas IA ─────────────────────────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const q     = questions[currentIdx];
+      if (!q) return;
+      const level = Number(btn.dataset.level);
+      const qHints    = hintCache.get(q.questionId) ?? new Map<number, string>();
+      const hintBox   = document.getElementById('hint-box')!;
+      const hintText  = document.getElementById('hint-text')!;
+      const loading   = document.getElementById('hint-loading')!;
+      if (qHints.has(level)) {
+        hintBox.style.display = 'block'; hintText.textContent = qHints.get(level)!;
+        return;
+      }
+      hintBox.style.display = 'block'; hintText.textContent = '';
+      loading.style.display = 'block'; btn.disabled = true;
+      try {
+        const res  = await aiHintApi.getHint(competenceId!, q.questionId, level);
+        const text = res.data!.hint;
+        qHints.set(level, text);
+        hintCache.set(q.questionId, qHints);
+        hintText.textContent = text;
+        const nextBtn = document.querySelector<HTMLButtonElement>(`.hbtn[data-level="${level + 1}"]`);
+        if (nextBtn && level < 3) nextBtn.disabled = false;
+      } catch (err: any) {
+        hintText.textContent = 'No se pudo obtener la pista.';
+      } finally {
+        loading.style.display = 'none'; btn.disabled = false;
+      }
+    });
   });
 
-  document.getElementById('btn-next')?.addEventListener('click', () => {
-    if (currentIdx < questions.length - 1) {
-      renderQuestion(currentIdx + 1);
-    } else {
-      openSummaryModal();
+  // ── Reportar duda ─────────────────────────────────────────────────────
+  document.getElementById('doubt-btn')?.addEventListener('click', () => {
+    const q = questions[currentIdx];
+    if (!q) return;
+    const preview = document.getElementById('doubt-q-preview')!;
+    preview.textContent = q.statement.substring(0, 120) + (q.statement.length > 120 ? '...' : '');
+    (document.getElementById('doubt-message') as HTMLTextAreaElement).value = '';
+    (document.getElementById('doubt-error') as HTMLElement).style.display = 'none';
+    (document.getElementById('doubt-modal') as HTMLElement).style.display = 'flex';
+  });
+
+  document.getElementById('doubt-cancel')?.addEventListener('click', () => {
+    (document.getElementById('doubt-modal') as HTMLElement).style.display = 'none';
+  });
+
+  document.getElementById('doubt-submit')?.addEventListener('click', async () => {
+    const q       = questions[currentIdx];
+    const message = (document.getElementById('doubt-message') as HTMLTextAreaElement).value.trim();
+    const errEl   = document.getElementById('doubt-error')!;
+    const btn     = document.getElementById('doubt-submit') as HTMLButtonElement;
+    errEl.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    try {
+      await apiFetch('/api/doubts', {
+        method: 'POST',
+        body: JSON.stringify({
+          source:       'STATIC',
+          competenceId: competenceId,
+          questionId:   q.questionId,
+          message:      message || undefined,
+        }),
+      });
+      toast.success('Duda reportada', { description: 'Un admin la revisará.' });
+      (document.getElementById('doubt-modal') as HTMLElement).style.display = 'none';
+    } catch (err: any) {
+      errEl.textContent = err?.message ?? 'Error al enviar'; errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Enviar reporte';
     }
   });
 
-  document.getElementById('finish-btn')?.addEventListener('click', openSummaryModal);
+  document.getElementById('doubt-modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('doubt-modal'))
+      (document.getElementById('doubt-modal') as HTMLElement).style.display = 'none';
+  });
 
+  // ── Timer ─────────────────────────────────────────────────────────────
+  function updateTimer(secs: number) {
+    const el = document.getElementById('timer-display');
+    if (el) el.textContent = fmtTimer(secs);
+  }
+
+  // ── Nav ───────────────────────────────────────────────────────────────
+  document.getElementById('btn-prev')?.addEventListener('click', () => {
+    if (currentIdx > 0) renderQuestion(currentIdx - 1);
+  });
+  document.getElementById('btn-next')?.addEventListener('click', () => {
+    if (currentIdx < questions.length - 1) renderQuestion(currentIdx + 1);
+    else openSummaryModal();
+  });
+  document.getElementById('finish-btn')?.addEventListener('click', openSummaryModal);
   document.getElementById('abandon-btn')?.addEventListener('click', () => {
-    if (confirm('¿Seguro que quieres abandonar? Tu progreso se perderá.')) finishExam(true);
+    if (confirm('¿Seguro que quieres abandonar?')) finishExam(true);
   });
 
   // ── Modal resumen ─────────────────────────────────────────────────────
   function openSummaryModal() {
-    const answered  = Object.keys(answers).length;
-    const total     = questions.length;
-    const pending   = total - answered;
-
+    const answered = Object.keys(answers).length;
+    const total    = questions.length;
+    const pending  = total - answered;
     (document.getElementById('summary-total')    as HTMLElement).textContent = String(total);
     (document.getElementById('summary-answered') as HTMLElement).textContent = String(answered);
     (document.getElementById('summary-pending')  as HTMLElement).textContent = String(pending);
-
-    const alertEl = document.getElementById('summary-alert')!;
-    alertEl.style.display = pending > 0 ? 'block' : 'none';
-
-    // Lista de preguntas sin responder
+    (document.getElementById('summary-alert') as HTMLElement).style.display = pending > 0 ? 'block' : 'none';
     const warningsEl = document.getElementById('summary-warnings')!;
     warningsEl.innerHTML = '';
     if (pending > 0) {
-      const unanswered = questions
-        .map((q, i) => ({ q, i }))
-        .filter(({ q }) => !answers[q.questionId]);
-
-      const div = document.createElement('div');
-      div.style.cssText = 'padding:0 0 0.5rem;display:flex;flex-wrap:wrap;gap:6px;align-items:center';
-      const label = document.createElement('span');
-      label.style.cssText = 'font-size:0.75rem;color:var(--ui-text-3);width:100%';
-      label.textContent = `Preguntas sin responder: ${unanswered.map(({i}) => i + 1).join(', ')}`;
-      div.appendChild(label);
-      warningsEl.appendChild(div);
+      const unanswered = questions.map((q,i)=>({q,i})).filter(({q})=>!answers[q.questionId]);
+      const p = document.createElement('p');
+      p.style.cssText = 'font-size:0.75rem;color:var(--ui-text-3);padding:0 0 0.5rem';
+      p.textContent = `Sin responder: preguntas ${unanswered.map(({i})=>i+1).join(', ')}`;
+      warningsEl.appendChild(p);
     }
-
-    document.getElementById('summary-modal')!.style.display = 'flex';
+    (document.getElementById('summary-modal') as HTMLElement).style.display = 'flex';
   }
-
   document.getElementById('summary-back')?.addEventListener('click', () => {
-    document.getElementById('summary-modal')!.style.display = 'none';
+    (document.getElementById('summary-modal') as HTMLElement).style.display = 'none';
   });
-
   document.getElementById('summary-confirm')?.addEventListener('click', () => {
-    document.getElementById('summary-modal')!.style.display = 'none';
+    (document.getElementById('summary-modal') as HTMLElement).style.display = 'none';
     finishExam(false);
   });
 
-  // ── Finalizar examen ──────────────────────────────────────────────────
+  // ── Finalizar ─────────────────────────────────────────────────────────
   async function finishExam(_timedOut = false) {
     if (examFinished) return;
     examFinished = true;
@@ -623,46 +587,31 @@ import { Icon } from 'astro-icon/components';
     const elapsed = Math.round((Date.now() - startTime) / 1000);
     try {
       const res = await triedsApi.finish(triedId!, elapsed);
-      if (res.data) {
-        showResults(
-          res.data.score ?? 0,
-          res.data.correctAnswers ?? 0,
-          elapsed,
-          res.data.totalQuestions
-        );
-      }
+      if (res.data) showResults(res.data.score ?? 0, res.data.correctAnswers ?? 0, elapsed, res.data.totalQuestions);
     } catch {
       showResults(0, 0, elapsed, questions.length);
     }
   }
 
   function showResults(score: number, correct: number, elapsed: number, total: number) {
-    const sc       = scoreColor(score);
+    const sc = scoreColor(score);
     const iconWrap = document.getElementById('result-icon-wrap')!;
-    const scoreEl  = document.getElementById('result-score')!;
-
     iconWrap.style.background = score >= 60 ? '#D1FAE5' : score >= 40 ? '#FEF3C7' : '#FEE2E2';
     iconWrap.innerHTML = score >= 60
       ? `<svg width="38" height="38" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`
-      : `<svg width="38" height="38" fill="none" stroke="${score >= 40 ? '#D97706' : '#DC2626'}" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>`;
-
+      : `<svg width="38" height="38" fill="none" stroke="${score >= 40 ? '#D97706' : '#DC2626'}" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`;
+    const scoreEl = document.getElementById('result-score')!;
     scoreEl.style.color = sc;
-    document.getElementById('res-correct')!.textContent = String(correct);
-    document.getElementById('res-wrong')!.textContent   = String(total - correct);
-    document.getElementById('res-time')!.textContent    = String(Math.round(elapsed / 60));
-    document.getElementById('result-msg')!.textContent  = score >= 80
-      ? '¡Excelente desempeño! Estás muy bien preparado para el Saber Pro.'
-      : score >= 60
-      ? '¡Buen trabajo! Sigue practicando para alcanzar la excelencia.'
-      : '¡No te rindas! Revisa las competencias y vuelve a intentarlo.';
-
-    // Link a review
+    (document.getElementById('res-correct') as HTMLElement).textContent = String(correct);
+    (document.getElementById('res-wrong')   as HTMLElement).textContent = String(total - correct);
+    (document.getElementById('res-time')    as HTMLElement).textContent = String(Math.round(elapsed / 60));
+    (document.getElementById('result-msg')  as HTMLElement).textContent = score >= 80
+      ? '¡Excelente! Estás muy bien preparado.' : score >= 60
+      ? '¡Buen trabajo! Sigue practicando.' : '¡Ánimo! Revisa los temas y vuelve a intentarlo.';
     const reviewBtn = document.getElementById('btn-review') as HTMLAnchorElement;
     if (reviewBtn) reviewBtn.href = `/tests/review/${triedId}`;
-
-    document.getElementById('results-overlay')!.style.display = 'flex';
-
-    // Animar puntaje
+    (document.getElementById('results-overlay') as HTMLElement).style.display = 'flex';
+    // Animar score
     let n = 0;
     scoreEl.textContent = '0';
     const step = Math.max(1, Math.floor(score / 60));
@@ -671,6 +620,108 @@ import { Icon } from 'astro-icon/components';
       scoreEl.textContent = n.toFixed(0);
       if (n >= score) clearInterval(intv);
     }, 20);
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────
+  async function init() {
+    // Anti-fraude en modos EXAM y TIMED
+    if (testMode === 'EXAM' || testMode === 'TIMED') {
+      document.body.classList.add('exam-antifraud');
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if ((e.ctrlKey && ['c','a','u','s'].includes(e.key.toLowerCase())) || e.key === 'F12')
+          e.preventDefault();
+      });
+      let tabWarnings = 0;
+      const showTabWarning = (count: number) => {
+        document.querySelector('.tab-warning-banner')?.remove();
+        const banner = document.createElement('div');
+        banner.className = 'tab-warning-banner';
+        banner.textContent = `Advertencia ${count}/3: No debes salir de la ventana del examen.`;
+        banner.style.background = count >= 3 ? '#DC2626' : '#D97706';
+        document.body.prepend(banner);
+        setTimeout(() => banner.remove(), 5000);
+      };
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') return;
+        tabWarnings++; showTabWarning(tabWarnings);
+      });
+      window.addEventListener('blur', () => { tabWarnings++; showTabWarning(tabWarnings); });
+    }
+
+    // Verificar disponibilidad de IA para hints en PRACTICE
+    if (testMode === 'PRACTICE') {
+      try {
+        const s = await aiTriedsApi.status();
+        aiHintsAvail = !!(s.data?.enabled && s.data?.reachable);
+      } catch {}
+    }
+
+    // Mode badge en header
+    const modeConfig: Record<string, {label:string;bg:string;color:string}> = {
+      PRACTICE: { label:'Práctica',     bg:'#D1FAE5', color:'#059669' },
+      EXAM:     { label:'Examen',       bg:'#DBEAFE', color:'#2563EB' },
+      TIMED:    { label:'Cronometrado', bg:'#FEF3C7', color:'#D97706' },
+    };
+    const mc = modeConfig[testMode];
+    if (mc) {
+      const modeBadge = document.getElementById('mode-badge')!;
+      modeBadge.textContent = mc.label;
+      modeBadge.style.cssText = `padding:2px 8px;border-radius:12px;font-size:0.625rem;font-weight:700;flex-shrink:0;display:inline;background:${mc.bg};color:${mc.color}`;
+    }
+
+    try {
+      const [testRes, questionsRes] = await Promise.all([
+        testsApi.findById(testId!, competenceId!),
+        testsApi.getQuestions(testId!, competenceId!),
+      ]);
+
+      const test = testRes.data;
+      questions  = questionsRes.data ?? [];
+
+      if (!test || questions.length === 0) {
+        toast.error('Error al cargar el test');
+        window.location.replace('/tests');
+        return;
+      }
+
+      // Guardar IDs de preguntas presentadas para el review
+      presentedQuestionIds = questions.map(q => q.questionId);
+      sessionStorage.setItem(`rp_exam_${triedId}`, JSON.stringify(presentedQuestionIds));
+
+      durationSecs = test.durationSeconds;
+
+      // Header
+      const s = getCompStyle(competenceId!, test.competenceName ?? '');
+      const badgeEl = document.getElementById('exam-comp-badge')!;
+      badgeEl.textContent = test.competenceName ?? competenceId!;
+      badgeEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0`;
+      (document.getElementById('exam-name') as HTMLElement).textContent = test.testName;
+      (document.getElementById('mobile-q-total') as HTMLElement).textContent = String(questions.length);
+
+      // Timer
+      let remaining = durationSecs;
+      updateTimer(remaining);
+      timerInt = setInterval(() => {
+        remaining--;
+        updateTimer(remaining);
+        if (remaining <= 60) document.getElementById('timer-wrap')?.classList.add('timer-danger');
+        if (remaining <= 0) {
+          clearInterval(timerInt!);
+          toast.warning('¡Tiempo agotado!');
+          finishExam(true);
+        }
+      }, 1000);
+
+      buildQNav();
+      (document.getElementById('exam-loading') as HTMLElement).style.display  = 'none';
+      (document.getElementById('question-card') as HTMLElement).style.display = 'block';
+      renderQuestion(0);
+
+    } catch (err: any) {
+      toast.error('Error al cargar el simulacro', { description: err?.message });
+      window.location.replace('/tests');
+    }
   }
 
   init();
