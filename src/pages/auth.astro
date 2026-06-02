@@ -249,15 +249,27 @@ import { Icon } from 'astro-icon/components';
     --auth-red-dark: #9B1F24;
   }
 
+  /* ── FONDO ─────────────────────────────────────────────── */
   .auth-bg {
     position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
     background: var(--ui-bg-alt);
-    transition: background 0.25s;
   }
   .auth-orb { position: absolute; border-radius: 50%; opacity: 0.07; background: var(--auth-red); }
-  .auth-orb.orb-1 { width: 550px; height: 550px; top: -150px; left: -160px; }
-  .auth-orb.orb-2 { width: 400px; height: 400px; bottom: -120px; right: -120px; }
+  .auth-orb.orb-1 { width: 550px; height: 550px; top: -150px; left: -160px; animation: orbDrift1 18s ease-in-out infinite; }
+  .auth-orb.orb-2 { width: 400px; height: 400px; bottom: -120px; right: -120px; animation: orbDrift2 22s ease-in-out infinite; }
 
+  @keyframes orbDrift1 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33%     { transform: translate(40px,-30px) scale(1.08); }
+    66%     { transform: translate(-20px,25px) scale(0.95); }
+  }
+  @keyframes orbDrift2 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33%     { transform: translate(-35px,20px) scale(1.05); }
+    66%     { transform: translate(25px,-35px) scale(0.97); }
+  }
+
+  /* ── MAIN ──────────────────────────────────────────────── */
   .auth-main {
     position: relative; z-index: 1;
     min-height: 100dvh;
@@ -265,6 +277,7 @@ import { Icon } from 'astro-icon/components';
     padding: 1.25rem;
   }
 
+  /* ── CARD ─────────────────────────────────────────────── */
   .auth-card {
     width: min(980px, 100%);
     min-height: 600px;
@@ -277,9 +290,15 @@ import { Icon } from 'astro-icon/components';
     grid-template-columns: 1fr 340px;
     position: relative;
     transition: background 0.25s, border-color 0.25s;
+    animation: cardEntrance 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
-  /* Forms area */
+  @keyframes cardEntrance {
+    from { opacity: 0; transform: translateY(32px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── FORMS AREA ────────────────────────────────────────── */
   .auth-forms {
     position: relative; overflow: hidden; min-height: 560px;
   }
@@ -291,6 +310,7 @@ import { Icon } from 'astro-icon/components';
     padding: 2.5rem 2rem;
     animation: slideIn 0.45s cubic-bezier(0.4,0,0.2,1) both;
   }
+
   @keyframes slideIn {
     from { opacity: 0; transform: translateX(-20px); }
     to   { opacity: 1; transform: translateX(0); }
@@ -299,12 +319,24 @@ import { Icon } from 'astro-icon/components';
   .auth-form-wrap { width: 100%; max-width: 320px; }
   #view-register .auth-form-wrap { max-width: 500px; }
 
-  /* Logo */
+  /* Stagger en los campos */
+  .auth-form-wrap .field-group:nth-child(1) { animation: fieldSlide 0.5s 0.1s ease both; }
+  .auth-form-wrap .field-group:nth-child(2) { animation: fieldSlide 0.5s 0.18s ease both; }
+  .auth-form-wrap .field-group:nth-child(3) { animation: fieldSlide 0.5s 0.26s ease both; }
+  .auth-form-wrap .field-group:nth-child(4) { animation: fieldSlide 0.5s 0.34s ease both; }
+
+  @keyframes fieldSlide {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── LOGO ──────────────────────────────────────────────── */
   .auth-logo {
     display: flex; align-items: center; gap: 0.625rem;
     margin-bottom: 1.25rem;
     font-size: 1.125rem; font-weight: 700; color: var(--ui-text-1);
     font-family: var(--font-sans);
+    animation: titleReveal 0.6s ease both;
   }
   .auth-logo strong { color: var(--auth-red); }
   .auth-logo-icon {
@@ -319,10 +351,17 @@ import { Icon } from 'astro-icon/components';
     font-family: var(--font-sans);
     font-size: 1.625rem; font-weight: 800; color: var(--ui-text-1);
     margin: 0 0 0.25rem; letter-spacing: -0.4px;
+    animation: titleReveal 0.6s ease both;
   }
+
+  @keyframes titleReveal {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   .auth-sub { font-size: 0.8125rem; color: var(--ui-text-2); margin: 0 0 1.5rem; }
 
-  /* Messages */
+  /* ── MESSAGES ──────────────────────────────────────────── */
   .auth-msg {
     padding: 0.625rem 0.875rem; border-radius: 8px;
     font-size: 0.8125rem; line-height: 1.5; margin-bottom: 0.875rem;
@@ -330,7 +369,7 @@ import { Icon } from 'astro-icon/components';
   .auth-msg.error   { background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C; }
   .auth-msg.success { background: #F0FDF4; border: 1px solid #BBF7D0; color: #15803D; }
 
-  /* Fields */
+  /* ── FIELDS ────────────────────────────────────────────── */
   .fields-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem;
     margin-bottom: 0.625rem;
@@ -352,7 +391,14 @@ import { Icon } from 'astro-icon/components';
     background: var(--ui-card);
     border-color: var(--auth-red);
     box-shadow: 0 0 0 3px rgba(212,18,36,0.1);
+    animation: focusPulse 0.3s ease;
   }
+
+  @keyframes focusPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(212,18,36,0.3); }
+    100% { box-shadow: 0 0 0 3px rgba(212,18,36,0.1); }
+  }
+
   .field-icon {
     width: 15px; height: 15px; flex-shrink: 0; margin-left: 11px;
     color: var(--ui-text-3); pointer-events: none;
@@ -386,7 +432,7 @@ import { Icon } from 'astro-icon/components';
   .terms-wrap input { accent-color: var(--auth-red); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
   .terms-wrap label a { color: var(--auth-red); font-weight: 600; }
 
-  /* Auth button */
+  /* ── AUTH BUTTON CON SHIMMER ───────────────────────────── */
   .auth-btn {
     display: flex; align-items: center; justify-content: center; gap: 0.5rem;
     width: 100%; padding: 0.75rem 1.5rem;
@@ -396,13 +442,21 @@ import { Icon } from 'astro-icon/components';
     letter-spacing: 0.06em; text-transform: uppercase;
     cursor: pointer; transition: all 0.2s;
     box-shadow: 0 4px 16px rgba(212,18,36,0.3); margin-top: 0.25rem;
+    position: relative; overflow: hidden;
   }
+  .auth-btn::before {
+    content: '';
+    position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s ease;
+  }
+  .auth-btn:hover::before { left: 100%; }
   .auth-btn:hover:not(:disabled) {
     box-shadow: 0 6px 24px rgba(212,18,36,0.45); transform: translateY(-1px);
   }
   .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  /* Switch link */
+  /* ── SWITCH LINKS ──────────────────────────────────────── */
   .auth-switch {
     text-align: center; font-size: 0.8125rem; color: var(--ui-text-2);
     margin-top: 1rem;
@@ -418,28 +472,77 @@ import { Icon } from 'astro-icon/components';
   }
   .back-home:hover { color: var(--auth-red); }
 
-  /* Decorative panel — el rojo siempre fijo, no cambia con temas */
+  /* ── PANEL DECORATIVO CON AURORA ───────────────────────── */
   .auth-deco {
-    background: linear-gradient(150deg, var(--auth-red) 0%, var(--auth-red-dark) 100%);
+    background: linear-gradient(-45deg, #D41224, #9B1F24, #FF2D42, #7B0D10, #C0000E, #D41224);
+    background-size: 500% 500%;
+    animation: aurora 10s ease infinite;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     padding: 2.5rem 2rem; position: relative; overflow: hidden;
   }
-  .auth-deco::before, .auth-deco::after {
-    content: ''; position: absolute; border-radius: 50%; background: rgba(255,255,255,0.05);
+
+  @keyframes aurora {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
-  .auth-deco::before { width: 280px; height: 280px; top: -80px; right: -80px; }
-  .auth-deco::after  { width: 200px; height: 200px; bottom: -60px; left: -60px; }
+
+  /* Partículas flotantes en el panel */
+  .auth-deco::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px),
+      radial-gradient(circle at 80% 80%, rgba(255,255,255,0.06) 1px, transparent 1px),
+      radial-gradient(circle at 60% 30%, rgba(255,255,255,0.05) 1px, transparent 1px),
+      radial-gradient(circle at 30% 70%, rgba(255,255,255,0.07) 1px, transparent 1px),
+      radial-gradient(circle at 90% 40%, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px, 80px 80px, 50px 50px, 70px 70px, 90px 90px;
+    animation: particlesDrift 20s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes particlesDrift {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-60px); }
+  }
+
+  .auth-deco::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    top: -80px; right: -80px;
+    animation: decoOrb 12s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes decoOrb {
+    0%,100% { transform: scale(1) translate(0,0); }
+    50%     { transform: scale(1.15) translate(-20px,20px); }
+  }
 
   .deco-content {
     position: relative; z-index: 1;
     display: flex; flex-direction: column; align-items: center;
     text-align: center; gap: 1rem;
-    animation: decoIn 0.5s cubic-bezier(0.4,0,0.2,1) both;
   }
-  @keyframes decoIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+
+  /* Orb inferior izquierdo */
+  .deco-content::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+    bottom: -120px; left: -80px;
+    animation: decoOrb2 16s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes decoOrb2 {
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(1.2) translate(15px,-15px); }
   }
 
   .deco-icon-wrap {
@@ -447,25 +550,50 @@ import { Icon } from 'astro-icon/components';
     background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.25);
     display: flex; align-items: center; justify-content: center;
     margin-bottom: 0.25rem;
+    animation: iconFloat 4s ease-in-out infinite;
   }
+
+  @keyframes iconFloat {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    50%     { transform: translateY(-6px) rotate(3deg); }
+  }
+
   .deco-content h2 {
     font-family: var(--font-sans); font-size: 1.75rem;
     font-weight: 700; color: white; line-height: 1.2; margin: 0;
+    animation: decoFadeUp 0.6s 0.1s ease both;
   }
   .deco-content p {
     font-size: 0.875rem; line-height: 1.7; color: rgba(255,255,255,0.8);
     max-width: 210px; margin: 0;
+    animation: decoFadeUp 0.6s 0.2s ease both;
   }
+
+  @keyframes decoFadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   .deco-btn {
     padding: 0.625rem 1.5rem; border: 1.5px solid rgba(255,255,255,0.6);
     border-radius: 10px; background: transparent; color: white;
     font-family: inherit; font-size: 0.8125rem; font-weight: 700;
     letter-spacing: 0.06em; text-transform: uppercase;
-    cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+    cursor: pointer; transition: background 0.2s, transform 0.2s; margin-top: 0.5rem;
+    animation: decoFadeUp 0.6s 0.3s ease both;
+    position: relative; overflow: hidden;
   }
-  .deco-btn:hover { background: rgba(255,255,255,0.15); }
+  .deco-btn::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+  }
+  .deco-btn:hover::after { transform: translateX(100%); }
+  .deco-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
 
-  /* ── DARK MODE ────────────────────────────────────────────── */
+  /* ── DARK MODE ─────────────────────────────────────────── */
   html.dark .auth-msg.error {
     background: rgba(185,28,28,0.15);
     border-color: rgba(220,38,38,0.3);
@@ -477,14 +605,13 @@ import { Icon } from 'astro-icon/components';
     color: #6EE7B7;
   }
 
-  /* Modal info */
   html.dark #info-modal > div {
     background: var(--ui-card) !important;
   }
   html.dark #info-modal h3 { color: var(--ui-text-1) !important; }
   html.dark #info-modal p  { color: var(--ui-text-2) !important; }
 
-  /* ── RESPONSIVE ───────────────────────────────────────────── */
+  /* ── RESPONSIVE ────────────────────────────────────────── */
   @media (max-width: 860px) {
     .auth-card { grid-template-columns: 1fr; min-height: unset; }
     .auth-deco { display: none; }

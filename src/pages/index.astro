@@ -24,16 +24,15 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
   }
 
   /* ── NAVBAR ─────────────────────────────────────────────── */
-  #navbar {
-    position: fixed; top: 0; width: 100%; z-index: 50;
-    transition: all 0.5s;
-  }
-  #navbar.scrolled {
-    background: var(--ui-overlay);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--ui-border);
-    box-shadow: 0 2px 20px rgba(212,18,36,0.06);
-  }
+#navbar {
+  position: fixed; top: 0; width: 100%; z-index: 50;
+  transition: background 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+#navbar.scrolled {
+  background: var(--ui-overlay);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 20px rgba(212,18,36,0.06);
+}
   .nav-inner {
     max-width: 75rem; margin: 0 auto; padding: 0 1.5rem;
     height: 64px; display: flex; align-items: center;
