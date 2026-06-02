@@ -152,6 +152,8 @@
     z-index: 9990;
     width: 44px;
     height: 44px;
+    /* Aislamos el widget del filter del html para que no se vea afectado por invert/saturate */
+    isolation: isolate;
   }
 
   .rp-fab {
@@ -289,13 +291,11 @@ const DEFAULTS: Prefs = {
 
 const FONT_URLS: Record<string, string> = {
   dyslexia: 'https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap',
-  // Lora y Poppins ya están en global.css — no duplicar
 };
 
 function load(): Prefs {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}');
-    // Migrar valores viejos: 'legible' → 'default' (Lora), 'lora' → 'default'
     if (saved.font === 'legible' || saved.font === 'lora') saved.font = 'default';
     return { ...DEFAULTS, ...saved };
   }
@@ -303,7 +303,7 @@ function load(): Prefs {
 }
 function save(p: Prefs) { localStorage.setItem(KEY, JSON.stringify(p)); }
 
-function buildBodyFilter(p: Prefs): string {
+function buildHtmlFilter(p: Prefs): string {
   const parts: string[] = [];
   if (p.vision !== 'none') parts.push(`url('#rp-filter-${p.vision}')`);
   if (p.sat === 'low')         parts.push('saturate(0.4)');
@@ -336,7 +336,24 @@ function apply(p: Prefs) {
   else h.setAttribute('data-font', p.font);
   if (p.align === 'left') h.removeAttribute('data-align');
   else h.setAttribute('data-align', p.align);
-  document.body.style.filter = buildBodyFilter(p);
+
+  // ── KEY FIX: aplicar filter al documentElement, NO al body ──
+  // Si se aplica al body, los elementos position:fixed quedan atrapados
+  // en el stacking context del filter y se descolocan del viewport.
+  // Al aplicarlo al html, el widget con isolation:isolate queda libre.
+  const filterVal = buildHtmlFilter(p);
+
+  // Para invertido: el CSS maneja html.contrast-inverted con filter,
+  // aquí solo aplicamos saturación/daltonismo sobre el html directamente.
+  // Evitamos sobreescribir el filter de contrast-inverted del CSS.
+  if (p.mode !== 'inverted') {
+    h.style.filter = filterVal;
+  } else {
+    // En modo invertido, el CSS ya pone invert+hue-rotate en html.contrast-inverted.
+    // Combinamos saturación/daltonismo encima si aplica.
+    h.style.filter = filterVal;
+  }
+
   h.classList.toggle('cursor-large', p.cursor === 'large');
   h.classList.toggle('highlight-links', p.links);
   h.classList.toggle('reading-mask', p.mask);
@@ -390,7 +407,6 @@ const closePanel = () => { panel.setAttribute('hidden',''); fab.setAttribute('ar
 fab.addEventListener('click', () => panel.hasAttribute('hidden') ? openPanel() : closePanel());
 closeBtn.addEventListener('click', closePanel);
 
-// Generic button handlers
 const btnHandler = (selector: string, key: keyof Prefs, getValue: (el: HTMLElement) => unknown) => {
   document.querySelectorAll<HTMLElement>(selector).forEach(btn => {
     btn.addEventListener('click', () => {

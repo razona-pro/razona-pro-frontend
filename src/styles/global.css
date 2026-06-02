@@ -68,9 +68,7 @@
   --sidebar-active-txt: #D41224;
 
   --font-sans: 'Lora', Georgia, serif;
-  /* Fuente sans-serif para UI compacto (tablas, inputs, badges) */
   --font-ui: 'Poppins', system-ui, -apple-system, sans-serif;
-  /* Fuente monoespaciada para IDs, código, etc. */
   --font-mono: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
 }
 
@@ -93,7 +91,6 @@ html.dark {
   --ui-input-bg:  #1E1E1E;
   --ui-hover:     #2A2A2A;
 
-  /* Sidebar oscuro en dark mode */
   --sidebar-bg:         #1C1917;
   --sidebar-border:     rgba(255, 255, 255, 0.06);
   --sidebar-text:       rgba(255, 255, 255, 0.5);
@@ -133,16 +130,36 @@ html.high-contrast {
   color-scheme: dark;
 }
 
+/* ── Fix navbar en alto contraste: el border blanco se ve como línea ── */
+html.high-contrast #navbar {
+  border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+}
+html.high-contrast #navbar.scrolled {
+  background: rgba(0, 0, 0, 0.95) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: none !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    7. CONTRASTE INVERTIDO
+   ⚠ KEY FIX: aplicar filter al html, NO al body.
+   Si se aplica al body, los position:fixed quedan atrapados
+   en el stacking context y se descolocan del viewport.
+   El widget usa isolation:isolate para contrarrestar el filter.
 ═══════════════════════════════════════════════════════════════ */
-html.contrast-inverted body {
+html.contrast-inverted {
   filter: invert(1) hue-rotate(180deg) !important;
 }
 html.contrast-inverted img,
-html.contrast-inverted video { filter: invert(1) hue-rotate(180deg); }
-/* Widget permanece legible */
-html.contrast-inverted #rp-a11y-root { filter: invert(1) hue-rotate(180deg); }
+html.contrast-inverted video,
+html.contrast-inverted canvas,
+html.contrast-inverted iframe {
+  filter: invert(1) hue-rotate(180deg);
+}
+/* El widget de accesibilidad se auto-corrige con isolation:isolate en su CSS */
+html.contrast-inverted #rp-a11y-root {
+  filter: invert(1) hue-rotate(180deg);
+}
 
 /* ═══════════════════════════════════════════════════════════════
    8. CONTRASTE DE LUZ (alto brillo)
@@ -193,11 +210,16 @@ html.contrast-dark {
   color-scheme: dark;
 }
 
+html.contrast-dark #navbar.scrolled {
+  background: rgba(0, 0, 0, 0.97) !important;
+  border-bottom-color: #2A2A2A !important;
+  box-shadow: none !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════
-   10. ESCALAS DE TAMAÑO DE TEXTO (5 niveles desde 14px)
-       html[data-fs] controla la raíz; rem/em escalan solos.
+   10. ESCALAS DE TAMAÑO DE TEXTO
 ═══════════════════════════════════════════════════════════════ */
-html                          { font-size: 16px; } /* base para rem — 15px en body vía CSS */
+html                          { font-size: 16px; }
 html[data-fs="pequeno"]       { font-size: 14px; }
 html[data-fs="normal"]        { font-size: 16px; }
 html[data-fs="grande"]        { font-size: 18px; }
@@ -205,7 +227,7 @@ html[data-fs="muy-grande"]    { font-size: 20px; }
 html[data-fs="extra-grande"]  { font-size: 24px; }
 
 /* ═══════════════════════════════════════════════════════════════
-   11. ESPACIADO DE LETRAS (5 escalas)
+   11. ESPACIADO DE LETRAS
 ═══════════════════════════════════════════════════════════════ */
 html[data-ls="amplio"]        * { letter-spacing: 0.05em; }
 html[data-ls="mas-amplio"]    * { letter-spacing: 0.10em; }
@@ -222,9 +244,7 @@ html[data-lh="1.75"] body { line-height: 1.75; }
 html[data-lh="2"]    body { line-height: 2;    }
 
 /* ═══════════════════════════════════════════════════════════════
-   13. FUENTES DE ACCESIBILIDAD — redefinen AMBAS variables CSS
-   Al cambiar --font-sans y --font-ui, TODOS los elementos del
-   sistema heredan el nuevo font sin necesidad de !important.
+   13. FUENTES DE ACCESIBILIDAD
 ═══════════════════════════════════════════════════════════════ */
 html[data-font="poppins"] {
   --font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
@@ -245,13 +265,7 @@ html[data-align="right"]   body :is(p, h1, h2, h3, h4, h5, h6, li, label) { text
 html[data-align="justify"] body :is(p, h1, h2, h3, h4, h5, h6, li, label) { text-align: justify !important; }
 
 /* ═══════════════════════════════════════════════════════════════
-   15. SATURACIÓN (aplicado via body.style.filter desde JS widget)
-   CSS classes usadas solo cuando JS ya cargó el body filter.
-   Daltonismo también se maneja via JS para poder combinarlos.
-═══════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════
-   16. CURSOR GRANDE
+   15. CURSOR GRANDE
 ═══════════════════════════════════════════════════════════════ */
 html.cursor-large,
 html.cursor-large * {
@@ -259,7 +273,7 @@ html.cursor-large * {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   17. RESALTAR ENLACES
+   16. RESALTAR ENLACES
 ═══════════════════════════════════════════════════════════════ */
 html.highlight-links a:not(#rp-a11y-root *):not(.nav-item):not([class*="btn"]):not([class*="qa-btn"]) {
   background-color: rgba(255, 220, 0, 0.45) !important;
@@ -271,7 +285,7 @@ html.highlight-links a:not(#rp-a11y-root *):not(.nav-item):not([class*="btn"]):n
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   18. MÁSCARA DE LECTURA
+   17. MÁSCARA DE LECTURA
 ═══════════════════════════════════════════════════════════════ */
 #rp-reading-mask {
   display:        none;
@@ -291,7 +305,7 @@ html.highlight-links a:not(#rp-a11y-root *):not(.nav-item):not([class*="btn"]):n
 html.reading-mask #rp-reading-mask { display: block; }
 
 /* ═══════════════════════════════════════════════════════════════
-   19. GUÍA DE LECTURA
+   18. GUÍA DE LECTURA
 ═══════════════════════════════════════════════════════════════ */
 #rp-reading-guide {
   display:        none;
@@ -309,7 +323,7 @@ html.reading-mask #rp-reading-mask { display: block; }
 html.reading-guide #rp-reading-guide { display: block; }
 
 /* ═══════════════════════════════════════════════════════════════
-   20. BASE STYLES
+   19. BASE STYLES
 ═══════════════════════════════════════════════════════════════ */
 html {
   scroll-behavior:          smooth;
@@ -320,7 +334,7 @@ html {
 
 body {
   font-family:             var(--font-sans);
-  font-size:               0.9375rem; /* Lora: 15px base equivale a ~16px Poppins visualmente */
+  font-size:               0.9375rem;
   line-height:             1.6;
   background:              var(--ui-bg);
   color:                   var(--ui-text-1);
@@ -330,13 +344,8 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   20b. UI COMPACTO — tablas, inputs, labels, badges, sidebar
-   Usan var(--font-ui) que por defecto es Poppins.
-   Cuando accesibilidad cambia --font-ui, TODO el sistema se
-   actualiza automáticamente sin !important.
+   19b. UI COMPACTO
 ═══════════════════════════════════════════════════════════════ */
-
-/* Tablas — reset limpio, sin overflow agresivo */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -348,7 +357,6 @@ table th, table td {
   box-sizing: border-box;
   vertical-align: middle;
 }
-/* Clases globales .th y .td usadas en todos los admin pages */
 .th {
   padding: 10px 16px;
   text-align: left;
@@ -372,7 +380,6 @@ table th, table td {
 .td-text { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .td-wrap { white-space: normal; word-break: break-word; }
 
-/* Inputs, selects, botones */
 input, select, textarea, button,
 label, .field-lbl, .field-inp,
 .page-btn, .action-btn {
@@ -380,16 +387,11 @@ label, .field-lbl, .field-inp,
   box-sizing: border-box;
 }
 
-/* Sidebar */
 #rp-sidebar, #rp-sidebar * { font-family: var(--font-sans); }
-
-/* Widget accesibilidad */
 #rp-a11y-root, #rp-a11y-root * { font-family: var(--font-ui); }
 
 /* ═══════════════════════════════════════════════════════════════
-   21. DARK / CONTRAST-DARK / HIGH-CONTRAST — Overrides componentes
-   Todos los modos oscuros comparten estos overrides para corregir
-   colores hardcodeados en HTML inline styles.
+   20. DARK / CONTRAST-DARK / HIGH-CONTRAST — Overrides componentes
 ═══════════════════════════════════════════════════════════════ */
 :where(html.dark, html.contrast-dark, html.high-contrast) #main-area {
   background: var(--ui-bg-alt) !important;
@@ -472,9 +474,7 @@ label, .field-lbl, .field-inp,
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   22. SIDEBAR MODO CLARO — Override inline styles del HTML
-   Los textos blancos del sidebar (hardcoded) deben ser oscuros
-   cuando el fondo del sidebar es blanco (modo por defecto).
+   21. SIDEBAR MODO CLARO — Override inline styles del HTML
 ═══════════════════════════════════════════════════════════════ */
 html:not(.dark):not(.high-contrast):not(.contrast-dark) #sb-name { color: var(--ui-text-1) !important; }
 html:not(.dark):not(.high-contrast):not(.contrast-dark) #sb-sub  { color: var(--ui-text-3) !important; }
@@ -506,13 +506,7 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   23. DALTONISMO (SVG filters en AccessibilityWidget)
-   Se aplican via body.style.filter desde el widget JS
-   para poder combinarlos con saturación.
-═══════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════
-   24. UTILIDADES GLOBALES
+   22. UTILIDADES GLOBALES
 ═══════════════════════════════════════════════════════════════ */
 
 /* Scrollbar */
@@ -527,7 +521,6 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 /* Focus accesible */
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 4px; }
 
-/* Tipografía escalable con rem */
 .fs-xs   { font-size: 0.75rem; }
 .fs-sm   { font-size: 0.857rem; }
 .fs-base { font-size: 1rem; }
@@ -538,7 +531,6 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 .fs-3xl  { font-size: 1.857rem; }
 .fs-4xl  { font-size: 2.143rem; }
 
-/* Botón primario */
 .btn-brand {
   display: inline-flex; align-items: center; justify-content: center;
   gap: 0.5rem; padding: 0.571rem 1.286rem;
@@ -553,7 +545,6 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 .btn-brand:hover  { background: var(--brand-dark); box-shadow: 0 6px 24px rgba(212, 18, 36, 0.45); transform: translateY(-1px); }
 .btn-brand:active { transform: translateY(0); }
 
-/* Botón outline */
 .btn-outline {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.571rem 1.143rem;
@@ -566,7 +557,6 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 }
 .btn-outline:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-muted); }
 
-/* Card base */
 .card-ui {
   background: var(--ui-card); border: 1px solid var(--ui-border);
   border-radius: 1rem; box-shadow: 0 1px 4px var(--ui-shadow);
@@ -574,7 +564,6 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 }
 .card-ui:hover { border-color: rgba(212, 18, 36, 0.2); box-shadow: 0 4px 16px var(--ui-shadow-md); }
 
-/* Input */
 .input-ui {
   width: 100%; padding: 0.571rem 0.857rem;
   background: var(--ui-input-bg); border: 1.5px solid var(--ui-border);
@@ -585,7 +574,6 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 .input-ui::placeholder { color: var(--ui-text-3); }
 .input-ui:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(212, 18, 36, 0.1); background: var(--ui-card); }
 
-/* Gradiente texto brand */
 .text-brand-gradient {
   background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
   -webkit-background-clip: text;
@@ -637,7 +625,6 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 .exam-antifraud ::selection { background: transparent; }
 .exam-antifraud img { pointer-events: none; }
 
-/* Aviso de tab perdido */
 .tab-warning-banner {
   position: fixed; top: 0; left: 0; right: 0; z-index: 9900;
   background: #D97706; color: #fff;
@@ -653,25 +640,21 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 /* ══════════════════════════════════════════════════════════════════
    MEJORAS GENERALES COMPONENTES
 ══════════════════════════════════════════════════════════════════ */
-/* Transiciones suaves para cards */
 .card-ui, .test-card, .profile-card {
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s, background 0.25s;
 }
 
-/* Mejorar scrollbars */
 * { scrollbar-width: thin; scrollbar-color: var(--ui-border-2) transparent; }
 *::-webkit-scrollbar { width: 5px; height: 5px; }
 *::-webkit-scrollbar-thumb { background: var(--ui-border-2); border-radius: 99px; }
 *::-webkit-scrollbar-thumb:hover { background: var(--brand); }
 
-/* Focus ring mejorado */
 :focus-visible {
   outline: 2.5px solid var(--brand);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
-/* Animación de entrada para modales/overlays */
 @keyframes overlayIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -679,4 +662,8 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 @keyframes cardIn {
   from { opacity: 0; transform: scale(0.93) translateY(12px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
