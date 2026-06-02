@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
 ---
 
 <BaseLayout title="Acerca de">
@@ -9,12 +10,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div style="max-width:75rem;margin:0 auto;height:60px;display:flex;align-items:center;justify-content:space-between">
         <a href="/" style="display:flex;align-items:center;gap:0.5rem;text-decoration:none;font-weight:800;font-size:1rem;color:#1A1A1A;font-family:var(--font-sans)">
           <div style="width:30px;height:30px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:8px;display:flex;align-items:center;justify-content:center">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 2L22 7L22 17L12 22L2 17L2 7Z" fill="rgba(255,255,255,0.2)"/><circle cx="12" cy="12" r="3" fill="white"/></svg>
+            <Icon name="tabler:brain" size={20} class="text-white"/>  
           </div>
-          Razona<span style="color:#D41224">Pro</span>
+          <div>Razona<span style="color:#D41224">Pro</span></div>
         </a>
         <a href="/auth" style="padding:7px 18px;border-radius:10px;background:#D41224;color:white;font-size:0.875rem;font-weight:700;text-decoration:none;font-family:var(--font-sans)">
-          Acceder
+          Iniciar sesión
         </a>
       </div>
     </header>
