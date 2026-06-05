@@ -341,7 +341,6 @@ import { Icon } from 'astro-icon/components';
   const triedId      = params.get('tried');
   const testId       = params.get('test');
   const competenceId = params.get('comp');
-  const testMode     = params.get('mode') ?? 'PRACTICE';
 
   if (!triedId || !testId || !competenceId) {
     window.location.replace('/tests');
@@ -357,14 +356,32 @@ import { Icon } from 'astro-icon/components';
   let examFinished = false;
   let durationSecs = 0;
   let aiHintsAvail = false;
+  // Modo real del test (se asigna desde el servidor en init(), no de la URL)
+  let testMode     = params.get('mode') ?? 'PRACTICE';
 
   // ── ANTI-FRAUDE ──────────────────────────────────────────────────
   let fraudViolations  = 0;
   let fraudModalOpen   = false;
-  let examStarted      = false;   // true solo después de que cargan preguntas
+  let examStarted      = false;   // true solo después de cerrar el modal inicial
   let lastViolationTs  = 0;       // timestamp de la última violación registrada
+  // Se asigna en init() tras conocer el testMode real del servidor
+  let IS_STRICT_MODE   = false;
 
-  const IS_STRICT_MODE = testMode === 'EXAM' || testMode === 'TIMED';
+  // ── CONTROL DE PESTAÑA ÚNICA ─────────────────────────────────────
+  // Evita que el mismo examen esté abierto en más de una pestaña/ventana.
+  const TAB_CHANNEL_NAME = `rp_exam_tab_${triedId}`;
+  let examChannel: BroadcastChannel | null = null;
+  try {
+    examChannel = new BroadcastChannel(TAB_CHANNEL_NAME);
+    examChannel.onmessage = () => {
+      if (!examFinished) {
+        examFinished = true;
+        if (timerInt) clearInterval(timerInt);
+        toast.error('Este examen fue abierto en otra pestaña o ventana.');
+        setTimeout(() => window.location.replace('/tests'), 2500);
+      }
+    };
+  } catch { /* BroadcastChannel no disponible en este entorno */ }
 
   // Caché de opciones aleatorias por pregunta (una vez mezcladas, no cambian)
   const optionOrderCache = new Map<string, OptionDto[]>();
@@ -384,59 +401,72 @@ import { Icon } from 'astro-icon/components';
     handleFraudViolation();
   }
 
-  if (IS_STRICT_MODE) {
-    // Protecciones de texto / selección / arrastre
+  // Los listeners de modo estricto se registran en setupStrictModeListeners(),
+  // que se llama desde init() una vez que se conoce el testMode real del servidor.
+  function setupStrictModeListeners() {
     document.documentElement.classList.add('exam-noselect');
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('dragstart',   e => e.preventDefault());
     document.addEventListener('copy',        e => e.preventDefault());
     document.addEventListener('cut',         e => e.preventDefault());
 
-    // Teclado - bloquear atajos de captura, consola y copiado
     document.addEventListener('keydown', e => {
-      // DevTools: F12 y Ctrl/Cmd+Shift+I/J/C/K
       if (e.key === 'F12') { e.preventDefault(); return; }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c','k'].includes(e.key.toLowerCase())) {
         e.preventDefault(); return;
       }
-      // Copiar / seleccionar todo / ver fuente / guardar / pegar
       if ((e.ctrlKey || e.metaKey) && ['c','a','u','s','p','x'].includes(e.key.toLowerCase())) {
         e.preventDefault(); return;
       }
-      // PrintScreen y tecla equivalente F13 - captura de pantalla
       if (e.key === 'PrintScreen' || e.key === 'F13') {
         e.preventDefault();
         triggerViolation();
         return;
       }
-      // Win+Shift+S (Snipping Tool Windows) y capturas macOS (Cmd+Shift+3/4/5)
       if ((e.metaKey || e.key === 'Meta') && e.shiftKey && ['s','3','4','5'].includes(e.key.toLowerCase())) {
         e.preventDefault(); return;
       }
-      // Alt+F4 no se puede bloquear, pero el blur lo captura
     });
 
-    // visibilitychange - cambio de pestaña, minimize, bloqueo de pantalla
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') triggerViolation();
     });
-
-    // blur - pérdida de foco: Alt+Tab, clic en otra app, notificaciones móvil
-    window.addEventListener('blur', () => triggerViolation());
-
-    // pagehide - móvil yendo a segundo plano (iOS Safari, antes de visibilitychange)
+    window.addEventListener('blur',     () => triggerViolation());
     window.addEventListener('pagehide', () => { if (!examFinished) triggerViolation(); });
-
-    // Page Lifecycle API - freeze (Android Chrome cuando app va al fondo)
     document.addEventListener('freeze', () => triggerViolation());
 
-    // fullscreenchange - usuario salió de pantalla completa manualmente
     const onFsChange = () => {
       const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
       if (!isFs && examStarted) triggerViolation();
     };
     document.addEventListener('fullscreenchange',       onFsChange);
     document.addEventListener('webkitfullscreenchange', onFsChange);
+  }
+
+  // ── Timer ────────────────────────────────────────────────────────
+  let pendingRemaining: number | null = null;
+
+  function startCountdown(remaining: number) {
+    startTime = Date.now();
+    updateTimer(remaining);
+    timerInt = setInterval(() => {
+      remaining--;
+      updateTimer(remaining);
+      if (remaining <= 60) document.getElementById('timer-wrap')?.classList.add('timer-danger');
+      if (remaining <= 0) {
+        clearInterval(timerInt!);
+        toast.warning('¡Tiempo agotado!');
+        finishExam(true);
+      }
+    }, 1000);
+  }
+
+  function activateExam() {
+    examStarted = true;
+    if (pendingRemaining !== null) {
+      startCountdown(pendingRemaining);
+      pendingRemaining = null;
+    }
   }
 
   // ── Handlers del modal de pantalla completa ──────────────────────
@@ -446,22 +476,25 @@ import { Icon } from 'astro-icon/components';
       (el.requestFullscreen?.() ?? (el as any).webkitRequestFullscreen?.())?.catch(() => {});
     } catch {}
     (document.getElementById('fs-modal') as HTMLElement).style.display = 'none';
-    examStarted = true;
+    activateExam();
   });
   document.getElementById('fs-skip')?.addEventListener('click', () => {
     (document.getElementById('fs-modal') as HTMLElement).style.display = 'none';
-    examStarted = true;
+    activateExam();
   });
 
-  function handleFraudViolation() {
+  async function handleFraudViolation() {
     fraudViolations++;
 
-    // Persistir el evento en el backend: incrementa fraud_attempts y, al superar
-    // el límite, el servidor anula el intento (ANULADO) y notifica a los admins.
-    triedsApi.reportFraud(triedId!).catch(() => {});
+    // Reportar al backend y verificar si el intento ya fue anulado
+    let resultStatus: string | undefined;
+    try {
+      const res = await triedsApi.reportFraud(triedId!);
+      resultStatus = res.data?.status;
+    } catch { /* continuar con lógica local */ }
 
-    if (fraudViolations >= 3) {
-      // ANULAR examen
+    // Si el backend ya lo anuló (p.ej. el contador llegó a 3), mostrar modal de anulación
+    if (resultStatus === 'ANULADO' || fraudViolations >= 3) {
       annulExam();
       return;
     }
@@ -497,11 +530,9 @@ import { Icon } from 'astro-icon/components';
     fraudModalOpen = false;
   });
 
-  async function annulExam() {
+  function annulExam() {
     examFinished = true;
     if (timerInt) clearInterval(timerInt);
-    // El intento se anula en el backend (ANULADO) - registra el último evento y notifica admins.
-    try { await triedsApi.reportFraud(triedId!); } catch {}
     (document.getElementById('fraud-modal') as HTMLElement).style.display = 'none';
     (document.getElementById('annulled-modal') as HTMLElement).style.display = 'flex';
   }
@@ -791,7 +822,6 @@ import { Icon } from 'astro-icon/components';
     finishExam(false);
   });
 
-  // ── Timer ────────────────────────────────────────────────────────
   function updateTimer(secs: number) {
     const el = document.getElementById('timer-display');
     if (el) el.textContent = fmtTimer(secs);
@@ -842,28 +872,6 @@ import { Icon } from 'astro-icon/components';
 
   // ── Init ─────────────────────────────────────────────────────────
   async function init() {
-    // Verificar IA para pistas (solo PRACTICE)
-    if (testMode === 'PRACTICE') {
-      try {
-        const { aiTriedsApi: aiApi } = await import('../../lib/api/ai-trieds.api');
-        const s = await aiApi.status();
-        aiHintsAvail = !!(s.data?.enabled && s.data?.reachable);
-      } catch {}
-    }
-
-    // Mode badge
-    const modeConfig: Record<string, { label: string; bg: string; color: string }> = {
-      PRACTICE: { label:'Práctica', bg:'#D1FAE5', color:'#059669' },
-      EXAM:     { label:'Examen',   bg:'#DBEAFE', color:'#2563EB' },
-      TIMED:    { label:'Cronometrado', bg:'#FEF3C7', color:'#D97706' },
-    };
-    const mc = modeConfig[testMode];
-    if (mc) {
-      const mb = document.getElementById('mode-badge')!;
-      mb.textContent = mc.label;
-      mb.style.cssText = `padding:2px 8px;border-radius:12px;font-size:0.625rem;font-weight:700;flex-shrink:0;display:inline;background:${mc.bg};color:${mc.color}`;
-    }
-
     try {
       // resume() valida ownership (403 si no es tuyo) y entrega el tiempo restante
       // autoritativo del servidor. Si ya está cerrado o expiró, se sale del examen.
@@ -881,6 +889,38 @@ import { Icon } from 'astro-icon/components';
         return;
       }
 
+      // Usar el testMode real del servidor (no confiar en el parámetro de URL)
+      testMode = resume.testMode ?? params.get('mode') ?? 'PRACTICE';
+      IS_STRICT_MODE = testMode === 'EXAM' || testMode === 'TIMED';
+
+      // Sincronizar contador de fraude con el backend para resistir recargas de página
+      fraudViolations = resume.tried?.fraudAttempts ?? 0;
+
+      // Notificar a otras pestañas que se abre este examen; ellas deben cerrarse
+      examChannel?.postMessage('TAKEOVER');
+
+      // Mode badge (requiere testMode del servidor)
+      const modeConfig: Record<string, { label: string; bg: string; color: string }> = {
+        PRACTICE: { label:'Práctica',      bg:'#D1FAE5', color:'#059669' },
+        EXAM:     { label:'Examen',        bg:'#DBEAFE', color:'#2563EB' },
+        TIMED:    { label:'Cronometrado',  bg:'#FEF3C7', color:'#D97706' },
+      };
+      const mc = modeConfig[testMode];
+      if (mc) {
+        const mb = document.getElementById('mode-badge')!;
+        mb.textContent = mc.label;
+        mb.style.cssText = `padding:2px 8px;border-radius:12px;font-size:0.625rem;font-weight:700;flex-shrink:0;display:inline;background:${mc.bg};color:${mc.color}`;
+      }
+
+      // Verificar IA para pistas (solo PRACTICE)
+      if (testMode === 'PRACTICE') {
+        try {
+          const { aiTriedsApi: aiApi } = await import('../../lib/api/ai-trieds.api');
+          const s = await aiApi.status();
+          aiHintsAvail = !!(s.data?.enabled && s.data?.reachable);
+        } catch {}
+      }
+
       const [testRes, questionsRes] = await Promise.all([
         testsApi.findById(testId!, competenceId!),
         testsApi.getQuestions(testId!, competenceId!),
@@ -890,7 +930,13 @@ import { Icon } from 'astro-icon/components';
       questions  = questionsRes.data ?? [];
 
       if (!test || questions.length === 0) {
-        toast.error('Error al cargar el test');
+        toast.error('El test no tiene preguntas disponibles o no existe');
+        window.location.replace('/tests');
+        return;
+      }
+
+      if (!Boolean(test.isActive)) {
+        toast.error('Este test no está disponible actualmente');
         window.location.replace('/tests');
         return;
       }
@@ -911,22 +957,12 @@ import { Icon } from 'astro-icon/components';
       (document.getElementById('exam-name')       as HTMLElement).textContent = test.testName;
       (document.getElementById('mobile-q-total')  as HTMLElement).textContent = String(questions.length);
 
-      // Timer - solo si el test tiene tiempo. La práctica corre sin cronómetro.
+      // Timer diferido: solo se muestra el valor inicial; el countdown arranca en activateExam()
+      // para que el tiempo no corra mientras se lee el modal de pantalla completa.
       if (hasTimer) {
-        let remaining = serverRemaining as number;
-        updateTimer(remaining);
-        timerInt = setInterval(() => {
-          remaining--;
-          updateTimer(remaining);
-          if (remaining <= 60) document.getElementById('timer-wrap')?.classList.add('timer-danger');
-          if (remaining <= 0) {
-            clearInterval(timerInt!);
-            toast.warning('¡Tiempo agotado!');
-            finishExam(true);
-          }
-        }, 1000);
+        pendingRemaining = serverRemaining as number;
+        updateTimer(pendingRemaining);
       } else {
-        // Sin tiempo: ocultar el cronómetro
         const tw = document.getElementById('timer-wrap');
         if (tw) tw.style.display = 'none';
       }
@@ -936,18 +972,19 @@ import { Icon } from 'astro-icon/components';
       (document.getElementById('question-card')  as HTMLElement).style.display = 'block';
       renderQuestion(0);
 
-      // Activar antifraude y sugerir pantalla completa en modo estricto
+      // Registrar protecciones de modo estricto ahora que IS_STRICT_MODE está definido
       if (IS_STRICT_MODE) {
+        setupStrictModeListeners();
         const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         if (!isMobile) {
-          // Escritorio: mostrar modal F11
+          // Escritorio: mostrar modal de pantalla completa antes de empezar el countdown
           (document.getElementById('fs-modal') as HTMLElement).style.display = 'flex';
         } else {
           // Móvil: activar directamente (no hay F11)
-          examStarted = true;
+          activateExam();
         }
       } else {
-        examStarted = true;
+        activateExam();
       }
 
     } catch (err: any) {

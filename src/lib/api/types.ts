@@ -119,6 +119,8 @@ export interface TriedResumeDto {
   durationSeconds: number | null;
   expired: boolean;
   closed: boolean;
+  /** Modo real del test desde el servidor, no del parámetro de URL. */
+  testMode?: 'PRACTICE' | 'EXAM' | 'TIMED';
 }
 
 // ── Rankings ──────────────────────────────────────────────────────
