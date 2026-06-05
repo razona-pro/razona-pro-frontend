@@ -36,7 +36,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
           </div>
         </div>
         <p id="admin-stat-tests" class="admin-stat-value" style="color:#2563EB">-</p>
-        <p class="admin-stat-sub">simulacros creados</p>
+        <p class="admin-stat-sub">pruebas creadas</p>
       </div>
       <div class="admin-stat-card" style="border-left-color:#059669">
         <div class="admin-stat-header">
@@ -50,7 +50,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
       </div>
       <div class="admin-stat-card" style="border-left-color:#7C3AED">
         <div class="admin-stat-header">
-          <span class="admin-stat-label">Simulacros realizados</span>
+          <span class="admin-stat-label">Pruebas realizadas</span>
           <div class="admin-stat-icon" style="background:#EDE9FE">
             <svg width="14" height="14" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
@@ -79,7 +79,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
               <div class="admin-mgmt-icon" style="background:#DBEAFE;color:#2563EB">
                 <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><polyline points="9 12 11 14 15 10"/></svg>
               </div>
-              <p class="admin-mgmt-label">Tests</p>
+              <p class="admin-mgmt-label">Pruebas</p>
               <p class="admin-mgmt-sub">Crear y editar</p>
             </a>
             <a href="/admin/questions" class="admin-mgmt-card">
@@ -125,7 +125,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
       <div style="height:6px;background:var(--ui-surface);border-radius:3px;overflow:hidden">
         <div id="admin-sat-bar" style="height:100%;border-radius:3px;background:linear-gradient(to right,#059669,#34D399);width:0%;transition:width 1.2s ease"></div>
       </div>
-      <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:4px 0 0">Simulacros con puntaje ≥60</p>
+      <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:4px 0 0">Pruebas con puntaje ≥60</p>
     </div>
     <div class="metric-item">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -245,7 +245,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
   <!-- ══════════ STUDENT DASHBOARD ══════════ -->
   <div id="student-dash" style="display:none">
     <div class="dashboard-header" style="margin-bottom:1.25rem">
-      <h1 id="welcome-title" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Dashboard</h1>
+      <h1 id="welcome-title" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Panel de control</h1>
       <p id="welcome-sub" style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Cargando...</p>
     </div>
 
@@ -259,7 +259,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
 
     <!-- Stats -->
     <div id="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem">
-      <StatCard id="stat-tests"  label="Tests realizados"  value="-" sub="simulacros"        icon="tabler:clipboard-check" color="#D41224" bg="#FEE2E2" />
+      <StatCard id="stat-tests"  label="Pruebas realizadas"  value="-" sub="pruebas"        icon="tabler:clipboard-check" color="#D41224" bg="#FEE2E2" />
       <StatCard id="stat-avg"    label="Promedio global"   value="-" sub="puntos / 100"      icon="tabler:chart-line"      color="#2563EB" bg="#DBEAFE" />
       <StatCard id="stat-rank"   label="Posición ranking"  value="-" sub="posición actual"   icon="tabler:trophy"          color="#D97706" bg="#FEF3C7" />
       <StatCard id="stat-streak" label="Racha activa"      value="-" sub="días consecutivos" icon="tabler:flame"           color="#059669" bg="#D1FAE5" />
@@ -287,7 +287,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
             <div style="flex:1;min-width:100px">
               <p style="color:var(--ui-text-3);font-size:0.625rem;margin:0 0 2px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700">Último test</p>
               <p id="lt-name" style="color:var(--ui-text-1);font-weight:800;font-size:0.9375rem;margin:0 0 2px">Sin intentos</p>
-              <p id="lt-meta" style="color:var(--ui-text-3);font-size:0.75rem;margin:0">Comienza tu primer simulacro</p>
+              <p id="lt-meta" style="color:var(--ui-text-3);font-size:0.75rem;margin:0">Comienza tu primera prueba</p>
             </div>
             <div style="text-align:right;flex-shrink:0">
               <p id="lt-score" style="font-size:1.75rem;font-weight:900;color:var(--brand);margin:0;letter-spacing:-1px">-</p>
@@ -323,7 +323,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
             </div>
             <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">¿Listo para practicar?</p>
           </div>
-          <p style="font-size:0.75rem;color:var(--ui-text-2);margin:0 0 0.875rem;line-height:1.55">Toma un simulacro y mejora tu posición en el ranking.</p>
+          <p style="font-size:0.75rem;color:var(--ui-text-2);margin:0 0 0.875rem;line-height:1.55">Toma una prueba y mejora tu posición en el ranking.</p>
           <a href="/tests" class="cta-btn-brand">Ver tests disponibles →</a>
         </div>
       </div>
@@ -536,7 +536,7 @@ async function initStudentDashboard() {
 
   const welcomeTitle = document.getElementById('welcome-title');
   const welcomeSub   = document.getElementById('welcome-sub');
-  if (welcomeTitle) welcomeTitle.textContent = 'Dashboard';
+  if (welcomeTitle) welcomeTitle.textContent = 'Panel de control';
   if (welcomeSub)   welcomeSub.textContent   = `${greet}, ${fullNameStored}! Continúa preparándote para el Saber Pro.`;
 
   const setStatVal = (id: string, val: string) => {

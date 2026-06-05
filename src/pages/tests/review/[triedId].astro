@@ -3,10 +3,10 @@ export const prerender = false;
 import AppLayout from '../../../layouts/AppLayout.astro';
 ---
 
-<AppLayout title="Revisión del simulacro" currentPage="history" requiredRole="STUDENT">
+<AppLayout title="Revisión de la prueba" currentPage="history" requiredRole="STUDENT">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:8px;flex-wrap:wrap">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span>
       <a href="/dashboard/history" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Historial</a>
       <span>›</span>
@@ -14,7 +14,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     </div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
       <div>
-        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 4px;letter-spacing:-0.5px">Revisión del simulacro</h1>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 4px;letter-spacing:-0.5px">Revisión de la prueba</h1>
         <p id="review-subtitle" style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Cargando...</p>
       </div>
       <div id="score-chip" style="display:none;padding:12px 20px;border-radius:14px;text-align:center;background:var(--ui-card);border:1px solid var(--ui-border)">
@@ -54,7 +54,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
   <div id="questions-list" style="display:flex;flex-direction:column;gap:1.25rem"></div>
 
   <div id="bottom-actions" style="display:none;margin-top:2rem;gap:10px;flex-wrap:wrap">
-    <a href="/tests" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Hacer otro test</a>
+    <a href="/tests" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Hacer otra prueba</a>
     <a href="/dashboard/history" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Ver historial</a>
   </div>
 </AppLayout>

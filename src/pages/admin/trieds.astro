@@ -253,10 +253,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${t.correctAnswers ?? '-'} / ${t.totalQuestions}</td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-3)">${fmtTime(t.finishedAt ?? t.attemptTimestamp)}</td>
         <td class="td">
-          ${t.status === 'FINISHED'
+          ${['FINISHED','ABANDONED','ANULADO','TIMED_OUT'].includes(t.status)
             ? `<button class="btn-review" data-tried="${t.triedId}" data-name="${(t.testName ?? t.testId).replace(/"/g,'&quot;')}"
                 style="padding:4px 10px;border-radius:7px;border:1.5px solid rgba(212,18,36,0.3);background:rgba(212,18,36,0.05);color:var(--brand);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
-                Ver revisión
+                Ver respuestas
               </button>`
             : '<span style="font-size:0.75rem;color:var(--ui-text-3)">-</span>'
           }

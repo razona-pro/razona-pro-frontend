@@ -2,17 +2,17 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
-<AppLayout title="Tests disponibles" currentPage="tests" requiredRole="STUDENT">
+<AppLayout title="Pruebas disponibles" currentPage="tests" requiredRole="STUDENT">
 
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Tests disponibles</span>
     </div>
     <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
         <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Tests disponibles</h1>
-        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Selecciona un simulacro y comienza a practicar.</p>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Selecciona una prueba y comienza a practicar.</p>
       </div>
       <div style="text-align:center;padding:8px 14px;background:var(--ui-card);border-radius:10px;border:1px solid var(--ui-border)">
         <p id="count-shown" style="font-size:1.25rem;font-weight:900;color:var(--brand);margin:0;line-height:1">0</p>
@@ -446,7 +446,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
     (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = true;
     (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = 'Iniciando...';
     pendingStart = null;
-    (window as any).rpLoader?.show('Preparando el simulacro...');
+    (window as any).rpLoader?.show('Preparando la prueba...');
     try {
       const res = await triedsApi.start(testId, competenceId);
       if (res.data) {

@@ -45,6 +45,11 @@ const {
           if (p.cursor === 'large') h.classList.add('cursor-large');
           if (p.links) h.classList.add('highlight-links');
         } catch (e) {}
+        // Sidebar: aplicar estado colapsado ANTES del primer paint para evitar flash
+        try {
+          if (localStorage.getItem('rp_sb_collapsed') === '1')
+            document.documentElement.classList.add('sb-collapsed');
+        } catch (e) {}
       })();
     </script>
   </head>

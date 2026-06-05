@@ -121,6 +121,8 @@ export interface TriedResumeDto {
   closed: boolean;
   /** Modo real del test desde el servidor, no del parámetro de URL. */
   testMode?: 'PRACTICE' | 'EXAM' | 'TIMED';
+  /** Respuestas previamente guardadas (questionId → optionId). null si cerrado. */
+  savedAnswers?: Record<string, string>;
 }
 
 // ── Rankings ──────────────────────────────────────────────────────
@@ -230,6 +232,8 @@ export interface AiQuestionDto {
   hintsUsed:       number;
   selectedIndex:   number | null;   // null = no respondida
   isCorrect:       boolean | null;  // null = no respondida
+  correctIndex:    number | null;   // null = no revelada (solo admin/review)
+  explanation:     string | null;   // null = no revelada (solo admin/review)
 }
 
 export interface AiStartResponseDto {

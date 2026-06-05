@@ -5,7 +5,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 <AppLayout title="Mi historial" currentPage="history" requiredRole="STUDENT">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Mi historial</span>
     </div>
     <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Mi historial</h1>
@@ -119,7 +119,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
     if (countEl) countEl.textContent = `${filtered.length} resultado(s)`;
 
     if (filtered.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:3rem 1rem;color:var(--ui-text-3)"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin resultados</p><p style="font-size:0.875rem">Ajusta los filtros o realiza tu primer simulacro.</p></div>';
+      list.innerHTML = '<div style="text-align:center;padding:3rem 1rem;color:var(--ui-text-3)"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin resultados</p><p style="font-size:0.875rem">Ajusta los filtros o realiza tu primera prueba.</p></div>';
       return;
     }
 

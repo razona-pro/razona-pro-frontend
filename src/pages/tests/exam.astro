@@ -57,7 +57,7 @@ import { Icon } from 'astro-icon/components';
             <button id="finish-btn"
               style="width:100%;padding:0.5625rem;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;border:none;box-shadow:0 3px 10px rgba(212,18,36,0.28);display:flex;align-items:center;justify-content:center;gap:5px">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Finalizar simulacro
+              Finalizar prueba
             </button>
           </div>
         </div>
@@ -68,7 +68,7 @@ import { Icon } from 'astro-icon/components';
         <div id="exam-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:320px;gap:1rem;text-align:center">
           <div style="width:52px;height:52px;border-radius:50%;border:3.5px solid rgba(212,18,36,0.15);border-top-color:#D41224;animation:spin 0.85s linear infinite"></div>
           <div>
-            <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Preparando tu simulacro</p>
+            <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Preparando tu prueba</p>
             <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0">Cargando preguntas y configurando el banco...</p>
           </div>
         </div>
@@ -192,7 +192,7 @@ import { Icon } from 'astro-icon/components';
       <h3 style="font-size:1.25rem;font-weight:900;color:#DC2626;margin:0 0 0.75rem">Examen anulado por plagio</h3>
       <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 0.75rem;line-height:1.65">Se detectaron 3 o más salidas de ventana durante el examen. El intento ha sido marcado como <strong>abandonado</strong> automáticamente.</p>
       <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0 0 1.5rem">Si crees que esto fue un error, comunícate con tu administrador.</p>
-      <a href="/tests" style="display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Volver a tests</a>
+      <a href="/tests" style="display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Volver a pruebas</a>
     </div>
   </div>
 
@@ -221,7 +221,7 @@ import { Icon } from 'astro-icon/components';
   <div id="summary-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
     <div style="background:var(--ui-card);border-radius:20px;padding:0;max-width:480px;width:calc(100%-2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.35s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
       <div style="padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid var(--ui-border)">
-        <h3 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0 0 4px">Resumen del simulacro</h3>
+        <h3 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0 0 4px">Resumen de la prueba</h3>
         <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Revisa tus respuestas antes de finalizar.</p>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:1.25rem 1.75rem">
@@ -270,10 +270,10 @@ import { Icon } from 'astro-icon/components';
       </div>
       <p id="result-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.65"></p>
       <div style="display:flex;gap:8px">
-        <a href="/tests" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Otro test</a>
+        <a href="/tests" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Otra prueba</a>
         <a id="btn-review" href="#" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Ver revisión</a>
       </div>
-      <a href="/dashboard" style="display:block;margin-top:10px;font-size:0.8125rem;color:var(--ui-text-3);text-decoration:none">Ir al dashboard →</a>
+      <a href="/dashboard" style="display:block;margin-top:10px;font-size:0.8125rem;color:var(--ui-text-3);text-decoration:none">Ir al panel de control →</a>
     </div>
   </div>
 </BaseLayout>
@@ -835,13 +835,14 @@ import { Icon } from 'astro-icon/components';
     const elapsed = Math.round((Date.now() - startTime) / 1000);
     try {
       const res = await triedsApi.finish(triedId!, elapsed);
-      if (res.data) showResults(res.data.score ?? 0, res.data.correctAnswers ?? 0, elapsed, res.data.totalQuestions);
-    } catch {
-      showResults(0, 0, elapsed, questions.length);
+      if (res.data) showResults(res.data.score ?? 0, res.data.correctAnswers ?? 0, elapsed, res.data.totalQuestions, true);
+    } catch (err: any) {
+      toast.error('Error al finalizar', { description: err?.message });
+      showResults(0, 0, elapsed, questions.length, false);
     }
   }
 
-  function showResults(score: number, correct: number, elapsed: number, total: number) {
+  function showResults(score: number, correct: number, elapsed: number, total: number, canReview = true) {
     const sc = scoreColor(score);
     const iconWrap = document.getElementById('result-icon-wrap')!;
     iconWrap.style.background = score >= 60 ? '#D1FAE5' : score >= 40 ? '#FEF3C7' : '#FEE2E2';
@@ -857,7 +858,13 @@ import { Icon } from 'astro-icon/components';
       ? '¡Excelente! Estás muy bien preparado.' : score >= 60
       ? '¡Buen trabajo! Sigue practicando.' : '¡Ánimo! Revisa los temas y vuelve a intentarlo.';
     const reviewBtn = document.getElementById('btn-review') as HTMLAnchorElement;
-    if (reviewBtn) reviewBtn.href = `/tests/review/${triedId}`;
+    if (reviewBtn) {
+      if (canReview) {
+        reviewBtn.href = `/tests/review/${triedId}`;
+      } else {
+        reviewBtn.style.display = 'none';
+      }
+    }
     (document.getElementById('results-overlay') as HTMLElement).style.display = 'flex';
     // Animar score
     let n = 0;
@@ -898,6 +905,11 @@ import { Icon } from 'astro-icon/components';
 
       // Notificar a otras pestañas que se abre este examen; ellas deben cerrarse
       examChannel?.postMessage('TAKEOVER');
+
+      // Restaurar respuestas previamente guardadas (por si el estudiante recargó o perdió conexión)
+      if (resume.savedAnswers) {
+        Object.assign(answers, resume.savedAnswers);
+      }
 
       // Mode badge (requiere testMode del servidor)
       const modeConfig: Record<string, { label: string; bg: string; color: string }> = {
@@ -988,7 +1000,7 @@ import { Icon } from 'astro-icon/components';
       }
 
     } catch (err: any) {
-      toast.error('Error al cargar el simulacro', { description: err?.message });
+      toast.error('Error al cargar la prueba', { description: err?.message });
       window.location.replace('/tests');
     }
   }
