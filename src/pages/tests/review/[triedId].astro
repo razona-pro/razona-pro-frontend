@@ -3,7 +3,7 @@ export const prerender = false;
 import AppLayout from '../../../layouts/AppLayout.astro';
 ---
 
-<AppLayout title="Revisión del simulacro" currentPage="history">
+<AppLayout title="Revisión del simulacro" currentPage="history" requiredRole="STUDENT">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:8px;flex-wrap:wrap">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
@@ -18,7 +18,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
         <p id="review-subtitle" style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Cargando...</p>
       </div>
       <div id="score-chip" style="display:none;padding:12px 20px;border-radius:14px;text-align:center;background:var(--ui-card);border:1px solid var(--ui-border)">
-        <p id="score-chip-val" style="font-size:2rem;font-weight:900;margin:0;line-height:1">—</p>
+        <p id="score-chip-val" style="font-size:2rem;font-weight:900;margin:0;line-height:1">-</p>
         <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.4px;margin:0">/ 100 pts</p>
       </div>
     </div>
@@ -31,10 +31,10 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 
   <!-- Stats -->
   <div id="stats-row" style="display:none;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem">
-    <div class="stat-chip" style="border-left-color:#059669"><span class="stat-chip-label">Correctas</span><p id="stat-correct" class="stat-chip-val" style="color:#059669">—</p></div>
-    <div class="stat-chip" style="border-left-color:#DC2626"><span class="stat-chip-label">Incorrectas</span><p id="stat-wrong" class="stat-chip-val" style="color:#DC2626">—</p></div>
-    <div class="stat-chip" style="border-left-color:#D97706"><span class="stat-chip-label">Sin responder</span><p id="stat-skipped" class="stat-chip-val" style="color:#D97706">—</p></div>
-    <div class="stat-chip" style="border-left-color:#2563EB"><span class="stat-chip-label">Tiempo</span><p id="stat-time" class="stat-chip-val" style="color:#2563EB">—</p></div>
+    <div class="stat-chip" style="border-left-color:#059669"><span class="stat-chip-label">Correctas</span><p id="stat-correct" class="stat-chip-val" style="color:#059669">-</p></div>
+    <div class="stat-chip" style="border-left-color:#DC2626"><span class="stat-chip-label">Incorrectas</span><p id="stat-wrong" class="stat-chip-val" style="color:#DC2626">-</p></div>
+    <div class="stat-chip" style="border-left-color:#D97706"><span class="stat-chip-label">Sin responder</span><p id="stat-skipped" class="stat-chip-val" style="color:#D97706">-</p></div>
+    <div class="stat-chip" style="border-left-color:#2563EB"><span class="stat-chip-label">Tiempo</span><p id="stat-time" class="stat-chip-val" style="color:#2563EB">-</p></div>
   </div>
 
   <!-- Filtros -->
@@ -241,7 +241,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
       const scoreChip = document.getElementById('score-chip')!;
       const scoreVal  = document.getElementById('score-chip-val')!;
       const sc        = scoreColor(r.score ?? 0);
-      scoreVal.textContent = r.score ? r.score.toFixed(0) : '—';
+      scoreVal.textContent = r.score ? r.score.toFixed(0) : '-';
       scoreVal.style.color = sc;
       scoreChip.style.borderColor = sc + '44';
       scoreChip.style.display = 'block';
@@ -250,7 +250,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
       const correct = questionsToShow.filter(q => q.answeredCorrectly && q.selectedOptionId).length;
       const wrong   = questionsToShow.filter(q => !q.answeredCorrectly && q.selectedOptionId).length;
       const skipped = questionsToShow.filter(q => !q.selectedOptionId).length;
-      const timeFmt = r.timeSpentSeconds ? fmtDuration(r.timeSpentSeconds) : '—';
+      const timeFmt = r.timeSpentSeconds ? fmtDuration(r.timeSpentSeconds) : '-';
 
       (document.getElementById('stat-correct') as HTMLElement).textContent  = String(correct);
       (document.getElementById('stat-wrong')   as HTMLElement).textContent  = String(wrong);

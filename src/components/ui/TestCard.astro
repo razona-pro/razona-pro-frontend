@@ -11,7 +11,7 @@ interface Props {
 
 const { test, bestScore } = Astro.props;
 const comp    = getCompStyle(test.competenceId, test.competenceName ?? '');
-const durMin  = Math.floor(test.durationSeconds / 60);
+const durLabel = test.durationSeconds != null ? `${Math.floor(test.durationSeconds / 60)} min` : 'Sin límite';
 const modeColor = TEST_MODE_COLOR[test.testMode] ?? '#6B7280';
 const modeBg    = TEST_MODE_BG[test.testMode]    ?? '#F3F4F6';
 const modeLabel = TEST_MODE_LABEL[test.testMode] ?? test.testMode;
@@ -47,7 +47,7 @@ const modeLabel = TEST_MODE_LABEL[test.testMode] ?? test.testMode;
     <div class="test-meta">
       <span class="meta-item">
         <Icon name="tabler:clock" size={13} />
-        {durMin} min
+        {durLabel}
       </span>
       <span class="meta-item">
         <Icon name="tabler:help-circle" size={13} />

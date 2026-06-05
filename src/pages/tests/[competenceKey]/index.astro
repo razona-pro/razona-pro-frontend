@@ -1,12 +1,13 @@
 ---
 // src/pages/tests/[competenceKey]/index.astro
 // Ruta dinámica: /tests/lc, /tests/rq, /tests/cc, /tests/ce, /tests/en
+export const prerender = false;
 import AppLayout from '../../../layouts/AppLayout.astro';
 
 const { competenceKey } = Astro.params;
 ---
 
-<AppLayout title="Tests disponibles" currentPage="tests">
+<AppLayout title="Tests disponibles" currentPage="tests" requiredRole="STUDENT">
   <!-- Reutiliza toda la lógica de /tests/index.astro pero con filtro pre-aplicado -->
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
@@ -49,7 +50,7 @@ const { competenceKey } = Astro.params;
     <a href="/tests" style="display:inline-block;margin-top:12px;color:var(--brand);font-weight:600;text-decoration:none">Ver todas las competencias →</a>
   </div>
 
-  <!-- Modal confirmar inicio — resumen completo del test -->
+  <!-- Modal confirmar inicio - resumen completo del test -->
   <div id="confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(5px);padding:1rem">
     <div style="background:var(--ui-card);border-radius:20px;padding:0;max-width:440px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.25);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;overflow:hidden">
       <!-- Header con color -->
@@ -138,7 +139,7 @@ const { competenceKey } = Astro.params;
   let allTests:   TestDto[]  = [];
   let allTrieds:  TriedDto[] = [];
   let filterMode = 'ALL';
-  let pendingStart: { testId: string; competenceId: string } | null = null;
+  let pendingStart: { testId: string; competenceId: string; testMode: string } | null = null;
 
   // Encontrar nombre de competencia por key
   competencesApi.findAll(true).then(res => {
@@ -178,7 +179,7 @@ const { competenceKey } = Astro.params;
 
     tests.forEach(t => {
       const s         = getCompStyle(t.competenceId, t.competenceName ?? '');
-      const durMin    = Math.floor(t.durationSeconds / 60);
+      const durLabel  = t.durationSeconds != null ? `${Math.floor(t.durationSeconds / 60)} min` : 'Sin límite';
       const myTrieds  = allTrieds.filter(tr => tr.testId === t.testId && tr.status === 'FINISHED' && tr.score != null);
       const bestScore = myTrieds.length ? Math.max(...myTrieds.map(tr => tr.score ?? 0)) : null;
       const modeColor = TEST_MODE_COLOR[t.testMode] ?? '#6B7280';
@@ -204,7 +205,7 @@ const { competenceKey } = Astro.params;
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px">
             <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--ui-text-3)">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              ${durMin} min
+              ${durLabel}
             </span>
             <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--ui-text-3)">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2"/></svg>
@@ -221,7 +222,7 @@ const { competenceKey } = Astro.params;
             data-test-id="${t.testId}"
             data-comp-id="${t.competenceId}"
             data-name="${t.testName.replace(/"/g,'&quot;')}"
-            data-dur="${durMin}"
+            data-dur="${t.durationSeconds != null ? Math.floor(t.durationSeconds/60) : ''}"
             data-q="${t.questionsToPresent ?? '?'}"
             data-mode="${t.testMode}"
             data-color="${s.color}"
@@ -239,7 +240,7 @@ const { competenceKey } = Astro.params;
     // Listeners
     grid.querySelectorAll<HTMLButtonElement>('.test-start-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        pendingStart = { testId: btn.dataset.testId!, competenceId: btn.dataset.compId! };
+        pendingStart = { testId: btn.dataset.testId!, competenceId: btn.dataset.compId!, testMode: btn.dataset.mode! };
         openTestModal(btn);
       });
     });
@@ -257,9 +258,9 @@ const { competenceKey } = Astro.params;
 
   // ── Modal enriquecido ───────────────────────────────────────────
   const MODE_DESC: Record<string, string> = {
-    PRACTICE: '📚 Modo práctica — sin presión de tiempo. Puedes revisar tus respuestas y aprender a tu ritmo.',
-    EXAM:     '📝 Modo examen — simula las condiciones reales del Saber Pro. Tiempo límite definido.',
-    TIMED:    '⏱ Modo cronometrado — responde tan rápido como puedas. El tiempo corre desde el primer segundo.',
+    PRACTICE: '📚 Modo práctica - sin presión de tiempo. Puedes revisar tus respuestas y aprender a tu ritmo.',
+    EXAM:     '📝 Modo examen - simula las condiciones reales del Saber Pro. Tiempo límite definido.',
+    TIMED:    '⏱ Modo cronometrado - responde tan rápido como puedas. El tiempo corre desde el primer segundo.',
   };
 
   function openTestModal(btn: HTMLButtonElement) {
@@ -286,9 +287,9 @@ const { competenceKey } = Astro.params;
     const metricsEl = document.getElementById('modal-metrics')!;
     const secPerQ   = total > 0 ? Math.round(dur * 60 / total) : 0;
     metricsEl.innerHTML = [
-      { label: 'Duración',    val: `${dur} min`,  icon: '🕐' },
+      { label: 'Duración',    val: dur > 0 ? `${dur} min` : 'Sin límite',  icon: '🕐' },
       { label: 'Preguntas',   val: q,              icon: '📋' },
-      { label: 'Seg/pregunta', val: secPerQ > 0 ? `~${secPerQ}s` : '—', icon: '⚡' },
+      { label: 'Seg/pregunta', val: secPerQ > 0 ? `~${secPerQ}s` : '-', icon: '⚡' },
     ].map(m => `
       <div style="text-align:center;padding:10px 6px;background:var(--ui-surface);border-radius:10px;border:1px solid var(--ui-border)">
         <p style="font-size:1rem;margin:0 0 2px">${m.icon}</p>
@@ -321,6 +322,8 @@ const { competenceKey } = Astro.params;
     (document.getElementById('modal-mode-desc') as HTMLElement).textContent =
       MODE_DESC[mode] ?? 'Test disponible. ¡Mucho éxito!';
 
+    (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';
+    (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = false;
     document.getElementById('confirm-modal')!.style.display = 'flex';
   }
 
@@ -336,18 +339,21 @@ const { competenceKey } = Astro.params;
   });
   document.getElementById('modal-confirm')?.addEventListener('click', async () => {
     if (!pendingStart) return;
-    document.getElementById('confirm-modal')!.style.display = 'none';
-    const { testId, competenceId } = pendingStart;
+    const { testId, competenceId, testMode } = pendingStart;
     pendingStart = null;
+    document.getElementById('confirm-modal')!.style.display = 'none';
     const confirmBtn = document.getElementById('modal-confirm') as HTMLButtonElement;
     confirmBtn.disabled = true;
     (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = 'Iniciando...';
+    (window as any).rpLoader?.show('Preparando el simulacro...');
     try {
       const res = await triedsApi.start(testId, competenceId);
       if (res.data) {
-        window.location.href = `/tests/exam?tried=${res.data.triedId}&test=${testId}&comp=${competenceId}`;
+        (window as any).rpLoader?.show('Cargando preguntas...');
+        window.location.href = `/tests/exam?tried=${res.data.triedId}&test=${testId}&comp=${competenceId}&mode=${testMode}`;
       }
     } catch (err: any) {
+      (window as any).rpLoader?.hide();
       toast.error('No se pudo iniciar', { description: err?.message ?? 'Inténtalo de nuevo.' });
       confirmBtn.disabled = false;
       (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';

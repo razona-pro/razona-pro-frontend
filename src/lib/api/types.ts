@@ -87,7 +87,7 @@ export interface TestDto {
   competenceName?: string;
   testName: string;
   description?: string;
-  durationSeconds: number;
+  durationSeconds: number | null;
   questionsToPresent?: number;
   testMode: 'PRACTICE' | 'EXAM' | 'TIMED';
   isActive: boolean;
@@ -100,14 +100,25 @@ export interface TriedDto {
   testId: string;
   testName?: string;
   competenceId: string;
-  status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED' | 'TIMED_OUT';
+  status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED' | 'TIMED_OUT' | 'ANULADO';
   score?: number;
   totalQuestions: number;
   correctAnswers?: number;
   timeSpentSeconds?: number;
+  fraudAttempts?: number;
   attemptTimestamp: string;
   finishedAt?: string;
   questions?: any[];
+  questionIds?: string[];
+}
+
+export interface TriedResumeDto {
+  tried: TriedDto;
+  /** Segundos restantes. null = sin tiempo (práctica). 0 = expirado. */
+  remainingSeconds: number | null;
+  durationSeconds: number | null;
+  expired: boolean;
+  closed: boolean;
 }
 
 // ── Rankings ──────────────────────────────────────────────────────

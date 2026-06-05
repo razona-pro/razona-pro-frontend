@@ -632,7 +632,7 @@ import { Icon } from 'astro-icon/components';
   import { saveSession, redirectIfAuthenticated } from '../lib/auth';
   import { toast } from '../lib/toast';
 
-  redirectIfAuthenticated('/dashboard');
+  redirectIfAuthenticated(); // Redirige al home del rol (admin→/admin/home, student→/dashboard)
 
   // ── View management ───────────────────────────────────────────────
   type View = 'login' | 'register' | 'forgot';
@@ -648,7 +648,27 @@ import { Icon } from 'astro-icon/components';
 
   let current: View = 'login';
 
+  // Limpia TODOS los formularios y mensajes al cambiar de vista,
+  // para que no queden datos del formulario anterior.
+  function resetAllForms() {
+    ['login-form', 'register-form', 'forgot-form'].forEach(id => {
+      (document.getElementById(id) as HTMLFormElement | null)?.reset();
+    });
+    ['login-msg', 'register-msg', 'forgot-msg'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    // Restablecer campos de contraseña a ocultos (los toggles los dejan en "text")
+    document.querySelectorAll<HTMLButtonElement>('.toggle-pw').forEach(btn => {
+      const input = document.getElementById(btn.dataset.target ?? '') as HTMLInputElement | null;
+      if (input) input.type = 'password';
+    });
+    // Quitar el aviso de reenvío de verificación si estaba visible
+    document.getElementById('resend-box')?.remove();
+  }
+
   function switchView(v: View) {
+    if (v !== current) resetAllForms();
     // Hide all views
     Object.values(views).forEach(id => {
       const el = document.getElementById(id);
@@ -737,19 +757,72 @@ import { Icon } from 'astro-icon/components';
     }
 
     setLoading('login-btn', 'login-label', true, 'Ingresar');
+    (window as any).rpLoader?.show('Iniciando sesión...');
     try {
       const res = await authApi.login(email, password, code);
       if (res.data?.token) {
         saveSession(res.data.token);
+        // Detectar rol desde el token y redirigir al home correcto
+        let userType = 'STUDENT';
+        try { userType = JSON.parse(atob(res.data.token.split('.')[1])).userType ?? 'STUDENT'; } catch {}
+        (window as any).rpLoader?.show('¡Bienvenido! Redirigiendo...');
         toast.success('¡Bienvenido!', { description: 'Sesión iniciada correctamente.' });
-        setTimeout(() => window.location.replace('/dashboard'), 600);
+        const dest = userType === 'ADMIN' ? '/admin/home' : '/dashboard';
+        setTimeout(() => window.location.replace(dest), 500);
       }
     } catch (err: any) {
-      showInfoModal('error', 'Error al ingresar', err?.message ?? 'Credenciales incorrectas.');
+      (window as any).rpLoader?.hide();
+      // EMAIL_NOT_VERIFIED → ofrecer reenvío en vez del modal de error
+      if (err?.code === 'EMAIL_NOT_VERIFIED') {
+        showMsg('login-msg', 'Debes verificar tu correo antes de ingresar.', 'error');
+        showResendVerification(email);
+      } else {
+        showInfoModal('error', 'Error al ingresar', err?.message ?? 'Credenciales incorrectas.');
+      }
     } finally {
       setLoading('login-btn', 'login-label', false, 'Ingresar');
     }
   });
+
+  // ── Reenvío de verificación (con cooldown manejado por el backend) ──
+  function showResendVerification(email: string) {
+    document.getElementById('resend-box')?.remove();
+    const anchor = document.getElementById('login-msg');
+    if (!anchor) return;
+    const box = document.createElement('div');
+    box.id = 'resend-box';
+    box.className = 'auth-msg';
+    box.style.cssText = 'display:block;margin-top:10px;background:var(--brand-muted);border:1px solid var(--brand-light);border-radius:10px;padding:12px 14px;color:var(--ui-text-1)';
+    box.innerHTML =
+      `<span style="display:block;font-size:0.8125rem;margin-bottom:9px">¿No recibiste el correo? Reenviar el enlace de verificación a <strong>${email}</strong>.</span>` +
+      `<button type="button" id="resend-btn" style="border:none;border-radius:8px;padding:8px 16px;font-size:0.8125rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff;font-family:inherit">Reenviar correo</button>`;
+    anchor.insertAdjacentElement('afterend', box);
+
+    const btn = document.getElementById('resend-btn') as HTMLButtonElement;
+    btn.addEventListener('click', async () => {
+      btn.disabled = true; btn.textContent = 'Enviando...';
+      try {
+        const res = await authApi.resendVerification(email);
+        toast.success('Correo reenviado', { description: 'Revisa tu bandeja de entrada y la carpeta de spam.' });
+        startResendCooldown(btn, res.data?.cooldownSeconds ?? 60);
+      } catch (e: any) {
+        // El backend devuelve el mensaje con los segundos restantes si va muy rápido
+        btn.disabled = false; btn.textContent = 'Reenviar correo';
+        toast.error('No se pudo reenviar', { description: e?.message ?? 'Intenta más tarde.' });
+      }
+    });
+  }
+
+  function startResendCooldown(btn: HTMLButtonElement, seconds: number) {
+    let s = seconds;
+    btn.disabled = true;
+    const tick = () => {
+      if (s <= 0) { btn.disabled = false; btn.textContent = 'Reenviar correo'; return; }
+      btn.textContent = `Reenviar en ${s}s`;
+      s--; setTimeout(tick, 1000);
+    };
+    tick();
+  }
 
   // ── REGISTER ──────────────────────────────────────────────────────
   document.getElementById('register-form')?.addEventListener('submit', async e => {
@@ -778,6 +851,7 @@ import { Icon } from 'astro-icon/components';
     const email = (document.getElementById('r-email') as HTMLInputElement).value.trim();
 
     setLoading('register-btn', 'register-label', true, 'Crear cuenta');
+    (window as any).rpLoader?.show('Creando tu cuenta...');
     try {
       await authApi.register({
         studentId,
@@ -793,9 +867,11 @@ import { Icon } from 'astro-icon/components';
       toast.success('¡Registro exitoso!', { description: 'Verifica tu correo antes de iniciar sesión.' });
       setTimeout(() => switchView('login'), 3000);
     } catch (err: any) {
+      (window as any).rpLoader?.hide();
       const msgs = err?.errors ? Object.values(err.errors as Record<string, string>).join(' ') : err?.message;
       showMsg('register-msg', msgs ?? 'Error al registrarse.', 'error');
     } finally {
+      (window as any).rpLoader?.hide();
       setLoading('register-btn', 'register-label', false, 'Crear cuenta');
     }
   });

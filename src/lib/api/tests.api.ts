@@ -10,10 +10,11 @@ export const testsApi = {
     apiFetch<QuestionDto[]>(`/api/tests/${testId}/${competenceId}/questions`),
   create: (p: {
     competenceId: string; testName: string; description?: string;
-    durationSeconds: number; questionsToPresent?: number; testMode: string;
+    durationSeconds: number | null; questionsToPresent?: number; testMode: string;
+    notifyStudents?: boolean;
   }) => apiFetch<TestDto>('/api/tests', { method: 'POST', body: JSON.stringify(p) }),
   update: (testId: string, competenceId: string, p: {
-    testName?: string; description?: string; durationSeconds?: number;
+    testName?: string; description?: string; durationSeconds?: number | null;
     questionsToPresent?: number; testMode?: string; isActive?: boolean;
   }) => apiFetch<TestDto>(`/api/tests/${testId}/${competenceId}`, { method: 'PUT', body: JSON.stringify(p) }),
   activate: (testId: string, competenceId: string) =>

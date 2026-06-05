@@ -22,7 +22,7 @@ export const competencesApi = {
   ) => apiFetch<QuestionDto>(`/api/competences/${competenceId}/questions`, { method: 'POST', body: JSON.stringify(q) }),
   updateQuestion: (
     competenceId: string, questionId: string,
-    q: { statement: string; explanation?: string; source?: string; difficultyLevel: string }
+    q: { statement: string; explanation?: string; source?: string; difficultyLevel: string; options?: { optionText: string; isCorrect: boolean }[] }
   ) => apiFetch<QuestionDto>(`/api/competences/${competenceId}/questions/${questionId}`,
         { method: 'PUT', body: JSON.stringify(q) }),
   activateQuestion: (competenceId: string, questionId: string) =>

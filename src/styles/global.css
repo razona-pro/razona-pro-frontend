@@ -1,6 +1,6 @@
 ﻿/*
  * ═══════════════════════════════════════════════════════════════
- *  RazonaPro — Design System Global CSS
+ *  RazonaPro - Design System Global CSS
  *  Single source of truth: fonts, tokens, themes, a11y, utilities
  *
  *  ARQUITECTURA DE COLOR:
@@ -9,11 +9,12 @@
  *  --sidebar-*  → Sidebar. CLARO por defecto, oscuro en html.dark.
  *
  *  FUENTE:
- *  Poppins se carga aquí una sola vez (NUNCA en páginas individuales).
+ *  Lora es la predeterminada (UI + contenido). Poppins/Lexend solo como
+ *  opciones de accesibilidad. Se cargan aquí una sola vez (NUNCA en páginas).
  * ═══════════════════════════════════════════════════════════════
  */
 
-/* ── 1. Fuentes — Poppins (predeterminada) + Lora (legible) ─ */
+/* ── 1. Fuentes - Lora (predeterminada) + Poppins (opción a11y) ─ */
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 /* ── 2. Tailwind ─────────────────────────────────────────── */
@@ -35,14 +36,14 @@
    --sidebar-*  → Sidebar. CLARO por defecto.
 ═══════════════════════════════════════════════════════ */
 :root {
-  /* Brand UFPSO — NUNCA cambian */
+  /* Brand UFPSO - NUNCA cambian */
   --brand:       #D41224;
   --brand-dark:  #9B1F24;
   --brand-light: #D94F54;
   --brand-pale:  #FDEAEA;
   --brand-muted: rgba(212, 18, 36, 0.12);
 
-  /* UI — Light mode (default) */
+  /* UI - Light mode (default) */
   --ui-bg:        #FFFFFF;
   --ui-bg-alt:    #F5F3F0;
   --ui-surface:   #F8F8F8;
@@ -58,7 +59,7 @@
   --ui-input-bg:  #F5F5F5;
   --ui-hover:     #F0F0F0;
 
-  /* Sidebar — CLARO por defecto */
+  /* Sidebar - CLARO por defecto */
   --sidebar-bg:         #FFFFFF;
   --sidebar-border:     #E5E5E5;
   --sidebar-text:       #6B6B6B;
@@ -67,8 +68,10 @@
   --sidebar-active-bg:  rgba(212, 18, 36, 0.08);
   --sidebar-active-txt: #D41224;
 
+  /* Lora es la fuente predeterminada en TODA la app (contenido y UI).
+     Poppins/Lexend solo se aplican si el usuario las elige en accesibilidad. */
   --font-sans: 'Lora', Georgia, serif;
-  --font-ui: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-ui:   'Lora', Georgia, serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
 }
 
@@ -391,7 +394,7 @@ label, .field-lbl, .field-inp,
 #rp-a11y-root, #rp-a11y-root * { font-family: var(--font-ui); }
 
 /* ═══════════════════════════════════════════════════════════════
-   20. DARK / CONTRAST-DARK / HIGH-CONTRAST — Overrides componentes
+   20. DARK / CONTRAST-DARK / HIGH-CONTRAST - Overrides componentes
 ═══════════════════════════════════════════════════════════════ */
 :where(html.dark, html.contrast-dark, html.high-contrast) #main-area {
   background: var(--ui-bg-alt) !important;
@@ -474,7 +477,7 @@ label, .field-lbl, .field-inp,
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   21. SIDEBAR MODO CLARO — Override inline styles del HTML
+   21. SIDEBAR MODO CLARO - Override inline styles del HTML
 ═══════════════════════════════════════════════════════════════ */
 html:not(.dark):not(.high-contrast):not(.contrast-dark) #sb-name { color: var(--ui-text-1) !important; }
 html:not(.dark):not(.high-contrast):not(.contrast-dark) #sb-sub  { color: var(--ui-text-3) !important; }
@@ -666,4 +669,34 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+/* ═══════════════════════════════════════════════════════════════
+   16. ANIMACIONES DE ENTRADA + BADGES ADAPTATIVOS
+   Animación global del contenido (como el login) en TODAS las
+   secciones, desde un solo lugar. Y badges de estado que se
+   adaptan a modo claro/oscuro sin colores quemados.
+═══════════════════════════════════════════════════════════════ */
+@keyframes rpContentIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.app-content > * {
+  animation: rpContentIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.rp-fade-in { animation: rpContentIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Badges de estado adaptativos (usar en código nuevo en vez de hex quemados) */
+.rp-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 12px;
+  font-size: 0.6875rem; font-weight: 700; line-height: 1.4;
+}
+.rp-badge-success { background: color-mix(in srgb, #059669 16%, var(--ui-card)); color: #10B981; }
+.rp-badge-warning { background: color-mix(in srgb, #D97706 16%, var(--ui-card)); color: #F59E0B; }
+.rp-badge-danger  { background: color-mix(in srgb, #DC2626 16%, var(--ui-card)); color: #F87171; }
+.rp-badge-info    { background: color-mix(in srgb, #2563EB 16%, var(--ui-card)); color: #60A5FA; }
+.rp-badge-neutral { background: var(--ui-surface); color: var(--ui-text-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-content > *, .rp-fade-in { animation: none; }
 }

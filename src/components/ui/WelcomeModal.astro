@@ -1,0 +1,100 @@
+---
+/**
+ * Aviso de bienvenida - se muestra UNA sola vez al estudiante recién registrado.
+ * Marca un flag en localStorage para no repetirse.
+ */
+import { Icon } from 'astro-icon/components';
+---
+
+<div id="rp-welcome" class="wm-overlay" role="dialog" aria-modal="true" aria-labelledby="wm-title" style="display:none">
+  <div class="wm-card">
+    <div class="wm-hero">
+      <div class="wm-logo"><Icon name="tabler:brain" size={26} /></div>
+      <h2 id="wm-title" class="wm-title">¡Bienvenido a RazonaPro!</h2>
+      <p class="wm-sub">Tu preparación para el Saber Pro empieza aquí.</p>
+    </div>
+    <div class="wm-body">
+      <ul class="wm-list">
+        <li><Icon name="tabler:clipboard-list" size={18} /><span><strong>Tests</strong> por competencia: practica o ponte a prueba en modo examen.</span></li>
+        <li><Icon name="tabler:robot" size={18} /><span><strong>Práctica con IA</strong>: preguntas adaptativas que suben de nivel contigo.</span></li>
+        <li><Icon name="tabler:trophy" size={18} /><span><strong>Rankings</strong>: compite con tu programa en los modos cronometrados.</span></li>
+        <li><Icon name="tabler:accessible" size={18} /><span><strong>Accesibilidad</strong>: ajusta fuente, contraste y tamaño desde el botón flotante.</span></li>
+      </ul>
+      <button id="wm-close" class="wm-btn" type="button">Empezar</button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    try {
+      var KEY = 'rp_welcomed';
+      var raw = localStorage.getItem('rp_token');
+      var p = null;
+      if (raw) { try { p = JSON.parse(atob(raw.split('.')[1])); } catch (e) {} }
+      // Solo estudiantes y solo si no se ha mostrado antes
+      if (!p || p.userType !== 'STUDENT') return;
+      if (localStorage.getItem(KEY)) return;
+
+      var el = document.getElementById('rp-welcome');
+      if (!el) return;
+      el.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+
+      function done() {
+        el.style.display = 'none';
+        document.body.style.overflow = '';
+        localStorage.setItem(KEY, '1');
+      }
+      document.getElementById('wm-close').addEventListener('click', done);
+      el.addEventListener('click', function (e) { if (e.target === el) done(); });
+    } catch (e) {}
+  })();
+</script>
+
+<style>
+  .wm-overlay {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 1rem;
+    font-family: var(--font-sans);
+    animation: wm-fade 0.25s ease both;
+  }
+  .wm-card {
+    max-width: 27rem; width: 100%;
+    background: var(--ui-card); border: 1px solid var(--ui-border);
+    border-radius: 1.25rem; overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.28);
+    animation: wm-rise 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .wm-hero {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff; text-align: center; padding: 1.75rem 1.5rem 1.5rem;
+  }
+  .wm-logo {
+    width: 52px; height: 52px; margin: 0 auto 0.75rem;
+    background: rgba(255,255,255,0.15); border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wm-title { margin: 0; font-size: 1.4rem; font-weight: 800; }
+  .wm-sub { margin: 0.35rem 0 0; opacity: 0.85; font-size: 0.95rem; }
+  .wm-body { padding: 1.5rem; }
+  .wm-list { list-style: none; margin: 0 0 1.25rem; padding: 0; display: grid; gap: 0.85rem; }
+  .wm-list li { display: flex; gap: 0.7rem; align-items: flex-start; color: var(--ui-text-2); line-height: 1.5; font-size: 0.9rem; }
+  .wm-list li :global(svg) { color: var(--brand); flex-shrink: 0; margin-top: 1px; }
+  .wm-list strong { color: var(--ui-text-1); }
+  .wm-btn {
+    width: 100%; border: none; cursor: pointer;
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff; font-family: var(--font-ui); font-weight: 700; font-size: 1rem;
+    padding: 0.8rem; border-radius: 0.75rem;
+    box-shadow: 0 6px 18px var(--brand-muted);
+    transition: transform 0.15s ease;
+  }
+  .wm-btn:hover { transform: translateY(-1px); }
+  .wm-btn:active { transform: translateY(1px); }
+
+  @keyframes wm-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes wm-rise { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .wm-overlay, .wm-card { animation: none; } }
+</style>

@@ -1,0 +1,359 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Intentos de estudiantes" currentPage="admin-trieds">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/admin/home" style="color:var(--ui-text-3);text-decoration:none"
+        onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Intentos</span>
+    </div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Intentos de estudiantes</h1>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Busca a un estudiante y revisa sus resultados detallados.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Búsqueda -->
+  <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);padding:1.25rem;margin-bottom:1.25rem">
+    <p style="font-size:0.75rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px">Buscar intentos</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:200px">
+        <label style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:4px">Código de estudiante</label>
+        <div style="position:relative">
+          <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--ui-text-3)" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="search-student" type="text" placeholder="Ej: 0192270" maxlength="10"
+            style="width:100%;padding:9px 14px 9px 34px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:10px;font-size:0.875rem;color:var(--ui-text-1);font-family:inherit;outline:none;transition:all 0.2s"
+            onfocus="this.style.borderColor='var(--brand)';this.style.boxShadow='0 0 0 3px rgba(212,18,36,0.1)'"
+            onblur="this.style.borderColor='var(--ui-border)';this.style.boxShadow='none'">
+        </div>
+      </div>
+      <div style="min-width:160px">
+        <label style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:4px">Estado</label>
+        <select id="filter-status" style="width:100%;padding:9px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:10px;color:var(--ui-text-1);font-family:inherit;font-size:0.875rem;outline:none">
+          <option value="">Todos</option>
+          <option value="FINISHED">Finalizados</option>
+          <option value="IN_PROGRESS">En progreso</option>
+          <option value="ABANDONED">Abandonados</option>
+          <option value="TIMED_OUT">Tiempo agotado</option>
+          <option value="ANULADO">Anulados</option>
+        </select>
+      </div>
+      <button id="btn-search" class="btn-brand">Buscar</button>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div id="results-section" style="display:none">
+    <!-- Info del estudiante -->
+    <div id="student-info" style="background:var(--ui-card);border-radius:14px;border:1px solid var(--ui-border);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px">
+      <div id="student-avatar" style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:0.875rem;flex-shrink:0">?</div>
+      <div style="flex:1">
+        <p id="student-name" style="font-size:0.9375rem;font-weight:700;color:var(--ui-text-1);margin:0"></p>
+        <p id="student-meta" style="font-size:0.8125rem;color:var(--ui-text-3);margin:0"></p>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="text-align:center"><p id="s-total" style="font-size:1.25rem;font-weight:900;color:var(--brand);margin:0;line-height:1">0</p><p style="font-size:0.5625rem;color:var(--ui-text-3);margin:2px 0 0;text-transform:uppercase">Total</p></div>
+        <div style="text-align:center"><p id="s-avg" style="font-size:1.25rem;font-weight:900;color:#059669;margin:0;line-height:1">-</p><p style="font-size:0.5625rem;color:var(--ui-text-3);margin:2px 0 0;text-transform:uppercase">Promedio</p></div>
+        <div style="text-align:center"><p id="s-best" style="font-size:1.25rem;font-weight:900;color:#2563EB;margin:0;line-height:1">-</p><p style="font-size:0.5625rem;color:var(--ui-text-3);margin:2px 0 0;text-transform:uppercase">Mejor</p></div>
+      </div>
+    </div>
+
+    <!-- Tabla de intentos -->
+    <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+      <div style="padding:12px 18px;border-bottom:1px solid var(--ui-border)">
+        <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Historial de intentos</p>
+        <p id="trieds-count-label" style="font-size:0.75rem;color:var(--ui-text-3);margin:2px 0 0"></p>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="border-bottom:1px solid var(--ui-border)">
+              <th class="th">ID Intento</th>
+              <th class="th">Test</th>
+              <th class="th">Competencia</th>
+              <th class="th">Estado</th>
+              <th class="th">Puntaje</th>
+              <th class="th">Correctas</th>
+              <th class="th">Fecha</th>
+              <th class="th">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="trieds-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío inicial -->
+  <div id="empty-state" style="text-align:center;padding:4rem 1rem;color:var(--ui-text-3)">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 12px;opacity:0.4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Busca un estudiante</p>
+    <p style="font-size:0.875rem;margin:0">Ingresa el código de estudiante para ver sus intentos.</p>
+  </div>
+</AdminLayout>
+
+<!-- Modal revisión del intento -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;align-items:flex-start;justify-content:center;backdrop-filter:blur(4px);padding:1rem;overflow-y:auto">
+  <div style="background:var(--ui-card);border-radius:20px;padding:0;max-width:700px;width:100%;margin:auto;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+    <!-- Header -->
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0">Revisión del intento</h2>
+        <p id="rev-subtitle" style="font-size:0.8125rem;color:var(--ui-text-3);margin:2px 0 0"></p>
+      </div>
+      <button id="review-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);font-size:1.375rem;line-height:1;padding:4px">×</button>
+    </div>
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:1rem 1.5rem;border-bottom:1px solid var(--ui-border)">
+      <div style="text-align:center;background:var(--ui-surface);border-radius:10px;padding:10px 6px">
+        <p id="rev-score" style="font-size:1.5rem;font-weight:900;color:var(--brand);margin:0;line-height:1">-</p>
+        <p style="font-size:0.5625rem;color:var(--ui-text-3);margin:3px 0 0;text-transform:uppercase">Puntaje</p>
+      </div>
+      <div style="text-align:center;background:#D1FAE5;border-radius:10px;padding:10px 6px">
+        <p id="rev-correct" style="font-size:1.5rem;font-weight:900;color:#059669;margin:0;line-height:1">0</p>
+        <p style="font-size:0.5625rem;color:#059669;margin:3px 0 0;text-transform:uppercase">Correctas</p>
+      </div>
+      <div style="text-align:center;background:#FEE2E2;border-radius:10px;padding:10px 6px">
+        <p id="rev-wrong" style="font-size:1.5rem;font-weight:900;color:#DC2626;margin:0;line-height:1">0</p>
+        <p style="font-size:0.5625rem;color:#DC2626;margin:3px 0 0;text-transform:uppercase">Incorrectas</p>
+      </div>
+      <div style="text-align:center;background:var(--ui-surface);border-radius:10px;padding:10px 6px">
+        <p id="rev-total" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0;line-height:1">0</p>
+        <p style="font-size:0.5625rem;color:var(--ui-text-3);margin:3px 0 0;text-transform:uppercase">Total</p>
+      </div>
+    </div>
+    <!-- Preguntas -->
+    <div id="rev-questions" style="padding:1rem 1.5rem;max-height:60vh;overflow-y:auto;display:flex;flex-direction:column;gap:1rem"></div>
+  </div>
+</div>
+
+<style>
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
+  @keyframes spin    { to{transform:rotate(360deg)} }
+</style>
+
+<script>
+  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { triedsApi }   from '../../lib/api/trieds.api';
+  import { studentsApi } from '../../lib/api/students.api';
+  import { toast }       from '../../lib/toast';
+  import type { TriedDto, TriedReviewDto } from '../../lib/api/types';
+  import { getCompStyle, fmtDate, scoreColor } from '../../lib/utils';
+
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
+
+  const STATUS_COLOR: Record<string, string> = {
+    FINISHED:'#059669', IN_PROGRESS:'#2563EB', ABANDONED:'#DC2626',
+    TIMED_OUT:'#D97706', ANULADO:'#991B1B',
+  };
+  const STATUS_LABEL: Record<string, string> = {
+    FINISHED:'Finalizado', IN_PROGRESS:'En progreso', ABANDONED:'Abandonado',
+    TIMED_OUT:'Tiempo agotado', ANULADO:'Anulado',
+  };
+  const STATUS_BG: Record<string, string> = {
+    FINISHED:'#D1FAE5', IN_PROGRESS:'#DBEAFE', ABANDONED:'#FEE2E2',
+    TIMED_OUT:'#FEF3C7', ANULADO:'#FEE2E2',
+  };
+  const DIFF_LABEL: Record<string, string> = { B:'Básico', M:'Medio', A:'Alto' };
+  const DIFF_COLOR: Record<string, string> = { B:'#059669', M:'#D97706', A:'#DC2626' };
+  const DIFF_BG:    Record<string, string> = { B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
+  const LETTERS = ['A','B','C','D','E','F'];
+
+  let allTrieds: TriedDto[] = [];
+
+  async function search() {
+    const studentId = (document.getElementById('search-student') as HTMLInputElement).value.trim();
+    const status    = (document.getElementById('filter-status') as HTMLSelectElement).value;
+    if (!studentId) { toast.warning('Ingresa un código de estudiante'); return; }
+
+    const btn = document.getElementById('btn-search') as HTMLButtonElement;
+    btn.disabled = true; btn.textContent = 'Buscando...';
+
+    try {
+      // Buscar trieds del estudiante (endpoint admin)
+      const res = await triedsApi.findByStudent(studentId, 0, 100, status || undefined);
+      allTrieds = res.data?.content ?? [];
+
+      // Mostrar info del estudiante (si está disponible)
+      studentsApi.findById(studentId).then(sRes => {
+        const s = sRes.data;
+        if (!s) return;
+        const full = [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean).join(' ');
+        const init = [s.firstName?.[0], s.firstSurname?.[0]].filter(Boolean).join('').toUpperCase();
+        (document.getElementById('student-avatar') as HTMLElement).textContent = init || studentId[0];
+        (document.getElementById('student-name')   as HTMLElement).textContent = full || studentId;
+        (document.getElementById('student-meta')   as HTMLElement).textContent = `${studentId} · Programa ${s.programId}`;
+      }).catch(() => {
+        (document.getElementById('student-name') as HTMLElement).textContent = studentId;
+        (document.getElementById('student-meta') as HTMLElement).textContent = 'Estudiante';
+      });
+
+      // Stats
+      const finished = allTrieds.filter(t => t.status === 'FINISHED' && t.score != null);
+      const scores   = finished.map(t => t.score as number);
+      const avg      = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : '-';
+      const best     = scores.length ? Math.max(...scores).toFixed(0) : '-';
+      (document.getElementById('s-total') as HTMLElement).textContent = String(allTrieds.length);
+      (document.getElementById('s-avg')   as HTMLElement).textContent = avg === '-' ? '-' : `${avg}%`;
+      (document.getElementById('s-best')  as HTMLElement).textContent = best === '-' ? '-' : `${best}%`;
+
+      renderTrieds(allTrieds);
+      (document.getElementById('results-section') as HTMLElement).style.display = 'block';
+      (document.getElementById('empty-state') as HTMLElement).style.display = 'none';
+    } catch (err: any) {
+      toast.error('Error al buscar', { description: err?.message ?? 'Verifica el código del estudiante.' });
+    } finally {
+      btn.disabled = false; btn.textContent = 'Buscar';
+    }
+  }
+
+  function renderTrieds(trieds: TriedDto[]) {
+    const tbody = document.getElementById('trieds-tbody')!;
+    tbody.innerHTML = '';
+    (document.getElementById('trieds-count-label') as HTMLElement).textContent = `${trieds.length} intento(s)`;
+
+    if (!trieds.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:2.5rem;text-align:center;color:var(--ui-text-3)">Sin intentos para los filtros seleccionados.</td></tr>';
+      return;
+    }
+
+    trieds.forEach(t => {
+      const s  = getCompStyle(t.competenceId ?? '', '');
+      const sc = scoreColor(t.score);
+      const stColor = STATUS_COLOR[t.status] ?? '#6B7280';
+      const stBg    = STATUS_BG[t.status]    ?? '#F3F4F6';
+      const stLabel = STATUS_LABEL[t.status] ?? t.status;
+      const fmtTime = (iso?: string) => iso ? fmtDate(iso) : '—';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td"><code style="background:var(--ui-surface);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;color:var(--brand);border:1px solid var(--ui-border)">${t.triedId.slice(-8)}</code></td>
+        <td class="td" style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${t.testName ?? t.testId}">${t.testName ?? t.testId}</td>
+        <td class="td">
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.bg};color:${s.color}">
+            <span style="width:6px;height:6px;border-radius:50%;background:${s.color}"></span>
+            ${t.competenceId}
+          </span>
+        </td>
+        <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${stBg};color:${stColor}">${stLabel}</span></td>
+        <td class="td">
+          ${t.score != null
+            ? `<span style="font-size:1rem;font-weight:900;color:${sc}">${t.score.toFixed(0)}%</span>`
+            : `<span style="color:var(--ui-text-3);font-size:0.8125rem">—</span>`
+          }
+        </td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${t.correctAnswers ?? '—'} / ${t.totalQuestions}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-3)">${fmtTime(t.finishedAt ?? t.attemptTimestamp)}</td>
+        <td class="td">
+          ${t.status === 'FINISHED'
+            ? `<button class="btn-review" data-tried="${t.triedId}" data-name="${(t.testName ?? t.testId).replace(/"/g,'&quot;')}"
+                style="padding:4px 10px;border-radius:7px;border:1.5px solid rgba(212,18,36,0.3);background:rgba(212,18,36,0.05);color:var(--brand);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
+                Ver revisión
+              </button>`
+            : '<span style="font-size:0.75rem;color:var(--ui-text-3)">—</span>'
+          }
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Listeners para ver revisión
+    document.querySelectorAll<HTMLButtonElement>('.btn-review').forEach(btn => {
+      btn.addEventListener('click', () => openReview(btn.dataset.tried!, btn.dataset.name!));
+    });
+  }
+
+  // ── Modal de revisión ────────────────────────────────────────────
+  async function openReview(triedId: string, testName: string) {
+    const modal = document.getElementById('review-modal')!;
+    const questionsEl = document.getElementById('rev-questions')!;
+    (document.getElementById('rev-subtitle') as HTMLElement).textContent = testName;
+    questionsEl.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--ui-text-3)"><div style="width:28px;height:28px;border:2.5px solid rgba(212,18,36,0.2);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 8px"></div>Cargando revisión...</div>';
+    modal.style.display = 'flex';
+
+    try {
+      const res = await triedsApi.getReview(triedId);
+      const d   = res.data!;
+
+      const correct = d.questions.filter(q => q.answeredCorrectly && q.selectedOptionId).length;
+      const wrong   = d.questions.filter(q => !q.answeredCorrectly && q.selectedOptionId).length;
+      (document.getElementById('rev-score')   as HTMLElement).textContent = d.score != null ? `${d.score.toFixed(0)}%` : '—';
+      (document.getElementById('rev-correct') as HTMLElement).textContent = String(correct);
+      (document.getElementById('rev-wrong')   as HTMLElement).textContent = String(wrong);
+      (document.getElementById('rev-total')   as HTMLElement).textContent = String(d.questions.length);
+      const sc  = scoreColor(d.score ?? 0);
+      (document.getElementById('rev-score') as HTMLElement).style.color = sc;
+
+      questionsEl.innerHTML = '';
+      d.questions.forEach((q, idx) => {
+        const isCorrect = q.answeredCorrectly && !!q.selectedOptionId;
+        const isWrong   = !q.answeredCorrectly && !!q.selectedOptionId;
+        const isSkipped = !q.selectedOptionId;
+        const status = isCorrect ? 'correct' : isWrong ? 'wrong' : 'skipped';
+        const statusColor = isCorrect ? '#059669' : isWrong ? '#DC2626' : '#D97706';
+        const statusBg    = isCorrect ? '#D1FAE5' : isWrong ? '#FEE2E2' : '#FEF3C7';
+        const statusLabel = isCorrect ? 'Correcta' : isWrong ? 'Incorrecta' : 'Sin responder';
+
+        const card = document.createElement('div');
+        card.style.cssText = `border-radius:12px;border:1.5px solid ${isCorrect?'#A7F3D0':isWrong?'#FECACA':'#FDE68A'};overflow:hidden`;
+
+        let optsHtml = '';
+        (q.options || []).forEach((opt, oi) => {
+          let cls = '', marker = LETTERS[oi] ?? String(oi+1);
+          if (opt.isCorrect && opt.wasSelected)      { cls = 'border:#A7F3D0;background:#D1FAE5'; marker = 'V'; }
+          else if (opt.isCorrect)                     { cls = 'border:#A7F3D0;background:#F0FDF4'; marker = 'V'; }
+          else if (!opt.isCorrect && opt.wasSelected) { cls = 'border:#FECACA;background:#FEF2F2'; marker = 'X'; }
+          else                                         { cls = 'border:var(--ui-border);background:var(--ui-card)'; }
+          optsHtml += `<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:8px;border:1.5px solid;${cls};margin-bottom:5px">
+            <span style="flex-shrink:0;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:800;background:${opt.isCorrect?'#059669':'var(--ui-border)'};color:${opt.isCorrect?'white':'var(--ui-text-2)'}">${marker}</span>
+            <span style="font-size:0.8125rem;color:var(--ui-text-1);line-height:1.45;flex:1">${opt.optionText}</span>
+          </div>`;
+        });
+
+        card.innerHTML = `
+          <div style="height:3px;background:${statusColor}"></div>
+          <div style="padding:1rem 1.125rem">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+              <span style="font-size:0.6875rem;font-weight:800;color:var(--brand);background:var(--brand-pale);padding:3px 10px;border-radius:20px">P${idx+1}</span>
+              ${q.difficultyLevel ? `<span style="padding:3px 9px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'}">${DIFF_LABEL[q.difficultyLevel]??q.difficultyLevel}</span>` : ''}
+              <span style="padding:3px 9px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${statusBg};color:${statusColor}">${statusLabel}</span>
+            </div>
+            <div style="background:var(--ui-surface);border-radius:9px;padding:12px 14px;border:1px solid var(--ui-border);margin-bottom:10px;font-size:0.875rem;color:var(--ui-text-1);line-height:1.7">${q.statement}</div>
+            ${optsHtml}
+            ${q.explanation ? `<div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:9px;padding:12px 14px;border:1px solid #BFDBFE;margin-top:8px"><p style="font-size:0.5625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#2563EB;margin:0 0 4px">Explicacion</p><p style="font-size:0.8125rem;color:#1E40AF;line-height:1.65;margin:0">${q.explanation}</p></div>` : ''}
+          </div>`;
+        questionsEl.appendChild(card);
+      });
+    } catch (err: any) {
+      questionsEl.innerHTML = `<div style="text-align:center;padding:2rem;color:#DC2626">Error al cargar la revisión: ${err?.message ?? 'Inténtalo de nuevo.'}</div>`;
+    }
+  }
+
+  // Event listeners
+  document.getElementById('btn-search')?.addEventListener('click', search);
+  document.getElementById('search-student')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') search();
+  });
+
+  document.getElementById('review-close')?.addEventListener('click', () => {
+    (document.getElementById('review-modal') as HTMLElement).style.display = 'none';
+  });
+  document.getElementById('review-modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('review-modal'))
+      (document.getElementById('review-modal') as HTMLElement).style.display = 'none';
+  });
+
+  // Init desde URL si hay studentId
+  const urlStudent = new URLSearchParams(window.location.search).get('student');
+  if (urlStudent) {
+    (document.getElementById('search-student') as HTMLInputElement).value = urlStudent;
+    search();
+  }
+</script>

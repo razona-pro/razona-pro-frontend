@@ -5,13 +5,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Competencias" currentPage="admin-competences">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Competencias</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
         <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Competencias</h1>
-        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Gestiona las competencias evaluadas en el Saber Pro.</p>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Gestiona las competencias disponibles en la plataforma.</p>
       </div>
       <button id="btn-new-comp" style="display:inline-flex;align-items:center;gap:7px;padding:0.625rem 1.125rem;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -24,20 +24,54 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
     <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D41224">
       <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Total</p>
-      <p id="stat-total" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;line-height:1">—</p>
+      <p id="stat-total" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;line-height:1">-</p>
     </div>
     <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #059669">
       <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Activas</p>
-      <p id="stat-active" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">—</p>
+      <p id="stat-active" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">-</p>
     </div>
     <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D97706">
       <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Inactivas</p>
-      <p id="stat-inactive" style="font-size:1.75rem;font-weight:900;color:#D97706;margin:0;line-height:1">—</p>
+      <p id="stat-inactive" style="font-size:1.75rem;font-weight:900;color:#D97706;margin:0;line-height:1">-</p>
     </div>
   </div>
 
-  <!-- Grid de competencias -->
-  <div id="comp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+  <!-- Búsqueda -->
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+    <div style="position:relative;flex:1;min-width:200px;max-width:360px">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ui-text-3);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-comp" type="text" placeholder="Buscar por nombre o ID..."
+        style="width:100%;padding:9px 14px 9px 34px;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:11px;font-size:0.8125rem;color:var(--ui-text-1);font-family:inherit;outline:none;transition:all 0.2s"
+        onfocus="this.style.borderColor='var(--brand)';this.style.boxShadow='0 0 0 3px rgba(212,18,36,0.1)'"
+        onblur="this.style.borderColor='var(--ui-border)';this.style.boxShadow='none'">
+    </div>
+    <select id="filter-status-comp" style="padding:7px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none">
+      <option value="ALL">Todos los estados</option>
+      <option value="active">Activas</option>
+      <option value="inactive">Inactivas</option>
+    </select>
+    <span id="count-comp-label" style="font-size:0.8125rem;color:var(--ui-text-3);margin-left:auto"></span>
+  </div>
+
+  <!-- Tabla -->
+  <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:1px solid var(--ui-border)">
+            <th class="th">ID</th>
+            <th class="th">Nombre de la competencia</th>
+            <th class="th">Descripción</th>
+            <th class="th">Estado</th>
+            <th class="th">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="comp-tbody">
+          <tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </AdminLayout>
 
 <!-- Modal crear/editar -->
@@ -91,11 +125,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   .field-lbl { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3) }
   .field-inp { padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none;transition:border-color 0.2s;width:100%;appearance:none }
   .field-inp:focus { border-color:var(--brand);box-shadow:0 0 0 3px rgba(212,18,36,0.1) }
-  .comp-card {
-    background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);
-    overflow:hidden;transition:all 0.2s;animation:cardIn 0.3s ease both;
-  }
-  .comp-card:hover { border-color:var(--ui-border-2);transform:translateY(-2px);box-shadow:0 8px 28px var(--ui-shadow-md); }
 </style>
 
 <script>
@@ -141,58 +170,69 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       (document.getElementById('stat-total') as HTMLElement).textContent   = String(allComps.length);
       (document.getElementById('stat-active') as HTMLElement).textContent  = String(active);
       (document.getElementById('stat-inactive') as HTMLElement).textContent = String(inactive);
-      renderGrid();
+      applyFilters();
     } catch (err: any) {
       toast.error('Error al cargar competencias', { description: err?.message });
     }
   }
 
-  function renderGrid() {
-    const grid = document.getElementById('comp-grid')!;
-    grid.innerHTML = '';
-    if (!allComps.length) {
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--ui-text-3)">Sin competencias registradas</div>';
+  function applyFilters() {
+    const search = (document.getElementById('search-comp') as HTMLInputElement)?.value.toLowerCase().trim() ?? '';
+    const status = (document.getElementById('filter-status-comp') as HTMLSelectElement)?.value ?? 'ALL';
+    const filtered = allComps.filter(c => {
+      const matchSearch = !search || c.competenceName.toLowerCase().includes(search) || c.competenceId.toLowerCase().includes(search);
+      const matchStatus = status === 'ALL' || (status === 'active' && c.isActive) || (status === 'inactive' && !c.isActive);
+      return matchSearch && matchStatus;
+    });
+    (document.getElementById('count-comp-label') as HTMLElement).textContent = `${filtered.length} competencia(s)`;
+    renderTable(filtered);
+  }
+
+  function renderTable(comps: CompetenceDto[]) {
+    const tbody = document.getElementById('comp-tbody')!;
+    tbody.innerHTML = '';
+    if (!comps.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:2.5rem;text-align:center;color:var(--ui-text-3)">Sin resultados.</td></tr>';
       return;
     }
-    allComps.forEach((c, i) => {
+    comps.forEach(c => {
       const [color, bg] = getColor(c.competenceName);
-      const card = document.createElement('div');
-      card.className = 'comp-card';
-      card.style.animationDelay = `${i * 0.05}s`;
-      card.innerHTML = `
-        <div style="height:4px;background:linear-gradient(to right,${color},${color}88)"></div>
-        <div style="padding:1.25rem">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <div style="width:44px;height:44px;border-radius:12px;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="20" height="20" fill="none" stroke="${color}" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2L22 7L22 17L12 22L2 17L2 7Z"/><circle cx="12" cy="12" r="3" fill="${color}" stroke="none"/></svg>
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:28px;height:28px;border-radius:7px;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <div style="width:10px;height:10px;border-radius:50%;background:${color}"></div>
             </div>
-            <div style="flex:1;min-width:0">
-              <p style="font-size:0.625rem;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.5px;margin:0 0 2px">${c.competenceId}</p>
-              <h3 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.competenceName}</h3>
-            </div>
-            <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${c.isActive?'#D1FAE5':'#FEE2E2'};color:${c.isActive?'#059669':'#DC2626'};flex-shrink:0">
-              ${c.isActive ? 'Activa' : 'Inactiva'}
-            </span>
+            <code style="background:var(--ui-surface);padding:2px 8px;border-radius:6px;font-size:0.8125rem;font-weight:700;color:${color};border:1px solid var(--ui-border)">${c.competenceId}</code>
           </div>
-          ${c.description ? `<p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 12px;line-height:1.5">${c.description}</p>` : '<p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0 0 12px;font-style:italic">Sin descripción</p>'}
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
+        </td>
+        <td class="td" style="font-weight:700">${c.competenceName}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.description ?? ''}">${c.description ?? '—'}</td>
+        <td class="td">
+          <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${c.isActive?'#D1FAE5':'#FEE2E2'};color:${c.isActive?'#059669':'#DC2626'}">
+            ${c.isActive ? 'Activa' : 'Inactiva'}
+          </span>
+        </td>
+        <td class="td">
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
             <button class="comp-edit" data-id="${c.competenceId}"
-              style="flex:1;padding:6px 12px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-surface);color:var(--ui-text-1);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
-              ✏️ Editar
+              style="padding:4px 10px;border-radius:7px;border:1.5px solid var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
+              Editar
             </button>
             ${c.isActive
               ? `<button class="comp-deact" data-id="${c.competenceId}" data-name="${c.competenceName}"
-                  style="flex:1;padding:6px 12px;border-radius:8px;border:1.5px solid #FDE68A;background:#FEF3C7;color:#92400E;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">
-                  ⏸ Desactivar
+                  style="padding:4px 10px;border-radius:7px;border:1.5px solid #FDE68A;background:#FEF3C7;color:#92400E;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
+                  Desactivar
                 </button>`
               : `<button class="comp-react" data-id="${c.competenceId}" data-name="${c.competenceName}"
-                  style="flex:1;padding:6px 12px;border-radius:8px;border:1.5px solid #A7F3D0;background:#D1FAE5;color:#065F46;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">
-                  ▶ Activar
+                  style="padding:4px 10px;border-radius:7px;border:1.5px solid #A7F3D0;background:#D1FAE5;color:#065F46;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
+                  Activar
                 </button>`
             }
           </div>
-        </div>`;
-      grid.appendChild(card);
+        </td>`;
+      tbody.appendChild(tr);
     });
 
     document.querySelectorAll<HTMLButtonElement>('.comp-edit').forEach(btn => {
@@ -300,6 +340,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       statusModal.style.display = 'none';
     }
   });
+
+  let debounce: ReturnType<typeof setTimeout>;
+  document.getElementById('search-comp')?.addEventListener('input', () => {
+    clearTimeout(debounce); debounce = setTimeout(applyFilters, 250);
+  });
+  document.getElementById('filter-status-comp')?.addEventListener('change', applyFilters);
 
   load();
 </script>

@@ -2,7 +2,7 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
-<AppLayout title="Tests disponibles" currentPage="tests">
+<AppLayout title="Tests disponibles" currentPage="tests" requiredRole="STUDENT">
 
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
@@ -57,7 +57,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
     <p style="font-size:0.875rem">No hay tests que coincidan con tu búsqueda.</p>
   </div>
 
-  <!-- Modal confirmar inicio — resumen completo del test -->
+  <!-- Modal confirmar inicio - resumen completo del test -->
   <div id="confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(5px);padding:1rem">
     <div style="background:var(--ui-card);border-radius:20px;padding:0;max-width:440px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.25);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;overflow:hidden">
       <div id="modal-header" style="padding:1.5rem 1.5rem 1.25rem;border-bottom:1px solid var(--ui-border)">
@@ -288,9 +288,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
     filtered.forEach(t => {
       const s         = getCompStyle(t.competenceId, t.competenceName ?? '');
-      const durMin    = Math.floor(t.durationSeconds / 60);
+      const durMin    = t.durationSeconds != null ? Math.floor(t.durationSeconds / 60) : null;
+      const durLabel  = durMin != null ? `${durMin} min` : 'Sin límite';
       const myTrieds  = allTrieds.filter(tr => tr.testId === t.testId && tr.status === 'FINISHED' && tr.score != null);
       const bestScore = myTrieds.length ? Math.max(...myTrieds.map(tr => tr.score ?? 0)) : null;
+      const inProgress = allTrieds.find(tr => tr.testId === t.testId && tr.competenceId === t.competenceId && tr.status === 'IN_PROGRESS');
       const modeColor = TEST_MODE_COLOR[t.testMode] ?? '#6B7280';
       const modeBg    = TEST_MODE_BG[t.testMode]    ?? '#F3F4F6';
       const modeLabel = TEST_MODE_LABEL[t.testMode] ?? t.testMode;
@@ -314,7 +316,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px">
             <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--ui-text-3)">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              ${durMin} min
+              ${durLabel}
             </span>
             <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--ui-text-3)">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
@@ -327,12 +329,17 @@ import AppLayout from '../../layouts/AppLayout.astro';
         </div>
         <div style="padding:10px 20px;border-top:1px solid var(--ui-border);background:var(--ui-surface);display:flex;align-items:center;justify-content:space-between;gap:8px">
           <span style="font-size:0.8125rem;font-weight:700;color:${s.color}">${modeLabel}</span>
-          <button class="test-start-btn"
+          ${inProgress
+            ? `<a class="test-resume-btn" href="/tests/exam?tried=${inProgress.triedId}&test=${t.testId}&comp=${t.competenceId}&mode=${t.testMode}"
+                 style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;background:linear-gradient(135deg,#D97706,#B45309);color:#fff;font-size:0.8125rem;font-weight:700;text-decoration:none">
+                 <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Reanudar
+               </a>`
+            : `<button class="test-start-btn"
             data-test-id="${t.testId}"
             data-comp-id="${t.competenceId}"
             data-mode="${t.testMode}"
             data-name="${t.testName.replace(/"/g,'&quot;')}"
-            data-dur="${durMin}"
+            data-dur="${durMin ?? ''}"
             data-q="${t.questionsToPresent ?? '?'}"
             data-color="${s.color}"
             data-comp-name="${(t.competenceName ?? '').replace(/"/g,'&quot;')}"
@@ -341,7 +348,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
             data-diff-a="${t.difficultyBreakdown?.A ?? 0}">
             <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             ${bestScore != null ? 'Reintentar' : 'Iniciar test'}
-          </button>
+          </button>`}
         </div>`;
       grid.appendChild(card);
     });
@@ -360,9 +367,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
   }
 
   const MODE_DESC: Record<string, string> = {
-    PRACTICE: '📚 Modo práctica — sin presión de tiempo. Revisa tus respuestas y aprende a tu ritmo.',
-    EXAM:     '📝 Modo examen — simula las condiciones reales del Saber Pro. Tiempo límite definido.',
-    TIMED:    '⏱ Modo cronometrado — responde tan rápido como puedas. El tiempo corre desde el inicio.',
+    PRACTICE: '📚 Modo práctica - sin presión de tiempo. Revisa tus respuestas y aprende a tu ritmo.',
+    EXAM:     '📝 Modo examen - simula las condiciones reales del Saber Pro. Tiempo límite definido.',
+    TIMED:    '⏱ Modo cronometrado - responde tan rápido como puedas. El tiempo corre desde el inicio.',
   };
 
   function openTestModal(btn: HTMLButtonElement) {
@@ -386,9 +393,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
     const secPerQ = total > 0 ? Math.round(dur * 60 / total) : 0;
     (document.getElementById('modal-metrics') as HTMLElement).innerHTML = [
-      { label:'Duración',     val:`${dur} min`, icon:'🕐' },
+      { label:'Duración',     val: dur > 0 ? `${dur} min` : 'Sin límite', icon:'🕐' },
       { label:'Preguntas',    val:q,            icon:'📋' },
-      { label:'Seg/pregunta', val: secPerQ > 0 ? `~${secPerQ}s` : '—', icon:'⚡' },
+      { label:'Seg/pregunta', val: secPerQ > 0 ? `~${secPerQ}s` : '-', icon:'⚡' },
     ].map(m => `
       <div style="text-align:center;padding:10px 6px;background:var(--ui-surface);border-radius:10px;border:1px solid var(--ui-border)">
         <p style="font-size:1rem;margin:0 0 2px">${m.icon}</p>
@@ -439,15 +446,18 @@ import AppLayout from '../../layouts/AppLayout.astro';
     (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = true;
     (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = 'Iniciando...';
     pendingStart = null;
+    (window as any).rpLoader?.show('Preparando el simulacro...');
     try {
       const res = await triedsApi.start(testId, competenceId);
       if (res.data) {
-        toast.success('Intento iniciado');
-        // ✅ CORRECCIÓN: usar testMode guardado
+        (window as any).rpLoader?.show('Cargando preguntas...');
         window.location.href = `/tests/exam?tried=${res.data.triedId}&test=${testId}&comp=${competenceId}&mode=${testMode}`;
       }
     } catch (err: any) {
+      (window as any).rpLoader?.hide();
       toast.error('No se pudo iniciar', { description: err?.message ?? 'Inténtalo de nuevo.' });
+      (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = false;
+      (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';
     }
   });
 

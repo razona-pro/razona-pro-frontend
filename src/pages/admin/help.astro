@@ -1,0 +1,91 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Ayuda — Admin" currentPage="help">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/admin/home" style="color:var(--ui-text-3);text-decoration:none"
+        onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Ayuda</span>
+    </div>
+    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Guía del panel de administración</h1>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Todo lo que necesitas para gestionar la plataforma.</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:1rem">
+
+    <!-- Sección Gestión -->
+    <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+      <div style="padding:1rem 1.25rem;background:var(--ui-surface);border-bottom:1px solid var(--ui-border);display:flex;align-items:center;gap:8px">
+        <svg width="15" height="15" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Sección: Gestión</p>
+      </div>
+      <div style="padding:1.25rem;display:flex;flex-direction:column;gap:12px">
+        <div class="hrow"><strong>Estudiantes</strong> — Lista todos los estudiantes. Puedes activar/desactivar cuentas. El filtro de estado incluye verificación de correo.</div>
+        <div class="hrow"><strong>Tests</strong> — Crea y edita simulacros. Cada test pertenece a una competencia y tiene un modo (Práctica, Examen, Cronometrado). La duración es opcional para el modo Práctica. El toggle "Notificar a estudiantes" envía email al publicar.</div>
+        <div class="hrow"><strong>Preguntas</strong> — Banco de preguntas por competencia. Al editar una pregunta, las opciones se pueden añadir (máximo 6), eliminar (mínimo 2) y reasignar cuál es la correcta con el radio button. La dificultad es opcional.</div>
+        <div class="hrow"><strong>Competencias</strong> — Áreas evaluadas en la plataforma. Puedes activar o desactivar competencias. Una competencia inactiva no aparece en nuevos tests.</div>
+        <div class="hrow"><strong>Programas</strong> — Los programas académicos identifican a qué carrera pertenece cada estudiante. El ID es un código único de hasta 3 caracteres.</div>
+        <div class="hrow"><strong>Administradores</strong> — Crea y gestiona cuentas de administrador. Los admins tienen acceso total al panel pero no aparecen en rankings.</div>
+        <div class="hrow"><strong>Dudas</strong> — Reportes que los estudiantes envían sobre preguntas. Puedes marcarlas como Revisada o Cerrada. Haz clic en una duda para ver la pregunta completa con sus opciones.</div>
+      </div>
+    </div>
+
+    <!-- Sección Análisis -->
+    <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+      <div style="padding:1rem 1.25rem;background:var(--ui-surface);border-bottom:1px solid var(--ui-border);display:flex;align-items:center;gap:8px">
+        <svg width="15" height="15" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Sección: Análisis</p>
+      </div>
+      <div style="padding:1.25rem;display:flex;flex-direction:column;gap:12px">
+        <div class="hrow"><strong>Intentos</strong> — Busca por código de estudiante. Muestra todos sus intentos con puntaje, estado y fecha. Al hacer clic en "Ver revisión" ves la pregunta, opciones y cuál eligió el estudiante.</div>
+        <div class="hrow"><strong>Estadísticas</strong> — Resumen general de la plataforma: estudiantes, intentos, preguntas activas. Incluye gráficas de distribución y tablas de rendimiento por estudiante y por pregunta.</div>
+        <div class="hrow"><strong>Rankings</strong> — Gestiona las tablas de posiciones. Puedes crear rankings por periodo (general, semanal, mensual) y por fuente de datos (tests, IA, ambos). Al seleccionar un ranking ves el leaderboard en tiempo real.</div>
+        <div class="hrow"><strong>Sesiones IA</strong> — Historial de sesiones de práctica adaptativa. Puedes buscar las sesiones de un estudiante y agregar preguntas generadas por la IA al banco de preguntas permanente.</div>
+      </div>
+    </div>
+
+    <!-- Flujo recomendado -->
+    <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
+      <div style="padding:1rem 1.25rem;background:var(--ui-surface);border-bottom:1px solid var(--ui-border);display:flex;align-items:center;gap:8px">
+        <svg width="15" height="15" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Flujo recomendado para configurar la plataforma</p>
+      </div>
+      <div style="padding:1.25rem">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="width:22px;height:22px;border-radius:6px;background:rgba(212,18,36,0.1);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6875rem;font-weight:800">1</div>
+            <div class="hrow">Crea los <a href="/admin/programs" style="color:var(--brand);text-decoration:none;font-weight:600">Programas</a> académicos con su código de identificación.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="width:22px;height:22px;border-radius:6px;background:rgba(212,18,36,0.1);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6875rem;font-weight:800">2</div>
+            <div class="hrow">Crea las <a href="/admin/competences" style="color:var(--brand);text-decoration:none;font-weight:600">Competencias</a> que quieres evaluar.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="width:22px;height:22px;border-radius:6px;background:rgba(212,18,36,0.1);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6875rem;font-weight:800">3</div>
+            <div class="hrow">Agrega <a href="/admin/questions" style="color:var(--brand);text-decoration:none;font-weight:600">Preguntas</a> al banco — mínimo 2 opciones, marca cuál es la correcta.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="width:22px;height:22px;border-radius:6px;background:rgba(212,18,36,0.1);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6875rem;font-weight:800">4</div>
+            <div class="hrow">Crea <a href="/admin/tests" style="color:var(--brand);text-decoration:none;font-weight:600">Tests</a> que seleccionen preguntas de una competencia y asigna el modo y duración.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="width:22px;height:22px;border-radius:6px;background:rgba(212,18,36,0.1);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6875rem;font-weight:800">5</div>
+            <div class="hrow">Los estudiantes se registran en la plataforma. Verifica que los programas coincidan con los códigos de estudiante (primeros 3 dígitos del código).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</AdminLayout>
+
+<style>
+  .hrow {
+    font-size: 0.8125rem; color: var(--ui-text-2); line-height: 1.65;
+    padding: 8px 12px; background: var(--ui-surface); border-radius: 9px;
+    border-left: 2px solid var(--ui-border-2);
+  }
+  .hrow a { color: var(--brand); text-decoration: none; font-weight: 600; }
+</style>

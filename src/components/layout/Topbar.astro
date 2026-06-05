@@ -28,12 +28,6 @@ const { currentPage = '' } = Astro.props;
     <span>Razona<strong>Pro</strong></span>
   </a>
 
-  <!-- Search -->
-  <div class="topbar-search" id="topbar-search">
-    <Icon name="tabler:search" size={15} class="search-icon" />
-    <input type="text" id="global-search" placeholder="Buscar tests, competencias..." autocomplete="off" />
-  </div>
-
   <!-- Right -->
   <div class="topbar-right">
     <button class="topbar-icon-btn" id="notif-btn" title="Notificaciones" aria-label="Notificaciones">
@@ -56,11 +50,6 @@ const { currentPage = '' } = Astro.props;
   .topbar-mobile-logo { display:none;align-items:center;gap:0.5rem;text-decoration:none;flex-shrink:0;color:var(--ui-text-1);font-size:0.9375rem;font-weight:700; }
   .topbar-mobile-logo strong { color:var(--brand); }
   .topbar-logo-icon { width:30px;height:30px;background:linear-gradient(135deg,#D41224,#9B1F24);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white; }
-  .topbar-search { flex:1;max-width:420px;position:relative;display:flex;align-items:center; }
-  .search-icon { position:absolute;left:0.8125rem;color:var(--ui-text-3);pointer-events:none; }
-  .topbar-search input { width:100%;padding:0.5625rem 1rem 0.5625rem 2.375rem;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:12px;font-size:0.8125rem;color:var(--ui-text-1);font-family:inherit;outline:none;transition:border-color 0.2s,background 0.2s; }
-  .topbar-search input::placeholder { color:var(--ui-text-3); }
-  .topbar-search input:focus { border-color:var(--brand);background:var(--ui-card);box-shadow:0 0 0 3px rgba(212,18,36,0.1); }
   .topbar-right { margin-left:auto;display:flex;align-items:center;gap:0.5rem; }
   .topbar-icon-btn { width:38px;height:38px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ui-text-2);position:relative;flex-shrink:0;transition:all 0.2s; }
   .topbar-icon-btn:hover { border-color:var(--brand);color:var(--brand); }
@@ -88,8 +77,10 @@ const { currentPage = '' } = Astro.props;
     const avatarEl = document.getElementById('tb-avatar');
     const nameEl   = document.getElementById('tb-name');
     const badgeEl  = document.getElementById('tb-badge') as HTMLElement | null;
+    const userLink = document.getElementById('topbar-user') as HTMLAnchorElement | null;
     if (avatarEl) avatarEl.textContent = initials;
     if (nameEl)   nameEl.textContent   = fullName;
+    if (userLink) userLink.href = isAdmin() ? '/admin/profile' : '/dashboard/profile';
     if (badgeEl) {
       if (isAdmin()) {
         badgeEl.textContent = 'Admin';

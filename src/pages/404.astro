@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Página no encontrada">
+  <main class="nf-wrap">
+    <div class="nf-card">
+      <div class="nf-badge" aria-hidden="true">404</div>
+      <h1 class="nf-title">Esta página no existe</h1>
+      <p class="nf-text">
+        El enlace que seguiste está roto o la página se movió. Revisa la dirección
+        o vuelve a un lugar seguro.
+      </p>
+      <div class="nf-actions">
+        <a id="nf-home" class="nf-btn nf-btn-primary" href="/">Ir al inicio</a>
+        <button id="nf-back" class="nf-btn nf-btn-ghost" type="button">Volver atrás</button>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script is:inline>
+  // Destino según la sesión: admin → panel, estudiante → dashboard, sin sesión → landing
+  (function () {
+    try {
+      var raw = localStorage.getItem('rp_token');
+      var p = null;
+      if (raw) { try { p = JSON.parse(atob(raw.split('.')[1])); } catch (e) {} }
+      var authed = p && typeof p.exp === 'number' && p.exp * 1000 > Date.now();
+      var home = !authed ? '/' : (p.userType === 'ADMIN' ? '/admin/stats' : '/dashboard');
+      var a = document.getElementById('nf-home');
+      if (a) { a.setAttribute('href', home); a.textContent = authed ? 'Ir a mi panel' : 'Ir al inicio'; }
+    } catch (e) {}
+    var b = document.getElementById('nf-back');
+    if (b) b.addEventListener('click', function () {
+      if (history.length > 1) history.back(); else location.href = '/';
+    });
+  })();
+</script>
+
+<style>
+  .nf-wrap {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, var(--brand-muted), transparent 60%),
+      var(--ui-bg-alt);
+    font-family: var(--font-sans);
+  }
+  .nf-card {
+    max-width: 30rem;
+    width: 100%;
+    text-align: center;
+    background: var(--ui-card);
+    border: 1px solid var(--ui-border);
+    border-radius: 1.25rem;
+    padding: 2.75rem 2rem 2.5rem;
+    box-shadow: 0 10px 40px var(--ui-shadow-md);
+    animation: nf-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .nf-badge {
+    font-size: 3.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--brand);
+    background: linear-gradient(135deg, var(--brand), var(--brand-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: nf-pulse 2.4s ease-in-out infinite;
+  }
+  .nf-title {
+    margin: 0.85rem 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ui-text-1);
+  }
+  .nf-text {
+    margin: 0 0 1.6rem;
+    color: var(--ui-text-2);
+    line-height: 1.6;
+  }
+  .nf-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .nf-btn {
+    border-radius: 0.7rem;
+    padding: 0.7rem 1.3rem;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .nf-btn:active { transform: translateY(1px); }
+  .nf-btn-primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff;
+    box-shadow: 0 6px 18px var(--brand-muted);
+  }
+  .nf-btn-primary:hover { box-shadow: 0 10px 26px var(--brand-muted); transform: translateY(-1px); }
+  .nf-btn-ghost {
+    background: transparent;
+    color: var(--ui-text-1);
+    border-color: var(--ui-border-2);
+  }
+  .nf-btn-ghost:hover { background: var(--ui-hover); }
+
+  @keyframes nf-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes nf-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.04); opacity: 0.85; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-card, .nf-badge { animation: none; }
+  }
+</style>

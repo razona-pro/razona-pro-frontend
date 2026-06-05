@@ -31,14 +31,14 @@ export async function apiFetch<T>(
   try {
     res = await fetch(`${BASE}${path}`, { ...options, headers });
   } catch {
-    throw new ApiError('SRV-000', 'Sin conexión al servidor.');
+    throw new ApiError('NETWORK_ERROR', 'Sin conexión al servidor.');
   }
 
   const json: ApiResponse<T> = await res.json();
 
   if (!res.ok || !json.success) {
     throw new ApiError(
-      json.code ?? 'SRV-001',
+      json.code ?? 'INTERNAL_ERROR',
       json.message ?? 'Error inesperado.',
       json.errors
     );

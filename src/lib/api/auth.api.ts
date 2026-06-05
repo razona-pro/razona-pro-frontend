@@ -26,6 +26,12 @@ export const authApi = {
   verifyEmail: (token: string) =>
     apiFetch<void>(`/api/auth/verify-email?token=${encodeURIComponent(token)}`),
 
+  resendVerification: (email: string) =>
+    apiFetch<{ cooldownSeconds: number }>('/api/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+
   forgotPassword: (email: string, code: string, phone: string) =>
     apiFetch<void>('/api/auth/forgot-password', {
       method: 'POST',

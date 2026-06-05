@@ -1,0 +1,136 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Ayuda" currentPage="help" requiredRole="STUDENT">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none"
+        onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Inicio</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Ayuda</span>
+    </div>
+    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Centro de ayuda</h1>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Todo lo que necesitas saber para usar la plataforma.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+
+    <!-- Tests -->
+    <div class="help-card">
+      <div class="help-icon" style="background:#FEE2E2;color:#D41224">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <h3 class="help-title">Tests y simulacros</h3>
+      <div class="help-body">
+        <p class="help-p">Los tests simulan las condiciones reales del examen. Hay tres modos:</p>
+        <div class="help-item"><strong>Práctica</strong> — Sin límite de tiempo. Puedes pedir pistas a la IA para entender el tema antes de responder.</div>
+        <div class="help-item"><strong>Examen</strong> — Modo estricto con tiempo límite y seguimiento anti-fraude. Cambiar de ventana queda registrado.</div>
+        <div class="help-item"><strong>Cronometrado</strong> — Tiempo corre desde el inicio pero sin restricciones de ventana.</div>
+        <p class="help-p" style="margin-top:10px">Al finalizar, puedes ver la <strong>revisión completa</strong> con la respuesta correcta y una explicación pedagógica de cada pregunta.</p>
+      </div>
+    </div>
+
+    <!-- Práctica IA -->
+    <div class="help-card">
+      <div class="help-icon" style="background:#EDE9FE;color:#7C3AED">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+      </div>
+      <h3 class="help-title">Práctica adaptativa con IA</h3>
+      <div class="help-body">
+        <p class="help-p">La IA genera preguntas en tiempo real y ajusta la dificultad según tu desempeño:</p>
+        <div class="help-item"><strong>Comienzas en dificultad media</strong> (nivel 5/10).</div>
+        <div class="help-item"><strong>Si aciertas</strong>, la siguiente pregunta es más difícil.</div>
+        <div class="help-item"><strong>Si fallas</strong>, la IA baja el nivel para consolidar el tema.</div>
+        <div class="help-item"><strong>Pistas por pregunta</strong>: puedes pedir hasta 3 pistas. La IA te orienta sin revelar la respuesta directamente.</div>
+        <p class="help-p" style="margin-top:10px">Al terminar ves tu <strong>puntaje ponderado</strong>: una pregunta difícil vale más puntos que una fácil.</p>
+      </div>
+    </div>
+
+    <!-- Puntaje y ranking -->
+    <div class="help-card">
+      <div class="help-icon" style="background:#FEF3C7;color:#D97706">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 21H4a2 2 0 01-2-2V5a2 2 0 012-2h4M14 21h4a2 2 0 002-2V5a2 2 0 00-2-2h-4M10 7h4v14h-4z"/></svg>
+      </div>
+      <h3 class="help-title">Puntaje y rankings</h3>
+      <div class="help-body">
+        <p class="help-p">Tu puntaje en tests estáticos va de 0 a 100 según cuántas respuestas correctas tuviste.</p>
+        <div class="help-item">El <strong>ranking general</strong> suma tus mejores intentos en todas las competencias.</div>
+        <div class="help-item">Solo los <strong>tests de tipo Examen y Cronometrado</strong> cuentan para el ranking.</div>
+        <div class="help-item">Las <strong>prácticas IA</strong> no afectan el ranking (son para aprender, no para competir).</div>
+        <p class="help-p" style="margin-top:10px">Puedes ver tu posición actual en la sección de <a href="/dashboard/rankings" style="color:var(--brand);font-weight:600;text-decoration:none">Rankings</a>.</p>
+      </div>
+    </div>
+
+    <!-- Anti-fraude -->
+    <div class="help-card">
+      <div class="help-icon" style="background:#FEE2E2;color:#DC2626">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      </div>
+      <h3 class="help-title">Sistema anti-fraude (exámenes)</h3>
+      <div class="help-body">
+        <p class="help-p">En modo Examen y Cronometrado la plataforma detecta comportamientos sospechosos:</p>
+        <div class="help-item"><strong>1ª y 2ª advertencia</strong>: cambiar de pestaña, minimizar o salir de pantalla completa.</div>
+        <div class="help-item"><strong>3ª vez</strong>: el examen se anula automáticamente y el administrador recibe una notificación.</div>
+        <p class="help-p" style="margin-top:10px">Para evitar esto, activa <strong>pantalla completa</strong> (F11) antes de iniciar. La plataforma lo sugerirá automáticamente.</p>
+      </div>
+    </div>
+
+    <!-- Historial -->
+    <div class="help-card">
+      <div class="help-icon" style="background:#DBEAFE;color:#2563EB">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3 class="help-title">Historial de intentos</h3>
+      <div class="help-body">
+        <p class="help-p">En <a href="/dashboard/history" style="color:var(--brand);font-weight:600;text-decoration:none">Mi historial</a> puedes ver todos tus intentos con sus resultados.</p>
+        <div class="help-item"><strong>Finalizados</strong>: puedes acceder a la revisión completa con cada pregunta.</div>
+        <div class="help-item"><strong>En progreso</strong>: si cerraste accidentalmente el examen, puedes reanudarlo desde <a href="/tests" style="color:var(--brand);text-decoration:none">Tests</a>.</div>
+        <div class="help-item"><strong>Anulados</strong>: el intento se marcó como fraude. Habla con tu administrador si crees que fue un error.</div>
+      </div>
+    </div>
+
+    <!-- Dudas -->
+    <div class="help-card">
+      <div class="help-icon" style="background:#FEF3C7;color:#D97706">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3 class="help-title">Reportar dudas</h3>
+      <div class="help-body">
+        <p class="help-p">Si encuentras una pregunta que crees que tiene un error, puedes reportarla durante el examen (modo Práctica).</p>
+        <div class="help-item">El botón <strong>"Reportar duda"</strong> aparece junto al número de pregunta.</div>
+        <div class="help-item">Puedes dejar un mensaje explicando tu duda.</div>
+        <div class="help-item">Un administrador revisará tu reporte y puede corregir la pregunta.</div>
+        <p class="help-p" style="margin-top:10px">Reportar una duda <strong>no interrumpe</strong> tu práctica — puedes seguir respondiendo normalmente.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contacto -->
+  <div style="background:var(--ui-card);border-radius:16px;padding:1.25rem;border:1px solid var(--ui-border);text-align:center">
+    <p style="font-size:0.9375rem;font-weight:700;color:var(--ui-text-1);margin:0 0 6px">¿Tienes otro problema?</p>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Habla con tu administrador o reporta una duda directamente desde el examen. El equipo revisará tu caso.</p>
+  </div>
+</AppLayout>
+
+<style>
+  .help-card {
+    background: var(--ui-card); border-radius: 16px; padding: 1.25rem;
+    border: 1px solid var(--ui-border); display: flex; flex-direction: column; gap: 10px;
+  }
+  .help-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .help-title {
+    font-size: 0.9375rem; font-weight: 800; color: var(--ui-text-1); margin: 0;
+  }
+  .help-body { display: flex; flex-direction: column; gap: 6px; }
+  .help-p { font-size: 0.8125rem; color: var(--ui-text-2); margin: 0; line-height: 1.6; }
+  .help-item {
+    font-size: 0.8125rem; color: var(--ui-text-2); line-height: 1.6; padding: 6px 10px;
+    background: var(--ui-surface); border-radius: 8px; border-left: 2px solid var(--ui-border-2);
+  }
+  @media(max-width:768px) {
+    div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  }
+</style>

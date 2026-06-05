@@ -34,7 +34,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
           <h1 style="font-family:var(--font-sans);font-size:1.25rem;font-weight:800;color:#1A1A1A;margin:0;">Enlace inválido</h1>
           <p id="s-error-msg" style="font-family:var(--font-sans);font-size:0.875rem;color:#6B7280;margin:0;">El enlace expiró o ya fue utilizado.</p>
-          <a href="/auth?tab=register" style="margin-top:0.5rem;display:inline-flex;padding:0.75rem 1.75rem;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-family:var(--font-sans);font-weight:700;text-decoration:none;">
+
+          <!-- Reenvío del enlace de verificación -->
+          <div style="width:100%;margin-top:0.5rem;text-align:left">
+            <label style="display:block;font-family:var(--font-sans);font-size:0.75rem;font-weight:700;color:#6B7280;margin-bottom:5px">Reenviar enlace de verificación</label>
+            <input id="resend-email" type="email" placeholder="tu-correo@ufpso.edu.co"
+                   style="width:100%;padding:10px 12px;border:1.5px solid #E5E5E5;border-radius:10px;font-family:var(--font-sans);font-size:0.875rem;outline:none;box-sizing:border-box" />
+            <p id="resend-feedback" style="font-family:var(--font-sans);font-size:0.75rem;margin:6px 0 0;display:none"></p>
+            <button id="resend-btn" type="button"
+                    style="width:100%;margin-top:8px;padding:0.7rem;border:none;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-family:var(--font-sans);font-weight:700;font-size:0.875rem;cursor:pointer">
+              Reenviar correo
+            </button>
+          </div>
+          <a href="/auth?tab=register" style="font-family:var(--font-sans);font-size:0.8125rem;color:#6B7280;text-decoration:underline">
             Volver al registro
           </a>
         </div>
@@ -70,4 +82,35 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         if (msg) msg.textContent = err?.message ?? 'El enlace es inválido o ya fue utilizado.';
       });
   }
+
+  // ── Reenvío de verificación (cooldown manejado por el backend) ──
+  const resendBtn = document.getElementById('resend-btn') as HTMLButtonElement | null;
+  const resendEmail = document.getElementById('resend-email') as HTMLInputElement | null;
+  const feedback = document.getElementById('resend-feedback');
+
+  function setFeedback(text: string, ok: boolean) {
+    if (!feedback) return;
+    feedback.textContent = text;
+    feedback.style.color = ok ? '#059669' : '#DC2626';
+    feedback.style.display = 'block';
+  }
+
+  resendBtn?.addEventListener('click', async () => {
+    const email = (resendEmail?.value ?? '').trim();
+    if (!email || !email.includes('@')) { setFeedback('Ingresa un correo válido.', false); return; }
+    resendBtn.disabled = true; resendBtn.textContent = 'Enviando...';
+    try {
+      const res = await authApi.resendVerification(email);
+      setFeedback('Enlace reenviado. Revisa tu bandeja y la carpeta de spam.', true);
+      let s = res.data?.cooldownSeconds ?? 60;
+      const tick = () => {
+        if (s <= 0) { resendBtn.disabled = false; resendBtn.textContent = 'Reenviar correo'; return; }
+        resendBtn.textContent = `Reenviar en ${s}s`; s--; setTimeout(tick, 1000);
+      };
+      tick();
+    } catch (err: any) {
+      resendBtn.disabled = false; resendBtn.textContent = 'Reenviar correo';
+      setFeedback(err?.message ?? 'No se pudo reenviar. Intenta más tarde.', false);
+    }
+  });
 </script>

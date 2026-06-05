@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Gestión de Estudiantes" currentPage="admin-students">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Estudiantes</span>
     </div>
     <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Estudiantes</h1>
@@ -16,19 +16,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">
     <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D41224">
       <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Total</p>
-      <p id="stat-total" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;line-height:1">—</p>
+      <p id="stat-total" style="font-size:1.75rem;font-weight:900;color:#D41224;margin:0;line-height:1">-</p>
     </div>
     <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #059669">
       <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Activos</p>
-      <p id="stat-active" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">—</p>
+      <p id="stat-active" style="font-size:1.75rem;font-weight:900;color:#059669;margin:0;line-height:1">-</p>
     </div>
     <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #2563EB">
       <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Email verificado</p>
-      <p id="stat-verified" style="font-size:1.75rem;font-weight:900;color:#2563EB;margin:0;line-height:1">—</p>
+      <p id="stat-verified" style="font-size:1.75rem;font-weight:900;color:#2563EB;margin:0;line-height:1">-</p>
     </div>
     <div style="background:var(--ui-card);border-radius:13px;padding:12px 16px;border:1px solid var(--ui-border);border-left:3px solid #D97706">
       <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px">Pendientes</p>
-      <p id="stat-pending" style="font-size:1.75rem;font-weight:900;color:#D97706;margin:0;line-height:1">—</p>
+      <p id="stat-pending" style="font-size:1.75rem;font-weight:900;color:#D97706;margin:0;line-height:1">-</p>
     </div>
   </div>
 
@@ -60,12 +60,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <table style="width:100%;border-collapse:collapse">
         <thead>
           <tr style="border-bottom:1px solid var(--ui-border)">
-            <th class="th">Código</th>
-            <th class="th">Nombre completo</th>
+            <th class="th sort-th" data-col="id" style="cursor:pointer">Código <span class="sort-ind asc" data-col="id"></span></th>
+            <th class="th sort-th" data-col="name" style="cursor:pointer">Nombre completo <span class="sort-ind" data-col="name"></span></th>
             <th class="th">Correo electrónico</th>
-            <th class="th">Programa</th>
+            <th class="th sort-th" data-col="prog" style="cursor:pointer">Programa <span class="sort-ind" data-col="prog"></span></th>
             <th class="th">Email</th>
-            <th class="th">Estado</th>
+            <th class="th sort-th" data-col="status" style="cursor:pointer">Estado <span class="sort-ind" data-col="status"></span></th>
             <th class="th">Acciones</th>
           </tr>
         </thead>
@@ -105,6 +105,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
   .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
   .page-btn:disabled { opacity:0.4;cursor:not-allowed }
+  .sort-th { cursor:pointer;user-select:none }
+  .sort-th:hover { background:var(--ui-hover) }
+  .sort-ind::after { content:''; font-size:0.625rem;margin-left:3px;opacity:0.35 }
+  .sort-ind.asc::after  { content:'▲'; opacity:1;color:var(--brand) }
+  .sort-ind.desc::after { content:'▼'; opacity:1;color:var(--brand) }
 </style>
 
 <script>
@@ -129,31 +134,63 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   let debounce: ReturnType<typeof setTimeout>;
   let pendingDeactivateId = '';
   let programMap: Record<string, string> = {};
+  let cachedStudents: StudentDto[] = [];
+  let sortColS: string | null = 'id';
+  let sortAscS = true;
 
   // Cargar programas para el filtro
   programsApi.findAll().then(res => {
-    if (!res.data) return;
-    res.data.forEach(p => { programMap[p.programId] = p.programName; });
+    if (!res.data?.length) return;
     const sel = document.getElementById('filter-program') as HTMLSelectElement;
     res.data.forEach(p => {
+      programMap[p.programId] = p.programName;
+      programMap[p.programId.toLowerCase()] = p.programName;
       const opt = document.createElement('option');
       opt.value = p.programId;
       opt.textContent = `${p.programName} (${p.programId})`;
       sel.appendChild(opt);
     });
-  }).catch(() => {});
+  }).catch(() => {
+    const sel = document.getElementById('filter-program') as HTMLSelectElement;
+    const opt = document.createElement('option');
+    opt.value = ''; opt.disabled = true;
+    opt.textContent = 'Error al cargar programas';
+    sel.appendChild(opt);
+  });
+
+  function sortStudents(rows: StudentDto[]): StudentDto[] {
+    if (!sortColS) return rows;
+    return [...rows].sort((a, b) => {
+      const fn = (s: StudentDto) => [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean).join(' ');
+      let av: any, bv: any;
+      if (sortColS === 'id')     { av = a.studentId; bv = b.studentId; }
+      if (sortColS === 'name')   { av = fn(a).toLowerCase(); bv = fn(b).toLowerCase(); }
+      if (sortColS === 'prog')   { av = a.programId; bv = b.programId; }
+      if (sortColS === 'status') { av = a.isActive ? 1 : 0; bv = b.isActive ? 1 : 0; }
+      if (av < bv) return sortAscS ? -1 : 1;
+      if (av > bv) return sortAscS ?  1 : -1;
+      return 0;
+    });
+  }
+  function updateSortIndicatorsS() {
+    document.querySelectorAll<HTMLElement>('.sort-ind').forEach(el => {
+      el.className = 'sort-ind' + (el.dataset.col === sortColS ? (sortAscS ? ' asc' : ' desc') : '');
+    });
+  }
 
   function renderRows(students: StudentDto[]) {
+    cachedStudents = students;
+    const sorted = sortStudents(students);
     const tbody = document.getElementById('students-tbody')!;
     tbody.innerHTML = '';
-    if (!students.length) {
+    if (!sorted.length) {
       tbody.innerHTML = `<tr><td colspan="7" style="padding:2.5rem;text-align:center">
         <p style="font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin resultados</p>
         <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0">Prueba con otros filtros o búsqueda.</p>
       </td></tr>`;
       return;
     }
-    students.forEach(s => {
+    sorted.forEach(s => {
       const fullName = [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean).join(' ');
       const progName = programMap[s.programId] ? `${programMap[s.programId]} (${s.programId})` : s.programId;
       const tr = document.createElement('tr');
@@ -161,7 +198,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="td">
           <code style="background:var(--ui-surface);padding:3px 8px;border-radius:6px;font-size:0.8125rem;font-weight:700;color:var(--brand);border:1px solid var(--ui-border)">${s.studentId}</code>
         </td>
-        <td class="td" style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${fullName}">${fullName || '—'}</td>
+        <td class="td" style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${fullName}">${fullName || '-'}</td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(s.email ?? '').toLowerCase()}</td>
         <td class="td" style="font-size:0.8125rem">${progName}</td>
         <td class="td">
@@ -230,14 +267,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       (document.getElementById('btn-prev') as HTMLButtonElement).disabled = page === 0;
       (document.getElementById('btn-next') as HTMLButtonElement).disabled = page >= tp - 1;
 
-      // Stats: sólo actualizamos activos/verificados cuando no hay filtro activo
-      if (!search && !programId && !status) {
-        const active   = content.filter(s => s.isActive).length;
-        const verified = content.filter(s => s.emailVerified).length;
-        (document.getElementById('stat-active') as HTMLElement).textContent   = te > SIZE ? '—' : String(active);
-        (document.getElementById('stat-verified') as HTMLElement).textContent = te > SIZE ? '—' : String(verified);
-        (document.getElementById('stat-pending') as HTMLElement).textContent  = te > SIZE ? '—' : String(content.filter(s => !s.emailVerified).length);
-      }
+      // Stats: siempre actualizar con los datos de la página actual
+      const active   = content.filter(s => s.isActive).length;
+      const verified = content.filter(s => s.emailVerified).length;
+      const pending  = content.filter(s => !s.emailVerified).length;
+      // Si hay filtros o más de una página, mostramos totales de la página actual con prefijo ~
+      const hasFilter = !!(search || programId || status);
+      const multiPage = te > SIZE;
+      const prefix = (hasFilter && multiPage) ? '~' : '';
+      (document.getElementById('stat-active') as HTMLElement).textContent   = prefix + String(active);
+      (document.getElementById('stat-verified') as HTMLElement).textContent = prefix + String(verified);
+      (document.getElementById('stat-pending') as HTMLElement).textContent  = prefix + String(pending);
 
       renderRows(content);
     } catch (err: any) {
@@ -282,6 +322,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     } finally {
       confirmBtn.disabled = false; confirmBtn.textContent = 'Desactivar';
     }
+  });
+
+  // Sort columns
+  document.querySelectorAll<HTMLElement>('.sort-th').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col!;
+      if (sortColS === col) sortAscS = !sortAscS; else { sortColS = col; sortAscS = true; }
+      updateSortIndicatorsS();
+      if (cachedStudents.length) renderRows(cachedStudents);
+    });
   });
 
   loadPage();

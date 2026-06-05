@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Dudas reportadas" currentPage="admin-doubts">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Dudas reportadas</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -14,9 +14,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Reportes de los estudiantes sobre preguntas del banco o sesiones IA.</p>
       </div>
       <div style="display:flex;gap:8px">
-        <div id="chip-open"     class="stat-chip" style="border-left-color:#D97706"><span class="sc-label">Abiertas</span><p id="n-open" class="sc-val" style="color:#D97706">—</p></div>
-        <div id="chip-reviewed" class="stat-chip" style="border-left-color:#2563EB"><span class="sc-label">Revisadas</span><p id="n-rev" class="sc-val" style="color:#2563EB">—</p></div>
-        <div id="chip-closed"   class="stat-chip" style="border-left-color:#059669"><span class="sc-label">Cerradas</span><p id="n-cls" class="sc-val" style="color:#059669">—</p></div>
+        <div id="chip-open"     class="stat-chip" style="border-left-color:#D97706"><span class="sc-label">Abiertas</span><p id="n-open" class="sc-val" style="color:#D97706">-</p></div>
+        <div id="chip-reviewed" class="stat-chip" style="border-left-color:#2563EB"><span class="sc-label">Revisadas</span><p id="n-rev" class="sc-val" style="color:#2563EB">-</p></div>
+        <div id="chip-closed"   class="stat-chip" style="border-left-color:#059669"><span class="sc-label">Cerradas</span><p id="n-cls" class="sc-val" style="color:#059669">-</p></div>
       </div>
     </div>
   </div>
@@ -52,26 +52,29 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     </div>
 
     <div style="margin-bottom:1rem">
+      <!-- Contexto del reporte -->
+      <div style="background:var(--ui-surface);border-radius:10px;padding:10px 14px;border:1px solid var(--ui-border);margin-bottom:12px;font-size:0.8125rem;color:var(--ui-text-2);line-height:1.65" id="d-context"></div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
         <div class="info-row"><span class="info-label">Estudiante</span><p id="d-student" class="info-val"></p></div>
-        <div class="info-row"><span class="info-label">Fuente</span><p id="d-source" class="info-val"></p></div>
+        <div class="info-row"><span class="info-label">Tipo de pregunta</span><p id="d-source" class="info-val"></p></div>
         <div class="info-row"><span class="info-label">Competencia</span><p id="d-comp" class="info-val"></p></div>
-        <div class="info-row"><span class="info-label">Fecha</span><p id="d-date" class="info-val"></p></div>
+        <div class="info-row"><span class="info-label">Fecha del reporte</span><p id="d-date" class="info-val"></p></div>
       </div>
 
       <div class="info-row" style="margin-bottom:8px">
-        <span class="info-label">Enunciado de la pregunta</span>
-        <div id="d-statement" style="padding:10px 12px;background:var(--ui-surface);border-radius:8px;border:1px solid var(--ui-border);font-size:0.875rem;color:var(--ui-text-1);line-height:1.6;max-height:150px;overflow-y:auto"></div>
+        <span class="info-label">Enunciado de la pregunta reportada</span>
+        <div id="d-statement" style="padding:12px 14px;background:var(--ui-surface);border-radius:8px;border:1px solid var(--ui-border);font-size:0.875rem;color:var(--ui-text-1);line-height:1.65;max-height:180px;overflow-y:auto;margin-top:4px"></div>
       </div>
 
       <div id="d-options-wrap" style="display:none;margin-bottom:8px">
-        <span class="info-label" style="display:block;margin-bottom:6px">Opciones de respuesta</span>
+        <span class="info-label" style="display:block;margin-bottom:6px">Opciones de respuesta de la pregunta</span>
         <div id="d-options" style="display:flex;flex-direction:column;gap:5px"></div>
       </div>
 
       <div class="info-row">
         <span class="info-label">Mensaje del estudiante</span>
-        <div id="d-message" style="padding:10px 12px;background:var(--ui-surface);border-radius:8px;border:1px solid var(--ui-border);font-size:0.875rem;color:var(--ui-text-2);line-height:1.6"></div>
+        <div id="d-message" style="padding:10px 12px;background:var(--ui-surface);border-radius:8px;border:1px solid var(--ui-border);font-size:0.875rem;color:var(--ui-text-2);line-height:1.6;font-style:italic;margin-top:4px"></div>
       </div>
     </div>
 
@@ -170,7 +173,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       const data = res.data!;
 
       totalPages = data.totalPages;
-      (document.getElementById('page-info') as HTMLElement).textContent  = `Pág. ${page + 1} de ${totalPages || 1} — ${data.totalElements} duda(s)`;
+      (document.getElementById('page-info') as HTMLElement).textContent  = `Pág. ${page + 1} de ${totalPages || 1} - ${data.totalElements} duda(s)`;
       (document.getElementById('count-label') as HTMLElement).textContent = `${data.totalElements} resultado(s)`;
       (document.getElementById('btn-prev') as HTMLButtonElement).disabled  = page === 0;
       (document.getElementById('btn-next') as HTMLButtonElement).disabled  = page >= totalPages - 1;
@@ -239,12 +242,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     selectedDoubt = d;
     const sc = STATUS_CONFIG[d.status];
 
+    // Contexto del reporte
+    const qId = d.questionId ?? d.aiQuestionId;
+    const contextMsg = `El estudiante ${d.studentId} reportó una duda sobre la pregunta ${qId ? `"${qId}"` : 'desconocida'} de la competencia "${d.competenceId ?? '?'}" (fuente: ${d.source === 'AI' ? 'Sesión IA' : 'Banco de preguntas estático'}) el ${fmtDate(d.createdAt)}.`;
+    (document.getElementById('d-context') as HTMLElement).textContent = contextMsg;
+
     (document.getElementById('d-student') as HTMLElement).textContent  = d.studentId;
-    (document.getElementById('d-source') as HTMLElement).textContent   = d.source === 'AI' ? '🤖 Sesión IA' : '📋 Banco estático';
+    (document.getElementById('d-source') as HTMLElement).textContent   = d.source === 'AI' ? 'Sesión IA' : 'Banco de preguntas';
     (document.getElementById('d-comp') as HTMLElement).textContent     = d.competenceId ?? '—';
     (document.getElementById('d-date') as HTMLElement).textContent     = fmtDate(d.createdAt);
-    (document.getElementById('d-statement') as HTMLElement).textContent = d.statement ?? 'Sin enunciado';
-    (document.getElementById('d-message') as HTMLElement).textContent  = d.message ?? '(Sin mensaje adicional)';
+    (document.getElementById('d-statement') as HTMLElement).textContent = d.statement ?? 'Sin enunciado disponible';
+    (document.getElementById('d-message') as HTMLElement).textContent  = d.message || '(Sin mensaje adicional del estudiante)';
 
     // Mostrar opciones si existen
     const optionsWrap = document.getElementById('d-options-wrap')!;

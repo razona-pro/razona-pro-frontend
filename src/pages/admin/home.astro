@@ -1,0 +1,161 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Panel de administración" currentPage="admin-home">
+  <!-- Header -->
+  <div style="margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div id="home-avatar" style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.125rem;font-family:var(--font-ui);flex-shrink:0">?</div>
+      <div>
+        <h1 id="home-name" style="font-size:1.375rem;font-weight:900;color:var(--ui-text-1);margin:0;letter-spacing:-0.3px">Hola, ...</h1>
+        <p id="home-date" style="font-size:0.8125rem;color:var(--ui-text-3);margin:0"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plataforma info -->
+  <div style="background:linear-gradient(135deg,rgba(212,18,36,0.06),rgba(155,31,36,0.03));border:1px solid rgba(212,18,36,0.12);border-radius:14px;padding:12px 16px;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px">
+    <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+    </div>
+    <div>
+      <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0">RazonaPro · Entrenamiento Saber Pro</p>
+      <p style="font-size:0.75rem;color:var(--ui-text-2);margin:0">Plataforma adaptativa de preparación para las Pruebas Saber Pro — UFPSO</p>
+    </div>
+  </div>
+
+  <!-- Indicadores -->
+  <div id="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:1.5rem">
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+  </div>
+</AdminLayout>
+
+<style>
+  @keyframes shimmer { 0%{background-position:-400px 0}100%{background-position:400px 0} }
+  .skel-card {
+    height:80px;border-radius:13px;
+    background:linear-gradient(90deg,var(--ui-surface) 25%,var(--ui-border) 50%,var(--ui-surface) 75%);
+    background-size:400px 100%;animation:shimmer 1.5s infinite;
+  }
+</style>
+
+<script>
+  import { requireAuth, isAdmin, getUser, getInitials, getFullName } from '../../lib/auth';
+  import { apiFetch }    from '../../lib/api/client';
+  import { adminsApi }   from '../../lib/api/admins.api';
+
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
+
+  // Pintar nombre desde localStorage
+  const u = getUser();
+  if (u) {
+    const full    = getFullName(u) || u.id;
+    const first   = full.split(' ')[0];   // solo primer nombre para el saludo
+    const initials = getInitials(u);
+    (document.getElementById('home-name')   as HTMLElement).textContent = `Hola, ${first}`;
+    (document.getElementById('home-avatar') as HTMLElement).textContent = initials;
+  }
+
+  // Fecha actual
+  const now = new Date();
+  const days = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  (document.getElementById('home-date') as HTMLElement).textContent =
+    `${days[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`;
+
+  // Actualizar nombre desde la API si es necesario
+  if (u && !u.firstName) {
+    adminsApi.me().then(res => {
+      if (res.data) {
+        const first = res.data.firstName || u?.id || '';
+        (document.getElementById('home-name') as HTMLElement).textContent = `Hola, ${first}`;
+        const init = [res.data.firstName?.[0], res.data.firstSurname?.[0]].filter(Boolean).join('').toUpperCase();
+        (document.getElementById('home-avatar') as HTMLElement).textContent = init || '?';
+      }
+    }).catch(() => {});
+  }
+
+  // Cargar indicadores
+  interface AdminOverview {
+    totalStudents: number; activeStudents: number;
+    totalQuestions: number; activeQuestions: number;
+    totalTests: number; finishedTrieds: number;
+    inProgressTrieds: number; openDoubts: number; totalAiSessions: number;
+  }
+
+  apiFetch<AdminOverview>('/api/stats/admin/overview').then(res => {
+    const d = res.data!;
+    const grid = document.getElementById('stats-grid')!;
+    grid.innerHTML = '';
+
+    const cards: { label: string; value: string | number; color: string; href: string }[] = [
+      { label:'Estudiantes activos',  value: d.activeStudents,  color:'#059669', href:'/admin/students' },
+      { label:'Preguntas activas',    value: d.activeQuestions, color:'#7C3AED', href:'/admin/questions' },
+      { label:'Tests disponibles',    value: d.totalTests,      color:'#2563EB', href:'/admin/tests' },
+      { label:'Intentos finalizados', value: d.finishedTrieds,  color:'#D41224', href:'/admin/trieds' },
+      { label:'En progreso',          value: d.inProgressTrieds, color:'#D97706', href:'/admin/trieds' },
+      { label:'Dudas abiertas',       value: d.openDoubts, color: d.openDoubts > 0 ? '#D97706' : '#059669', href:'/admin/doubts' },
+    ];
+
+    cards.forEach(c => {
+      const a = document.createElement('a');
+      a.href = c.href;
+      a.style.cssText = `background:var(--ui-card);border-radius:13px;padding:14px 16px;border:1px solid var(--ui-border);border-left:3px solid ${c.color};text-decoration:none;display:block;transition:all 0.15s`;
+      a.addEventListener('mouseenter', () => { a.style.boxShadow='0 4px 14px var(--ui-shadow-md)'; a.style.transform='translateY(-1px)'; });
+      a.addEventListener('mouseleave', () => { a.style.boxShadow=''; a.style.transform=''; });
+      a.innerHTML = `
+        <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px">${c.label}</p>
+        <p style="font-size:1.75rem;font-weight:900;color:${c.color};margin:0;line-height:1">${c.value}</p>
+      `;
+      grid.appendChild(a);
+    });
+
+  }).catch(() => {
+    (document.getElementById('stats-grid') as HTMLElement).innerHTML =
+      '<div style="grid-column:1/-1;padding:1rem;text-align:center;color:var(--ui-text-3);font-size:0.875rem">No se pudieron cargar los indicadores.</div>';
+  });
+
+  // Acceso rápido
+  const quickLinks = [
+    { href:'/admin/students',    color:'#059669', label:'Estudiantes',     desc:'Gestionar cuentas' },
+    { href:'/admin/tests',       color:'#2563EB', label:'Tests',           desc:'Crear simulacros' },
+    { href:'/admin/questions',   color:'#7C3AED', label:'Preguntas',       desc:'Banco de preguntas' },
+    { href:'/admin/competences', color:'#D41224', label:'Competencias',    desc:'Áreas Saber Pro' },
+    { href:'/admin/doubts',      color:'#D97706', label:'Dudas',           desc:'Reportes estudiantes' },
+    { href:'/admin/stats',       color:'#0891B2', label:'Estadísticas',    desc:'Métricas globales' },
+  ];
+  const quickGrid = document.createElement('div');
+  quickGrid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:0.5rem';
+  const quickTitle = document.createElement('p');
+  quickTitle.style.cssText = 'font-size:0.5625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--ui-text-3);margin:0 0 8px';
+  quickTitle.textContent = 'Acceso rápido';
+  const quickContainer = document.createElement('div');
+  quickContainer.style.cssText = 'margin-top:1.25rem';
+  quickContainer.appendChild(quickTitle);
+  quickContainer.appendChild(quickGrid);
+  (document.getElementById('stats-grid') as HTMLElement).parentElement?.appendChild(quickContainer);
+
+  quickLinks.forEach(l => {
+    const a = document.createElement('a');
+    a.href = l.href;
+    a.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--ui-card);border:1px solid var(--ui-border);border-left:3px solid ' + l.color + ';border-radius:11px;text-decoration:none;transition:all 0.15s;cursor:pointer';
+    a.addEventListener('mouseenter', () => { a.style.boxShadow='0 3px 12px var(--ui-shadow-md)'; a.style.transform='translateY(-1px)'; });
+    a.addEventListener('mouseleave', () => { a.style.boxShadow=''; a.style.transform=''; });
+    a.innerHTML = `
+      <div style="min-width:0;flex:1">
+        <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0">${l.label}</p>
+        <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">${l.desc}</p>
+      </div>
+      <svg width="13" height="13" fill="none" stroke="${l.color}" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" style="flex-shrink:0;opacity:0.6"><polyline points="9 18 15 12 9 6"/></svg>`;
+    quickGrid.appendChild(a);
+  });
+</script>

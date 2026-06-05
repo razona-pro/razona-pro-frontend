@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Gestión de Tests" currentPage="admin-tests">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none">Dashboard</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Tests</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -50,7 +50,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             <th class="th">Competencia</th>
             <th class="th">Modo</th>
             <th class="th">Duración</th>
-            <th class="th">Preguntas</th>
+            <th class="th">Preguntas (total/mostrar)</th>
             <th class="th">Estado</th>
             <th class="th">Acciones</th>
           </tr>
@@ -82,7 +82,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1rem">
         <div class="field-grp">
           <label class="field-lbl">Competencia *</label>
-          <select id="f-comp" class="field-inp"><option value="">— Selecciona —</option></select>
+          <select id="f-comp" class="field-inp"><option value="">- Selecciona -</option></select>
         </div>
         <div class="field-grp">
           <label class="field-lbl">Nombre del test * <span style="font-weight:400;opacity:0.6">(único por competencia)</span></label>
@@ -102,14 +102,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </select>
           </div>
           <div class="field-grp">
-            <label class="field-lbl">Duración (min) *</label>
-            <input id="f-dur" type="number" class="field-inp" min="1" value="60" required />
+            <label class="field-lbl">Duración (min)</label>
+            <input id="f-dur" type="number" class="field-inp" min="1" value="60" />
+            <span id="f-dur-hint" style="font-size:0.6875rem;color:var(--ui-text-3);margin-top:3px;display:none">En práctica puede quedar vacío (sin límite de tiempo).</span>
           </div>
           <div class="field-grp">
             <label class="field-lbl">Preguntas a presentar</label>
             <input id="f-qcount" type="number" class="field-inp" min="1" placeholder="Todas" />
           </div>
         </div>
+        <label style="display:flex;align-items:center;gap:9px;margin-top:14px;cursor:pointer;font-size:0.8125rem;color:var(--ui-text-1)">
+          <input id="f-notify" type="checkbox" checked style="width:17px;height:17px;accent-color:var(--brand);cursor:pointer" />
+          Notificar a todos los estudiantes al publicar el test
+        </label>
       </div>
       <div style="display:flex;gap:8px">
         <button type="button" id="form-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
@@ -145,7 +150,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <div id="existing-list" style="display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto"></div>
     </div>
 
-    <!-- Panel agregar — SIN filtro de competencia (ya viene fijo de la competencia del test) -->
+    <!-- Panel agregar - SIN filtro de competencia (ya viene fijo de la competencia del test) -->
     <div id="panel-add" style="display:none;flex-direction:column">
       <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--ui-border);display:flex;gap:10px;flex-wrap:wrap">
         <input id="assoc-search" type="text" placeholder="Buscar por enunciado..." style="flex:2;min-width:200px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-surface);font-family:inherit;font-size:0.8125rem;color:var(--ui-text-1);outline:none"/>
@@ -261,6 +266,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     } catch (err: any) { toast.error('Error al cargar tests', { description: err?.message }); }
   }
 
+  function renderQuestionCount(t: TestDto): string {
+    const bd = t.difficultyBreakdown;
+    const total = bd ? ((bd.B ?? 0) + (bd.M ?? 0) + (bd.A ?? 0)) : null;
+    const need  = t.questionsToPresent;
+    if (total === null) return need ? String(need) : '-';
+    if (total === 0)
+      return `<span title="Sin preguntas asignadas" style="color:#DC2626;font-weight:700">0${need ? ' / ' + need : ''} ⚠</span>`;
+    if (need && total < need)
+      return `<span title="Solo ${total} preguntas asignadas, pero el test pide ${need}" style="color:#D97706;font-weight:700">${total} / ${need} ⚠</span>`;
+    return need ? `${total} / ${need}` : String(total);
+  }
+
   function renderTable() {
     const tbody = document.getElementById('tests-tbody')!;
     tbody.innerHTML = '';
@@ -269,7 +286,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       return;
     }
     filteredTests.forEach(t => {
-      const durMin   = Math.floor(t.durationSeconds / 60);
+      const durLabel = t.durationSeconds != null ? `${Math.floor(t.durationSeconds / 60)} min` : 'Sin límite';
       const compName = t.competenceName ?? competenceMap[t.competenceId] ?? t.competenceId;
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -277,18 +294,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="td" style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${t.testName}">${t.testName}</td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${compName}</td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${MODE_BG[t.testMode]??'#F3F4F6'};color:${MODE_COLOR[t.testMode]??'#6B7280'}">${MODE_LABEL[t.testMode]??t.testMode}</span></td>
-        <td class="td" style="font-size:0.8125rem">${durMin} min</td>
-        <td class="td" style="font-size:0.8125rem">${t.questionsToPresent ?? '—'}</td>
+        <td class="td" style="font-size:0.8125rem">${durLabel}</td>
+        <td class="td" style="font-size:0.8125rem">${renderQuestionCount(t)}</td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${t.isActive?'#D1FAE5':'#FEE2E2'};color:${t.isActive?'#059669':'#DC2626'}">${t.isActive?'Activo':'Inactivo'}</span></td>
         <td class="td">
           <div style="display:flex;gap:5px;flex-wrap:wrap">
             <button class="action-btn btn-edit" data-id="${t.testId}" data-comp="${t.competenceId}"
-              style="border-color:var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1)">✏️ Editar</button>
+              style="border-color:var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1)">Editar</button>
             <button class="action-btn btn-manage" data-test="${t.testId}" data-comp="${t.competenceId}" data-name="${t.testName.replace(/"/g,'&quot;')}"
-              style="border-color:var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1)">📋 Preguntas</button>
+              style="border-color:var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1)">Preguntas</button>
             <button class="action-btn btn-toggle" data-test="${t.testId}" data-comp="${t.competenceId}" data-name="${t.testName.replace(/"/g,'&quot;')}" data-active="${t.isActive}"
               style="border-color:${t.isActive?'#FECACA':'#A7F3D0'};background:${t.isActive?'#FEF2F2':'#D1FAE5'};color:${t.isActive?'#DC2626':'#059669'}">
-              ${t.isActive ? '⏸ Desactivar' : '▶ Activar'}
+              ${t.isActive ? 'Desactivar' : 'Activar'}
             </button>
           </div>
         </td>`;
@@ -368,6 +385,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // ── Form modal (crear / editar) ───────────────────────────────────────
   const formModal = document.getElementById('form-modal')!;
 
+  // Muestra el hint "sin límite" y quita el required visual cuando el modo es práctica
+  function syncDurHint() {
+    const mode = (document.getElementById('f-mode') as HTMLSelectElement)?.value;
+    const hint = document.getElementById('f-dur-hint');
+    if (hint) hint.style.display = mode === 'PRACTICE' ? 'block' : 'none';
+  }
+  document.getElementById('f-mode')?.addEventListener('change', syncDurHint);
+
   function openFormModal(test?: TestDto) {
     editingTestId = test?.testId ?? '';
     editingCompId = test?.competenceId ?? '';
@@ -378,8 +403,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     (document.getElementById('f-name') as HTMLInputElement).value             = test?.testName ?? '';
     (document.getElementById('f-desc') as HTMLInputElement).value             = test?.description ?? '';
     (document.getElementById('f-mode') as HTMLSelectElement).value            = test?.testMode ?? 'PRACTICE';
-    (document.getElementById('f-dur')  as HTMLInputElement).value             = test ? String(Math.floor(test.durationSeconds/60)) : '60';
+    (document.getElementById('f-dur')  as HTMLInputElement).value             = test ? (test.durationSeconds != null ? String(Math.floor(test.durationSeconds/60)) : '') : '60';
     (document.getElementById('f-qcount') as HTMLInputElement).value           = test?.questionsToPresent ? String(test.questionsToPresent) : '';
+    (document.getElementById('f-notify') as HTMLInputElement).checked         = true;
+    syncDurHint();
     (document.getElementById('form-error') as HTMLElement).style.display = 'none';
     formModal.style.display = 'flex';
   }
@@ -401,13 +428,20 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const testName           = (document.getElementById('f-name') as HTMLInputElement).value.trim();
     const description        = (document.getElementById('f-desc') as HTMLInputElement).value.trim() || undefined;
     const testMode           = (document.getElementById('f-mode') as HTMLSelectElement).value;
-    const durMin             = Number((document.getElementById('f-dur') as HTMLInputElement).value);
+    const durRaw             = (document.getElementById('f-dur') as HTMLInputElement).value.trim();
+    const durMin             = durRaw ? Number(durRaw) : null;
     const qcountRaw          = (document.getElementById('f-qcount') as HTMLInputElement).value.trim();
     const questionsToPresent = qcountRaw ? Number(qcountRaw) : undefined;
+    const notifyStudents     = (document.getElementById('f-notify') as HTMLInputElement)?.checked ?? true;
 
-    if (!competenceId || !testName || durMin < 1) {
+    if (!competenceId || !testName) {
       errEl.textContent = 'Completa los campos obligatorios.'; errEl.style.display='block'; return;
     }
+    // Práctica puede ir sin tiempo; examen/cronometrado lo exigen
+    if (testMode !== 'PRACTICE' && (durMin == null || durMin < 1)) {
+      errEl.textContent = 'Los modos Examen y Cronometrado requieren una duración.'; errEl.style.display='block'; return;
+    }
+    const durationSeconds = durMin != null ? durMin * 60 : null;
 
     submit.disabled = true; lblEl.textContent = editingTestId ? 'Guardando...' : 'Creando...';
     window.rpLoader?.show(editingTestId ? 'Guardando cambios...' : 'Creando test...');
@@ -415,12 +449,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       if (editingTestId) {
         await testsApi.update(editingTestId, editingCompId, {
           testName, description, testMode,
-          durationSeconds: durMin * 60, questionsToPresent,
+          durationSeconds, questionsToPresent,
         });
         toast.success('Test actualizado correctamente');
         closeFormModal(); loadPage();
       } else {
-        const res = await testsApi.create({ competenceId, testName, description, durationSeconds: durMin * 60, questionsToPresent, testMode });
+        const res = await testsApi.create({ competenceId, testName, description, durationSeconds, questionsToPresent, testMode, notifyStudents });
         const t = res.data!;
         toast.success('Test creado. Ahora agrega preguntas.');
         closeFormModal(); await loadPage();

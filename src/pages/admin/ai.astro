@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Sesiones IA" currentPage="admin-ai">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Sesiones IA</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -24,20 +24,32 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem">
     <div class="stat-card" style="border-left-color:#6366F1">
       <p class="sc-lbl">Total sesiones</p>
-      <p id="n-total" class="sc-val" style="color:#6366F1">—</p>
+      <p id="n-total" class="sc-val" style="color:#6366F1">-</p>
     </div>
     <div class="stat-card" style="border-left-color:#059669">
       <p class="sc-lbl">Finalizadas</p>
-      <p id="n-finished" class="sc-val" style="color:#059669">—</p>
+      <p id="n-finished" class="sc-val" style="color:#059669">-</p>
     </div>
     <div class="stat-card" style="border-left-color:#D97706">
       <p class="sc-lbl">En progreso</p>
-      <p id="n-inprogress" class="sc-val" style="color:#D97706">—</p>
+      <p id="n-inprogress" class="sc-val" style="color:#D97706">-</p>
     </div>
     <div class="stat-card" style="border-left-color:#D41224">
       <p class="sc-lbl">Abandonadas</p>
-      <p id="n-abandoned" class="sc-val" style="color:#D41224">—</p>
+      <p id="n-abandoned" class="sc-val" style="color:#D41224">-</p>
     </div>
+  </div>
+
+  <!-- ══════════ Visor de intentos IA por estudiante ══════════ -->
+  <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);padding:1.25rem;margin-bottom:1.25rem">
+    <p style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0 0 4px">Ver intentos IA de un estudiante</p>
+    <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 12px">Consulta qué le preguntó la IA a un estudiante y agrega cualquier pregunta a tu banco.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input id="ai-search-student" type="text" placeholder="Código del estudiante (ej. FIS0001)"
+             style="flex:1;min-width:220px;padding:9px 12px;border:1.5px solid var(--ui-border);border-radius:9px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.875rem;outline:none" />
+      <button id="ai-search-btn" style="padding:9px 18px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff;font-weight:700;font-size:0.875rem;border:none;cursor:pointer;font-family:inherit">Buscar</button>
+    </div>
+    <div id="ai-attempts-list" style="margin-top:14px;display:none"></div>
   </div>
 
   <!-- Info del módulo IA -->
@@ -50,14 +62,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       </div>
       <div>
         <p style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0">Módulo de práctica IA</p>
-        <p id="ai-provider" style="font-size:0.8125rem;color:var(--ui-text-3);margin:2px 0 0">—</p>
+        <p id="ai-provider" style="font-size:0.8125rem;color:var(--ui-text-3);margin:2px 0 0">-</p>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
-      <div class="info-row"><span class="info-label">Estado</span><p id="ai-enabled" class="info-val">—</p></div>
-      <div class="info-row"><span class="info-label">Preguntas por sesión</span><p id="ai-maxq" class="info-val">—</p></div>
-      <div class="info-row"><span class="info-label">Modelo IA</span><p id="ai-model" class="info-val">—</p></div>
-      <div class="info-row"><span class="info-label">Proveedor</span><p id="ai-prov2" class="info-val">—</p></div>
+      <div class="info-row"><span class="info-label">Estado</span><p id="ai-enabled" class="info-val">-</p></div>
+      <div class="info-row"><span class="info-label">Preguntas por sesión</span><p id="ai-maxq" class="info-val">-</p></div>
+      <div class="info-row"><span class="info-label">Modelo IA</span><p id="ai-model" class="info-val">-</p></div>
+      <div class="info-row"><span class="info-label">Configuración</span><p id="ai-prov2" class="info-val">-</p></div>
     </div>
   </div>
 
@@ -65,7 +77,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
     <div style="padding:14px 18px;border-bottom:1px solid var(--ui-border)">
       <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Actividad reciente (sesiones de estudiantes)</p>
-      <p style="font-size:0.75rem;color:var(--ui-text-3);margin:2px 0 0">Las sesiones son personales — el admin puede monitorear el volumen global.</p>
+      <p style="font-size:0.75rem;color:var(--ui-text-3);margin:2px 0 0">Las sesiones son personales - el admin puede monitorear el volumen global.</p>
     </div>
     <div style="padding:2rem;text-align:center;color:var(--ui-text-3)">
       <div style="width:48px;height:48px;border-radius:50%;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem">
@@ -75,6 +87,20 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       </div>
       <p style="font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Resumen de sesiones IA cargado arriba</p>
       <p style="font-size:0.875rem">Los datos agregados de sesiones están en las tarjetas de estadísticas.<br>El detalle individual de cada sesión es accesible por el estudiante en su historial.</p>
+    </div>
+  </div>
+
+  <!-- Modal: preguntas de un intento IA -->
+  <div id="ai-q-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:1rem">
+    <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);max-width:680px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--ui-border)">
+        <div>
+          <p style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0">Preguntas generadas por la IA</p>
+          <p id="ai-q-modal-sub" style="font-size:0.75rem;color:var(--ui-text-3);margin:2px 0 0">-</p>
+        </div>
+        <button id="ai-q-close" style="background:var(--ui-surface);border:1px solid var(--ui-border);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--ui-text-2);font-size:1.1rem;line-height:1">✕</button>
+      </div>
+      <div id="ai-q-body" style="padding:1.1rem 1.25rem;overflow-y:auto"></div>
     </div>
   </div>
 </AdminLayout>
@@ -91,12 +117,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <script>
   import { requireAuth, isAdmin } from '../../lib/auth';
   import { apiFetch }             from '../../lib/api/client';
+  import { aiTriedsApi }          from '../../lib/api/ai-trieds.api';
   import { toast }                from '../../lib/toast';
 
 
   interface AiStatus {
-    enabled: boolean; provider?: string; model?: string;
-    adaptiveMode?: boolean; maxQuestionsPerSession?: number;
+    [x: string]: string | boolean | number | undefined;
+    enabled: boolean;
+    provider?: string;
+    model?: string;
+    adaptiveMode?: boolean;
+    maxQuestionsPerSession?: number;
+    message?: string;
   }
 
   async function load() {
@@ -105,16 +137,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       const res = await apiFetch<AiStatus>('/api/ai-trieds/status');
       const s   = res.data!;
       const chip = document.getElementById('ai-status-chip')!;
-      chip.textContent = s.enabled ? '✓ Módulo IA activo' : '✕ Módulo IA desactivado';
+      chip.textContent = s.enabled ? 'Módulo IA activo' : 'Módulo IA desactivado';
       chip.style.cssText += s.enabled
         ? ';background:#D1FAE5;border-color:#A7F3D0;color:#059669'
         : ';background:#FEE2E2;border-color:#FECACA;color:#DC2626';
 
-      document.getElementById('ai-enabled')!.textContent  = s.enabled ? '✓ Activo' : '✕ Inactivo';
-      document.getElementById('ai-provider')!.textContent = s.provider ?? 'No especificado';
-      document.getElementById('ai-prov2')!.textContent    = s.provider ?? '—';
-      document.getElementById('ai-maxq')!.textContent     = String(s.maxQuestionsPerSession ?? '—');
-      document.getElementById('ai-model')!.textContent    = s.model ?? '—';
+      document.getElementById('ai-enabled')!.textContent = s.enabled ? 'Activo' : 'Inactivo';
+      document.getElementById('ai-provider')!.textContent = s.message ?? (s.enabled ? 'Servicio disponible' : 'Servicio no disponible');
+      document.getElementById('ai-prov2')!.textContent    = s.model ? `Modelo ${s.model}` : 'No especificado';
+      document.getElementById('ai-maxq')!.textContent     = String(s.maxQuestionsPerSession ?? '-');
+      document.getElementById('ai-model')!.textContent    = s.model ?? '-';
       document.getElementById('ai-module-info')!.style.display = 'block';
     } catch {}
 
@@ -122,15 +154,126 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     try {
       const res = await apiFetch<any>('/api/stats/admin/overview');
       const d   = res.data!;
-      document.getElementById('n-total')!.textContent     = String(d.totalAiSessions ?? '—');
+      document.getElementById('n-total')!.textContent     = String(d.totalAiSessions ?? '-');
       // Las siguientes son aproximaciones usando el overview (no hay endpoint específico por estado de IA)
-      document.getElementById('n-finished')!.textContent  = '—';
-      document.getElementById('n-inprogress')!.textContent = '—';
-      document.getElementById('n-abandoned')!.textContent = '—';
+      document.getElementById('n-finished')!.textContent  = '-';
+      document.getElementById('n-inprogress')!.textContent = '-';
+      document.getElementById('n-abandoned')!.textContent = '-';
     } catch (err: any) {
       toast.error('Error al cargar stats IA', { description: err?.message });
     }
   }
 
   load();
+
+  // ══════════ Visor de intentos IA por estudiante ══════════
+  const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
+    FINISHED:    { bg: '#D1FAE5', color: '#059669', label: 'Finalizado' },
+    IN_PROGRESS: { bg: '#FEF3C7', color: '#D97706', label: 'En progreso' },
+    ABANDONED:   { bg: '#FEE2E2', color: '#DC2626', label: 'Abandonado' },
+    ANULADO:     { bg: '#FEE2E2', color: '#991B1B', label: 'Anulado' },
+  };
+
+  function esc(s: string) {
+    return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c] as string));
+  }
+
+  async function searchStudent() {
+    const input = document.getElementById('ai-search-student') as HTMLInputElement;
+    const code  = input.value.trim().toUpperCase();
+    const listEl = document.getElementById('ai-attempts-list')!;
+    if (code.length < 4) { toast.warning('Ingresa un código de estudiante válido'); return; }
+    const programId = code.slice(0, 3);
+
+    listEl.style.display = 'block';
+    listEl.innerHTML = '<p style="font-size:0.8125rem;color:var(--ui-text-3);padding:8px 0">Buscando...</p>';
+    try {
+      const res = await aiTriedsApi.findByStudent(programId, code, 0, 50);
+      const items = res.data?.content ?? [];
+      if (!items.length) {
+        listEl.innerHTML = '<p style="font-size:0.8125rem;color:var(--ui-text-3);padding:8px 0">Este estudiante no tiene intentos IA.</p>';
+        return;
+      }
+      listEl.innerHTML = '';
+      items.forEach((at: any) => {
+        const st = STATUS_STYLE[at.status] ?? { bg:'var(--ui-surface)', color:'var(--ui-text-2)', label: at.status };
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--ui-border);border-radius:10px;margin-bottom:6px;background:var(--ui-bg)';
+        const date = at.attemptTimestamp ? new Date(at.attemptTimestamp).toLocaleString('es-CO', { dateStyle:'medium', timeStyle:'short' }) : '';
+        row.innerHTML = `
+          <div style="min-width:0">
+            <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0">${esc(at.competenceId ?? 'Competencia')} · ${at.correctAnswers ?? 0}/${at.totalQuestions ?? 0} correctas</p>
+            <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:2px 0 0">${esc(date)}${at.score != null ? ' · ' + at.score + ' pts' : ''}</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${st.bg};color:${st.color}">${st.label}</span>
+            <button class="ai-view-q" data-id="${at.aiTriedId}" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--brand);font-size:0.75rem;font-weight:700;cursor:pointer;font-family:inherit">Ver preguntas</button>
+          </div>`;
+        listEl.appendChild(row);
+      });
+      listEl.querySelectorAll<HTMLButtonElement>('.ai-view-q').forEach(b =>
+        b.addEventListener('click', () => openQuestions(b.dataset.id!)));
+    } catch (err: any) {
+      listEl.innerHTML = `<p style="font-size:0.8125rem;color:#DC2626;padding:8px 0">${esc(err?.message ?? 'Error al cargar intentos')}</p>`;
+    }
+  }
+
+  async function openQuestions(aiTriedId: string) {
+    const modal = document.getElementById('ai-q-modal')!;
+    const body  = document.getElementById('ai-q-body')!;
+    const sub   = document.getElementById('ai-q-modal-sub')!;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    sub.textContent = 'Intento ' + aiTriedId;
+    body.innerHTML = '<p style="color:var(--ui-text-3);font-size:0.875rem">Cargando preguntas...</p>';
+    try {
+      const res = await aiTriedsApi.adminQuestions(aiTriedId);
+      const qs  = res.data ?? [];
+      if (!qs.length) { body.innerHTML = '<p style="color:var(--ui-text-3)">Sin preguntas generadas.</p>'; return; }
+      body.innerHTML = '';
+      qs.forEach((q: any, i: number) => {
+        const card = document.createElement('div');
+        card.style.cssText = 'border:1px solid var(--ui-border);border-radius:11px;padding:12px 14px;margin-bottom:10px;background:var(--ui-bg)';
+        const opts = (q.options ?? []).map((o: any, idx: number) =>
+          `<li style="font-size:0.8125rem;color:var(--ui-text-2);margin:2px 0">${String.fromCharCode(65+idx)}) ${esc(o.optionText ?? o.text ?? '')}</li>`).join('');
+        card.innerHTML = `
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px">
+            <p style="font-size:0.875rem;font-weight:600;color:var(--ui-text-1);margin:0;line-height:1.45">${i+1}. ${esc(q.statement)}</p>
+            <span style="flex-shrink:0;padding:2px 8px;border-radius:10px;font-size:0.625rem;font-weight:700;background:var(--brand-muted);color:var(--brand)">Nivel ${q.difficultyLevel ?? '-'}</span>
+          </div>
+          <ul style="list-style:none;padding:0;margin:0 0 10px">${opts}</ul>
+          <button class="ai-add-bank" data-id="${q.aiQuestionId}" style="padding:6px 13px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:inherit">+ Agregar al banco</button>`;
+        body.appendChild(card);
+      });
+      body.querySelectorAll<HTMLButtonElement>('.ai-add-bank').forEach(b =>
+        b.addEventListener('click', async () => {
+          b.disabled = true; b.textContent = 'Agregando...';
+          try {
+            await aiTriedsApi.addToBank(b.dataset.id!);
+            b.textContent = '✓ Agregada al banco';
+            b.style.background = 'var(--ui-surface)';
+            b.style.color = '#059669';
+            toast.success('Pregunta agregada al banco');
+          } catch (err: any) {
+            b.disabled = false; b.textContent = '+ Agregar al banco';
+            toast.error('No se pudo agregar', { description: err?.message });
+          }
+        }));
+    } catch (err: any) {
+      body.innerHTML = `<p style="color:#DC2626">${esc(err?.message ?? 'Error')}</p>`;
+    }
+  }
+
+  document.getElementById('ai-search-btn')?.addEventListener('click', searchStudent);
+  document.getElementById('ai-search-student')?.addEventListener('keydown', (e) => {
+    if ((e as KeyboardEvent).key === 'Enter') searchStudent();
+  });
+  function closeQModal() {
+    document.getElementById('ai-q-modal')!.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.getElementById('ai-q-close')?.addEventListener('click', closeQModal);
+  document.getElementById('ai-q-modal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('ai-q-modal')) closeQModal();
+  });
 </script>

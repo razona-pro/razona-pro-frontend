@@ -36,7 +36,7 @@ razonapro/
 │   │   └── Footer.astro
 │   ├── layouts/            # Plantillas base de página
 │   │   └── BaseLayout.astro
-│   ├── pages/              # Rutas — cada archivo es una URL
+│   ├── pages/              # Rutas - cada archivo es una URL
 │   │   ├── index.astro     → /
 │   │   └── about.astro     → /about
 │   ├── routes/             # Definición centralizada de rutas

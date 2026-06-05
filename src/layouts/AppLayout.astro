@@ -6,10 +6,28 @@ import Topbar from '../components/layout/Topbar.astro';
 interface Props {
   title: string;
   currentPage: string;
+  /** Si se indica, solo ese rol puede entrar; otro rol se redirige a su home. */
+  requiredRole?: 'ADMIN' | 'STUDENT';
 }
 
-const { title, currentPage } = Astro.props;
+const { title, currentPage, requiredRole } = Astro.props;
 ---
+
+<!-- Guard de ruta por rol: inline para ejecutarse ANTES de cualquier render/script de la página -->
+<script is:inline define:vars={{ requiredRole }}>
+  (function rpGuard() {
+    try {
+      var raw = localStorage.getItem('rp_token');
+      var p = null;
+      if (raw) { try { p = JSON.parse(atob(raw.split('.')[1])); } catch (e) { p = null; } }
+      var authed = p && typeof p.exp === 'number' && p.exp * 1000 > Date.now();
+      if (!authed) { location.replace('/auth'); return; }
+      if (requiredRole && p.userType !== requiredRole) {
+        location.replace(p.userType === 'ADMIN' ? '/admin/home' : '/dashboard');
+      }
+    } catch (e) { location.replace('/auth'); }
+  })();
+</script>
 
 <BaseLayout {title}>
   <div id="sidebar-overlay" onclick="window.__closeSidebar && window.__closeSidebar()" aria-hidden="true"></div>

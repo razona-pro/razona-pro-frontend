@@ -2,7 +2,7 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
-<AppLayout title="Mi historial" currentPage="history">
+<AppLayout title="Mi historial" currentPage="history" requiredRole="STUDENT">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Dashboard</a>
@@ -30,11 +30,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
     </div>
     <div class="hstat" style="border-left-color:#2563EB">
       <span class="hstat-label">Promedio</span>
-      <p id="hs-avg" class="hstat-val" style="color:#2563EB">—</p>
+      <p id="hs-avg" class="hstat-val" style="color:#2563EB">-</p>
     </div>
     <div class="hstat" style="border-left-color:#D97706">
       <span class="hstat-label">Mejor puntaje</span>
-      <p id="hs-best" class="hstat-val" style="color:#D97706">—</p>
+      <p id="hs-best" class="hstat-val" style="color:#D97706">-</p>
     </div>
   </div>
 
@@ -45,6 +45,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
       <option value="FINISHED">Finalizados</option>
       <option value="IN_PROGRESS">En progreso</option>
       <option value="ABANDONED">Abandonados</option>
+      <option value="TIMED_OUT">Tiempo agotado</option>
+      <option value="ANULADO">Anulados por fraude</option>
     </select>
     <select id="comp-filter" style="padding:7px 14px;border:1.5px solid var(--ui-border);border-radius:10px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none;cursor:pointer">
       <option value="ALL">Todas las competencias</option>
@@ -125,10 +127,10 @@ import AppLayout from '../../layouts/AppLayout.astro';
       const s  = getCompStyle(t.competenceId ?? '', t.testName ?? '');
       const sc = scoreColor(t.score);
       const statusColor: Record<string, string> = {
-        FINISHED: '#059669', IN_PROGRESS: '#2563EB', ABANDONED: '#DC2626', TIMED_OUT: '#D97706',
+        FINISHED: '#059669', IN_PROGRESS: '#2563EB', ABANDONED: '#DC2626', TIMED_OUT: '#D97706', ANULADO: '#991B1B',
       };
       const statusLabel: Record<string, string> = {
-        FINISHED: 'Finalizado', IN_PROGRESS: 'En progreso', ABANDONED: 'Abandonado', TIMED_OUT: 'Tiempo agotado',
+        FINISHED: 'Finalizado', IN_PROGRESS: 'En progreso', ABANDONED: 'Abandonado', TIMED_OUT: 'Tiempo agotado', ANULADO: 'Anulado por fraude',
       };
 
       const div = document.createElement('div');
@@ -171,8 +173,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
     animCount(document.getElementById('hs-finished') as HTMLElement, finished.length);
     const avgEl  = document.getElementById('hs-avg')!;
     const bestEl = document.getElementById('hs-best')!;
-    avgEl.textContent  = finished.length ? avg.toFixed(1) : '—';
-    bestEl.textContent = best != null ? best.toFixed(0) : '—';
+    avgEl.textContent  = finished.length ? avg.toFixed(1) : '-';
+    bestEl.textContent = best != null ? best.toFixed(0) : '-';
   }
 
   // Tabs

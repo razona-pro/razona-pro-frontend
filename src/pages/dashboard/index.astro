@@ -1,9 +1,12 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import StatCard from '../../components/ui/StatCard.astro';
+import WelcomeModal from '../../components/ui/WelcomeModal.astro';
 ---
 
-<AppLayout title="Dashboard" currentPage="dashboard">
+<AppLayout title="Dashboard" currentPage="dashboard" requiredRole="STUDENT">
+
+  <WelcomeModal />
 
   <!-- ══════════ ADMIN DASHBOARD ══════════ -->
   <div id="admin-dash" style="display:none">
@@ -22,7 +25,7 @@ import StatCard from '../../components/ui/StatCard.astro';
             <svg width="14" height="14" fill="none" stroke="#D41224" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           </div>
         </div>
-        <p id="admin-stat-students" class="admin-stat-value" style="color:#D41224">—</p>
+        <p id="admin-stat-students" class="admin-stat-value" style="color:#D41224">-</p>
         <p class="admin-stat-sub">en la plataforma</p>
       </div>
       <div class="admin-stat-card" style="border-left-color:#2563EB">
@@ -32,7 +35,7 @@ import StatCard from '../../components/ui/StatCard.astro';
             <svg width="14" height="14" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           </div>
         </div>
-        <p id="admin-stat-tests" class="admin-stat-value" style="color:#2563EB">—</p>
+        <p id="admin-stat-tests" class="admin-stat-value" style="color:#2563EB">-</p>
         <p class="admin-stat-sub">simulacros creados</p>
       </div>
       <div class="admin-stat-card" style="border-left-color:#059669">
@@ -42,7 +45,7 @@ import StatCard from '../../components/ui/StatCard.astro';
             <svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
         </div>
-        <p id="admin-stat-questions" class="admin-stat-value" style="color:#059669">—</p>
+        <p id="admin-stat-questions" class="admin-stat-value" style="color:#059669">-</p>
         <p class="admin-stat-sub">preguntas activas</p>
       </div>
       <div class="admin-stat-card" style="border-left-color:#7C3AED">
@@ -52,7 +55,7 @@ import StatCard from '../../components/ui/StatCard.astro';
             <svg width="14" height="14" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
         </div>
-        <p id="admin-stat-trieds" class="admin-stat-value" style="color:#7C3AED">—</p>
+        <p id="admin-stat-trieds" class="admin-stat-value" style="color:#7C3AED">-</p>
         <p class="admin-stat-sub">finalizados</p>
       </div>
     </div>
@@ -117,7 +120,7 @@ import StatCard from '../../components/ui/StatCard.astro';
     <div class="metric-item">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1)">Tasa de satisfacción</span>
-        <span id="admin-satisfaction" style="font-size:1rem;font-weight:900;color:#059669">—%</span>
+        <span id="admin-satisfaction" style="font-size:1rem;font-weight:900;color:#059669">-%</span>
       </div>
       <div style="height:6px;background:var(--ui-surface);border-radius:3px;overflow:hidden">
         <div id="admin-sat-bar" style="height:100%;border-radius:3px;background:linear-gradient(to right,#059669,#34D399);width:0%;transition:width 1.2s ease"></div>
@@ -127,7 +130,7 @@ import StatCard from '../../components/ui/StatCard.astro';
     <div class="metric-item">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1)">Competencias activas</span>
-        <span id="admin-comp-count" style="font-size:1rem;font-weight:900;color:#2563EB">—</span>
+        <span id="admin-comp-count" style="font-size:1rem;font-weight:900;color:#2563EB">-</span>
       </div>
       <div style="height:6px;background:var(--ui-surface);border-radius:3px;overflow:hidden">
         <div id="admin-comp-bar" style="height:100%;border-radius:3px;background:linear-gradient(to right,#2563EB,#60A5FA);width:0%;transition:width 1.2s ease"></div>
@@ -148,15 +151,15 @@ import StatCard from '../../components/ui/StatCard.astro';
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
       <div style="background:var(--ui-card);border-radius:9px;padding:10px;border:1px solid var(--ui-border);text-align:center">
-        <p id="ai-stat-sessions" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">—</p>
+        <p id="ai-stat-sessions" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">-</p>
         <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Sesiones IA</p>
       </div>
       <div style="background:var(--ui-card);border-radius:9px;padding:10px;border:1px solid var(--ui-border);text-align:center">
-        <p id="ai-stat-questions" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">—</p>
+        <p id="ai-stat-questions" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">-</p>
         <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">Preguntas gen.</p>
       </div>
       <div style="background:var(--ui-card);border-radius:9px;padding:10px;border:1px solid var(--ui-border);text-align:center">
-        <p id="ai-stat-accuracy" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">—</p>
+        <p id="ai-stat-accuracy" style="font-size:1.25rem;font-weight:900;color:#6366F1;margin:0 0 2px">-</p>
         <p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase;letter-spacing:0.4px">% aciertos IA</p>
       </div>
     </div>
@@ -256,10 +259,10 @@ import StatCard from '../../components/ui/StatCard.astro';
 
     <!-- Stats -->
     <div id="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem">
-      <StatCard id="stat-tests"  label="Tests realizados"  value="—" sub="simulacros"        icon="tabler:clipboard-check" color="#D41224" bg="#FEE2E2" />
-      <StatCard id="stat-avg"    label="Promedio global"   value="—" sub="puntos / 100"      icon="tabler:chart-line"      color="#2563EB" bg="#DBEAFE" />
-      <StatCard id="stat-rank"   label="Posición ranking"  value="—" sub="posición actual"   icon="tabler:trophy"          color="#D97706" bg="#FEF3C7" />
-      <StatCard id="stat-streak" label="Racha activa"      value="—" sub="días consecutivos" icon="tabler:flame"           color="#059669" bg="#D1FAE5" />
+      <StatCard id="stat-tests"  label="Tests realizados"  value="-" sub="simulacros"        icon="tabler:clipboard-check" color="#D41224" bg="#FEE2E2" />
+      <StatCard id="stat-avg"    label="Promedio global"   value="-" sub="puntos / 100"      icon="tabler:chart-line"      color="#2563EB" bg="#DBEAFE" />
+      <StatCard id="stat-rank"   label="Posición ranking"  value="-" sub="posición actual"   icon="tabler:trophy"          color="#D97706" bg="#FEF3C7" />
+      <StatCard id="stat-streak" label="Racha activa"      value="-" sub="días consecutivos" icon="tabler:flame"           color="#059669" bg="#D1FAE5" />
     </div>
 
     <!-- Main grid -->
@@ -287,7 +290,7 @@ import StatCard from '../../components/ui/StatCard.astro';
               <p id="lt-meta" style="color:var(--ui-text-3);font-size:0.75rem;margin:0">Comienza tu primer simulacro</p>
             </div>
             <div style="text-align:right;flex-shrink:0">
-              <p id="lt-score" style="font-size:1.75rem;font-weight:900;color:var(--brand);margin:0;letter-spacing:-1px">—</p>
+              <p id="lt-score" style="font-size:1.75rem;font-weight:900;color:var(--brand);margin:0;letter-spacing:-1px">-</p>
               <p style="color:var(--ui-text-3);font-size:0.6875rem;margin:0">/ 100 pts</p>
             </div>
           </div>
@@ -304,7 +307,7 @@ import StatCard from '../../components/ui/StatCard.astro';
           <div id="ranking-list" style="margin-bottom:0.75rem"></div>
           <div id="my-rank-card" style="display:none;margin-top:0.625rem;padding:0.625rem 0.75rem;background:#FFF1F2;border-radius:10px;border:1.5px solid #FECACA">
             <div style="display:flex;align-items:center;gap:0.625rem">
-              <span style="font-size:1.125rem;font-weight:900;color:#D41224;min-width:28px">#<span id="my-rank-num">—</span></span>
+              <span style="font-size:1.125rem;font-weight:900;color:#D41224;min-width:28px">#<span id="my-rank-num">-</span></span>
               <div style="flex:1">
                 <p id="my-rank-name" style="font-size:0.8125rem;font-weight:700;color:#991B1B;margin:0"></p>
                 <p style="font-size:0.6875rem;color:#B91C1C;margin:0;opacity:0.6">Tu posición actual</p>
@@ -513,13 +516,13 @@ try {
     modelL.textContent     = aiStatus.data?.provider ?? '';
   }
 
-  // Stats de sesiones IA — consultar desde API
+  // Stats de sesiones IA - consultar desde API
   const aiRes = await apiFetch<any>('/api/ai-trieds/my?page=0&size=1'); // solo para saber si hay datos
   // Como admin no tiene /my, usamos un endpoint diferente o simplemente mostramos "N/A"
   // Si tienes endpoint admin de ai_trieds, úsalo aquí
-  document.getElementById('ai-stat-sessions')!.textContent  = '—';
-  document.getElementById('ai-stat-questions')!.textContent = '—';
-  document.getElementById('ai-stat-accuracy')!.textContent  = '—';
+  document.getElementById('ai-stat-sessions')!.textContent  = '-';
+  document.getElementById('ai-stat-questions')!.textContent = '-';
+  document.getElementById('ai-stat-accuracy')!.textContent  = '-';
 } catch {}
 }
 
@@ -563,7 +566,7 @@ async function initStudentDashboard() {
 
       const testEl = document.getElementById('stat-tests');
       if (testEl) animCount(testEl, finished.length);
-      setStatVal('stat-avg', avgScore > 0 ? avgScore.toFixed(1) : '—');
+      setStatVal('stat-avg', avgScore > 0 ? avgScore.toFixed(1) : '-');
       setStatVal('stat-streak', String(calcStreak(finished)));
 
       const sorted = [...finished].sort((a, b) =>
@@ -578,7 +581,7 @@ async function initStudentDashboard() {
         const ltScore = document.getElementById('lt-score');
         if (ltName)  ltName.textContent  = lt.testName ?? lt.testId;
         if (ltMeta)  ltMeta.textContent  = `${fmtDate(lt.finishedAt ?? lt.attemptTimestamp)} · ${lt.totalQuestions} preguntas`;
-        if (ltScore) { ltScore.textContent = lt.score?.toFixed(0) ?? '—'; ltScore.style.color = scoreColor(lt.score); }
+        if (ltScore) { ltScore.textContent = lt.score?.toFixed(0) ?? '-'; ltScore.style.color = scoreColor(lt.score); }
       }
 
       const recentList = document.getElementById('recent-list');
@@ -593,7 +596,7 @@ async function initStudentDashboard() {
             div.innerHTML = `
               <div style="width:34px;height:34px;border-radius:8px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;font-weight:900;color:${s.color}">${s.short}</span></div>
               <div style="flex:1;min-width:0"><p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.testName ?? t.testId}</p><p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">${fmtDate(t.finishedAt ?? t.attemptTimestamp)} · ${t.totalQuestions} preg.</p></div>
-              <div style="text-align:right;flex-shrink:0"><p style="font-size:1rem;font-weight:900;color:${scoreColor(t.score)};margin:0">${t.score?.toFixed(0) ?? '—'}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">/100</p></div>`;
+              <div style="text-align:right;flex-shrink:0"><p style="font-size:1rem;font-weight:900;color:${scoreColor(t.score)};margin:0">${t.score?.toFixed(0) ?? '-'}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">/100</p></div>`;
             recentList.appendChild(div);
           });
         } else {
@@ -626,7 +629,7 @@ async function initStudentDashboard() {
                   <span style="font-size:0.8125rem;font-weight:600;color:var(--ui-text-1)">${c.competenceName}</span>
                 </div>
                 <div style="display:flex;align-items:baseline;gap:3px;flex-shrink:0">
-                  <span style="font-size:1rem;font-weight:900;color:${s.color}">${score > 0 ? score : '—'}</span>
+                  <span style="font-size:1rem;font-weight:900;color:${s.color}">${score > 0 ? score : '-'}</span>
                   <span style="font-size:0.6875rem;color:var(--ui-text-3)">/100</span>
                 </div>
               </div>

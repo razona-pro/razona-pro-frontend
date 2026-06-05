@@ -4,7 +4,7 @@ import { Icon } from 'astro-icon/components';
 const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
 ---
 
-<BaseLayout title="Inicio" description="Plataforma inteligente de preparación Saber Pro — UFPSO">
+<BaseLayout title="Inicio" description="Plataforma inteligente de preparación Saber Pro - UFPSO">
 
 <style>
   :root {
@@ -178,7 +178,7 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
     transition: background 0.25s, border-color 0.25s;
   }
 
-  /* Badge "Activo" en la hero card — definido correctamente */
+  /* Badge "Activo" en la hero card - definido correctamente */
   .hero-card-badge {
     display: inline-block;
     padding: 4px 12px; border-radius: 20px;
@@ -467,9 +467,9 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
         <!-- Stats rápidas -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
           {[
-            { val: '—', label: 'Simulacros',   id: 'hero-stat-tests'    },
-            { val: '—', label: 'Satisfacción', id: 'hero-stat-avg'      },
-            { val: '—', label: 'Estudiantes',  id: 'hero-stat-students' },
+            { val: '-', label: 'Simulacros',   id: 'hero-stat-tests'    },
+            { val: '-', label: 'Satisfacción', id: 'hero-stat-avg'      },
+            { val: '-', label: 'Estudiantes',  id: 'hero-stat-students' },
           ].map(s => (
             <div class="hero-stat-box">
               <p id={s.id} class="hero-stat-val">{s.val}</p>
@@ -550,7 +550,7 @@ const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080';
     <h2 class="cta-title">¿Listo para asegurar<br/><span class="text-gradient">tu futuro académico?</span></h2>
     <p class="cta-sub">Únete a los estudiantes UFPSO que transforman su método de estudio con inteligencia artificial adaptativa.</p>
     <a href="/auth?tab=register" id="cta-main-btn" class="btn-hero-primary" style="display:inline-flex">
-      Comenzar ahora — es gratis
+      Comenzar ahora - es gratis
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
     </a>
   </div>

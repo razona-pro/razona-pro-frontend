@@ -69,7 +69,7 @@ export function tokenSecondsLeft(): number {
 export function isAdmin(): boolean   { return getUser()?.userType === 'ADMIN'; }
 export function isStudent(): boolean { return getUser()?.userType === 'STUDENT'; }
 
-/** Nombre completo con los 4 segmentos — CORREGIDO para incluir secondName y secondSurname */
+/** Nombre completo con los 4 segmentos - CORREGIDO para incluir secondName y secondSurname */
 export function getFullName(user: StoredUser | null): string {
   if (!user) return '';
   return [user.firstName, user.secondName, user.firstSurname, user.secondSurname]
@@ -104,8 +104,30 @@ export function requireAuth(redirect = '/auth'): StoredUser {
   return getUser()!;
 }
 
-export function redirectIfAuthenticated(to = '/dashboard'): void {
-  if (isAuthenticated()) window.location.replace(to);
+export function redirectIfAuthenticated(to?: string): void {
+  if (isAuthenticated()) window.location.replace(to ?? defaultHomeFor(getUser()?.userType));
+}
+
+/** Landing por defecto según el rol. */
+export function defaultHomeFor(userType?: string): string {
+  return userType === 'ADMIN' ? '/admin/home' : '/dashboard';
+}
+
+/**
+ * Exige sesión válida Y un rol concreto. Si no está autenticado → /auth.
+ * Si está autenticado pero con otro rol → su home (admin→/admin, student→/dashboard).
+ */
+export function requireRole(role: 'ADMIN' | 'STUDENT', redirect = '/auth'): StoredUser {
+  if (!isAuthenticated()) {
+    window.location.replace(redirect);
+    throw new Error('Unauthenticated');
+  }
+  const user = getUser()!;
+  if (user.userType !== role) {
+    window.location.replace(defaultHomeFor(user.userType));
+    throw new Error('Unauthorized');
+  }
+  return user;
 }
 
 export function getTokenPayload(): Record<string, unknown> {
@@ -121,7 +143,7 @@ export function initSessionWatcher(onExpired: () => void): () => void {
     bc = new BroadcastChannel(LOGOUT_EVENT);
     bc.onmessage = (e) => {
       if (e.data?.type === 'logout') {
-        // Otra pestaña hizo logout — redirigir silenciosamente sin mostrar modal de expirado
+        // Otra pestaña hizo logout - redirigir silenciosamente sin mostrar modal de expirado
         window.location.href = '/auth';
       }
     };

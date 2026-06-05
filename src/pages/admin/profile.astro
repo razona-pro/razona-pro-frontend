@@ -1,0 +1,125 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Mi perfil" currentPage="profile">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/admin/home" style="color:var(--ui-text-3);text-decoration:none"
+        onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Mi perfil</span>
+    </div>
+    <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Mi perfil</h1>
+    <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Información de tu cuenta de administrador.</p>
+  </div>
+
+  <!-- Hero -->
+  <div style="background:var(--ui-card);border-radius:20px;border:1px solid var(--ui-border);overflow:hidden;margin-bottom:1.25rem">
+    <div style="height:80px;background:linear-gradient(135deg,#D41224 0%,#9B1F24 60%,#6B1318 100%);position:relative;overflow:hidden">
+      <div style="position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.07)"></div>
+    </div>
+    <div style="padding:0 1.5rem 1.5rem;display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">
+      <div style="margin-top:-30px;position:relative;flex-shrink:0">
+        <div id="profile-avatar" style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#D41224,#9B1F24);border:3px solid var(--ui-card);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.25rem;font-family:var(--font-ui);box-shadow:0 4px 14px rgba(0,0,0,0.15)">?</div>
+      </div>
+      <div style="flex:1;min-width:160px;padding-top:0.5rem">
+        <h2 id="profile-name" style="font-size:1.125rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.3px">Cargando...</h2>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:rgba(212,18,36,0.1);color:#D41224">
+          <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+          Administrador
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Datos -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div style="background:var(--ui-card);border-radius:16px;padding:1.25rem;border:1px solid var(--ui-border)">
+      <h3 style="font-size:0.8125rem;font-weight:800;color:var(--ui-text-1);margin:0 0 1rem;display:flex;align-items:center;gap:7px">
+        <svg width="13" height="13" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-8 8-8s8 4 8 8"/></svg>
+        Datos personales
+      </h3>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <p class="data-lbl">ID de administrador</p>
+          <p id="info-adminid" class="data-val" style="font-family:monospace">—</p>
+        </div>
+        <div>
+          <p class="data-lbl">Nombre completo</p>
+          <p id="info-fullname" class="data-val">—</p>
+        </div>
+        <div>
+          <p class="data-lbl">Correo electrónico</p>
+          <p id="info-email" class="data-val">—</p>
+        </div>
+        <div>
+          <p class="data-lbl">Teléfono</p>
+          <p id="info-phone" class="data-val">—</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--ui-card);border-radius:16px;padding:1.25rem;border:1px solid var(--ui-border)">
+      <h3 style="font-size:0.8125rem;font-weight:800;color:var(--ui-text-1);margin:0 0 1rem;display:flex;align-items:center;gap:7px">
+        <svg width="13" height="13" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        Acceso
+      </h3>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <p class="data-lbl">Último acceso</p>
+          <p id="info-lastlogin" class="data-val">—</p>
+        </div>
+        <div>
+          <p class="data-lbl">Cuenta creada</p>
+          <p id="info-createdat" class="data-val">—</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .data-lbl { font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 3px }
+  .data-val  { font-size:0.875rem;color:var(--ui-text-1);margin:0;font-weight:500 }
+  @media(max-width:640px) { div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr!important } }
+</style>
+
+<script>
+  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { adminsApi }            from '../../lib/api/admins.api';
+
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard/profile'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
+
+  function fmt(d?: string) {
+    if (!d) return '—';
+    return new Date(d).toLocaleString('es-CO', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+    });
+  }
+
+  async function load() {
+    try {
+      const res = await adminsApi.me();
+      const a   = res.data;
+      if (!a) return;
+
+      const fullName = [a.firstName, a.secondName, a.firstSurname, a.secondSurname].filter(Boolean).join(' ');
+      const initials = [a.firstName?.[0], a.firstSurname?.[0]].filter(Boolean).join('').toUpperCase() || '?';
+
+      (document.getElementById('profile-avatar') as HTMLElement).textContent = initials;
+      (document.getElementById('profile-name')   as HTMLElement).textContent = fullName;
+      (document.getElementById('info-adminid')   as HTMLElement).textContent = a.adminId;
+      (document.getElementById('info-fullname')  as HTMLElement).textContent = fullName || '—';
+      (document.getElementById('info-email')     as HTMLElement).textContent = a.email?.toLowerCase() ?? '—';
+      (document.getElementById('info-phone')     as HTMLElement).textContent = a.phone || '—';
+      (document.getElementById('info-lastlogin') as HTMLElement).textContent = fmt(a.lastLoginAt);
+      (document.getElementById('info-createdat') as HTMLElement).textContent = fmt(a.createdAt);
+    } catch {}
+  }
+
+  load();
+</script>

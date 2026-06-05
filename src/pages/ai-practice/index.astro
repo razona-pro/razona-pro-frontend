@@ -2,7 +2,7 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 ---
 
-<AppLayout title="Práctica adaptativa con IA" currentPage="ai-practice">
+<AppLayout title="Práctica adaptativa con IA" currentPage="ai-practice" requiredRole="STUDENT">
 
   <div id="view-setup">
     <div style="margin-bottom:1.25rem">
@@ -50,7 +50,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
         <div class="fg">
           <label class="fl">Notas de sesión <span style="font-weight:400;opacity:0.6">(opcional)</span></label>
-          <input id="setup-desc" type="text" class="fi" placeholder="Ej: Preparación parcial — semana 3" maxlength="200" />
+          <input id="setup-desc" type="text" class="fi" placeholder="Ej: Preparación parcial - semana 3" maxlength="200" />
         </div>
 
         <div id="setup-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:0.875rem"></div>
@@ -119,7 +119,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
           <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center">
-            <p id="ps-q-count" style="font-size:1.5rem;font-weight:900;color:white;margin:0">—</p>
+            <p id="ps-q-count" style="font-size:1.5rem;font-weight:900;color:white;margin:0">-</p>
             <p style="font-size:0.625rem;color:rgba(255,255,255,0.65);margin:0;text-transform:uppercase;letter-spacing:0.4px">Preguntas</p>
           </div>
           <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center">
@@ -127,7 +127,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
             <p style="font-size:0.625rem;color:rgba(255,255,255,0.65);margin:0;text-transform:uppercase;letter-spacing:0.4px">Niveles</p>
           </div>
           <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center">
-            <p id="ps-est-time" style="font-size:1.5rem;font-weight:900;color:white;margin:0">—</p>
+            <p id="ps-est-time" style="font-size:1.5rem;font-weight:900;color:white;margin:0">-</p>
             <p style="font-size:0.625rem;color:rgba(255,255,255,0.65);margin:0;text-transform:uppercase;letter-spacing:0.4px">Min. aprox.</p>
           </div>
         </div>

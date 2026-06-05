@@ -65,9 +65,12 @@ import { Icon } from 'astro-icon/components';
 
       <!-- Main -->
       <main class="exam-main">
-        <div id="exam-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;gap:1rem">
-          <div style="width:44px;height:44px;border-radius:50%;border:3px solid rgba(212,18,36,0.15);border-top-color:#D41224;animation:spin 0.85s linear infinite"></div>
-          <p style="font-size:0.875rem;color:var(--ui-text-3)">Cargando preguntas...</p>
+        <div id="exam-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:320px;gap:1rem;text-align:center">
+          <div style="width:52px;height:52px;border-radius:50%;border:3.5px solid rgba(212,18,36,0.15);border-top-color:#D41224;animation:spin 0.85s linear infinite"></div>
+          <div>
+            <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Preparando tu simulacro</p>
+            <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0">Cargando preguntas y configurando el banco...</p>
+          </div>
         </div>
 
         <div id="question-card" style="display:none;max-width:760px;margin:0 auto;width:100%">
@@ -85,7 +88,7 @@ import { Icon } from 'astro-icon/components';
             <span id="q-comp-chip"  style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
             <span id="q-diff-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
             <span id="q-answered-badge" style="display:none;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#D1FAE5;color:#059669">✓ Respondida</span>
-            <!-- Botón duda — siempre visible para estudiantes -->
+            <!-- Botón duda - siempre visible para estudiantes -->
             <button id="doubt-btn"
               style="display:none;margin-left:auto;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;border:1.5px solid #FDE68A;background:#FEF3C7;color:#92400E;cursor:pointer;font-family:inherit">
               ⚠ Reportar duda
@@ -100,18 +103,42 @@ import { Icon } from 'astro-icon/components';
           <!-- Opciones -->
           <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.25rem"></div>
 
-          <!-- Hint section: solo en modo PRACTICE con IA -->
-          <div id="hint-section" style="display:none;margin-bottom:1.125rem">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-              <span style="font-size:0.75rem;color:var(--ui-text-3);font-weight:600">💡 Ayuda IA:</span>
-              <button class="hbtn" data-level="1" type="button">Pista 1</button>
-              <button class="hbtn" data-level="2" type="button" disabled>Pista 2</button>
-              <button class="hbtn" data-level="3" type="button" disabled>Pista 3</button>
+          <!-- Asistente IA (solo en modo PRACTICE con IA disponible) -->
+          <div id="hint-section" style="display:none;margin-bottom:1.125rem;border:1.5px solid #BAE6FD;border-radius:14px;overflow:hidden;background:var(--ui-card)">
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 13px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-bottom:1px solid #BAE6FD">
+              <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#2563EB,#1D4ED8);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg width="13" height="13" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+              </div>
+              <div style="flex:1">
+                <p style="font-size:0.75rem;font-weight:700;color:#1E40AF;margin:0">Asistente IA <span style="font-weight:400;opacity:0.7">— Modo práctica</span></p>
+                <p style="font-size:0.5625rem;color:#3B82F6;margin:0">Las pistas orientan sin revelar la respuesta</p>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="hbtn" data-level="1" type="button">Pista 1</button>
+                <button class="hbtn" data-level="2" type="button" disabled>Pista 2</button>
+                <button class="hbtn" data-level="3" type="button" disabled>Pista 3</button>
+              </div>
             </div>
-            <div id="hint-box" style="display:none;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 14px">
-              <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0369A1;margin:0 0 5px">Orientación (no revela la respuesta)</p>
-              <p id="hint-text" style="font-size:0.875rem;color:#0C4A6E;margin:0;line-height:1.65"></p>
-              <div id="hint-loading" style="display:none;font-size:0.8125rem;color:#0369A1">Generando pista...</div>
+            <div id="hint-box" style="display:none;padding:12px 14px">
+              <div style="display:flex;align-items:flex-start;gap:9px">
+                <div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#2563EB,#1D4ED8);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                  <svg width="11" height="11" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+                </div>
+                <div style="flex:1;background:#DBEAFE;border-radius:0 10px 10px 10px;padding:9px 12px">
+                  <div id="hint-loading" style="display:none;align-items:center;gap:5px;font-size:0.8125rem;color:#1D4ED8">
+                    <span style="display:inline-flex;gap:3px">
+                      <span style="width:4px;height:4px;border-radius:50%;background:#2563EB;animation:typingDot 1.2s 0s infinite"></span>
+                      <span style="width:4px;height:4px;border-radius:50%;background:#2563EB;animation:typingDot 1.2s 0.2s infinite"></span>
+                      <span style="width:4px;height:4px;border-radius:50%;background:#2563EB;animation:typingDot 1.2s 0.4s infinite"></span>
+                    </span>
+                    Generando orientación...
+                  </div>
+                  <p id="hint-text" style="font-size:0.875rem;color:#1E40AF;margin:0;line-height:1.7"></p>
+                </div>
+              </div>
+            </div>
+            <div id="hint-idle" style="padding:10px 14px;font-size:0.8125rem;color:#3B82F6;text-align:center;opacity:0.7">
+              Pide la Pista 1 si necesitas orientación sobre esta pregunta
             </div>
           </div>
 
@@ -166,6 +193,27 @@ import { Icon } from 'astro-icon/components';
       <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 0.75rem;line-height:1.65">Se detectaron 3 o más salidas de ventana durante el examen. El intento ha sido marcado como <strong>abandonado</strong> automáticamente.</p>
       <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0 0 1.5rem">Si crees que esto fue un error, comunícate con tu administrador.</p>
       <a href="/tests" style="display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Volver a tests</a>
+    </div>
+  </div>
+
+  <!-- Modal recomendación pantalla completa (solo EXAM/TIMED en escritorio) -->
+  <div id="fs-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9200;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+    <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:420px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;box-shadow:0 24px 60px rgba(0,0,0,0.35)">
+      <div style="width:72px;height:72px;border-radius:50%;margin:0 auto 1.125rem;display:flex;align-items:center;justify-content:center;background:#EFF6FF">
+        <svg width="34" height="34" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+      </div>
+      <h3 style="font-size:1.125rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Activa pantalla completa</h3>
+      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 0.375rem;line-height:1.65">Para este examen (<strong>modo estricto</strong>) se recomienda pantalla completa.</p>
+      <p style="font-size:0.8125rem;color:#DC2626;font-weight:600;margin:0 0 1.375rem">⚠ Cambiar de ventana, minimizar o salir de la pestaña se registra como intento de fraude.</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button id="fs-enter" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:0.75rem;border-radius:11px;border:none;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(37,99,235,0.3)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+          Activar pantalla completa (F11)
+        </button>
+        <button id="fs-skip" style="padding:0.625rem;border-radius:11px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-3);font-family:inherit;font-weight:600;font-size:0.8125rem;cursor:pointer">
+          Continuar sin pantalla completa (bajo tu responsabilidad)
+        </button>
+      </div>
     </div>
   </div>
 
@@ -263,9 +311,14 @@ import { Icon } from 'astro-icon/components';
   .exam-noselect .exam-main,
   .exam-noselect .exam-sidebar { user-select: none; -webkit-user-select: none; }
 
-  .hbtn { padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;border:1.5px solid #BAE6FD;background:#F0F9FF;color:#0369A1;cursor:pointer;transition:all 0.15s;font-family:inherit; }
-  .hbtn:hover:not(:disabled) { background:#0369A1;color:white;border-color:#0369A1; }
+  .hbtn { padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;border:1.5px solid #BFDBFE;background:#DBEAFE;color:#1D4ED8;cursor:pointer;transition:all 0.15s;font-family:inherit; }
+  .hbtn:hover:not(:disabled) { background:#2563EB;color:white;border-color:#2563EB; }
   .hbtn:disabled { opacity:0.35;cursor:not-allowed; }
+
+  @keyframes typingDot {
+    0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1.0); opacity: 1; }
+  }
 
   .timer-danger { background:#FEE2E2!important;border-color:#FECACA!important;color:#DC2626!important;animation:timerPulse 1s ease-in-out infinite; }
 
@@ -273,7 +326,7 @@ import { Icon } from 'astro-icon/components';
 </style>
 
 <script>
-  import { requireAuth, isStudent }   from '../../lib/auth';
+  import { requireRole, isStudent }   from '../../lib/auth';
   import { testsApi }                 from '../../lib/api/tests.api';
   import { triedsApi }                from '../../lib/api/trieds.api';
   import { aiHintApi }                from '../../lib/api/ai-trieds.api';
@@ -282,7 +335,7 @@ import { Icon } from 'astro-icon/components';
   import { getCompStyle, fmtTimer, scoreColor } from '../../lib/utils';
   import { toast } from '../../lib/toast';
 
-  try { requireAuth(); } catch { throw new Error('redirect'); }
+  try { requireRole('STUDENT'); } catch { throw new Error('redirect'); }
 
   const params       = new URLSearchParams(window.location.search);
   const triedId      = params.get('tried');
@@ -308,7 +361,8 @@ import { Icon } from 'astro-icon/components';
   // ── ANTI-FRAUDE ──────────────────────────────────────────────────
   let fraudViolations  = 0;
   let fraudModalOpen   = false;
-  let fraudCooldown    = false; // evita doble-disparo
+  let examStarted      = false;   // true solo después de que cargan preguntas
+  let lastViolationTs  = 0;       // timestamp de la última violación registrada
 
   const IS_STRICT_MODE = testMode === 'EXAM' || testMode === 'TIMED';
 
@@ -321,29 +375,90 @@ import { Icon } from 'astro-icon/components';
   const DIFF_BG:    Record<string, string> = { B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
   const LETTERS = ['A','B','C','D','E','F'];
 
-  // ── Anti-fraude: detectar salida de ventana ──────────────────────
+  // ── Disparador central de violaciones (cooldown 3 s entre eventos) ─
+  function triggerViolation() {
+    if (!examStarted || examFinished || fraudModalOpen) return;
+    const now = Date.now();
+    if (now - lastViolationTs < 3000) return;
+    lastViolationTs = now;
+    handleFraudViolation();
+  }
+
   if (IS_STRICT_MODE) {
-    // Sin selección de texto
+    // Protecciones de texto / selección / arrastre
     document.documentElement.classList.add('exam-noselect');
     document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('dragstart',   e => e.preventDefault());
+    document.addEventListener('copy',        e => e.preventDefault());
+    document.addEventListener('cut',         e => e.preventDefault());
+
+    // Teclado - bloquear atajos de captura, consola y copiado
     document.addEventListener('keydown', e => {
-      if ((e.ctrlKey || e.metaKey) && ['c','a','u','s','p'].includes(e.key.toLowerCase())) e.preventDefault();
-      if (e.key === 'F12') e.preventDefault();
+      // DevTools: F12 y Ctrl/Cmd+Shift+I/J/C/K
+      if (e.key === 'F12') { e.preventDefault(); return; }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c','k'].includes(e.key.toLowerCase())) {
+        e.preventDefault(); return;
+      }
+      // Copiar / seleccionar todo / ver fuente / guardar / pegar
+      if ((e.ctrlKey || e.metaKey) && ['c','a','u','s','p','x'].includes(e.key.toLowerCase())) {
+        e.preventDefault(); return;
+      }
+      // PrintScreen y tecla equivalente F13 - captura de pantalla
+      if (e.key === 'PrintScreen' || e.key === 'F13') {
+        e.preventDefault();
+        triggerViolation();
+        return;
+      }
+      // Win+Shift+S (Snipping Tool Windows) y capturas macOS (Cmd+Shift+3/4/5)
+      if ((e.metaKey || e.key === 'Meta') && e.shiftKey && ['s','3','4','5'].includes(e.key.toLowerCase())) {
+        e.preventDefault(); return;
+      }
+      // Alt+F4 no se puede bloquear, pero el blur lo captura
     });
 
-    // Solo detectar cuando el usuario VUELVE (visibilitychange: visible)
-    // con debounce para evitar doble disparo
+    // visibilitychange - cambio de pestaña, minimize, bloqueo de pantalla
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState !== 'hidden') return;
-      if (fraudCooldown || examFinished || fraudModalOpen) return;
-      fraudCooldown = true;
-      setTimeout(() => { fraudCooldown = false; }, 2000);
-      handleFraudViolation();
+      if (document.visibilityState === 'hidden') triggerViolation();
     });
+
+    // blur - pérdida de foco: Alt+Tab, clic en otra app, notificaciones móvil
+    window.addEventListener('blur', () => triggerViolation());
+
+    // pagehide - móvil yendo a segundo plano (iOS Safari, antes de visibilitychange)
+    window.addEventListener('pagehide', () => { if (!examFinished) triggerViolation(); });
+
+    // Page Lifecycle API - freeze (Android Chrome cuando app va al fondo)
+    document.addEventListener('freeze', () => triggerViolation());
+
+    // fullscreenchange - usuario salió de pantalla completa manualmente
+    const onFsChange = () => {
+      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      if (!isFs && examStarted) triggerViolation();
+    };
+    document.addEventListener('fullscreenchange',       onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
   }
+
+  // ── Handlers del modal de pantalla completa ──────────────────────
+  document.getElementById('fs-enter')?.addEventListener('click', () => {
+    try {
+      const el = document.documentElement;
+      (el.requestFullscreen?.() ?? (el as any).webkitRequestFullscreen?.())?.catch(() => {});
+    } catch {}
+    (document.getElementById('fs-modal') as HTMLElement).style.display = 'none';
+    examStarted = true;
+  });
+  document.getElementById('fs-skip')?.addEventListener('click', () => {
+    (document.getElementById('fs-modal') as HTMLElement).style.display = 'none';
+    examStarted = true;
+  });
 
   function handleFraudViolation() {
     fraudViolations++;
+
+    // Persistir el evento en el backend: incrementa fraud_attempts y, al superar
+    // el límite, el servidor anula el intento (ANULADO) y notifica a los admins.
+    triedsApi.reportFraud(triedId!).catch(() => {});
 
     if (fraudViolations >= 3) {
       // ANULAR examen
@@ -369,7 +484,7 @@ import { Icon } from 'astro-icon/components';
     } else {
       iconEl.style.background = '#FEE2E2';
       iconEl.innerHTML = '<svg width="32" height="32" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
-      titleEl.textContent = '🚨 Segunda advertencia — ÚLTIMA';
+      titleEl.textContent = '🚨 Segunda advertencia - ÚLTIMA';
       descEl.textContent  = 'Esta es tu segunda y última advertencia. Si vuelves a salir de la ventana, el examen será anulado inmediatamente y registrado como plagio.';
       (document.getElementById('fraud-accept') as HTMLButtonElement).style.background = 'linear-gradient(135deg,#DC2626,#991B1B)';
     }
@@ -385,11 +500,8 @@ import { Icon } from 'astro-icon/components';
   async function annulExam() {
     examFinished = true;
     if (timerInt) clearInterval(timerInt);
-    // Finalizar el intento en el backend
-    try {
-      const elapsed = Math.round((Date.now() - startTime) / 1000);
-      await triedsApi.finish(triedId!, elapsed);
-    } catch {}
+    // El intento se anula en el backend (ANULADO) - registra el último evento y notifica admins.
+    try { await triedsApi.reportFraud(triedId!); } catch {}
     (document.getElementById('fraud-modal') as HTMLElement).style.display = 'none';
     (document.getElementById('annulled-modal') as HTMLElement).style.display = 'flex';
   }
@@ -450,8 +562,13 @@ import { Icon } from 'astro-icon/components';
     chipEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
 
     const diffEl = document.getElementById('q-diff-badge')!;
-    diffEl.textContent = DIFF_LABEL[q.difficultyLevel] ?? q.difficultyLevel;
-    diffEl.style.cssText = `background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
+    if (q.difficultyLevel && DIFF_LABEL[q.difficultyLevel]) {
+      diffEl.style.display = 'inline';
+      diffEl.textContent = DIFF_LABEL[q.difficultyLevel];
+      diffEl.style.cssText = `display:inline;background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
+    } else {
+      diffEl.style.display = 'none';  // dificultad "no aplica"
+    }
 
     const answeredBadge = document.getElementById('q-answered-badge')!;
     const changeHint    = document.getElementById('q-change-hint')!;
@@ -461,7 +578,7 @@ import { Icon } from 'astro-icon/components';
       answeredBadge.style.display = 'none';   changeHint.style.display = 'none';
     }
 
-    // Botón duda — siempre visible para estudiantes
+    // Botón duda - siempre visible para estudiantes
     const doubtBtn = document.getElementById('doubt-btn')!;
     doubtBtn.style.display = isStudent() ? 'inline' : 'none';
 
@@ -507,12 +624,15 @@ import { Icon } from 'astro-icon/components';
       document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(b => {
         b.disabled = Number(b.dataset.level) > qHints.size + 1;
       });
-      const hintBox = document.getElementById('hint-box')!;
+      const hintBox  = document.getElementById('hint-box')!;
+      const hintIdle = document.getElementById('hint-idle');
       if (qHints.size > 0) {
         hintBox.style.display = 'block';
+        if (hintIdle) hintIdle.style.display = 'none';
         (document.getElementById('hint-text') as HTMLElement).textContent = qHints.get(Math.max(...qHints.keys()))!;
       } else {
         hintBox.style.display = 'none';
+        if (hintIdle) hintIdle.style.display = 'block';
       }
     } else {
       hintSection.style.display = 'none';
@@ -568,14 +688,17 @@ import { Icon } from 'astro-icon/components';
       const hintText = document.getElementById('hint-text')!;
       const loading  = document.getElementById('hint-loading')!;
 
+      const hintIdle = document.getElementById('hint-idle');
       if (qHints.has(level)) {
         hintBox.style.display = 'block';
+        if (hintIdle) hintIdle.style.display = 'none';
         hintText.textContent  = qHints.get(level)!;
         return;
       }
       hintBox.style.display  = 'block';
+      if (hintIdle) hintIdle.style.display = 'none';
       hintText.textContent   = '';
-      loading.style.display  = 'block';
+      loading.style.display  = 'flex';
       btn.disabled = true;
       try {
         const res  = await aiHintApi.getHint(competenceId!, q.questionId, level);
@@ -742,6 +865,22 @@ import { Icon } from 'astro-icon/components';
     }
 
     try {
+      // resume() valida ownership (403 si no es tuyo) y entrega el tiempo restante
+      // autoritativo del servidor. Si ya está cerrado o expiró, se sale del examen.
+      let resume;
+      try {
+        resume = (await triedsApi.resume(triedId!)).data;
+      } catch {
+        toast.error('No tienes acceso a este intento');
+        window.location.replace('/tests');
+        return;
+      }
+      if (resume?.closed) {
+        toast.warning(resume.expired ? 'El tiempo de este intento se agotó' : 'Este intento ya finalizó');
+        window.location.replace('/tests');
+        return;
+      }
+
       const [testRes, questionsRes] = await Promise.all([
         testsApi.findById(testId!, competenceId!),
         testsApi.getQuestions(testId!, competenceId!),
@@ -759,7 +898,11 @@ import { Icon } from 'astro-icon/components';
       // Guardar IDs de preguntas presentadas
       sessionStorage.setItem(`rp_exam_${triedId}`, JSON.stringify(questions.map(q => q.questionId)));
 
-      durationSecs = test.durationSeconds;
+      // Tiempo autoritativo del servidor (ya descuenta lo transcurrido tras una recarga).
+      // En práctica (sin duración) remainingSeconds es null → sin cronómetro.
+      durationSecs = resume?.durationSeconds ?? test.durationSeconds ?? 0;
+      const serverRemaining = resume?.remainingSeconds;
+      const hasTimer = serverRemaining != null && durationSecs > 0;
 
       const s = getCompStyle(competenceId!, test.competenceName ?? '');
       const badgeEl = document.getElementById('exam-comp-badge')!;
@@ -768,24 +911,44 @@ import { Icon } from 'astro-icon/components';
       (document.getElementById('exam-name')       as HTMLElement).textContent = test.testName;
       (document.getElementById('mobile-q-total')  as HTMLElement).textContent = String(questions.length);
 
-      // Timer
-      let remaining = durationSecs;
-      updateTimer(remaining);
-      timerInt = setInterval(() => {
-        remaining--;
+      // Timer - solo si el test tiene tiempo. La práctica corre sin cronómetro.
+      if (hasTimer) {
+        let remaining = serverRemaining as number;
         updateTimer(remaining);
-        if (remaining <= 60) document.getElementById('timer-wrap')?.classList.add('timer-danger');
-        if (remaining <= 0) {
-          clearInterval(timerInt!);
-          toast.warning('¡Tiempo agotado!');
-          finishExam(true);
-        }
-      }, 1000);
+        timerInt = setInterval(() => {
+          remaining--;
+          updateTimer(remaining);
+          if (remaining <= 60) document.getElementById('timer-wrap')?.classList.add('timer-danger');
+          if (remaining <= 0) {
+            clearInterval(timerInt!);
+            toast.warning('¡Tiempo agotado!');
+            finishExam(true);
+          }
+        }, 1000);
+      } else {
+        // Sin tiempo: ocultar el cronómetro
+        const tw = document.getElementById('timer-wrap');
+        if (tw) tw.style.display = 'none';
+      }
 
       buildQNav();
       (document.getElementById('exam-loading')   as HTMLElement).style.display = 'none';
       (document.getElementById('question-card')  as HTMLElement).style.display = 'block';
       renderQuestion(0);
+
+      // Activar antifraude y sugerir pantalla completa en modo estricto
+      if (IS_STRICT_MODE) {
+        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (!isMobile) {
+          // Escritorio: mostrar modal F11
+          (document.getElementById('fs-modal') as HTMLElement).style.display = 'flex';
+        } else {
+          // Móvil: activar directamente (no hay F11)
+          examStarted = true;
+        }
+      } else {
+        examStarted = true;
+      }
 
     } catch (err: any) {
       toast.error('Error al cargar el simulacro', { description: err?.message });
