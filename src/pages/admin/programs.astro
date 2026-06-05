@@ -200,16 +200,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="td">
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="action-btn btn-edit" data-id="${p.programId}"
-              style="border-color:var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1)">
+              style="padding:4px 10px;border-radius:7px;border:1.5px solid var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">
               Editar
             </button>
             ${p.isActive
               ? `<button class="action-btn btn-deact" data-id="${p.programId}" data-name="${p.programName}"
-                  style="border-color:#FDE68A;background:#FEF3C7;color:#D97706">
+                  style="padding:4px 10px;border-radius:7px;border:1.5px solid #FECACA;background:#FEF2F2;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">
                   Desactivar
                 </button>`
               : `<button class="action-btn btn-react" data-id="${p.programId}"
-                  style="border-color:#A7F3D0;background:#D1FAE5;color:#059669">
+                  style="padding:4px 10px;border-radius:7px;border:1.5px solid #A7F3D0;background:#D1FAE5;color:#059669">
                   Activar
                 </button>`
             }
