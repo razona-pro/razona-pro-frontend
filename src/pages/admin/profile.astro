@@ -42,19 +42,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <div style="display:flex;flex-direction:column;gap:12px">
         <div>
           <p class="data-lbl">ID de administrador</p>
-          <p id="info-adminid" class="data-val" style="font-family:monospace">—</p>
+          <p id="info-adminid" class="data-val" style="font-family:monospace">-</p>
         </div>
         <div>
           <p class="data-lbl">Nombre completo</p>
-          <p id="info-fullname" class="data-val">—</p>
+          <p id="info-fullname" class="data-val">-</p>
         </div>
         <div>
           <p class="data-lbl">Correo electrónico</p>
-          <p id="info-email" class="data-val">—</p>
+          <p id="info-email" class="data-val">-</p>
         </div>
         <div>
           <p class="data-lbl">Teléfono</p>
-          <p id="info-phone" class="data-val">—</p>
+          <p id="info-phone" class="data-val">-</p>
         </div>
       </div>
     </div>
@@ -67,11 +67,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <div style="display:flex;flex-direction:column;gap:12px">
         <div>
           <p class="data-lbl">Último acceso</p>
-          <p id="info-lastlogin" class="data-val">—</p>
+          <p id="info-lastlogin" class="data-val">-</p>
         </div>
         <div>
           <p class="data-lbl">Cuenta creada</p>
-          <p id="info-createdat" class="data-val">—</p>
+          <p id="info-createdat" class="data-val">-</p>
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   } catch { throw new Error('redirect'); }
 
   function fmt(d?: string) {
-    if (!d) return '—';
+    if (!d) return '-';
     return new Date(d).toLocaleString('es-CO', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', second: '2-digit',
@@ -113,9 +113,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       (document.getElementById('profile-avatar') as HTMLElement).textContent = initials;
       (document.getElementById('profile-name')   as HTMLElement).textContent = fullName;
       (document.getElementById('info-adminid')   as HTMLElement).textContent = a.adminId;
-      (document.getElementById('info-fullname')  as HTMLElement).textContent = fullName || '—';
-      (document.getElementById('info-email')     as HTMLElement).textContent = a.email?.toLowerCase() ?? '—';
-      (document.getElementById('info-phone')     as HTMLElement).textContent = a.phone || '—';
+      (document.getElementById('info-fullname')  as HTMLElement).textContent = fullName || '-';
+      (document.getElementById('info-email')     as HTMLElement).textContent = a.email?.toLowerCase() ?? '-';
+      (document.getElementById('info-phone')     as HTMLElement).textContent = a.phone || '-';
       (document.getElementById('info-lastlogin') as HTMLElement).textContent = fmt(a.lastLoginAt);
       (document.getElementById('info-createdat') as HTMLElement).textContent = fmt(a.createdAt);
     } catch {}

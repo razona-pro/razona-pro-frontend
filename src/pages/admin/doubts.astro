@@ -249,7 +249,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
     (document.getElementById('d-student') as HTMLElement).textContent  = d.studentId;
     (document.getElementById('d-source') as HTMLElement).textContent   = d.source === 'AI' ? 'Sesión IA' : 'Banco de preguntas';
-    (document.getElementById('d-comp') as HTMLElement).textContent     = d.competenceId ?? '—';
+    (document.getElementById('d-comp') as HTMLElement).textContent     = d.competenceId ?? '-';
     (document.getElementById('d-date') as HTMLElement).textContent     = fmtDate(d.createdAt);
     (document.getElementById('d-statement') as HTMLElement).textContent = d.statement ?? 'Sin enunciado disponible';
     (document.getElementById('d-message') as HTMLElement).textContent  = d.message || '(Sin mensaje adicional del estudiante)';

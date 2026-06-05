@@ -2,7 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
-<AdminLayout title="Ayuda — Admin" currentPage="help">
+<AdminLayout title="Ayuda - Admin" currentPage="help">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/admin/home" style="color:var(--ui-text-3);text-decoration:none"
@@ -22,13 +22,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Sección: Gestión</p>
       </div>
       <div style="padding:1.25rem;display:flex;flex-direction:column;gap:12px">
-        <div class="hrow"><strong>Estudiantes</strong> — Lista todos los estudiantes. Puedes activar/desactivar cuentas. El filtro de estado incluye verificación de correo.</div>
-        <div class="hrow"><strong>Tests</strong> — Crea y edita simulacros. Cada test pertenece a una competencia y tiene un modo (Práctica, Examen, Cronometrado). La duración es opcional para el modo Práctica. El toggle "Notificar a estudiantes" envía email al publicar.</div>
-        <div class="hrow"><strong>Preguntas</strong> — Banco de preguntas por competencia. Al editar una pregunta, las opciones se pueden añadir (máximo 6), eliminar (mínimo 2) y reasignar cuál es la correcta con el radio button. La dificultad es opcional.</div>
-        <div class="hrow"><strong>Competencias</strong> — Áreas evaluadas en la plataforma. Puedes activar o desactivar competencias. Una competencia inactiva no aparece en nuevos tests.</div>
-        <div class="hrow"><strong>Programas</strong> — Los programas académicos identifican a qué carrera pertenece cada estudiante. El ID es un código único de hasta 3 caracteres.</div>
-        <div class="hrow"><strong>Administradores</strong> — Crea y gestiona cuentas de administrador. Los admins tienen acceso total al panel pero no aparecen en rankings.</div>
-        <div class="hrow"><strong>Dudas</strong> — Reportes que los estudiantes envían sobre preguntas. Puedes marcarlas como Revisada o Cerrada. Haz clic en una duda para ver la pregunta completa con sus opciones.</div>
+        <div class="hrow"><strong>Estudiantes</strong> - Lista todos los estudiantes. Puedes activar/desactivar cuentas. El filtro de estado incluye verificación de correo.</div>
+        <div class="hrow"><strong>Tests</strong> - Crea y edita simulacros. Cada test pertenece a una competencia y tiene un modo (Práctica, Examen, Cronometrado). La duración es opcional para el modo Práctica. El toggle "Notificar a estudiantes" envía email al publicar.</div>
+        <div class="hrow"><strong>Preguntas</strong> - Banco de preguntas por competencia. Al editar una pregunta, las opciones se pueden añadir (máximo 6), eliminar (mínimo 2) y reasignar cuál es la correcta con el radio button. La dificultad es opcional.</div>
+        <div class="hrow"><strong>Competencias</strong> - Áreas evaluadas en la plataforma. Puedes activar o desactivar competencias. Una competencia inactiva no aparece en nuevos tests.</div>
+        <div class="hrow"><strong>Programas</strong> - Los programas académicos identifican a qué carrera pertenece cada estudiante. El ID es un código único de hasta 3 caracteres.</div>
+        <div class="hrow"><strong>Administradores</strong> - Crea y gestiona cuentas de administrador. Los admins tienen acceso total al panel pero no aparecen en rankings.</div>
+        <div class="hrow"><strong>Dudas</strong> - Reportes que los estudiantes envían sobre preguntas. Puedes marcarlas como Revisada o Cerrada. Haz clic en una duda para ver la pregunta completa con sus opciones.</div>
       </div>
     </div>
 
@@ -39,10 +39,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <p style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0">Sección: Análisis</p>
       </div>
       <div style="padding:1.25rem;display:flex;flex-direction:column;gap:12px">
-        <div class="hrow"><strong>Intentos</strong> — Busca por código de estudiante. Muestra todos sus intentos con puntaje, estado y fecha. Al hacer clic en "Ver revisión" ves la pregunta, opciones y cuál eligió el estudiante.</div>
-        <div class="hrow"><strong>Estadísticas</strong> — Resumen general de la plataforma: estudiantes, intentos, preguntas activas. Incluye gráficas de distribución y tablas de rendimiento por estudiante y por pregunta.</div>
-        <div class="hrow"><strong>Rankings</strong> — Gestiona las tablas de posiciones. Puedes crear rankings por periodo (general, semanal, mensual) y por fuente de datos (tests, IA, ambos). Al seleccionar un ranking ves el leaderboard en tiempo real.</div>
-        <div class="hrow"><strong>Sesiones IA</strong> — Historial de sesiones de práctica adaptativa. Puedes buscar las sesiones de un estudiante y agregar preguntas generadas por la IA al banco de preguntas permanente.</div>
+        <div class="hrow"><strong>Intentos</strong> - Busca por código de estudiante. Muestra todos sus intentos con puntaje, estado y fecha. Al hacer clic en "Ver revisión" ves la pregunta, opciones y cuál eligió el estudiante.</div>
+        <div class="hrow"><strong>Estadísticas</strong> - Resumen general de la plataforma: estudiantes, intentos, preguntas activas. Incluye gráficas de distribución y tablas de rendimiento por estudiante y por pregunta.</div>
+        <div class="hrow"><strong>Rankings</strong> - Gestiona las tablas de posiciones. Puedes crear rankings por periodo (general, semanal, mensual) y por fuente de datos (tests, IA, ambos). Al seleccionar un ranking ves el leaderboard en tiempo real.</div>
+        <div class="hrow"><strong>Sesiones IA</strong> - Historial de sesiones de práctica adaptativa. Puedes buscar las sesiones de un estudiante y agregar preguntas generadas por la IA al banco de preguntas permanente.</div>
       </div>
     </div>
 
@@ -64,7 +64,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </div>
           <div style="display:flex;align-items:flex-start;gap:10px">
             <div style="width:22px;height:22px;border-radius:6px;background:rgba(212,18,36,0.1);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6875rem;font-weight:800">3</div>
-            <div class="hrow">Agrega <a href="/admin/questions" style="color:var(--brand);text-decoration:none;font-weight:600">Preguntas</a> al banco — mínimo 2 opciones, marca cuál es la correcta.</div>
+            <div class="hrow">Agrega <a href="/admin/questions" style="color:var(--brand);text-decoration:none;font-weight:600">Preguntas</a> al banco - mínimo 2 opciones, marca cuál es la correcta.</div>
           </div>
           <div style="display:flex;align-items:flex-start;gap:10px">
             <div style="width:22px;height:22px;border-radius:6px;background:rgba(212,18,36,0.1);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6875rem;font-weight:800">4</div>

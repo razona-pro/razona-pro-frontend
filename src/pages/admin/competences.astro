@@ -208,7 +208,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </div>
         </td>
         <td class="td" style="font-weight:700">${c.competenceName}</td>
-        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.description ?? ''}">${c.description ?? '—'}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.description ?? ''}">${c.description ?? '-'}</td>
         <td class="td">
           <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${c.isActive?'#D1FAE5':'#FEE2E2'};color:${c.isActive?'#059669':'#DC2626'}">
             ${c.isActive ? 'Activa' : 'Inactiva'}

@@ -231,7 +231,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       const stColor = STATUS_COLOR[t.status] ?? '#6B7280';
       const stBg    = STATUS_BG[t.status]    ?? '#F3F4F6';
       const stLabel = STATUS_LABEL[t.status] ?? t.status;
-      const fmtTime = (iso?: string) => iso ? fmtDate(iso) : '—';
+      const fmtTime = (iso?: string) => iso ? fmtDate(iso) : '-';
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -247,10 +247,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="td">
           ${t.score != null
             ? `<span style="font-size:1rem;font-weight:900;color:${sc}">${t.score.toFixed(0)}%</span>`
-            : `<span style="color:var(--ui-text-3);font-size:0.8125rem">—</span>`
+            : `<span style="color:var(--ui-text-3);font-size:0.8125rem">-</span>`
           }
         </td>
-        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${t.correctAnswers ?? '—'} / ${t.totalQuestions}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${t.correctAnswers ?? '-'} / ${t.totalQuestions}</td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-3)">${fmtTime(t.finishedAt ?? t.attemptTimestamp)}</td>
         <td class="td">
           ${t.status === 'FINISHED'
@@ -258,7 +258,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                 style="padding:4px 10px;border-radius:7px;border:1.5px solid rgba(212,18,36,0.3);background:rgba(212,18,36,0.05);color:var(--brand);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
                 Ver revisión
               </button>`
-            : '<span style="font-size:0.75rem;color:var(--ui-text-3)">—</span>'
+            : '<span style="font-size:0.75rem;color:var(--ui-text-3)">-</span>'
           }
         </td>`;
       tbody.appendChild(tr);
@@ -284,7 +284,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
       const correct = d.questions.filter(q => q.answeredCorrectly && q.selectedOptionId).length;
       const wrong   = d.questions.filter(q => !q.answeredCorrectly && q.selectedOptionId).length;
-      (document.getElementById('rev-score')   as HTMLElement).textContent = d.score != null ? `${d.score.toFixed(0)}%` : '—';
+      (document.getElementById('rev-score')   as HTMLElement).textContent = d.score != null ? `${d.score.toFixed(0)}%` : '-';
       (document.getElementById('rev-correct') as HTMLElement).textContent = String(correct);
       (document.getElementById('rev-wrong')   as HTMLElement).textContent = String(wrong);
       (document.getElementById('rev-total')   as HTMLElement).textContent = String(d.questions.length);
