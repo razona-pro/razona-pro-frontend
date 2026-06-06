@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Rankings" currentPage="admin-rankings">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Rankings</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -195,7 +195,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     GENERAL: 'General', WEEKLY: 'Semanal', MONTHLY: 'Mensual', DAILY: 'Diario'
   };
   const SOURCE_LABEL: Record<string, string> = {
-    ALL: 'Tests + IA', TRIEDS: 'Solo tests', AI_TRIEDS: 'Solo IA'
+    ALL: 'Pruebas + IA', TRIEDS: 'Solo pruebas', AI_TRIEDS: 'Solo IA'
   };
   const PERIOD_COLOR: Record<string, string> = {
     GENERAL: '#7C3AED', WEEKLY: '#2563EB', MONTHLY: '#059669', DAILY: '#D97706'

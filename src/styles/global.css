@@ -700,3 +700,25 @@ html:not(.dark):not(.high-contrast):not(.contrast-dark) #logout-btn:hover {
 @media (prefers-reduced-motion: reduce) {
   .app-content > *, .rp-fade-in { animation: none; }
 }
+
+/* ───────────────────────────────────────────────────────────────
+ * Botones de acción de tablas admin - consistentes en TODO el panel
+ * (mismo borde, radio, padding, tipografía). Variantes por intención.
+ * Uso: <button class="act-btn">Editar</button>
+ *      <button class="act-btn act-btn-danger">Desactivar</button>
+ *      <button class="act-btn act-btn-success">Activar</button>
+ * ─────────────────────────────────────────────────────────────── */
+.act-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 5px 12px; border-radius: 8px;
+  border: 1.5px solid var(--ui-border-2);
+  background: var(--ui-surface); color: var(--ui-text-1);
+  font-family: inherit; font-size: 0.75rem; font-weight: 600; line-height: 1;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.act-btn:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+.act-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.act-btn-danger  { border-color: #FECACA; background: #FEF2F2; color: #DC2626; }
+.act-btn-danger:hover:not(:disabled)  { border-color: #DC2626; background: #FEE2E2; color: #DC2626; }
+.act-btn-success { border-color: #A7F3D0; background: #D1FAE5; color: #059669; }
+.act-btn-success:hover:not(:disabled) { border-color: #059669; background: #BBF7D0; color: #047857; }

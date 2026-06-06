@@ -19,7 +19,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
       </div>
       <div id="score-chip" style="display:none;padding:12px 20px;border-radius:14px;text-align:center;background:var(--ui-card);border:1px solid var(--ui-border)">
         <p id="score-chip-val" style="font-size:2rem;font-weight:900;margin:0;line-height:1">-</p>
-        <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.4px;margin:0">/ 100 pts</p>
+        <p id="score-chip-max" style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.4px;margin:0">pts</p>
       </div>
     </div>
   </div>
@@ -240,9 +240,15 @@ import AppLayout from '../../../layouts/AppLayout.astro';
       // Score chip
       const scoreChip = document.getElementById('score-chip')!;
       const scoreVal  = document.getElementById('score-chip-val')!;
-      const sc        = scoreColor(r.score ?? 0);
-      scoreVal.textContent = r.score ? r.score.toFixed(0) : '-';
+      // score = puntos crudos ponderados; el color se basa en el % de aciertos.
+      const weightOf  = (d?: string | null) => d === 'M' ? 2 : d === 'A' ? 3 : 1;
+      const maxPoints = (r.questions ?? []).reduce((acc, q) => acc + weightOf(q.difficultyLevel), 0);
+      const accPct    = r.totalQuestions > 0 ? ((r.correctAnswers ?? 0) / r.totalQuestions) * 100 : 0;
+      const sc        = scoreColor(accPct);
+      scoreVal.textContent = r.score != null ? r.score.toFixed(0) : '-';
       scoreVal.style.color = sc;
+      const maxEl = document.getElementById('score-chip-max');
+      if (maxEl) maxEl.textContent = maxPoints > 0 ? `de ${maxPoints} pts` : 'pts';
       scoreChip.style.borderColor = sc + '44';
       scoreChip.style.display = 'block';
 

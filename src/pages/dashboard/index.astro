@@ -4,7 +4,7 @@ import StatCard from '../../components/ui/StatCard.astro';
 import WelcomeModal from '../../components/ui/WelcomeModal.astro';
 ---
 
-<AppLayout title="Dashboard" currentPage="dashboard" requiredRole="STUDENT">
+<AppLayout title="Panel de control" currentPage="dashboard" requiredRole="STUDENT">
 
   <WelcomeModal />
 
@@ -12,7 +12,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
   <div id="admin-dash" style="display:none">
     <!-- Header admin -->
     <div style="margin-bottom:1.5rem">
-      <h1 id="admin-welcome-title" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Panel de administración</h1>
+      <h1 id="admin-welcome-title" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Panel de control</h1>
       <p id="admin-welcome-sub" style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Bienvenido de vuelta. Aquí tienes el resumen del sistema.</p>
     </div>
 
@@ -30,7 +30,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
       </div>
       <div class="admin-stat-card" style="border-left-color:#2563EB">
         <div class="admin-stat-header">
-          <span class="admin-stat-label">Tests disponibles</span>
+          <span class="admin-stat-label">Pruebas disponibles</span>
           <div class="admin-stat-icon" style="background:#DBEAFE">
             <svg width="14" height="14" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           </div>
@@ -251,7 +251,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
 
     <!-- Quick actions -->
     <div class="qa-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;overflow-x:auto;padding-bottom:4px">
-      <a href="/tests" class="qa-btn qa-primary"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg> Tests disponibles</a>
+      <a href="/tests" class="qa-btn qa-primary"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg> Pruebas disponibles</a>
       <a href="/ai-practice" class="qa-btn"><svg width="14" height="14" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12l2 2 4-4"/></svg> Práctica con IA</a>
       <a href="/dashboard/rankings" class="qa-btn"><svg width="14" height="14" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M8 21H4a2 2 0 01-2-2v-4a2 2 0 012-2h4M14 21h4a2 2 0 002-2V5a2 2 0 00-2-2h-4M10 7h4v14h-4z"/></svg> Rankings</a>
       <a href="/dashboard/history" class="qa-btn"><svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 0 .5-4.5"/><polyline points="3 3 3 7 7 7"/></svg> Mi historial</a>
@@ -260,7 +260,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
     <!-- Stats -->
     <div id="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem">
       <StatCard id="stat-tests"  label="Pruebas realizadas"  value="-" sub="pruebas"        icon="tabler:clipboard-check" color="#D41224" bg="#FEE2E2" />
-      <StatCard id="stat-avg"    label="Promedio global"   value="-" sub="puntos / 100"      icon="tabler:chart-line"      color="#2563EB" bg="#DBEAFE" />
+      <StatCard id="stat-avg"    label="Promedio global"   value="-" sub="% de aciertos"      icon="tabler:chart-line"      color="#2563EB" bg="#DBEAFE" />
       <StatCard id="stat-rank"   label="Posición ranking"  value="-" sub="posición actual"   icon="tabler:trophy"          color="#D97706" bg="#FEF3C7" />
       <StatCard id="stat-streak" label="Racha activa"      value="-" sub="días consecutivos" icon="tabler:flame"           color="#059669" bg="#D1FAE5" />
     </div>
@@ -291,7 +291,7 @@ import WelcomeModal from '../../components/ui/WelcomeModal.astro';
             </div>
             <div style="text-align:right;flex-shrink:0">
               <p id="lt-score" style="font-size:1.75rem;font-weight:900;color:var(--brand);margin:0;letter-spacing:-1px">-</p>
-              <p style="color:var(--ui-text-3);font-size:0.6875rem;margin:0">/ 100 pts</p>
+              <p style="color:var(--ui-text-3);font-size:0.6875rem;margin:0">pts</p>
             </div>
           </div>
           <div id="recent-list"></div>
@@ -560,13 +560,16 @@ async function initStudentDashboard() {
 
     if (triedsR.status === 'fulfilled' && triedsR.value.data) {
       const trieds   = triedsR.value.data.content;
-      const finished = trieds.filter(t => t.status === 'FINISHED' && t.score != null);
-      const scores   = finished.map(t => t.score as number);
-      const avgScore = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+      const finished = trieds.filter(t => t.status === 'FINISHED');
+      // El score es puntos crudos; para promedio y dominio usamos % de aciertos (correctas/total).
+      const accOf    = (t: typeof finished[number]) =>
+        t.totalQuestions > 0 ? ((t.correctAnswers ?? 0) / t.totalQuestions) * 100 : 0;
+      const accs     = finished.map(accOf);
+      const avgAcc   = accs.length ? accs.reduce((a, b) => a + b, 0) / accs.length : 0;
 
       const testEl = document.getElementById('stat-tests');
       if (testEl) animCount(testEl, finished.length);
-      setStatVal('stat-avg', avgScore > 0 ? avgScore.toFixed(1) : '-');
+      setStatVal('stat-avg', avgAcc > 0 ? `${avgAcc.toFixed(0)}%` : '-');
       setStatVal('stat-streak', String(calcStreak(finished)));
 
       const sorted = [...finished].sort((a, b) =>
@@ -581,7 +584,7 @@ async function initStudentDashboard() {
         const ltScore = document.getElementById('lt-score');
         if (ltName)  ltName.textContent  = lt.testName ?? lt.testId;
         if (ltMeta)  ltMeta.textContent  = `${fmtDate(lt.finishedAt ?? lt.attemptTimestamp)} · ${lt.totalQuestions} preguntas`;
-        if (ltScore) { ltScore.textContent = lt.score?.toFixed(0) ?? '-'; ltScore.style.color = scoreColor(lt.score); }
+        if (ltScore) { ltScore.textContent = lt.score?.toFixed(0) ?? '-'; ltScore.style.color = scoreColor(accOf(lt)); }
       }
 
       const recentList = document.getElementById('recent-list');
@@ -596,7 +599,7 @@ async function initStudentDashboard() {
             div.innerHTML = `
               <div style="width:34px;height:34px;border-radius:8px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;font-weight:900;color:${s.color}">${s.short}</span></div>
               <div style="flex:1;min-width:0"><p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.testName ?? t.testId}</p><p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">${fmtDate(t.finishedAt ?? t.attemptTimestamp)} · ${t.totalQuestions} preg.</p></div>
-              <div style="text-align:right;flex-shrink:0"><p style="font-size:1rem;font-weight:900;color:${scoreColor(t.score)};margin:0">${t.score?.toFixed(0) ?? '-'}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">/100</p></div>`;
+              <div style="text-align:right;flex-shrink:0"><p style="font-size:1rem;font-weight:900;color:${scoreColor(accOf(t))};margin:0">${t.score?.toFixed(0) ?? '-'}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">pts</p></div>`;
             recentList.appendChild(div);
           });
         } else {
@@ -605,11 +608,11 @@ async function initStudentDashboard() {
       }
 
       if (compsR.status === 'fulfilled' && compsR.value.data) {
+        // Dominio por competencia = promedio del % de aciertos (no de los puntos crudos).
         const byComp: Record<string, number[]> = {};
         finished.forEach(t => {
-          if (t.score == null) return;
           if (!byComp[t.competenceId]) byComp[t.competenceId] = [];
-          byComp[t.competenceId].push(t.score);
+          byComp[t.competenceId].push(accOf(t));
         });
 
         const compList = document.getElementById('comp-list');

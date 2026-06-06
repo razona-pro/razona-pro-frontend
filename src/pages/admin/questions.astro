@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Banco de Preguntas" currentPage="admin-questions">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Preguntas</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -46,17 +46,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <table style="width:100%;border-collapse:collapse">
         <thead>
           <tr style="border-bottom:1px solid var(--ui-border)">
-            <th class="th sort-th" data-col="id">Ítem <span class="sort-ind" data-col="id"></span></th>
-            <th class="th sort-th" data-col="stmt">Enunciado <span class="sort-ind" data-col="stmt"></span></th>
-            <th class="th sort-th" data-col="diff">Dificultad <span class="sort-ind" data-col="diff"></span></th>
+            <th class="th">Ítem</th>
+            <th class="th">Competencia</th>
+            <th class="th">Enunciado</th>
+            <th class="th">Dificultad</th>
             <th class="th">Fuente</th>
-            <th class="th sort-th" data-col="opts">Opciones <span class="sort-ind" data-col="opts"></span></th>
-            <th class="th sort-th" data-col="status">Estado <span class="sort-ind" data-col="status"></span></th>
+            <th class="th">Opciones</th>
+            <th class="th">Estado</th>
             <th class="th">Acciones</th>
           </tr>
         </thead>
         <tbody id="questions-tbody">
-          <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando preguntas...</td></tr>
+          <tr><td colspan="8" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando preguntas...</td></tr>
         </tbody>
       </table>
     </div>
@@ -209,11 +210,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   .field-lbl { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3) }
   .field-inp { padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none;transition:border-color 0.2s;width:100%;appearance:none }
   .field-inp:focus { border-color:var(--brand);box-shadow:0 0 0 3px rgba(212,18,36,0.1) }
-  .sort-th { cursor:pointer;user-select:none }
-  .sort-th:hover { background:var(--ui-hover) }
-  .sort-ind::after { content:''; font-size:0.625rem;margin-left:4px;opacity:0.4 }
-  .sort-ind.asc::after  { content:'▲'; opacity:1;color:var(--brand) }
-  .sort-ind.desc::after { content:'▼'; opacity:1;color:var(--brand) }
 </style>
 
 <script>
@@ -221,7 +217,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   import { competencesApi }  from '../../lib/api/competences.api';
   import { apiFetch }        from '../../lib/api/client';
   import { toast }           from '../../lib/toast';
+  import { getCompStyle }    from '../../lib/utils';
   import type { QuestionDto } from '../../lib/api/types';
+
+  const compNameMap = new Map<string, string>();
 
   try {
     requireAuth();
@@ -241,9 +240,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   let debounce: ReturnType<typeof setTimeout>;
   let pendingDeactComp = '';
   let pendingDeactQ    = '';
-  let sortCol: string | null = 'id';  // orden por defecto: ítem ascendente
-  let sortAsc = true;
-  let cachedRows: any[] = [];         // copia local para ordenar sin volver a pedir al API
 
   const questionMap = new Map<string, QuestionDto>();
 
@@ -253,6 +249,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const filterSel = document.getElementById('filter-comp') as HTMLSelectElement;
     const formSel   = document.getElementById('c-comp')      as HTMLSelectElement;
     res.data.forEach(c => {
+      compNameMap.set(c.competenceId, c.competenceName);
       [filterSel, formSel].forEach(sel => {
         const opt = document.createElement('option');
         opt.value = c.competenceId;
@@ -266,25 +263,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   async function loadQuestions() {
     const tbody = document.getElementById('questions-tbody')!;
-    tbody.innerHTML = `<tr><td colspan="7" style="padding:1.5rem;text-align:center;color:var(--ui-text-3)">
+    tbody.innerHTML = `<tr><td colspan="8" style="padding:1.5rem;text-align:center;color:var(--ui-text-3)">
       <div style="display:inline-flex;align-items:center;gap:8px"><div style="width:14px;height:14px;border:2px solid var(--brand);border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite"></div> Cargando...</div>
     </td></tr>`;
 
     try {
-      let url: string;
-      if (currentComp) {
-        // Endpoint correcto para preguntas de una competencia
-        let q = `page=${page}&size=${SIZE}`;
-        if (currentDiff !== 'ALL')   q += currentDiff === 'NONE' ? `&difficultyLevel=` : `&difficultyLevel=${currentDiff}`;
-        if (currentStatus !== 'ALL') q += `&isActive=${currentStatus === 'active'}`;
-        url = `/api/competences/${currentComp}/questions?${q}`;
-      } else {
-        // Endpoint global
-        let q = `page=${page}&size=${SIZE}`;
-        if (currentDiff !== 'ALL')   q += currentDiff === 'NONE' ? `&difficultyLevel=` : `&difficultyLevel=${currentDiff}`;
-        if (currentStatus !== 'ALL') q += `&isActive=${currentStatus === 'active'}`;
-        url = `/api/questions?${q}`;
-      }
+      // Siempre el endpoint global: es el único que filtra COMBINADO
+      // (competencia + dificultad + estado + búsqueda).
+      let q = `page=${page}&size=${SIZE}`;
+      if (currentComp)             q += `&competenceId=${encodeURIComponent(currentComp)}`;
+      if (currentDiff !== 'ALL')   q += `&difficulty=${currentDiff}`;          // 'NONE' = No aplica, o B/M/A
+      if (currentStatus !== 'ALL') q += `&status=${currentStatus === 'active' ? 'active' : 'inactive'}`;
+      const url = `/api/questions?${q}`;
 
       const res = await apiFetch<any>(url);
       if (!res.data) { renderTable([]); return; }
@@ -296,60 +286,41 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       (document.getElementById('btn-prev') as HTMLButtonElement).disabled = page === 0;
       (document.getElementById('btn-next') as HTMLButtonElement).disabled = page >= tp - 1;
       renderTable(content);
-      updateSortIndicators();
     } catch (err: any) {
       const tb = document.getElementById('questions-tbody')!;
-      tb.innerHTML = `<tr><td colspan="7" style="padding:2rem;text-align:center;color:#DC2626">
+      tb.innerHTML = `<tr><td colspan="8" style="padding:2rem;text-align:center;color:#DC2626">
         <p style="margin:0;font-weight:700">Error al cargar</p>
         <p style="margin:4px 0 0;font-size:0.8125rem">${err?.message ?? 'Verifica la conexión con el servidor.'}</p>
       </td></tr>`;
     }
   }
 
-  const DIFF_ORDER: Record<string, number> = { B:1, M:2, A:3 };
-
-  function sortRows(rows: QuestionDto[]): QuestionDto[] {
-    if (!sortCol) return rows;
-    return [...rows].sort((a, b) => {
-      let av: any, bv: any;
-      if (sortCol === 'id')     { av = parseInt(a.questionId.replace(/\D/g,''),10); bv = parseInt(b.questionId.replace(/\D/g,''),10); }
-      if (sortCol === 'stmt')   { av = a.statement.toLowerCase(); bv = b.statement.toLowerCase(); }
-      if (sortCol === 'diff')   { av = DIFF_ORDER[a.difficultyLevel??''] ?? 0; bv = DIFF_ORDER[b.difficultyLevel??''] ?? 0; }
-      if (sortCol === 'opts')   { av = a.options?.length ?? 0; bv = b.options?.length ?? 0; }
-      if (sortCol === 'status') { av = a.isActive ? 1 : 0; bv = b.isActive ? 1 : 0; }
-      if (av < bv) return sortAsc ? -1 : 1;
-      if (av > bv) return sortAsc ?  1 : -1;
-      return 0;
-    });
-  }
-
-  function updateSortIndicators() {
-    document.querySelectorAll<HTMLElement>('.sort-ind').forEach(el => {
-      el.className = 'sort-ind' + (el.dataset.col === sortCol ? (sortAsc ? ' asc' : ' desc') : '');
-    });
-  }
-
   function renderTable(questions: QuestionDto[]) {
-    cachedRows = questions;
-    const sorted = sortRows(questions);
     const tbody = document.getElementById('questions-tbody')!;
     tbody.innerHTML = '';
-    if (!sorted.length) {
-      tbody.innerHTML = `<tr><td colspan="7" style="padding:2.5rem;text-align:center">
+    if (!questions.length) {
+      tbody.innerHTML = `<tr><td colspan="8" style="padding:2.5rem;text-align:center">
         <p style="font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin preguntas</p>
         <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0">Prueba cambiando los filtros o selecciona otra competencia.</p>
       </td></tr>`;
       return;
     }
-    sorted.forEach((q: QuestionDto, rowIdx: number) => {
+    questions.forEach((q: QuestionDto, rowIdx: number) => {
       questionMap.set(q.questionId, q);
-      const rowNum = page * SIZE + rowIdx + 1;   // número secuencial global
+      const itm  = page * SIZE + rowIdx + 1;       // contador corrido y continuo entre páginas (20 por página)
+      const cs   = getCompStyle(q.competenceId, compNameMap.get(q.competenceId) ?? '');
+      const cName = compNameMap.get(q.competenceId) ?? q.competenceId;
       const stmt = q.statement.length > 90 ? q.statement.substring(0, 90) + '…' : q.statement;
       const opts = q.options?.length ?? '-';
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="td">
-          <span style="display:inline-block;background:var(--brand-muted);padding:2px 9px;border-radius:12px;font-size:0.75rem;font-weight:700;color:var(--brand);width:fit-content">${rowNum}</span>
+          <span style="display:inline-block;background:var(--brand-muted);padding:2px 9px;border-radius:12px;font-size:0.75rem;font-weight:700;color:var(--brand);width:fit-content">${itm}</span>
+        </td>
+        <td class="td">
+          <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${cs.bg};color:${cs.color}" title="${cName.replace(/"/g,'&quot;')}">
+            <span style="width:6px;height:6px;border-radius:50%;background:${cs.color};flex-shrink:0"></span>${cName}
+          </span>
         </td>
         <td class="td" style="max-width:300px;font-size:0.8125rem;line-height:1.45;color:var(--ui-text-1)" title="${q.statement.replace(/"/g,'&quot;')}">${stmt}</td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${q.difficultyLevel?(DIFF_BG[q.difficultyLevel]??'#F3F4F6'):'#F3F4F6'};color:${q.difficultyLevel?(DIFF_COLOR[q.difficultyLevel]??'#6B7280'):'#9CA3AF'}">${q.difficultyLevel?(DIFF_LABEL[q.difficultyLevel]??q.difficultyLevel):'No aplica'}</span></td>
@@ -358,14 +329,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${q.isActive?'#D1FAE5':'#FEE2E2'};color:${q.isActive?'#059669':'#DC2626'}">${q.isActive?'Activa':'Inactiva'}</span></td>
         <td class="td" style="white-space:nowrap">
           <div style="display:flex;gap:5px;flex-wrap:nowrap">
-            <button class="btn-edit" data-comp="${q.competenceId}" data-q="${q.questionId}"
+            <button class="btn-edit act-btn" data-comp="${q.competenceId}" data-q="${q.questionId}"
               data-stmt="${q.statement.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
               data-diff="${q.difficultyLevel??''}" data-src="${q.source??''}"
-              data-exp="${(q.explanation??'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
-              style="padding:4px 10px;border-radius:7px;border:1.5px solid var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Editar</button>
+              data-exp="${(q.explanation??'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}">Editar</button>
             ${q.isActive
-              ? `<button class="btn-deact" data-comp="${q.competenceId}" data-q="${q.questionId}" style="padding:4px 10px;border-radius:7px;border:1.5px solid #FECACA;background:#FEF2F2;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Desactivar</button>`
-              : `<button class="btn-act"  data-comp="${q.competenceId}" data-q="${q.questionId}" style="padding:4px 10px;border-radius:7px;border:1.5px solid #A7F3D0;background:#D1FAE5;color:#059669;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Activar</button>`
+              ? `<button class="btn-deact act-btn act-btn-danger" data-comp="${q.competenceId}" data-q="${q.questionId}">Desactivar</button>`
+              : `<button class="btn-act act-btn act-btn-success" data-comp="${q.competenceId}" data-q="${q.questionId}">Activar</button>`
             }
           </div>
         </td>`;
@@ -426,17 +396,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   }
 
   function triggerLoad() { page = 0; clearTimeout(debounce); debounce = setTimeout(loadQuestions, 280); }
-
-  // Ordenamiento por columna (client-side sobre la página actual)
-  document.querySelectorAll<HTMLElement>('.sort-th').forEach(th => {
-    th.addEventListener('click', () => {
-      const col = th.dataset.col!;
-      if (sortCol === col) sortAsc = !sortAsc;
-      else { sortCol = col; sortAsc = true; }
-      updateSortIndicators();
-      if (cachedRows.length) renderTable(cachedRows);
-    });
-  });
 
   document.getElementById('filter-comp')?.addEventListener('change', (e) => {
     currentComp = (e.target as HTMLSelectElement).value; triggerLoad();

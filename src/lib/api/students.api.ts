@@ -13,7 +13,7 @@ export const studentsApi = {
   findById: (id: string) => apiFetch<StudentDto>(`/api/students/${id}`),
   update: (
     id: string,
-    p: { firstName?: string; firstSurname?: string; phone?: string; isActive?: boolean }
+    p: { firstName?: string; secondName?: string; firstSurname?: string; secondSurname?: string; email?: string; phone?: string; isActive?: boolean }
   ) => apiFetch<StudentDto>(`/api/students/${id}`, { method: 'PUT', body: JSON.stringify(p) }),
   activate: (id: string) =>
     apiFetch<StudentDto>(`/api/students/${id}/activate`, { method: 'PUT' }),

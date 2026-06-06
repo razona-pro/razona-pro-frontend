@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Programas Académicos" currentPage="admin-programs">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Programas</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -199,19 +199,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </td>
         <td class="td">
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button class="action-btn btn-edit" data-id="${p.programId}"
-              style="padding:4px 10px;border-radius:7px;border:1.5px solid var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">
-              Editar
-            </button>
+            <button class="action-btn btn-edit act-btn" data-id="${p.programId}">Editar</button>
             ${p.isActive
-              ? `<button class="action-btn btn-deact" data-id="${p.programId}" data-name="${p.programName}"
-                  style="padding:4px 10px;border-radius:7px;border:1.5px solid #FECACA;background:#FEF2F2;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">
-                  Desactivar
-                </button>`
-              : `<button class="action-btn btn-react" data-id="${p.programId}"
-                  style="padding:4px 10px;border-radius:7px;border:1.5px solid #A7F3D0;background:#D1FAE5;color:#059669">
-                  Activar
-                </button>`
+              ? `<button class="action-btn btn-deact act-btn act-btn-danger" data-id="${p.programId}" data-name="${p.programName}">Desactivar</button>`
+              : `<button class="action-btn btn-react act-btn act-btn-success" data-id="${p.programId}">Activar</button>`
             }
           </div>
         </td>`;

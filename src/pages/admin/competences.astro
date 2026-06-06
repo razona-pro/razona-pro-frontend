@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Competencias" currentPage="admin-competences">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Competencias</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -59,7 +59,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <table style="width:100%;border-collapse:collapse">
         <thead>
           <tr style="border-bottom:1px solid var(--ui-border)">
-            <th class="th">ID</th>
             <th class="th">Nombre de la competencia</th>
             <th class="th">Descripción</th>
             <th class="th">Estado</th>
@@ -67,7 +66,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </tr>
         </thead>
         <tbody id="comp-tbody">
-          <tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando...</td></tr>
+          <tr><td colspan="4" style="padding:2rem;text-align:center;color:var(--ui-text-3)">Cargando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -131,30 +130,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   import { requireAuth, isAdmin } from '../../lib/auth';
   import { competencesApi } from '../../lib/api/competences.api';
   import { toast } from '../../lib/toast';
+  import { getCompStyle } from '../../lib/utils';
   import type { CompetenceDto } from '../../lib/api/types';
 
   try {
     requireAuth();
     if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
   } catch { throw new Error('redirect'); }
-
-  const COMP_COLORS: [string, string, string][] = [
-    ['#D41224','#FEE2E2','lectur'],
-    ['#2563EB','#DBEAFE','cuantit'],
-    ['#2563EB','#DBEAFE','razon'],
-    ['#059669','#D1FAE5','ciudadan'],
-    ['#7C3AED','#EDE9FE','escrit'],
-    ['#7C3AED','#EDE9FE','comunicac'],
-    ['#D97706','#FEF3C7','ingl'],
-  ];
-
-  function getColor(name: string): [string, string] {
-    const n = name.toLowerCase();
-    for (const [color, bg, kw] of COMP_COLORS) {
-      if (n.includes(kw)) return [color, bg];
-    }
-    return ['#6B7280','#F3F4F6'];
-  }
 
   let allComps: CompetenceDto[] = [];
   let editingId = '';
@@ -192,22 +174,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const tbody = document.getElementById('comp-tbody')!;
     tbody.innerHTML = '';
     if (!comps.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="padding:2.5rem;text-align:center;color:var(--ui-text-3)">Sin resultados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:2.5rem;text-align:center;color:var(--ui-text-3)">Sin resultados.</td></tr>';
       return;
     }
     comps.forEach(c => {
-      const [color, bg] = getColor(c.competenceName);
+      const cs = getCompStyle(c.competenceId, c.competenceName);
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="td">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="width:28px;height:28px;border-radius:7px;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <div style="width:10px;height:10px;border-radius:50%;background:${color}"></div>
-            </div>
-            <code style="background:var(--ui-surface);padding:2px 8px;border-radius:6px;font-size:0.8125rem;font-weight:700;color:${color};border:1px solid var(--ui-border)">${c.competenceId}</code>
+        <td class="td" style="font-weight:700">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:30px;height:30px;border-radius:8px;background:${cs.bg};color:${cs.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6875rem;font-weight:900">${cs.short}</div>
+            <span>${c.competenceName}</span>
           </div>
         </td>
-        <td class="td" style="font-weight:700">${c.competenceName}</td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.description ?? ''}">${c.description ?? '-'}</td>
         <td class="td">
           <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${c.isActive?'#D1FAE5':'#FEE2E2'};color:${c.isActive?'#059669':'#DC2626'}">
@@ -216,19 +195,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </td>
         <td class="td">
           <div style="display:flex;gap:5px;flex-wrap:wrap">
-            <button class="comp-edit" data-id="${c.competenceId}"
-              style="padding:4px 10px;border-radius:7px;border:1.5px solid var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
-              Editar
-            </button>
+            <button class="comp-edit act-btn" data-id="${c.competenceId}">Editar</button>
             ${c.isActive
-              ? `<button class="comp-deact" data-id="${c.competenceId}" data-name="${c.competenceName}"
-                  style="padding:4px 10px;border-radius:7px;border:1.5px solid #FDE68A;background:#FEF3C7;color:#92400E;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
-                  Desactivar
-                </button>`
-              : `<button class="comp-react" data-id="${c.competenceId}" data-name="${c.competenceName}"
-                  style="padding:4px 10px;border-radius:7px;border:1.5px solid #A7F3D0;background:#D1FAE5;color:#065F46;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
-                  Activar
-                </button>`
+              ? `<button class="comp-deact act-btn act-btn-danger" data-id="${c.competenceId}" data-name="${c.competenceName}">Desactivar</button>`
+              : `<button class="comp-react act-btn act-btn-success" data-id="${c.competenceId}" data-name="${c.competenceName}">Activar</button>`
             }
           </div>
         </td>`;

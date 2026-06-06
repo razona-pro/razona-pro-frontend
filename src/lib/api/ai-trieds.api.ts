@@ -61,6 +61,13 @@ export const aiTriedsApi = {
   }),
 
   // ── Admin ──────────────────────────────────────────────────────────
+  // Historial de TODAS las sesiones IA (studentId es filtro opcional)
+  findAllAdmin: (page = 0, size = 20, studentId?: string) => {
+    let url = `/api/ai-trieds/admin/all?page=${page}&size=${size}`;
+    if (studentId) url += `&studentId=${encodeURIComponent(studentId)}`;
+    return apiFetch<PagedResponse<AiTriedDto>>(url);
+  },
+
   // Intentos IA de un estudiante
   findByStudent: (programId: string, studentId: string, page = 0, size = 20) =>
     apiFetch<PagedResponse<AiTriedDto>>(

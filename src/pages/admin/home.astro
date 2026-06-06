@@ -2,7 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
-<AdminLayout title="Panel de administración" currentPage="admin-home">
+<AdminLayout title="Panel de control" currentPage="admin-home">
   <!-- Header -->
   <div style="margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
     <div style="display:flex;align-items:center;gap:12px">
@@ -100,7 +100,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const cards: { label: string; value: string | number; color: string; href: string }[] = [
       { label:'Estudiantes activos',  value: d.activeStudents,  color:'#059669', href:'/admin/students' },
       { label:'Preguntas activas',    value: d.activeQuestions, color:'#7C3AED', href:'/admin/questions' },
-      { label:'Tests disponibles',    value: d.totalTests,      color:'#2563EB', href:'/admin/tests' },
+      { label:'Pruebas disponibles',    value: d.totalTests,      color:'#2563EB', href:'/admin/tests' },
       { label:'Intentos finalizados', value: d.finishedTrieds,  color:'#D41224', href:'/admin/trieds' },
       { label:'En progreso',          value: d.inProgressTrieds, color:'#D97706', href:'/admin/trieds' },
       { label:'Dudas abiertas',       value: d.openDoubts, color: d.openDoubts > 0 ? '#D97706' : '#059669', href:'/admin/doubts' },

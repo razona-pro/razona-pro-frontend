@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Administradores" currentPage="admin-admins">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Administradores</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -97,10 +97,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <div class="field-grp"><label class="field-lbl">Primer apellido *</label><input id="c-lname1" type="text" class="field-inp" placeholder="Ej: Pérez" maxlength="15" required /></div>
         <div class="field-grp"><label class="field-lbl">Segundo apellido</label><input id="c-lname2" type="text" class="field-inp" placeholder="Opcional" maxlength="15" /></div>
         <div class="field-grp" style="grid-column:1/-1"><label class="field-lbl">Correo electrónico *</label><input id="c-email" type="email" class="field-inp" placeholder="correo@dominio.com" maxlength="50" required /></div>
-        <div class="field-grp"><label class="field-lbl">Teléfono *</label><input id="c-phone" type="tel" class="field-inp" placeholder="+573001234567" required /></div>
-        <div class="field-grp"><label class="field-lbl">Contraseña *</label><input id="c-password" type="password" class="field-inp" placeholder="Mín. 8 caracteres" required /></div>
       </div>
-      <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0 0 1rem">* La contraseña debe tener mayúscula, minúscula y número.</p>
+      <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0 0 1rem">La contraseña se generará automáticamente y se enviará al correo del administrador.</p>
       <div style="display:flex;gap:8px">
         <button type="button" id="create-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
         <button type="submit" id="create-submit" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
@@ -112,6 +110,32 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 </div>
 
 <!-- Modal toggle estado admin -->
+<!-- Modal editar administrador -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:480px;width:calc(100%-2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h2 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Editar administrador</h2>
+      <button id="edit-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);padding:4px;font-size:1.25rem;line-height:1">×</button>
+    </div>
+    <div id="edit-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:1rem"></div>
+    <form id="edit-form" novalidate>
+      <input type="hidden" id="e-id" />
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+        <div class="field-grp"><label class="field-lbl">Primer nombre *</label><input id="e-fname" type="text" class="field-inp" maxlength="15" required /></div>
+        <div class="field-grp"><label class="field-lbl">Segundo nombre</label><input id="e-mname" type="text" class="field-inp" maxlength="15" /></div>
+        <div class="field-grp"><label class="field-lbl">Primer apellido *</label><input id="e-lname1" type="text" class="field-inp" maxlength="15" required /></div>
+        <div class="field-grp"><label class="field-lbl">Segundo apellido</label><input id="e-lname2" type="text" class="field-inp" maxlength="15" /></div>
+        <div class="field-grp" style="grid-column:1/-1"><label class="field-lbl">Correo electrónico</label><input id="e-email" type="email" class="field-inp" maxlength="50" /></div>
+        <div class="field-grp" style="grid-column:1/-1"><label class="field-lbl">Teléfono</label><input id="e-phone" type="tel" class="field-inp" placeholder="+573001234567" /></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="edit-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+        <button type="submit" id="edit-submit" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)"><span id="edit-label">Guardar cambios</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="toggle-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:360px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
     <div id="toggle-icon-wrap" style="width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem"></div>
@@ -233,12 +257,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </span>
         </td>
         <td class="td">
-          <div style="display:flex;gap:5px">
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button class="btn-edit act-btn" data-id="${a.adminId}"
+              data-fname="${(a.firstName??'').replace(/"/g,'&quot;')}" data-mname="${(a.secondName??'').replace(/"/g,'&quot;')}"
+              data-lname1="${(a.firstSurname??'').replace(/"/g,'&quot;')}" data-lname2="${(a.secondSurname??'').replace(/"/g,'&quot;')}"
+              data-email="${(a.email??'').replace(/"/g,'&quot;')}" data-phone="${(a.phone??'').replace(/"/g,'&quot;')}">Editar</button>
             ${isMe
               ? `<span style="font-size:0.75rem;color:var(--ui-text-3);padding:4px 10px;background:var(--ui-surface);border-radius:7px;border:1.5px solid var(--ui-border)">Mi cuenta</span>`
-              : `<button class="action-btn btn-toggle"
-                  data-id="${a.adminId}" data-name="${fullName}" data-active="${a.isActive}"
-                  style="border-color:${a.isActive?'#FECACA':'#A7F3D0'};background:${a.isActive?'#FEF2F2':'#D1FAE5'};color:${a.isActive?'#DC2626':'#059669'}">
+              : `<button class="action-btn btn-toggle act-btn ${a.isActive ? 'act-btn-danger' : 'act-btn-success'}"
+                  data-id="${a.adminId}" data-name="${fullName}" data-active="${a.isActive}">
                   ${a.isActive ? 'Desactivar' : 'Activar'}
                 </button>`
             }
@@ -285,7 +312,55 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         (document.getElementById('toggle-modal') as HTMLElement).style.display = 'flex';
       });
     });
+
+    document.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        (document.getElementById('e-id')     as HTMLInputElement).value = btn.dataset.id!;
+        (document.getElementById('e-fname')  as HTMLInputElement).value = btn.dataset.fname  ?? '';
+        (document.getElementById('e-mname')  as HTMLInputElement).value = btn.dataset.mname  ?? '';
+        (document.getElementById('e-lname1') as HTMLInputElement).value = btn.dataset.lname1 ?? '';
+        (document.getElementById('e-lname2') as HTMLInputElement).value = btn.dataset.lname2 ?? '';
+        (document.getElementById('e-email')  as HTMLInputElement).value = btn.dataset.email  ?? '';
+        (document.getElementById('e-phone')  as HTMLInputElement).value = btn.dataset.phone  ?? '';
+        (document.getElementById('edit-error') as HTMLElement).style.display = 'none';
+        (document.getElementById('edit-modal') as HTMLElement).style.display = 'flex';
+      });
+    });
   }
+
+  // ── Editar administrador ────────────────────────────────────────────
+  const editModal = document.getElementById('edit-modal')!;
+  const closeEdit = () => { editModal.style.display = 'none'; };
+  document.getElementById('edit-close')?.addEventListener('click', closeEdit);
+  document.getElementById('edit-cancel')?.addEventListener('click', closeEdit);
+  editModal.addEventListener('click', e => { if (e.target === editModal) closeEdit(); });
+  document.getElementById('edit-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl  = document.getElementById('edit-error')!;
+    const lblEl  = document.getElementById('edit-label')!;
+    const submit = document.getElementById('edit-submit') as HTMLButtonElement;
+    errEl.style.display = 'none';
+    const id            = (document.getElementById('e-id')     as HTMLInputElement).value;
+    const firstName     = (document.getElementById('e-fname')  as HTMLInputElement).value.trim();
+    const secondName    = (document.getElementById('e-mname')  as HTMLInputElement).value.trim() || undefined;
+    const firstSurname  = (document.getElementById('e-lname1') as HTMLInputElement).value.trim();
+    const secondSurname = (document.getElementById('e-lname2') as HTMLInputElement).value.trim() || undefined;
+    const email         = (document.getElementById('e-email')  as HTMLInputElement).value.trim() || undefined;
+    const phone         = (document.getElementById('e-phone')  as HTMLInputElement).value.trim() || undefined;
+    if (!firstName || !firstSurname) {
+      errEl.textContent = 'Nombre y apellido son obligatorios.'; errEl.style.display = 'block'; return;
+    }
+    submit.disabled = true; lblEl.textContent = 'Guardando...';
+    try {
+      await adminsApi.update(id, { firstName, secondName, firstSurname, secondSurname, email, phone });
+      toast.success('Administrador actualizado');
+      closeEdit(); loadPage();
+    } catch (err: any) {
+      errEl.textContent = err?.message ?? 'Error al actualizar.'; errEl.style.display = 'block';
+    } finally {
+      submit.disabled = false; lblEl.textContent = 'Guardar cambios';
+    }
+  });
 
   document.getElementById('search-admin')?.addEventListener('input', e => {
     searchStr = (e.target as HTMLInputElement).value.trim();
@@ -350,19 +425,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const firstSurname  = (document.getElementById('c-lname1')   as HTMLInputElement).value.trim();
     const secondSurname = (document.getElementById('c-lname2')   as HTMLInputElement).value.trim() || undefined;
     const email         = (document.getElementById('c-email')    as HTMLInputElement).value.trim();
-    const phone         = (document.getElementById('c-phone')    as HTMLInputElement).value.trim();
-    const password      = (document.getElementById('c-password') as HTMLInputElement).value;
 
-    if (!firstName || !firstSurname || !email || !phone || !password) {
-      errEl.textContent   = 'Completa todos los campos obligatorios.';
+    if (!firstName || !firstSurname || !email) {
+      errEl.textContent   = 'Completa nombre, apellido y correo.';
       errEl.style.display = 'block'; return;
     }
 
     submit.disabled = true; lblEl.textContent = 'Creando...';
     window.rpLoader?.show('Creando administrador...');
     try {
-      await adminsApi.create({ firstName, secondName, firstSurname, secondSurname, email, phone, password });
-      toast.success('Administrador creado correctamente');
+      await adminsApi.create({ firstName, secondName, firstSurname, secondSurname, email });
+      toast.success('Administrador creado', { description: 'Se enviaron las credenciales al correo indicado.' });
       closeCreate();
       (document.getElementById('create-form') as HTMLFormElement).reset();
       page = 0; loadPage();

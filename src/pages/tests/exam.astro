@@ -42,7 +42,8 @@ import { Icon } from 'astro-icon/components';
           <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ui-text-3);margin:0">Preguntas</p>
           <div id="q-nav" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px"></div>
           <div style="display:flex;flex-direction:column;gap:4px">
-            <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:#D1FAE5;border:1.5px solid #059669;flex-shrink:0"></span>Respondida</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:#D1FAE5;border:1.5px solid #059669;flex-shrink:0"></span>Guardada</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:#FEF3C7;border:1.5px solid #D97706;flex-shrink:0"></span>Sin guardar</div>
             <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:var(--brand);flex-shrink:0"></span>Actual</div>
             <div style="display:flex;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ui-text-3)"><span style="width:9px;height:9px;border-radius:2px;background:var(--ui-surface);border:1.5px solid var(--ui-border);flex-shrink:0"></span>Sin responder</div>
           </div>
@@ -101,7 +102,14 @@ import { Icon } from 'astro-icon/components';
           </div>
 
           <!-- Opciones -->
-          <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:1.25rem"></div>
+          <div id="q-options" style="display:flex;flex-direction:column;gap:9px;margin-bottom:0.875rem"></div>
+
+          <!-- Botón Guardar respuesta (guardado explícito por pregunta) -->
+          <button id="btn-save" disabled
+            style="width:100%;padding:0.6875rem;border-radius:11px;border:none;background:var(--ui-surface);color:var(--ui-text-3);font-family:inherit;font-weight:700;font-size:0.875rem;cursor:not-allowed;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.18s">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span id="btn-save-label">Guardar respuesta</span>
+          </button>
 
           <!-- Asistente IA (solo en modo PRACTICE con IA disponible) -->
           <div id="hint-section" style="display:none;margin-bottom:1.125rem;border:1.5px solid #BAE6FD;border-radius:14px;overflow:hidden;background:var(--ui-card)">
@@ -189,10 +197,10 @@ import { Icon } from 'astro-icon/components';
       <div style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;background:#FEE2E2">
         <svg width="40" height="40" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="12" x2="15" y2="12" style="transform:rotate(45deg);transform-origin:center"/></svg>
       </div>
-      <h3 style="font-size:1.25rem;font-weight:900;color:#DC2626;margin:0 0 0.75rem">Examen anulado por plagio</h3>
-      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 0.75rem;line-height:1.65">Se detectaron 3 o más salidas de ventana durante el examen. El intento ha sido marcado como <strong>abandonado</strong> automáticamente.</p>
-      <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0 0 1.5rem">Si crees que esto fue un error, comunícate con tu administrador.</p>
-      <a href="/tests" style="display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Volver a pruebas</a>
+      <h3 style="font-size:1.25rem;font-weight:900;color:#DC2626;margin:0 0 0.75rem">Examen anulado y cuenta desactivada</h3>
+      <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 0.75rem;line-height:1.65">Se detectaron <strong>2 eventos de plagio</strong> durante el examen. El intento fue <strong>anulado</strong> y tu cuenta ha sido <strong>desactivada</strong> automáticamente.</p>
+      <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0 0 1.5rem">Para recuperar el acceso debes <strong>enviar una apelación</strong> a un administrador. Mientras tanto no podrás iniciar sesión.</p>
+      <a href="/auth" style="display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Entendido</a>
     </div>
   </div>
 
@@ -226,11 +234,11 @@ import { Icon } from 'astro-icon/components';
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:1.25rem 1.75rem">
         <div style="text-align:center;background:var(--ui-surface);border-radius:10px;padding:12px 8px"><p id="summary-total" style="font-size:1.5rem;font-weight:900;color:var(--ui-text-1);margin:0">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Total</p></div>
-        <div style="text-align:center;background:#D1FAE5;border-radius:10px;padding:12px 8px"><p id="summary-answered" style="font-size:1.5rem;font-weight:900;color:#059669;margin:0">0</p><p style="font-size:0.625rem;color:#059669;margin:0;text-transform:uppercase">Respondidas</p></div>
-        <div style="text-align:center;background:#FEF3C7;border-radius:10px;padding:12px 8px"><p id="summary-pending" style="font-size:1.5rem;font-weight:900;color:#D97706;margin:0">0</p><p style="font-size:0.625rem;color:#D97706;margin:0;text-transform:uppercase">Sin responder</p></div>
+        <div style="text-align:center;background:#D1FAE5;border-radius:10px;padding:12px 8px"><p id="summary-answered" style="font-size:1.5rem;font-weight:900;color:#059669;margin:0">0</p><p style="font-size:0.625rem;color:#059669;margin:0;text-transform:uppercase">Guardadas</p></div>
+        <div style="text-align:center;background:#FEF3C7;border-radius:10px;padding:12px 8px"><p id="summary-pending" style="font-size:1.5rem;font-weight:900;color:#D97706;margin:0">0</p><p style="font-size:0.625rem;color:#D97706;margin:0;text-transform:uppercase">Sin guardar</p></div>
       </div>
       <div id="summary-alert" style="display:none;margin:0 1.75rem 1rem;padding:10px 14px;background:#FEF3C7;border-radius:10px;border:1px solid #FDE68A;font-size:0.875rem;color:#92400E">
-        ⚠️ Tienes preguntas sin responder. Serán marcadas como incorrectas.
+        ⚠️ Tienes preguntas sin guardar. No se incluirán en tu puntaje si finalizas ahora.
       </div>
       <div style="padding:0 1.75rem 1.5rem;display:flex;gap:10px">
         <button id="summary-back" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">← Regresar</button>
@@ -243,7 +251,7 @@ import { Icon } from 'astro-icon/components';
   <div id="doubt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:350;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
     <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:440px;width:calc(100%-2rem);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
       <h3 style="font-size:1rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Reportar duda sobre esta pregunta</h3>
-      <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 1rem;line-height:1.5">Un administrador revisará tu reporte. Puedes continuar con el test.</p>
+      <p style="font-size:0.8125rem;color:var(--ui-text-2);margin:0 0 1rem;line-height:1.5">Un administrador revisará tu reporte. Puedes continuar con la prueba.</p>
       <div id="doubt-q-preview" style="background:var(--ui-surface);border-radius:8px;padding:10px 12px;margin-bottom:1rem;font-size:0.8125rem;color:var(--ui-text-2);border:1px solid var(--ui-border);max-height:80px;overflow:hidden;line-height:1.5"></div>
       <textarea id="doubt-message" placeholder="Describe tu duda (opcional)..."
         style="width:100%;padding:10px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s"
@@ -262,7 +270,7 @@ import { Icon } from 'astro-icon/components';
       <div id="result-icon-wrap" style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center"></div>
       <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.25rem">Tu puntaje</p>
       <p id="result-score" style="font-size:4.5rem;font-weight:900;margin:0;line-height:1;letter-spacing:-3px;color:var(--brand)">0</p>
-      <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">/ 100 puntos</p>
+      <p id="result-max" style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">puntos</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
         <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Correctas</p></div>
         <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-wrong"   style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Incorrectas</p></div>
@@ -295,6 +303,7 @@ import { Icon } from 'astro-icon/components';
   .q-nav-item:hover    { border-color:var(--brand);color:var(--brand); }
   .q-nav-item.current  { background:var(--brand);border-color:var(--brand);color:white; }
   .q-nav-item.answered { background:#D1FAE5;border-color:#059669;color:#059669; }
+  .q-nav-item.dirty    { background:#FEF3C7;border-color:#D97706;color:#D97706; }
 
   .exam-option { display:flex;align-items:stretch;width:100%;background:var(--ui-card);border:1.5px solid var(--ui-border);border-radius:12px;cursor:pointer;transition:border-color 0.18s,background 0.18s,transform 0.18s,box-shadow 0.18s;text-align:left;font-family:inherit;overflow:hidden;animation:optSlide 0.25s ease both; }
   .exam-option:hover:not(.selected) { border-color:var(--brand);background:rgba(212,18,36,0.03);transform:translateX(3px);box-shadow:0 3px 12px rgba(212,18,36,0.08); }
@@ -349,7 +358,9 @@ import { Icon } from 'astro-icon/components';
 
   // ── Estado ───────────────────────────────────────────────────────
   let questions:   QuestionDto[] = [];
-  let answers:     Record<string, string> = {};
+  let answers:     Record<string, string> = {};   // selección local (aún no necesariamente guardada)
+  let saved:       Record<string, string> = {};   // última respuesta persistida en el servidor por pregunta
+  let savingNow    = false;
   let currentIdx   = 0;
   let startTime    = Date.now();
   let timerInt:    ReturnType<typeof setInterval> | null = null;
@@ -387,7 +398,9 @@ import { Icon } from 'astro-icon/components';
   const optionOrderCache = new Map<string, OptionDto[]>();
   const hintCache        = new Map<string, Map<number, string>>();
 
-  const DIFF_LABEL: Record<string, string> = { B:'Básico · 1pt', M:'Medio · 3pts', A:'Alto · 5pts' };
+  const DIFF_LABEL: Record<string, string> = { B:'Básico · 1pt', M:'Medio · 2pts', A:'Alto · 3pts' };
+  // Peso de dificultad para el puntaje (debe coincidir con el backend): N/A o B = 1, M = 2, A = 3.
+  const weightOf = (d?: string | null): number => d === 'M' ? 2 : d === 'A' ? 3 : 1;
   const DIFF_COLOR: Record<string, string> = { B:'#059669', M:'#D97706', A:'#D41224' };
   const DIFF_BG:    Record<string, string> = { B:'#D1FAE5', M:'#FEF3C7', A:'#FEE2E2' };
   const LETTERS = ['A','B','C','D','E','F'];
@@ -493,34 +506,25 @@ import { Icon } from 'astro-icon/components';
       resultStatus = res.data?.status;
     } catch { /* continuar con lógica local */ }
 
-    // Si el backend ya lo anuló (p.ej. el contador llegó a 3), mostrar modal de anulación
-    if (resultStatus === 'ANULADO' || fraudViolations >= 3) {
+    // Límite = 2 eventos. Al segundo (o si el backend ya anuló) → anulación + cuenta desactivada.
+    if (resultStatus === 'ANULADO' || fraudViolations >= 2) {
       annulExam();
       return;
     }
 
-    // Mostrar advertencia modal
+    // Única advertencia (la próxima salida anula el examen y DESACTIVA la cuenta)
     fraudModalOpen = true;
     const counterEl = document.getElementById('fraud-counter')!;
     const titleEl   = document.getElementById('fraud-title')!;
     const descEl    = document.getElementById('fraud-desc')!;
     const iconEl    = document.getElementById('fraud-icon')!;
 
-    counterEl.textContent = `Advertencia ${fraudViolations} de 2`;
-
-    if (fraudViolations === 1) {
-      iconEl.style.background = '#FEF3C7';
-      iconEl.innerHTML = '<svg width="32" height="32" fill="none" stroke="#D97706" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
-      titleEl.textContent = '⚠ Primera advertencia';
-      descEl.textContent  = 'Se detectó que saliste de la ventana del examen. Esto queda registrado. En la tercera ocasión, el examen será anulado automáticamente por posible plagio.';
-      (document.getElementById('fraud-accept') as HTMLButtonElement).style.background = 'linear-gradient(135deg,#D97706,#B45309)';
-    } else {
-      iconEl.style.background = '#FEE2E2';
-      iconEl.innerHTML = '<svg width="32" height="32" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
-      titleEl.textContent = '🚨 Segunda advertencia - ÚLTIMA';
-      descEl.textContent  = 'Esta es tu segunda y última advertencia. Si vuelves a salir de la ventana, el examen será anulado inmediatamente y registrado como plagio.';
-      (document.getElementById('fraud-accept') as HTMLButtonElement).style.background = 'linear-gradient(135deg,#DC2626,#991B1B)';
-    }
+    counterEl.textContent = 'Advertencia única';
+    iconEl.style.background = '#FEE2E2';
+    iconEl.innerHTML = '<svg width="32" height="32" fill="none" stroke="#DC2626" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    titleEl.textContent = '🚨 Advertencia por posible plagio';
+    descEl.textContent  = 'Se detectó que saliste de la ventana del examen. Si vuelves a hacerlo, el examen será anulado y tu cuenta quedará DESACTIVADA; deberás enviar una apelación a un administrador para reactivarla.';
+    (document.getElementById('fraud-accept') as HTMLButtonElement).style.background = 'linear-gradient(135deg,#DC2626,#991B1B)';
 
     (document.getElementById('fraud-modal') as HTMLElement).style.display = 'flex';
   }
@@ -561,11 +565,13 @@ import { Icon } from 'astro-icon/components';
 
   function updateQNav() {
     document.getElementById('q-nav')!.querySelectorAll<HTMLElement>('.q-nav-item').forEach((btn, i) => {
-      btn.classList.remove('current', 'answered');
-      if (i === currentIdx) btn.classList.add('current');
-      else if (answers[questions[i].questionId]) btn.classList.add('answered');
+      btn.classList.remove('current', 'answered', 'dirty');
+      const qid = questions[i].questionId;
+      if (i === currentIdx)   btn.classList.add('current');
+      else if (saved[qid])    btn.classList.add('answered');   // verde = guardada
+      else if (answers[qid])  btn.classList.add('dirty');      // ámbar = seleccionada sin guardar
     });
-    const answered = Object.keys(answers).length;
+    const answered = Object.keys(saved).length;   // el progreso refleja lo GUARDADO
     const total    = questions.length;
     const pct      = total > 0 ? Math.round((answered / total) * 100) : 0;
     const sBar  = document.getElementById('sidebar-bar-fill');
@@ -575,7 +581,7 @@ import { Icon } from 'astro-icon/components';
     if (sBar)  sBar.style.width  = `${pct}%`;
     if (sPct)  sPct.textContent  = `${pct}%`;
     if (mFill) mFill.style.width = `${pct}%`;
-    if (mLbl)  mLbl.textContent  = `${answered} / ${total} respondidas`;
+    if (mLbl)  mLbl.textContent  = `${answered} / ${total} guardadas`;
   }
 
   // ── Renderizar pregunta ──────────────────────────────────────────
@@ -601,13 +607,8 @@ import { Icon } from 'astro-icon/components';
       diffEl.style.display = 'none';  // dificultad "no aplica"
     }
 
-    const answeredBadge = document.getElementById('q-answered-badge')!;
-    const changeHint    = document.getElementById('q-change-hint')!;
-    if (answers[q.questionId]) {
-      answeredBadge.style.display = 'inline'; changeHint.style.display = 'block';
-    } else {
-      answeredBadge.style.display = 'none';   changeHint.style.display = 'none';
-    }
+    // El badge "Respondida" y la pista de cambio los gestiona updateSaveButton()
+    // según si la selección actual ya está guardada o no.
 
     // Botón duda - siempre visible para estudiantes
     const doubtBtn = document.getElementById('doubt-btn')!;
@@ -686,10 +687,11 @@ import { Icon } from 'astro-icon/components';
     }
 
     updateQNav();
+    updateSaveButton();
   }
 
-  // ── Seleccionar respuesta ────────────────────────────────────────
-  async function selectAnswer(questionId: string, optionId: string, qIdx: number) {
+  // ── Seleccionar respuesta (solo marca localmente; NO guarda en servidor) ──
+  function selectAnswer(questionId: string, optionId: string, qIdx: number) {
     answers[questionId] = optionId;
     const q        = questions[qIdx];
     const shuffled = getShuffledOptions(q);
@@ -698,15 +700,64 @@ import { Icon } from 'astro-icon/components';
       if (shuffled[i]?.optionId === optionId) btn.classList.add('selected');
       else btn.classList.remove('selected');
     });
-    (document.getElementById('q-answered-badge') as HTMLElement).style.display = 'inline';
-    (document.getElementById('q-change-hint')   as HTMLElement).style.display = 'block';
+    updateSaveButton();
     updateQNav();
-    try {
-      await triedsApi.submitAnswer(triedId!, questionId, optionId);
-    } catch (err: any) {
-      toast.error('Error al guardar respuesta', { description: err?.message });
+  }
+
+  // ── Estado del botón Guardar según selección vs. lo guardado ──────
+  function updateSaveButton() {
+    const q     = questions[currentIdx];
+    const btn   = document.getElementById('btn-save') as HTMLButtonElement;
+    const label = document.getElementById('btn-save-label');
+    const badge = document.getElementById('q-answered-badge') as HTMLElement;
+    const hint  = document.getElementById('q-change-hint') as HTMLElement;
+    if (!q || !btn || !label) return;
+    const sel     = answers[q.questionId];
+    const isSaved = sel != null && saved[q.questionId] === sel;
+    const isDirty = sel != null && saved[q.questionId] !== sel;
+
+    if (isSaved) {
+      btn.disabled = true;  btn.style.cursor = 'default';
+      btn.style.background = '#D1FAE5'; btn.style.color = '#059669';
+      label.textContent = '✓ Respuesta guardada';
+      badge.style.display = 'inline'; hint.style.display = 'block';
+    } else if (isDirty) {
+      btn.disabled = false; btn.style.cursor = 'pointer';
+      btn.style.background = 'linear-gradient(135deg,var(--brand),var(--brand-dark))';
+      btn.style.color = 'white';
+      label.textContent = 'Guardar respuesta';
+      badge.style.display = 'none'; hint.style.display = 'none';
+    } else {
+      btn.disabled = true;  btn.style.cursor = 'not-allowed';
+      btn.style.background = 'var(--ui-surface)'; btn.style.color = 'var(--ui-text-3)';
+      label.textContent = 'Guardar respuesta';
+      badge.style.display = 'none'; hint.style.display = 'none';
     }
   }
+
+  // ── Guardar la respuesta de la pregunta actual en el servidor ─────
+  async function saveCurrentAnswer() {
+    if (savingNow) return;
+    const q = questions[currentIdx];
+    if (!q) return;
+    const sel = answers[q.questionId];
+    if (sel == null || saved[q.questionId] === sel) return;
+    savingNow = true;
+    const label = document.getElementById('btn-save-label');
+    if (label) label.textContent = 'Guardando...';
+    try {
+      await triedsApi.submitAnswer(triedId!, q.questionId, sel);
+      saved[q.questionId] = sel;
+      toast.success('Respuesta guardada');
+    } catch (err: any) {
+      toast.error('Error al guardar respuesta', { description: err?.message });
+    } finally {
+      savingNow = false;
+      updateSaveButton();
+      updateQNav();
+    }
+  }
+  document.getElementById('btn-save')?.addEventListener('click', saveCurrentAnswer);
 
   // ── Pistas IA ────────────────────────────────────────────────────
   document.querySelectorAll<HTMLButtonElement>('.hbtn').forEach(btn => {
@@ -805,7 +856,7 @@ import { Icon } from 'astro-icon/components';
 
   // ── Modal resumen ────────────────────────────────────────────────
   function openSummaryModal() {
-    const answered = Object.keys(answers).length;
+    const answered = Object.keys(saved).length;   // solo cuentan las GUARDADAS
     const total    = questions.length;
     const pending  = total - answered;
     (document.getElementById('summary-total')    as HTMLElement).textContent = String(total);
@@ -843,19 +894,23 @@ import { Icon } from 'astro-icon/components';
   }
 
   function showResults(score: number, correct: number, elapsed: number, total: number, canReview = true) {
-    const sc = scoreColor(score);
+    // score = puntos crudos ponderados. Calculamos el máximo posible para el % interno (color/mensaje).
+    const maxPoints = questions.reduce((acc, q) => acc + weightOf(q.difficultyLevel), 0);
+    const pct = maxPoints > 0 ? (score / maxPoints) * 100 : 0;
+    const sc = scoreColor(pct);
     const iconWrap = document.getElementById('result-icon-wrap')!;
-    iconWrap.style.background = score >= 60 ? '#D1FAE5' : score >= 40 ? '#FEF3C7' : '#FEE2E2';
-    iconWrap.innerHTML = score >= 60
+    iconWrap.style.background = pct >= 60 ? '#D1FAE5' : pct >= 40 ? '#FEF3C7' : '#FEE2E2';
+    iconWrap.innerHTML = pct >= 60
       ? `<svg width="38" height="38" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`
-      : `<svg width="38" height="38" fill="none" stroke="${score >= 40 ? '#D97706' : '#DC2626'}" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`;
+      : `<svg width="38" height="38" fill="none" stroke="${pct >= 40 ? '#D97706' : '#DC2626'}" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`;
     const scoreEl = document.getElementById('result-score')!;
     scoreEl.style.color = sc;
+    (document.getElementById('result-max')  as HTMLElement).textContent = `de ${maxPoints} puntos`;
     (document.getElementById('res-correct') as HTMLElement).textContent = String(correct);
     (document.getElementById('res-wrong')   as HTMLElement).textContent = String(total - correct);
     (document.getElementById('res-time')    as HTMLElement).textContent = String(Math.round(elapsed / 60));
-    (document.getElementById('result-msg')  as HTMLElement).textContent = score >= 80
-      ? '¡Excelente! Estás muy bien preparado.' : score >= 60
+    (document.getElementById('result-msg')  as HTMLElement).textContent = pct >= 80
+      ? '¡Excelente! Estás muy bien preparado.' : pct >= 60
       ? '¡Buen trabajo! Sigue practicando.' : '¡Ánimo! Revisa los temas y vuelve a intentarlo.';
     const reviewBtn = document.getElementById('btn-review') as HTMLAnchorElement;
     if (reviewBtn) {
@@ -909,6 +964,7 @@ import { Icon } from 'astro-icon/components';
       // Restaurar respuestas previamente guardadas (por si el estudiante recargó o perdió conexión)
       if (resume.savedAnswers) {
         Object.assign(answers, resume.savedAnswers);
+        Object.assign(saved,   resume.savedAnswers);   // lo del servidor ya está guardado
       }
 
       // Mode badge (requiere testMode del servidor)
@@ -942,13 +998,13 @@ import { Icon } from 'astro-icon/components';
       questions  = questionsRes.data ?? [];
 
       if (!test || questions.length === 0) {
-        toast.error('El test no tiene preguntas disponibles o no existe');
+        toast.error('La prueba no tiene preguntas disponibles o no existe');
         window.location.replace('/tests');
         return;
       }
 
       if (!Boolean(test.isActive)) {
-        toast.error('Este test no está disponible actualmente');
+        toast.error('Esta prueba no está disponible actualmente');
         window.location.replace('/tests');
         return;
       }

@@ -23,7 +23,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
   <div id="ranking-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem"></div>
 
   <!-- Layout principal -->
-  <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">
+  <div class="rankings-grid" style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">
 
     <!-- Columna leaderboard -->
     <div>
@@ -63,7 +63,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
           </div>
           <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;text-align:center">
             <p id="my-trieds-count" style="font-size:1.25rem;font-weight:900;color:white;margin:0 0 2px">-</p>
-            <p style="font-size:0.625rem;color:rgba(255,255,255,0.6);margin:0;text-transform:uppercase;letter-spacing:0.4px">Tests</p>
+            <p style="font-size:0.625rem;color:rgba(255,255,255,0.6);margin:0;text-transform:uppercase;letter-spacing:0.4px">Pruebas</p>
           </div>
         </div>
       </div>
@@ -211,13 +211,19 @@ import AppLayout from '../../layouts/AppLayout.astro';
     border-top: 1px dashed var(--ui-border); margin: 4px 0;
   }
 
-  @media (max-width: 768px) {
-    .app-content > div:last-child > div[style*="grid-template-columns:1fr 300px"] {
-      grid-template-columns: 1fr !important;
-    }
-    div[style*="position:sticky"] { position: relative !important; top: auto !important; }
+  @media (max-width: 860px) {
+    .rankings-grid { grid-template-columns: 1fr !important; }
+    .rankings-grid > div[style*="position:sticky"],
+    .rankings-grid div[style*="position:sticky"] { position: relative !important; top: auto !important; }
     .podium-av-1 { width: 52px !important; height: 52px !important; }
     .podium-av-2, .podium-av-3 { width: 42px !important; height: 42px !important; }
+    .lb-row { padding-left: 8px; padding-right: 8px; }
+    .lb-name { font-size: 0.8125rem; }
+    .lb-meta { font-size: 0.625rem; }
+  }
+  @media (max-width: 420px) {
+    .lb-avatar { display: none; }
+    .podium-name { max-width: 80px; }
   }
 </style>
 
@@ -237,7 +243,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
   let allLoaded: RankingStudentDto[] = [];
 
   const PERIOD_LABEL: Record<string,string> = { GENERAL:'General', WEEKLY:'Semanal', MONTHLY:'Mensual', DAILY:'Diario' };
-  const SOURCE_LABEL: Record<string,string>  = { ALL:'Tests + IA', TRIEDS:'Solo tests', AI_TRIEDS:'Solo IA' };
+  const SOURCE_LABEL: Record<string,string>  = { ALL:'Pruebas + IA', TRIEDS:'Solo pruebas', AI_TRIEDS:'Solo IA' };
   const PERIOD_COLOR: Record<string,string>  = { GENERAL:'#7C3AED', WEEKLY:'#2563EB', MONTHLY:'#059669', DAILY:'#D97706' };
   const PERIOD_BG:    Record<string,string>  = { GENERAL:'#EDE9FE', WEEKLY:'#DBEAFE', MONTHLY:'#D1FAE5', DAILY:'#FEF3C7' };
 

@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <AdminLayout title="Gestión de Estudiantes" currentPage="admin-students">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Estudiantes</span>
     </div>
     <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Estudiantes</h1>
@@ -60,12 +60,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <table style="width:100%;border-collapse:collapse">
         <thead>
           <tr style="border-bottom:1px solid var(--ui-border)">
-            <th class="th sort-th" data-col="id" style="cursor:pointer">Código <span class="sort-ind asc" data-col="id"></span></th>
-            <th class="th sort-th" data-col="name" style="cursor:pointer">Nombre completo <span class="sort-ind" data-col="name"></span></th>
+            <th class="th">Código</th>
+            <th class="th">Nombre completo</th>
             <th class="th">Correo electrónico</th>
-            <th class="th sort-th" data-col="prog" style="cursor:pointer">Programa <span class="sort-ind" data-col="prog"></span></th>
+            <th class="th">Programa</th>
             <th class="th">Email</th>
-            <th class="th sort-th" data-col="status" style="cursor:pointer">Estado <span class="sort-ind" data-col="status"></span></th>
+            <th class="th">Estado</th>
             <th class="th">Acciones</th>
           </tr>
         </thead>
@@ -83,6 +83,32 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     </div>
   </div>
 </AdminLayout>
+
+<!-- Modal editar estudiante -->
+<div id="sedit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:480px;width:calc(100%-2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h2 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Editar estudiante</h2>
+      <button id="sedit-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);padding:4px;font-size:1.25rem;line-height:1">×</button>
+    </div>
+    <div id="sedit-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;font-size:0.8125rem;color:#B91C1C;margin-bottom:1rem"></div>
+    <form id="sedit-form" novalidate>
+      <input type="hidden" id="se-id" />
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+        <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3)">Primer nombre *</label><input id="se-fname" type="text" maxlength="15" required style="padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none" /></div>
+        <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3)">Segundo nombre</label><input id="se-mname" type="text" maxlength="15" style="padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none" /></div>
+        <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3)">Primer apellido *</label><input id="se-lname1" type="text" maxlength="15" required style="padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none" /></div>
+        <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3)">Segundo apellido</label><input id="se-lname2" type="text" maxlength="15" style="padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none" /></div>
+        <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1"><label style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3)">Correo electrónico</label><input id="se-email" type="email" maxlength="50" style="padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none" /></div>
+        <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1"><label style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3)">Teléfono</label><input id="se-phone" type="tel" placeholder="+573001234567" style="padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none" /></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="sedit-cancel" style="flex:1;padding:0.6875rem;border-radius:10px;border:1.5px solid var(--ui-border);background:transparent;color:var(--ui-text-1);font-family:inherit;font-weight:600;font-size:0.875rem;cursor:pointer">Cancelar</button>
+        <button type="submit" id="sedit-submit" style="flex:2;padding:0.6875rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;box-shadow:0 3px 12px rgba(212,18,36,0.28)"><span id="sedit-label">Guardar cambios</span></button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- Modal desactivar -->
 <div id="deactivate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
@@ -105,11 +131,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
   .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
   .page-btn:disabled { opacity:0.4;cursor:not-allowed }
-  .sort-th { cursor:pointer;user-select:none }
-  .sort-th:hover { background:var(--ui-hover) }
-  .sort-ind::after { content:''; font-size:0.625rem;margin-left:3px;opacity:0.35 }
-  .sort-ind.asc::after  { content:'▲'; opacity:1;color:var(--brand) }
-  .sort-ind.desc::after { content:'▼'; opacity:1;color:var(--brand) }
 </style>
 
 <script>
@@ -134,9 +155,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   let debounce: ReturnType<typeof setTimeout>;
   let pendingDeactivateId = '';
   let programMap: Record<string, string> = {};
-  let cachedStudents: StudentDto[] = [];
-  let sortColS: string | null = 'id';
-  let sortAscS = true;
 
   // Cargar programas para el filtro
   programsApi.findAll().then(res => {
@@ -158,39 +176,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     sel.appendChild(opt);
   });
 
-  function sortStudents(rows: StudentDto[]): StudentDto[] {
-    if (!sortColS) return rows;
-    return [...rows].sort((a, b) => {
-      const fn = (s: StudentDto) => [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean).join(' ');
-      let av: any, bv: any;
-      if (sortColS === 'id')     { av = a.studentId; bv = b.studentId; }
-      if (sortColS === 'name')   { av = fn(a).toLowerCase(); bv = fn(b).toLowerCase(); }
-      if (sortColS === 'prog')   { av = a.programId; bv = b.programId; }
-      if (sortColS === 'status') { av = a.isActive ? 1 : 0; bv = b.isActive ? 1 : 0; }
-      if (av < bv) return sortAscS ? -1 : 1;
-      if (av > bv) return sortAscS ?  1 : -1;
-      return 0;
-    });
-  }
-  function updateSortIndicatorsS() {
-    document.querySelectorAll<HTMLElement>('.sort-ind').forEach(el => {
-      el.className = 'sort-ind' + (el.dataset.col === sortColS ? (sortAscS ? ' asc' : ' desc') : '');
-    });
-  }
-
   function renderRows(students: StudentDto[]) {
-    cachedStudents = students;
-    const sorted = sortStudents(students);
     const tbody = document.getElementById('students-tbody')!;
     tbody.innerHTML = '';
-    if (!sorted.length) {
+    if (!students.length) {
       tbody.innerHTML = `<tr><td colspan="7" style="padding:2.5rem;text-align:center">
         <p style="font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin resultados</p>
         <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0">Prueba con otros filtros o búsqueda.</p>
       </td></tr>`;
       return;
     }
-    sorted.forEach(s => {
+    students.forEach(s => {
       const fullName = [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean).join(' ');
       const progName = programMap[s.programId] ? `${programMap[s.programId]} (${s.programId})` : s.programId;
       const tr = document.createElement('tr');
@@ -212,10 +208,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </span>
         </td>
         <td class="td">
-          <button class="btn-toggle" data-id="${s.studentId}" data-name="${fullName}" data-active="${s.isActive}"
-            style="padding:4px 11px;border-radius:7px;border:1.5px solid ${s.isActive?'#FECACA':'#A7F3D0'};background:${s.isActive?'#FEF2F2':'#D1FAE5'};color:${s.isActive?'#DC2626':'#065F46'};font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">
-            ${s.isActive ? 'Desactivar' : 'Activar'}
-          </button>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button class="btn-edit act-btn" data-id="${s.studentId}"
+              data-fname="${(s.firstName??'').replace(/"/g,'&quot;')}" data-mname="${(s.secondName??'').replace(/"/g,'&quot;')}"
+              data-lname1="${(s.firstSurname??'').replace(/"/g,'&quot;')}" data-lname2="${(s.secondSurname??'').replace(/"/g,'&quot;')}"
+              data-email="${(s.email??'').replace(/"/g,'&quot;')}" data-phone="${(s.phone??'').replace(/"/g,'&quot;')}">Editar</button>
+            <button class="btn-toggle act-btn ${s.isActive ? 'act-btn-danger' : 'act-btn-success'}" data-id="${s.studentId}" data-name="${fullName}" data-active="${s.isActive}">
+              ${s.isActive ? 'Desactivar' : 'Activar'}
+            </button>
+          </div>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -241,6 +242,20 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             btn.disabled = false; btn.textContent = 'Activar';
           }
         }
+      });
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        (document.getElementById('se-id')     as HTMLInputElement).value = btn.dataset.id!;
+        (document.getElementById('se-fname')  as HTMLInputElement).value = btn.dataset.fname  ?? '';
+        (document.getElementById('se-mname')  as HTMLInputElement).value = btn.dataset.mname  ?? '';
+        (document.getElementById('se-lname1') as HTMLInputElement).value = btn.dataset.lname1 ?? '';
+        (document.getElementById('se-lname2') as HTMLInputElement).value = btn.dataset.lname2 ?? '';
+        (document.getElementById('se-email')  as HTMLInputElement).value = btn.dataset.email  ?? '';
+        (document.getElementById('se-phone')  as HTMLInputElement).value = btn.dataset.phone  ?? '';
+        (document.getElementById('sedit-error') as HTMLElement).style.display = 'none';
+        (document.getElementById('sedit-modal') as HTMLElement).style.display = 'flex';
       });
     });
   }
@@ -324,14 +339,38 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
   });
 
-  // Sort columns
-  document.querySelectorAll<HTMLElement>('.sort-th').forEach(th => {
-    th.addEventListener('click', () => {
-      const col = th.dataset.col!;
-      if (sortColS === col) sortAscS = !sortAscS; else { sortColS = col; sortAscS = true; }
-      updateSortIndicatorsS();
-      if (cachedStudents.length) renderRows(cachedStudents);
-    });
+  // ── Editar estudiante ───────────────────────────────────────────────
+  const seditModal = document.getElementById('sedit-modal')!;
+  const closeSedit = () => { seditModal.style.display = 'none'; };
+  document.getElementById('sedit-close')?.addEventListener('click', closeSedit);
+  document.getElementById('sedit-cancel')?.addEventListener('click', closeSedit);
+  seditModal.addEventListener('click', e => { if (e.target === seditModal) closeSedit(); });
+  document.getElementById('sedit-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl  = document.getElementById('sedit-error')!;
+    const lblEl  = document.getElementById('sedit-label')!;
+    const submit = document.getElementById('sedit-submit') as HTMLButtonElement;
+    errEl.style.display = 'none';
+    const id            = (document.getElementById('se-id')     as HTMLInputElement).value;
+    const firstName     = (document.getElementById('se-fname')  as HTMLInputElement).value.trim();
+    const secondName    = (document.getElementById('se-mname')  as HTMLInputElement).value.trim() || undefined;
+    const firstSurname  = (document.getElementById('se-lname1') as HTMLInputElement).value.trim();
+    const secondSurname = (document.getElementById('se-lname2') as HTMLInputElement).value.trim() || undefined;
+    const email         = (document.getElementById('se-email')  as HTMLInputElement).value.trim() || undefined;
+    const phone         = (document.getElementById('se-phone')  as HTMLInputElement).value.trim() || undefined;
+    if (!firstName || !firstSurname) {
+      errEl.textContent = 'Nombre y apellido son obligatorios.'; errEl.style.display = 'block'; return;
+    }
+    submit.disabled = true; lblEl.textContent = 'Guardando...';
+    try {
+      await studentsApi.update(id, { firstName, secondName, firstSurname, secondSurname, email, phone });
+      toast.success('Estudiante actualizado');
+      closeSedit(); loadPage();
+    } catch (err: any) {
+      errEl.textContent = err?.message ?? 'Error al actualizar.'; errEl.style.display = 'block';
+    } finally {
+      submit.disabled = false; lblEl.textContent = 'Guardar cambios';
+    }
   });
 
   loadPage();

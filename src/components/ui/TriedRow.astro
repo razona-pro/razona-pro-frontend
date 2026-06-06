@@ -11,7 +11,11 @@ interface Props {
 const { tried, compact = false } = Astro.props;
 const s = getCompStyle(tried.competenceId, tried.testName ?? '');
 const score = tried.score;
-const sColor = scoreColor(score);
+// El score es puntos crudos ponderados; el color se basa en el % de aciertos (correctas/total).
+const accuracyPct = tried.totalQuestions > 0
+  ? ((tried.correctAnswers ?? 0) / tried.totalQuestions) * 100
+  : 0;
+const sColor = scoreColor(accuracyPct);
 ---
 
 <div class:list={['tried-row', compact && 'compact']}>
@@ -31,7 +35,7 @@ const sColor = scoreColor(score);
   </div>
   <div class="tried-score">
     {score != null
-      ? <><span class="score-val" style={`color:${sColor}`}>{score.toFixed(0)}</span><span class="score-max">/100</span></>
+      ? <><span class="score-val" style={`color:${sColor}`}>{score.toFixed(0)}</span><span class="score-max"> pts</span></>
       : <span class="score-pending">En progreso</span>
     }
   </div>

@@ -14,7 +14,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
   <!-- Tabs -->
   <div style="display:flex;gap:6px;margin-bottom:1.25rem">
-    <button class="htab active" data-tab="trieds">Tests regulares</button>
+    <button class="htab active" data-tab="trieds">Pruebas regulares</button>
     <button class="htab" data-tab="ai">Práctica con IA</button>
   </div>
 
@@ -125,7 +125,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
     filtered.forEach(t => {
       const s  = getCompStyle(t.competenceId ?? '', t.testName ?? '');
-      const sc = scoreColor(t.score);
+      // score = puntos crudos; el color se basa en el % de aciertos.
+      const accPct = t.totalQuestions > 0 ? ((t.correctAnswers ?? 0) / t.totalQuestions) * 100 : 0;
+      const sc = scoreColor(accPct);
       const statusColor: Record<string, string> = {
         FINISHED: '#059669', IN_PROGRESS: '#2563EB', ABANDONED: '#DC2626', TIMED_OUT: '#D97706', ANULADO: '#991B1B',
       };
@@ -151,7 +153,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
         </div>
         <div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
           ${t.score != null
-            ? `<div><p style="font-size:1.5rem;font-weight:900;color:${sc};margin:0;line-height:1">${t.score.toFixed(0)}</p><p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">/100 · ${t.correctAnswers ?? 0}/${t.totalQuestions} correctas</p></div>`
+            ? `<div><p style="font-size:1.5rem;font-weight:900;color:${sc};margin:0;line-height:1">${t.score.toFixed(0)} <span style="font-size:0.875rem;font-weight:700;color:var(--ui-text-3)">pts</span></p><p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">${t.correctAnswers ?? 0}/${t.totalQuestions} correctas</p></div>`
             : `<p style="font-size:0.875rem;color:var(--ui-text-3);margin:0">${t.totalQuestions} preg.</p>`}
           ${showReviewBtn
             ? `<a href="${reviewHref}" style="font-size:0.6875rem;font-weight:700;color:var(--brand);text-decoration:none;padding:4px 10px;border-radius:8px;border:1.5px solid rgba(212,18,36,0.3);background:rgba(212,18,36,0.05);white-space:nowrap;transition:all 0.15s" onmouseover="this.style.background='rgba(212,18,36,0.1)'" onmouseout="this.style.background='rgba(212,18,36,0.05)'">📋 Ver revisión</a>`
@@ -173,8 +175,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
     animCount(document.getElementById('hs-finished') as HTMLElement, finished.length);
     const avgEl  = document.getElementById('hs-avg')!;
     const bestEl = document.getElementById('hs-best')!;
-    avgEl.textContent  = finished.length ? avg.toFixed(1) : '-';
-    bestEl.textContent = best != null ? best.toFixed(0) : '-';
+    avgEl.textContent  = finished.length ? `${avg.toFixed(1)} pts` : '-';
+    bestEl.textContent = best != null ? `${best.toFixed(0)} pts` : '-';
   }
 
   // Tabs

@@ -1,11 +1,46 @@
-import { COMP_KEY_KEYWORDS, COMP_STYLES } from './constants';
+import { COMP_KEY_KEYWORDS } from './constants';
 
+// Paleta modular: cualquier competencia recibe un color estable (no "quemado").
+// El mismo competenceId siempre cae en el mismo color, en admin y en estudiante.
+const COMP_PALETTE: { color: string; bg: string }[] = [
+  { color: '#D41224', bg: '#FEE2E2' },
+  { color: '#2563EB', bg: '#DBEAFE' },
+  { color: '#059669', bg: '#D1FAE5' },
+  { color: '#7C3AED', bg: '#EDE9FE' },
+  { color: '#D97706', bg: '#FEF3C7' },
+  { color: '#0891B2', bg: '#CFFAFE' },
+  { color: '#DB2777', bg: '#FCE7F3' },
+  { color: '#65A30D', bg: '#ECFCCB' },
+  { color: '#9333EA', bg: '#F3E8FF' },
+  { color: '#EA580C', bg: '#FFEDD5' },
+];
+
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function compInitials(name: string, fallback: string): string {
+  const words = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (fallback || '?').slice(0, 2).toUpperCase();
+}
+
+/**
+ * Estilo de competencia. El color/bg son deterministas por competenceId (modulares),
+ * el `key` se sigue derivando del nombre para conservar el ruteo /tests/{key}.
+ */
 export function getCompStyle(competenceId: string, name = '') {
-  const n = name.toLowerCase();
+  const n = (name || '').toLowerCase();
+  let key = '';
   for (const [kw, style] of COMP_KEY_KEYWORDS) {
-    if (n.includes(kw)) return style;
+    if (n.includes(kw)) { key = style.key; break; }
   }
-  return { color: '#6B7280', bg: '#F3F4F6', short: '?', key: '' };
+  const seed = competenceId || name || 'default';
+  const pal  = COMP_PALETTE[hashString(seed) % COMP_PALETTE.length];
+  return { color: pal.color, bg: pal.bg, short: compInitials(name, competenceId), key, name };
 }
 
 export function animCount(el: HTMLElement | null, target: number, dec = 0) {

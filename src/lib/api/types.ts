@@ -92,11 +92,15 @@ export interface TestDto {
   testMode: 'PRACTICE' | 'EXAM' | 'TIMED';
   isActive: boolean;
   difficultyBreakdown?: { B?: number; M?: number; A?: number };
+  /** Total de preguntas asignadas (se presentan todas si questionsToPresent es null). */
+  questionCount?: number;
 }
 
 // ── Trieds ────────────────────────────────────────────────────────
 export interface TriedDto {
   triedId: string;
+  studentId?: string;
+  programId?: string;
   testId: string;
   testName?: string;
   competenceId: string;
@@ -123,6 +127,17 @@ export interface TriedResumeDto {
   testMode?: 'PRACTICE' | 'EXAM' | 'TIMED';
   /** Respuestas previamente guardadas (questionId → optionId). null si cerrado. */
   savedAnswers?: Record<string, string>;
+}
+
+export interface TriedEligibilityDto {
+  /** true si puede entrar (iniciar nuevo o reanudar uno activo). */
+  allowed: boolean;
+  /** Motivo cuando no se permite entrar (null si allowed). */
+  reason: string | null;
+  testActive: boolean;
+  hasQuestions: boolean;
+  /** Si != null, hay un intento activo que debe REANUDARSE en vez de iniciar uno nuevo. */
+  inProgressTriedId: string | null;
 }
 
 // ── Rankings ──────────────────────────────────────────────────────

@@ -7,7 +7,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   <div style="margin-bottom:1.5rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none"
-        onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
+        onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Estadísticas</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -156,10 +156,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     background-size:400px 100%;animation:shimmer 1.5s infinite;
   }
   .ov-card {
-    background:var(--ui-card);border-radius:14px;padding:14px 16px;border:1px solid var(--ui-border);
-    transition:border-color 0.2s,box-shadow 0.2s;
+    background:var(--ui-card);border-radius:16px;padding:16px 18px;border:1px solid var(--ui-border);
+    transition:transform 0.18s ease,border-color 0.2s,box-shadow 0.2s;
   }
-  .ov-card:hover { border-color:rgba(212,18,36,0.25);box-shadow:0 4px 16px var(--ui-shadow-md); }
+  .ov-card:hover { transform:translateY(-2px);border-color:var(--ui-border-2);box-shadow:0 6px 20px var(--ui-shadow-md); }
 
   .tab-btn {
     display:inline-flex;align-items:center;gap:6px;
@@ -214,22 +214,24 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         { label:'Estudiantes activos',  value: d.activeStudents,    color:'#059669', sub: `${d.inactiveStudents} inactivos` },
         { label:'Preguntas activas',    value: d.activeQuestions,   color:'#2563EB', sub: `de ${d.totalQuestions} total` },
         { label:'Competencias activas', value: d.activeCompetences, color:'#7C3AED', sub: `de ${d.totalCompetences} total` },
-        { label:'Tests disponibles',    value: d.totalTests,        color:'#D97706' },
+        { label:'Pruebas disponibles',    value: d.totalTests,        color:'#D97706' },
         { label:'Intentos finalizados', value: d.finishedTrieds,    color:'#D41224', sub: `${d.inProgressTrieds} en progreso` },
         { label:'Dudas abiertas',       value: d.openDoubts,        color: d.openDoubts > 0 ? '#D97706' : '#059669' },
         { label:'Sesiones IA',          value: d.totalAiSessions,   color:'#6366F1' },
-        { label:'Puntaje promedio',     value: `${d.avgScore.toFixed(1)}%`, color: d.avgScore >= 60 ? '#059669' : '#DC2626', sub: d.avgScore >= 60 ? 'Sobre la meta (60%)' : 'Bajo la meta (60%)' },
+        { label:'Aciertos promedio',    value: `${d.avgScore.toFixed(1)}%`, color: d.avgScore >= 60 ? '#059669' : '#DC2626', sub: d.avgScore >= 60 ? 'Sobre la meta (60%)' : 'Bajo la meta (60%)' },
         { label:'Nivel de rendimiento', value: `${d.satisfactionRate.toFixed(1)}%`, color:'#D41224' },
       ];
 
       cards.forEach(c => {
         const div = document.createElement('div');
         div.className = 'ov-card';
-        div.style.borderLeft = `3px solid ${c.color}`;
         div.innerHTML = `
-          <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px">${c.label}</p>
-          <p style="font-size:1.625rem;font-weight:900;color:${c.color};margin:0;line-height:1">${c.value}</p>
-          ${c.sub ? `<p style="font-size:0.6875rem;color:var(--ui-text-3);margin:5px 0 0">${c.sub}</p>` : ''}
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+            <span style="width:8px;height:8px;border-radius:50%;background:${c.color};flex-shrink:0"></span>
+            <p style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0">${c.label}</p>
+          </div>
+          <p style="font-size:1.875rem;font-weight:900;color:var(--ui-text-1);margin:0;line-height:1;letter-spacing:-0.5px">${c.value}</p>
+          ${c.sub ? `<p style="font-size:0.6875rem;color:var(--ui-text-3);margin:6px 0 0">${c.sub}</p>` : ''}
         `;
         grid.appendChild(div);
       });
@@ -323,11 +325,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         { label: 'Intentos finalizados', value: d.finishedTrieds,   color: '#D41224' },
         { label: 'En progreso',          value: d.inProgressTrieds, color: '#D97706' },
         { label: 'Sesiones IA',          value: d.totalAiSessions,  color: '#6366F1' },
-        { label: 'Tests disponibles',    value: d.totalTests,       color: '#2563EB' },
+        { label: 'Pruebas disponibles',    value: d.totalTests,       color: '#2563EB' },
       ])),
       chartCard('Indicadores de calidad', 'Puntaje promedio y satisfacción IRT',
         `<div style="display:flex;justify-content:space-around;align-items:flex-start;flex-wrap:wrap;gap:12px;padding-top:4px">
-          ${gauge('Puntaje promedio', avg, avg >= 60 ? '#059669' : '#DC2626')}
+          ${gauge('Aciertos promedio', avg, avg >= 60 ? '#059669' : '#DC2626')}
           ${gauge('Nivel de rendimiento', sat, '#D41224')}
         </div>`),
     ].join('');
@@ -361,9 +363,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       return;
     }
     data.forEach((s, idx) => {
-      const score    = s.avgScore ?? 0;
-      const accuracy = s.accuracyRate ?? 0;
-      const barColor = score >= 70 ? '#059669' : score >= 50 ? '#D97706' : '#DC2626';
+      const score    = s.avgScore ?? 0;       // puntos crudos promedio (ponderado)
+      const accuracy = s.accuracyRate ?? 0;   // % de aciertos (mide el dominio)
+      const barColor = accuracy >= 70 ? '#059669' : accuracy >= 50 ? '#D97706' : '#DC2626';
       const rank     = idx + 1;
       const medal    = rank === 1 ? '1°' : rank === 2 ? '2°' : rank === 3 ? '3°' : `#${rank}`;
       const tr = document.createElement('tr');
@@ -373,21 +375,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <code style="background:var(--ui-surface);padding:2px 8px;border-radius:6px;font-size:0.8125rem;font-weight:700;color:var(--brand);border:1px solid var(--ui-border)">${s.studentId}</code>
         </td>
         <td class="td" style="text-align:center;font-weight:700">${s.totalTrieds}</td>
+        <td class="td"><span style="font-weight:800;color:var(--ui-text-1)">${score.toFixed(1)} <span style="font-size:0.75rem;font-weight:600;color:var(--ui-text-3)">pts</span></span></td>
         <td class="td">
           <div style="display:flex;align-items:center;gap:8px">
-            <div class="score-bar-wrap"><div class="score-bar" style="width:${Math.min(score,100)}%;background:${barColor}"></div></div>
-            <span style="font-weight:800;color:${barColor};min-width:44px">${score.toFixed(1)}%</span>
+            <div class="score-bar-wrap"><div class="score-bar" style="width:${Math.min(accuracy,100)}%;background:${barColor}"></div></div>
+            <span style="font-weight:800;color:${barColor};min-width:44px">${accuracy.toFixed(1)}%</span>
           </div>
-        </td>
-        <td class="td">
-          <span class="rp-badge ${accuracy>=70?'rp-badge-success':accuracy>=50?'rp-badge-warning':'rp-badge-danger'}">
-            ${accuracy.toFixed(1)}%
-          </span>
         </td>
         <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${s.totalCorrect} / ${s.totalQuestions}</td>
         <td class="td">
           <div style="display:flex;gap:2px;align-items:flex-end">
-            ${Array.from({length:5}, (_,i) => `<div style="width:6px;height:${10+(i*4)}px;border-radius:2px;background:${i < Math.round(score/20) ? barColor : 'var(--ui-border)'}"></div>`).join('')}
+            ${Array.from({length:5}, (_,i) => `<div style="width:6px;height:${10+(i*4)}px;border-radius:2px;background:${i < Math.round(accuracy/20) ? barColor : 'var(--ui-border)'}"></div>`).join('')}
           </div>
         </td>`;
       tbody.appendChild(tr);

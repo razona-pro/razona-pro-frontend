@@ -7,16 +7,16 @@ import AppLayout from '../../layouts/AppLayout.astro';
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
-      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Tests disponibles</span>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Pruebas disponibles</span>
     </div>
     <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
-        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Tests disponibles</h1>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Pruebas disponibles</h1>
         <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Selecciona una prueba y comienza a practicar.</p>
       </div>
       <div style="text-align:center;padding:8px 14px;background:var(--ui-card);border-radius:10px;border:1px solid var(--ui-border)">
         <p id="count-shown" style="font-size:1.25rem;font-weight:900;color:var(--brand);margin:0;line-height:1">0</p>
-        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:2px 0 0;font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Tests</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:2px 0 0;font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Pruebas</p>
       </div>
     </div>
   </div>
@@ -320,11 +320,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
             </span>
             <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--ui-text-3)">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
-              ${t.questionsToPresent ?? '?'} preguntas
+              ${t.questionsToPresent ?? t.questionCount ?? '?'} preguntas
             </span>
           </div>
           ${bestScore != null
-            ? `<div style="padding:8px 10px;background:${s.bg};border-radius:8px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:0.6875rem;font-weight:600;color:${s.color}">⭐ Mejor puntaje</span><strong style="font-size:1rem;color:${s.color}">${bestScore.toFixed(0)}/100</strong></div>`
+            ? `<div style="padding:8px 10px;background:${s.bg};border-radius:8px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:0.6875rem;font-weight:600;color:${s.color}">⭐ Mejor puntaje</span><strong style="font-size:1rem;color:${s.color}">${bestScore.toFixed(0)} pts</strong></div>`
             : `<div style="padding:8px 10px;background:var(--ui-surface);border-radius:8px;border:1px dashed var(--ui-border-2);font-size:0.6875rem;color:var(--ui-text-3)">Sin intentos aún</div>`}
         </div>
         <div style="padding:10px 20px;border-top:1px solid var(--ui-border);background:var(--ui-surface);display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -340,7 +340,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
             data-mode="${t.testMode}"
             data-name="${t.testName.replace(/"/g,'&quot;')}"
             data-dur="${durMin ?? ''}"
-            data-q="${t.questionsToPresent ?? '?'}"
+            data-q="${t.questionsToPresent ?? t.questionCount ?? '?'}"
             data-color="${s.color}"
             data-comp-name="${(t.competenceName ?? '').replace(/"/g,'&quot;')}"
             data-diff-b="${t.difficultyBreakdown?.B ?? 0}"
@@ -421,7 +421,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
     } else { diffEl.style.display = 'none'; }
 
     (document.getElementById('modal-mode-desc') as HTMLElement).textContent =
-      MODE_DESC[mode] ?? 'Test disponible. ¡Mucho éxito!';
+      MODE_DESC[mode] ?? 'Prueba disponible. ¡Mucho éxito!';
 
     (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';
     (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = false;
@@ -446,18 +446,36 @@ import AppLayout from '../../layouts/AppLayout.astro';
     (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = true;
     (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = 'Iniciando...';
     pendingStart = null;
-    (window as any).rpLoader?.show('Preparando la prueba...');
+    (window as any).rpLoader?.show('Verificando acceso...');
+    const restoreBtn = () => {
+      (window as any).rpLoader?.hide();
+      (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = false;
+      (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';
+    };
     try {
+      // 1. ¿Puede entrar?
+      const elig = await triedsApi.eligibility(testId, competenceId);
+      if (!elig.data?.allowed) {
+        restoreBtn();
+        toast.error('No puedes entrar a esta prueba', { description: elig.data?.reason ?? 'Prueba no disponible.' });
+        return;
+      }
+      // 2. Reanudar intento activo si existe
+      if (elig.data.inProgressTriedId) {
+        (window as any).rpLoader?.show('Reanudando tu intento...');
+        window.location.href = `/tests/exam?tried=${elig.data.inProgressTriedId}&test=${testId}&comp=${competenceId}&mode=${testMode}`;
+        return;
+      }
+      // 3. Iniciar intento nuevo
+      (window as any).rpLoader?.show('Preparando la prueba...');
       const res = await triedsApi.start(testId, competenceId);
       if (res.data) {
         (window as any).rpLoader?.show('Cargando preguntas...');
         window.location.href = `/tests/exam?tried=${res.data.triedId}&test=${testId}&comp=${competenceId}&mode=${testMode}`;
       }
     } catch (err: any) {
-      (window as any).rpLoader?.hide();
+      restoreBtn();
       toast.error('No se pudo iniciar', { description: err?.message ?? 'Inténtalo de nuevo.' });
-      (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = false;
-      (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';
     }
   });
 

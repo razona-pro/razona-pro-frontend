@@ -12,17 +12,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
         <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Intentos de estudiantes</h1>
-        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Busca a un estudiante y revisa sus resultados detallados.</p>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Historial de todos los intentos. Filtra por estudiante o estado.</p>
       </div>
     </div>
   </div>
 
   <!-- Búsqueda -->
   <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);padding:1.25rem;margin-bottom:1.25rem">
-    <p style="font-size:0.75rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px">Buscar intentos</p>
+    <p style="font-size:0.75rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px">Filtros</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
       <div style="flex:1;min-width:200px">
-        <label style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:4px">Código de estudiante</label>
+        <label style="font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:4px">Código de estudiante (opcional)</label>
         <div style="position:relative">
           <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--ui-text-3)" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input id="search-student" type="text" placeholder="Ej: 0192100" maxlength="10"
@@ -42,14 +42,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <option value="ANULADO">Anulados</option>
         </select>
       </div>
-      <button id="btn-search" class="btn-brand">Buscar</button>
+      <button id="btn-search" class="btn-brand">Filtrar</button>
+      <button id="btn-clear" class="act-btn" style="padding:9px 14px">Limpiar</button>
     </div>
   </div>
 
   <!-- Resultados -->
-  <div id="results-section" style="display:none">
-    <!-- Info del estudiante -->
-    <div id="student-info" style="background:var(--ui-card);border-radius:14px;border:1px solid var(--ui-border);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px">
+  <div id="results-section">
+    <!-- Info del estudiante (solo al filtrar por un estudiante) -->
+    <div id="student-info" style="display:none;background:var(--ui-card);border-radius:14px;border:1px solid var(--ui-border);padding:1rem 1.25rem;margin-bottom:1.25rem;align-items:center;gap:12px">
       <div id="student-avatar" style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:0.875rem;flex-shrink:0">?</div>
       <div style="flex:1">
         <p id="student-name" style="font-size:0.9375rem;font-weight:700;color:var(--ui-text-1);margin:0"></p>
@@ -72,10 +73,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <table style="width:100%;border-collapse:collapse">
           <thead>
             <tr style="border-bottom:1px solid var(--ui-border)">
-              <th class="th">ID Intento</th>
-              <th class="th">Test</th>
+              <th class="th">Estudiante</th>
+              <th class="th">Prueba</th>
               <th class="th">Competencia</th>
               <th class="th">Estado</th>
+              <th class="th">Plagio</th>
               <th class="th">Puntaje</th>
               <th class="th">Correctas</th>
               <th class="th">Fecha</th>
@@ -86,14 +88,21 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </tbody>
         </table>
       </div>
+      <div style="padding:0.875rem 1.25rem;border-top:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <span id="page-info" style="font-size:0.8125rem;color:var(--ui-text-3)"></span>
+        <div style="display:flex;gap:8px">
+          <button id="t-prev" class="act-btn" disabled>← Anterior</button>
+          <button id="t-next" class="act-btn" disabled>Siguiente →</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Estado vacío inicial -->
-  <div id="empty-state" style="text-align:center;padding:4rem 1rem;color:var(--ui-text-3)">
+  <!-- Estado vacío -->
+  <div id="empty-state" style="display:none;text-align:center;padding:4rem 1rem;color:var(--ui-text-3)">
     <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 12px;opacity:0.4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Busca un estudiante</p>
-    <p style="font-size:0.875rem;margin:0">Ingresa el código de estudiante para ver sus intentos.</p>
+    <p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin intentos</p>
+    <p style="font-size:0.875rem;margin:0">No hay intentos para los filtros seleccionados.</p>
   </div>
 </AdminLayout>
 
@@ -168,50 +177,65 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   const LETTERS = ['A','B','C','D','E','F'];
 
   let allTrieds: TriedDto[] = [];
+  let page = 0;
+  const SIZE = 20;
+  let totalPages = 1;
+  let totalEl = 0;
 
-  async function search() {
+  async function load() {
     const studentId = (document.getElementById('search-student') as HTMLInputElement).value.trim();
     const status    = (document.getElementById('filter-status') as HTMLSelectElement).value;
-    if (!studentId) { toast.warning('Ingresa un código de estudiante'); return; }
 
     const btn = document.getElementById('btn-search') as HTMLButtonElement;
-    btn.disabled = true; btn.textContent = 'Buscando...';
+    btn.disabled = true; btn.textContent = 'Cargando...';
 
     try {
-      // Buscar trieds del estudiante (endpoint admin)
-      const res = await triedsApi.findByStudent(studentId, 0, 100, status || undefined);
-      allTrieds = res.data?.content ?? [];
+      const res = await triedsApi.findAll(page, SIZE, studentId || undefined, status || undefined);
+      allTrieds  = res.data?.content ?? [];
+      totalPages = res.data?.totalPages ?? 1;
+      totalEl    = res.data?.totalElements ?? allTrieds.length;
 
-      // Mostrar info del estudiante (si está disponible)
-      studentsApi.findById(studentId).then(sRes => {
-        const s = sRes.data;
-        if (!s) return;
-        const full = [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean).join(' ');
-        const init = [s.firstName?.[0], s.firstSurname?.[0]].filter(Boolean).join('').toUpperCase();
-        (document.getElementById('student-avatar') as HTMLElement).textContent = init || studentId[0];
-        (document.getElementById('student-name')   as HTMLElement).textContent = full || studentId;
-        (document.getElementById('student-meta')   as HTMLElement).textContent = `${studentId} · Programa ${s.programId}`;
-      }).catch(() => {
-        (document.getElementById('student-name') as HTMLElement).textContent = studentId;
-        (document.getElementById('student-meta') as HTMLElement).textContent = 'Estudiante';
-      });
-
-      // Stats
-      const finished = allTrieds.filter(t => t.status === 'FINISHED' && t.score != null);
-      const scores   = finished.map(t => t.score as number);
-      const avg      = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : '-';
-      const best     = scores.length ? Math.max(...scores).toFixed(0) : '-';
-      (document.getElementById('s-total') as HTMLElement).textContent = String(allTrieds.length);
-      (document.getElementById('s-avg')   as HTMLElement).textContent = avg === '-' ? '-' : `${avg}%`;
-      (document.getElementById('s-best')  as HTMLElement).textContent = best === '-' ? '-' : `${best}%`;
+      // Tarjeta de estudiante: solo cuando se filtra por un estudiante concreto
+      const infoEl = document.getElementById('student-info') as HTMLElement;
+      if (studentId) {
+        infoEl.style.display = 'flex';
+        studentsApi.findById(studentId).then(sRes => {
+          const s = sRes.data;
+          if (!s) return;
+          const full = [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean).join(' ');
+          const init = [s.firstName?.[0], s.firstSurname?.[0]].filter(Boolean).join('').toUpperCase();
+          (document.getElementById('student-avatar') as HTMLElement).textContent = init || studentId[0];
+          (document.getElementById('student-name')   as HTMLElement).textContent = full || studentId;
+          (document.getElementById('student-meta')   as HTMLElement).textContent = `${studentId} · Programa ${s.programId}`;
+        }).catch(() => {
+          (document.getElementById('student-name') as HTMLElement).textContent = studentId;
+          (document.getElementById('student-meta') as HTMLElement).textContent = 'Estudiante';
+        });
+        // Stats del estudiante (por % de aciertos)
+        const fin = allTrieds.filter(t => t.status === 'FINISHED' && t.score != null);
+        const accs = fin.map(t => t.totalQuestions > 0 ? ((t.correctAnswers ?? 0) / t.totalQuestions) * 100 : 0);
+        const avg  = accs.length ? (accs.reduce((a, b) => a + b, 0) / accs.length).toFixed(0) : '-';
+        const best = fin.length ? Math.max(...fin.map(t => t.score as number)).toFixed(0) : '-';
+        (document.getElementById('s-total') as HTMLElement).textContent = String(totalEl);
+        (document.getElementById('s-avg')   as HTMLElement).textContent = avg  === '-' ? '-' : `${avg}%`;
+        (document.getElementById('s-best')  as HTMLElement).textContent = best === '-' ? '-' : `${best} pts`;
+      } else {
+        infoEl.style.display = 'none';
+      }
 
       renderTrieds(allTrieds);
-      (document.getElementById('results-section') as HTMLElement).style.display = 'block';
-      (document.getElementById('empty-state') as HTMLElement).style.display = 'none';
+
+      // Paginación + vacío
+      (document.getElementById('results-section') as HTMLElement).style.display = allTrieds.length ? 'block' : 'none';
+      (document.getElementById('empty-state')     as HTMLElement).style.display = allTrieds.length ? 'none'  : 'block';
+      (document.getElementById('page-info') as HTMLElement).textContent =
+        `Página ${page + 1} de ${totalPages || 1} · ${totalEl} intento(s)`;
+      (document.getElementById('t-prev') as HTMLButtonElement).disabled = page === 0;
+      (document.getElementById('t-next') as HTMLButtonElement).disabled = page >= totalPages - 1;
     } catch (err: any) {
-      toast.error('Error al buscar', { description: err?.message ?? 'Verifica el código del estudiante.' });
+      toast.error('Error al cargar', { description: err?.message ?? 'Inténtalo de nuevo.' });
     } finally {
-      btn.disabled = false; btn.textContent = 'Buscar';
+      btn.disabled = false; btn.textContent = 'Filtrar';
     }
   }
 
@@ -221,13 +245,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     (document.getElementById('trieds-count-label') as HTMLElement).textContent = `${trieds.length} intento(s)`;
 
     if (!trieds.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="padding:2.5rem;text-align:center;color:var(--ui-text-3)">Sin intentos para los filtros seleccionados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="padding:2.5rem;text-align:center;color:var(--ui-text-3)">Sin intentos para los filtros seleccionados.</td></tr>';
       return;
     }
 
     trieds.forEach(t => {
       const s  = getCompStyle(t.competenceId ?? '', '');
-      const sc = scoreColor(t.score);
+      const accPct = t.totalQuestions > 0 ? ((t.correctAnswers ?? 0) / t.totalQuestions) * 100 : 0;
+      const sc = scoreColor(accPct);
       const stColor = STATUS_COLOR[t.status] ?? '#6B7280';
       const stBg    = STATUS_BG[t.status]    ?? '#F3F4F6';
       const stLabel = STATUS_LABEL[t.status] ?? t.status;
@@ -235,7 +260,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="td"><code style="background:var(--ui-surface);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;color:var(--brand);border:1px solid var(--ui-border)">${t.triedId.slice(-8)}</code></td>
+        <td class="td"><code style="background:var(--ui-surface);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;color:var(--ui-text-1);border:1px solid var(--ui-border)">${t.studentId ?? '-'}</code></td>
         <td class="td" style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${t.testName ?? t.testId}">${t.testName ?? t.testId}</td>
         <td class="td">
           <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.bg};color:${s.color}">
@@ -245,8 +270,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${stBg};color:${stColor}">${stLabel}</span></td>
         <td class="td">
+          ${(t.fraudAttempts ?? 0) > 0
+            ? `<span title="Eventos sospechosos detectados durante el intento" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:800;background:#FEE2E2;color:#991B1B">⚠ ${t.fraudAttempts}</span>`
+            : `<span style="font-size:0.75rem;color:var(--ui-text-3)">-</span>`
+          }
+        </td>
+        <td class="td">
           ${t.score != null
-            ? `<span style="font-size:1rem;font-weight:900;color:${sc}">${t.score.toFixed(0)}%</span>`
+            ? `<span style="font-size:1rem;font-weight:900;color:${sc}">${t.score.toFixed(0)} pts</span>`
             : `<span style="color:var(--ui-text-3);font-size:0.8125rem">-</span>`
           }
         </td>
@@ -284,7 +315,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
       const correct = d.questions.filter(q => q.answeredCorrectly && q.selectedOptionId).length;
       const wrong   = d.questions.filter(q => !q.answeredCorrectly && q.selectedOptionId).length;
-      (document.getElementById('rev-score')   as HTMLElement).textContent = d.score != null ? `${d.score.toFixed(0)}%` : '-';
+      (document.getElementById('rev-score')   as HTMLElement).textContent = d.score != null ? `${d.score.toFixed(0)} pts` : '-';
       (document.getElementById('rev-correct') as HTMLElement).textContent = String(correct);
       (document.getElementById('rev-wrong')   as HTMLElement).textContent = String(wrong);
       (document.getElementById('rev-total')   as HTMLElement).textContent = String(d.questions.length);
@@ -337,10 +368,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   }
 
   // Event listeners
-  document.getElementById('btn-search')?.addEventListener('click', search);
+  const applyFilters = () => { page = 0; load(); };
+  document.getElementById('btn-search')?.addEventListener('click', applyFilters);
   document.getElementById('search-student')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') search();
+    if (e.key === 'Enter') applyFilters();
   });
+  document.getElementById('filter-status')?.addEventListener('change', applyFilters);
+  document.getElementById('btn-clear')?.addEventListener('click', () => {
+    (document.getElementById('search-student') as HTMLInputElement).value = '';
+    (document.getElementById('filter-status') as HTMLSelectElement).value = '';
+    applyFilters();
+  });
+  document.getElementById('t-prev')?.addEventListener('click', () => { if (page > 0) { page--; load(); } });
+  document.getElementById('t-next')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; load(); } });
 
   document.getElementById('review-close')?.addEventListener('click', () => {
     (document.getElementById('review-modal') as HTMLElement).style.display = 'none';
@@ -350,10 +390,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       (document.getElementById('review-modal') as HTMLElement).style.display = 'none';
   });
 
-  // Init desde URL si hay studentId
+  // Init: carga el historial de todos; si viene ?student= lo aplica como filtro
   const urlStudent = new URLSearchParams(window.location.search).get('student');
   if (urlStudent) {
     (document.getElementById('search-student') as HTMLInputElement).value = urlStudent;
-    search();
   }
+  load();
 </script>

@@ -176,6 +176,13 @@ import { Icon } from 'astro-icon/components';
             </div>
           </div>
 
+          <!-- Botón Verificar (procesa la respuesta seleccionada) -->
+          <button id="btn-verify" disabled
+            style="width:100%;padding:0.75rem;border-radius:12px;border:none;background:var(--ui-surface);color:var(--ui-text-3);font-family:inherit;font-weight:700;font-size:0.9375rem;cursor:not-allowed;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.18s">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span id="btn-verify-label">Verificar respuesta</span>
+          </button>
+
           <!-- Resultado de respuesta -->
           <div id="answer-result" style="display:none;border-radius:12px;padding:14px 16px;margin-bottom:1rem;border:1px solid">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
@@ -244,7 +251,7 @@ import { Icon } from 'astro-icon/components';
       </div>
       <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ui-text-3);margin:0 0 0.25rem">Puntaje final</p>
       <p id="result-score" style="font-size:3.5rem;font-weight:900;margin:0;line-height:1;letter-spacing:-2px;color:#7C3AED">0</p>
-      <p style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">/ 100 puntos</p>
+      <p id="result-max" style="font-size:0.875rem;color:var(--ui-text-3);margin:0 0 1.5rem">puntos</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem">
         <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-correct" style="font-size:1.625rem;font-weight:900;color:#059669;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Correctas</p></div>
         <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-wrong" style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Incorrectas</p></div>
@@ -331,6 +338,7 @@ import { Icon } from 'astro-icon/components';
   let currentTheta    = 0;
   let sessionFinished = false;
   let answerLocked    = false;
+  let pendingIndex: number | null = null;   // opción seleccionada pero aún NO verificada
 
   // Caché de pistas por pregunta
   const hintCache = new Map<string, Map<number, string>>();
@@ -381,6 +389,7 @@ import { Icon } from 'astro-icon/components';
   function renderQuestion(q: AiQuestionDto) {
     currentQ     = q;
     answerLocked = false;
+    pendingIndex = null;
 
     const qNum = (allQuestions.indexOf(q)) + 1;
     (document.getElementById('q-number-badge') as HTMLElement).textContent   = `P${qNum}`;
@@ -441,7 +450,7 @@ import { Icon } from 'astro-icon/components';
       btn.appendChild(body);
 
       if (q.selectedIndex === null) {
-        btn.addEventListener('click', () => handleSelectAnswer(i, btn));
+        btn.addEventListener('click', () => pickOption(i, btn));
       }
       optsEl.appendChild(btn);
     });
@@ -471,7 +480,17 @@ import { Icon } from 'astro-icon/components';
       (document.getElementById('answer-result') as HTMLElement).style.display = 'none';
     }
 
-    // Botón siguiente
+    // Botón Verificar: visible solo si la pregunta aún no fue respondida
+    if (q.selectedIndex === null) {
+      setVerifyVisible(true);
+      setVerifyEnabled(false);
+      const vl = document.getElementById('btn-verify-label');
+      if (vl) vl.textContent = 'Verificar respuesta';
+    } else {
+      setVerifyVisible(false);
+    }
+
+    // Botón siguiente: habilitado solo cuando la pregunta ya está verificada/respondida
     enableNextBtn(q.selectedIndex !== null);
 
     // Mostrar card
@@ -487,19 +506,44 @@ import { Icon } from 'astro-icon/components';
     btn.style.opacity = enabled ? '1' : '0.4';
   }
 
-  // ── Seleccionar respuesta ───────────────────────────────────────
-  async function handleSelectAnswer(selectedIndex: number, clickedBtn: HTMLButtonElement) {
-    if (answerLocked || !currentQ) return;
-    answerLocked = true;
+  // ── Helpers del botón Verificar ─────────────────────────────────
+  function setVerifyEnabled(enabled: boolean) {
+    const btn = document.getElementById('btn-verify') as HTMLButtonElement;
+    if (!btn) return;
+    btn.disabled = !enabled;
+    btn.style.cursor     = enabled ? 'pointer' : 'not-allowed';
+    btn.style.background = enabled ? 'linear-gradient(135deg,#7C3AED,#5B21B6)' : 'var(--ui-surface)';
+    btn.style.color      = enabled ? 'white' : 'var(--ui-text-3)';
+  }
+  function setVerifyVisible(visible: boolean) {
+    const btn = document.getElementById('btn-verify') as HTMLElement;
+    if (btn) btn.style.display = visible ? 'flex' : 'none';
+  }
 
+  // ── Seleccionar opción (solo marca; NO procesa hasta Verificar) ──
+  function pickOption(index: number, btn: HTMLButtonElement) {
+    if (answerLocked || !currentQ) return;
+    pendingIndex = index;
+    document.querySelectorAll<HTMLElement>('.exam-option').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    setVerifyEnabled(true);
+  }
+
+  // ── Verificar la respuesta seleccionada ─────────────────────────
+  async function verifyAnswer() {
+    if (answerLocked || !currentQ || pendingIndex === null) return;
+    const selectedIndex = pendingIndex;
+    answerLocked = true;
+    setVerifyEnabled(false);
+    const verifyLabel = document.getElementById('btn-verify-label');
+    if (verifyLabel) verifyLabel.textContent = 'Verificando...';
+
+    const clickedBtn = document.querySelector<HTMLButtonElement>(`.exam-option[data-index="${selectedIndex}"]`)!;
     // Bloquear todos los botones de opción
-    document.querySelectorAll<HTMLElement>('.exam-option').forEach(b => {
-      b.classList.add('locked');
-    });
-    clickedBtn.classList.add('selected');
+    document.querySelectorAll<HTMLElement>('.exam-option').forEach(b => b.classList.add('locked'));
 
     try {
-      // ← CORRECTO: submitAnswer con selectedIndex (número), no optionId
+      // submitAnswer con selectedIndex (número), no optionId
       const res  = await aiTriedsApi.submitAnswer(aiTriedId, currentQ.aiQuestionId, selectedIndex);
       const data = res.data!;
 
@@ -547,6 +591,9 @@ import { Icon } from 'astro-icon/components';
 
       updateSidebar();
 
+      // Respuesta verificada: ocultar Verificar (Siguiente ya queda habilitado)
+      setVerifyVisible(false);
+
       // ¿Finalizó automáticamente?
       if (data.finished) {
         sessionFinished = true;
@@ -561,12 +608,16 @@ import { Icon } from 'astro-icon/components';
       }
 
     } catch (err: any) {
-      toast.error('Error al enviar respuesta', { description: err?.message });
+      toast.error('Error al verificar respuesta', { description: err?.message });
+      // Permitir reintentar: se mantiene la selección y se reactiva Verificar
       answerLocked = false;
-      clickedBtn.classList.remove('selected');
       document.querySelectorAll<HTMLElement>('.exam-option').forEach(b => b.classList.remove('locked'));
+      setVerifyEnabled(true);
+      const vl = document.getElementById('btn-verify-label');
+      if (vl) vl.textContent = 'Verificar respuesta';
     }
   }
+  document.getElementById('btn-verify')?.addEventListener('click', verifyAnswer);
 
   // ── Siguiente pregunta ──────────────────────────────────────────
   async function loadNextQuestion() {
@@ -751,12 +802,15 @@ import { Icon } from 'astro-icon/components';
   }
 
   function showResults(score: number, correct: number, total: number) {
+    // score = puntos crudos ponderados por nivel. Máximo = suma de niveles de las preguntas generadas.
     const safeScore = Math.round(score);
     const wrong     = total - correct;
+    const maxPoints = allQuestions.reduce((acc, q) => acc + (q.difficultyLevel ?? 5), 0);
+    const pct = maxPoints > 0 ? (safeScore / maxPoints) * 100 : 0;
 
     // Animar score
     const scoreEl = document.getElementById('result-score')!;
-    scoreEl.style.color = safeScore >= 70 ? '#059669' : safeScore >= 50 ? '#D97706' : '#DC2626';
+    scoreEl.style.color = pct >= 70 ? '#059669' : pct >= 50 ? '#D97706' : '#DC2626';
     let n = 0;
     const step = Math.max(1, Math.floor(safeScore / 60));
     const intv = setInterval(() => {
@@ -765,12 +819,14 @@ import { Icon } from 'astro-icon/components';
       if (n >= safeScore) clearInterval(intv);
     }, 20);
 
+    const maxEl = document.getElementById('result-max');
+    if (maxEl) maxEl.textContent = maxPoints > 0 ? `de ${maxPoints} puntos` : 'puntos';
     (document.getElementById('res-correct') as HTMLElement).textContent = String(correct);
     (document.getElementById('res-wrong')   as HTMLElement).textContent = String(wrong);
     (document.getElementById('res-total')   as HTMLElement).textContent = String(total);
-    (document.getElementById('result-msg')  as HTMLElement).textContent = safeScore >= 75
+    (document.getElementById('result-msg')  as HTMLElement).textContent = pct >= 75
       ? '¡Excelente! Tu nivel es muy alto en esta competencia.'
-      : safeScore >= 50
+      : pct >= 50
       ? '¡Buen trabajo! Sigue practicando para mejorar.'
       : 'Ánimo, la práctica constante es la clave del éxito.';
 

@@ -2,15 +2,15 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
-<AdminLayout title="Gestión de Tests" currentPage="admin-tests">
+<AdminLayout title="Gestión de Pruebas" currentPage="admin-tests">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
-      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel admin</a>
-      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Tests</span>
+      <a href="/admin/stats" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Pruebas</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
-        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Tests</h1>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Pruebas</h1>
         <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Administra las pruebas disponibles en la plataforma.</p>
       </div>
       <button id="btn-new-test" style="display:inline-flex;align-items:center;gap:7px;padding:0.625rem 1.125rem;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(212,18,36,0.28)">
@@ -250,7 +250,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       (status === 'ALL' || (status === 'active' && t.isActive) || (status === 'inactive' && !t.isActive))
     );
     const countEl = document.getElementById('count-label');
-    if (countEl) countEl.textContent = `${filteredTests.length} test(s)`;
+    if (countEl) countEl.textContent = `${filteredTests.length} prueba(s)`;
     renderTable();
   }
 
@@ -299,12 +299,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${t.isActive?'#D1FAE5':'#FEE2E2'};color:${t.isActive?'#059669':'#DC2626'}">${t.isActive?'Activo':'Inactivo'}</span></td>
         <td class="td">
           <div style="display:flex;gap:5px;flex-wrap:wrap">
-            <button class="action-btn btn-edit" data-id="${t.testId}" data-comp="${t.competenceId}"
-              style="border-color:var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1)">Editar</button>
-            <button class="action-btn btn-manage" data-test="${t.testId}" data-comp="${t.competenceId}" data-name="${t.testName.replace(/"/g,'&quot;')}"
-              style="border-color:var(--ui-border-2);background:var(--ui-surface);color:var(--ui-text-1)">Preguntas</button>
-            <button class="action-btn btn-toggle" data-test="${t.testId}" data-comp="${t.competenceId}" data-name="${t.testName.replace(/"/g,'&quot;')}" data-active="${t.isActive}"
-              style="border-color:${t.isActive?'#FECACA':'#A7F3D0'};background:${t.isActive?'#FEF2F2':'#D1FAE5'};color:${t.isActive?'#DC2626':'#059669'}">
+            <button class="act-btn btn-edit" data-id="${t.testId}" data-comp="${t.competenceId}">Editar</button>
+            <button class="act-btn btn-manage" data-test="${t.testId}" data-comp="${t.competenceId}" data-name="${t.testName.replace(/"/g,'&quot;')}">Preguntas</button>
+            <button class="act-btn ${t.isActive ? 'act-btn-danger' : 'act-btn-success'} btn-toggle" data-test="${t.testId}" data-comp="${t.competenceId}" data-name="${t.testName.replace(/"/g,'&quot;')}" data-active="${t.isActive}">
               ${t.isActive ? 'Desactivar' : 'Activar'}
             </button>
           </div>
@@ -371,10 +368,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     try {
       if (pendingToggle.activate) {
         await testsApi.activate(pendingToggle.testId, pendingToggle.competenceId);
-        toast.success('Test activado');
+        toast.success('Prueba activada');
       } else {
         await testsApi.deactivate(pendingToggle.testId, pendingToggle.competenceId);
-        toast.success('Test desactivado');
+        toast.success('Prueba desactivada');
       }
       loadPage();
     } catch (err: any) {
@@ -451,12 +448,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           testName, description, testMode,
           durationSeconds, questionsToPresent,
         });
-        toast.success('Test actualizado correctamente');
+        toast.success('Prueba actualizada correctamente');
         closeFormModal(); loadPage();
       } else {
         const res = await testsApi.create({ competenceId, testName, description, durationSeconds, questionsToPresent, testMode, notifyStudents });
         const t = res.data!;
-        toast.success('Test creado. Ahora agrega preguntas.');
+        toast.success('Prueba creada. Ahora agrega preguntas.');
         closeFormModal(); await loadPage();
         openAssocModal(t.testId, t.competenceId, t.testName);
       }

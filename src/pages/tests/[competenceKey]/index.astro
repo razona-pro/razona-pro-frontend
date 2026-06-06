@@ -13,18 +13,18 @@ const { competenceKey } = Astro.params;
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
       <span>›</span>
-      <a href="/tests" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Tests</a>
+      <a href="/tests" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Pruebas</a>
       <span>›</span>
       <span id="comp-breadcrumb" style="color:var(--ui-text-1);font-weight:600">Cargando...</span>
     </div>
     <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
-        <h1 id="page-title" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Tests disponibles</h1>
+        <h1 id="page-title" style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Pruebas disponibles</h1>
         <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Selecciona una prueba y comienza a practicar.</p>
       </div>
       <div style="text-align:center;padding:8px 14px;background:var(--ui-card);border-radius:10px;border:1px solid var(--ui-border)">
         <p id="count-shown" style="font-size:1.25rem;font-weight:900;color:var(--brand);margin:0;line-height:1">0</p>
-        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:2px 0 0;font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Tests</p>
+        <p style="font-size:0.625rem;color:var(--ui-text-3);margin:2px 0 0;font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Pruebas</p>
       </div>
     </div>
   </div>
@@ -182,6 +182,7 @@ const { competenceKey } = Astro.params;
       const durLabel  = t.durationSeconds != null ? `${Math.floor(t.durationSeconds / 60)} min` : 'Sin límite';
       const myTrieds  = allTrieds.filter(tr => tr.testId === t.testId && tr.status === 'FINISHED' && tr.score != null);
       const bestScore = myTrieds.length ? Math.max(...myTrieds.map(tr => tr.score ?? 0)) : null;
+      const inProgress = allTrieds.find(tr => tr.testId === t.testId && tr.competenceId === t.competenceId && tr.status === 'IN_PROGRESS');
       const modeColor = TEST_MODE_COLOR[t.testMode] ?? '#6B7280';
       const modeBg    = TEST_MODE_BG[t.testMode]    ?? '#F3F4F6';
       const modeLabel = TEST_MODE_LABEL[t.testMode] ?? t.testMode;
@@ -209,21 +210,26 @@ const { competenceKey } = Astro.params;
             </span>
             <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--ui-text-3)">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2"/></svg>
-              ${t.questionsToPresent ?? '?'} preguntas
+              ${t.questionsToPresent ?? t.questionCount ?? '?'} preguntas
             </span>
           </div>
           ${bestScore != null
-            ? `<div style="padding:8px 10px;background:${s.bg};border-radius:8px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:0.6875rem;font-weight:600;color:${s.color}">⭐ Mejor puntaje</span><strong style="font-size:1rem;color:${s.color}">${bestScore.toFixed(0)}/100</strong></div>`
+            ? `<div style="padding:8px 10px;background:${s.bg};border-radius:8px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:0.6875rem;font-weight:600;color:${s.color}">⭐ Mejor puntaje</span><strong style="font-size:1rem;color:${s.color}">${bestScore.toFixed(0)} pts</strong></div>`
             : `<div style="padding:8px 10px;background:var(--ui-surface);border-radius:8px;border:1px dashed var(--ui-border-2);font-size:0.6875rem;color:var(--ui-text-3)">Sin intentos aún</div>`}
         </div>
         <div style="padding:10px 20px;border-top:1px solid var(--ui-border);background:var(--ui-surface);display:flex;align-items:center;justify-content:space-between;gap:8px">
           <span style="font-size:0.8125rem;font-weight:700;color:${s.color}">${modeLabel}</span>
-          <button class="test-start-btn"
+          ${inProgress
+            ? `<a class="test-resume-btn" href="/tests/exam?tried=${inProgress.triedId}&test=${t.testId}&comp=${t.competenceId}&mode=${t.testMode}"
+                 style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;background:linear-gradient(135deg,#D97706,#B45309);color:#fff;font-size:0.8125rem;font-weight:700;text-decoration:none">
+                 <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Reanudar
+               </a>`
+            : `<button class="test-start-btn"
             data-test-id="${t.testId}"
             data-comp-id="${t.competenceId}"
             data-name="${t.testName.replace(/"/g,'&quot;')}"
             data-dur="${t.durationSeconds != null ? Math.floor(t.durationSeconds/60) : ''}"
-            data-q="${t.questionsToPresent ?? '?'}"
+            data-q="${t.questionsToPresent ?? t.questionCount ?? '?'}"
             data-mode="${t.testMode}"
             data-color="${s.color}"
             data-comp-name="${(t.competenceName ?? '').replace(/"/g,'&quot;')}"
@@ -232,7 +238,7 @@ const { competenceKey } = Astro.params;
             data-diff-a="${t.difficultyBreakdown?.A ?? 0}">
             <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             ${bestScore != null ? 'Reintentar' : 'Iniciar test'}
-          </button>
+          </button>`}
         </div>`;
       grid.appendChild(card);
     });
@@ -320,7 +326,7 @@ const { competenceKey } = Astro.params;
 
     // Modo
     (document.getElementById('modal-mode-desc') as HTMLElement).textContent =
-      MODE_DESC[mode] ?? 'Test disponible. ¡Mucho éxito!';
+      MODE_DESC[mode] ?? 'Prueba disponible. ¡Mucho éxito!';
 
     (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';
     (document.getElementById('modal-confirm') as HTMLButtonElement).disabled = false;
@@ -345,18 +351,36 @@ const { competenceKey } = Astro.params;
     const confirmBtn = document.getElementById('modal-confirm') as HTMLButtonElement;
     confirmBtn.disabled = true;
     (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = 'Iniciando...';
-    (window as any).rpLoader?.show('Preparando la prueba...');
+    (window as any).rpLoader?.show('Verificando acceso...');
+    const restoreBtn = () => {
+      (window as any).rpLoader?.hide();
+      confirmBtn.disabled = false;
+      (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';
+    };
     try {
+      // 1. ¿Puede entrar?
+      const elig = await triedsApi.eligibility(testId, competenceId);
+      if (!elig.data?.allowed) {
+        restoreBtn();
+        toast.error('No puedes entrar a esta prueba', { description: elig.data?.reason ?? 'Prueba no disponible.' });
+        return;
+      }
+      // 2. Si ya hay un intento activo, reanudarlo en vez de iniciar uno nuevo
+      if (elig.data.inProgressTriedId) {
+        (window as any).rpLoader?.show('Reanudando tu intento...');
+        window.location.href = `/tests/exam?tried=${elig.data.inProgressTriedId}&test=${testId}&comp=${competenceId}&mode=${testMode}`;
+        return;
+      }
+      // 3. Iniciar intento nuevo
+      (window as any).rpLoader?.show('Preparando la prueba...');
       const res = await triedsApi.start(testId, competenceId);
       if (res.data) {
         (window as any).rpLoader?.show('Cargando preguntas...');
         window.location.href = `/tests/exam?tried=${res.data.triedId}&test=${testId}&comp=${competenceId}&mode=${testMode}`;
       }
     } catch (err: any) {
-      (window as any).rpLoader?.hide();
+      restoreBtn();
       toast.error('No se pudo iniciar', { description: err?.message ?? 'Inténtalo de nuevo.' });
-      confirmBtn.disabled = false;
-      (document.getElementById('modal-confirm-txt') as HTMLElement).textContent = '▶ Comenzar';
     }
   });
 

@@ -20,8 +20,6 @@ export const adminsApi = {
     firstSurname: string;
     secondSurname?: string;
     email: string;
-    phone: string;
-    password: string;
   }) =>
     apiFetch<AdminDto>('/api/admins', {
       method: 'POST',
@@ -33,6 +31,7 @@ export const adminsApi = {
     secondName?: string;
     firstSurname?: string;
     secondSurname?: string;
+    email?: string;
     phone?: string;
     isActive?: boolean;
   }) =>
