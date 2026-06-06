@@ -89,16 +89,37 @@ import AppLayout from '../../layouts/AppLayout.astro';
       </div>
     </div>
 
-    <!-- Historial -->
+    <!-- Resumen de sesiones (consumido desde el historial) -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">
+      <div class="ai-stat" style="border-left-color:#6366F1"><span class="ai-stat-label">Total</span><p id="ai-stat-total" class="ai-stat-val" style="color:#6366F1">0</p></div>
+      <div class="ai-stat" style="border-left-color:#059669"><span class="ai-stat-label">Finalizadas</span><p id="ai-stat-finished" class="ai-stat-val" style="color:#059669">0</p></div>
+      <div class="ai-stat" style="border-left-color:#2563EB"><span class="ai-stat-label">En progreso</span><p id="ai-stat-progress" class="ai-stat-val" style="color:#2563EB">0</p></div>
+      <div class="ai-stat" style="border-left-color:#DC2626"><span class="ai-stat-label">Abandonadas</span><p id="ai-stat-abandoned" class="ai-stat-val" style="color:#DC2626">0</p></div>
+    </div>
+
+    <!-- Historial (tabla) -->
     <div style="background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);overflow:hidden">
       <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--ui-border);display:flex;align-items:center;justify-content:space-between">
-        <h2 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0">Sesiones recientes</h2>
+        <h2 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0">Historial de sesiones</h2>
         <span id="hist-count" style="font-size:0.75rem;color:var(--ui-text-3)"></span>
       </div>
-      <div id="hist-list" style="padding:0.75rem">
-        <div class="skel" style="height:52px;border-radius:10px;margin-bottom:6px"></div>
-        <div class="skel" style="height:52px;border-radius:10px;margin-bottom:6px;width:85%"></div>
-        <div class="skel" style="height:52px;border-radius:10px;width:90%"></div>
+      <div style="overflow-x:auto">
+        <table class="ai-table">
+          <thead>
+            <tr>
+              <th>Sesión</th>
+              <th>Estado</th>
+              <th class="ai-th-num">Correctas</th>
+              <th class="ai-th-num">Generadas</th>
+              <th class="ai-th-num">Solicitadas</th>
+              <th class="ai-th-num">Puntaje</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="hist-tbody">
+            <tr><td colspan="7" style="padding:0.75rem"><div class="skel" style="height:40px;border-radius:8px"></div></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -187,12 +208,24 @@ import AppLayout from '../../layouts/AppLayout.astro';
     background-size:400px 100%;animation:shimmer 1.5s infinite
   }
 
-  .hist-item {
-    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
-    border:1px solid var(--ui-border);background:var(--ui-surface);margin-bottom:6px;
-    cursor:pointer;transition:all 0.15s
+  .ai-stat {
+    background: var(--ui-card); border-radius: 12px; padding: 12px 14px;
+    border: 1px solid var(--ui-border); border-left: 3px solid;
   }
-  .hist-item:hover { border-color:var(--ui-border-2);background:var(--ui-card) }
+  .ai-stat-label { font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px }
+  .ai-stat-val   { font-size:1.5rem;font-weight:900;margin:4px 0 0;line-height:1 }
+
+  .ai-table { width:100%;border-collapse:collapse;font-size:0.8125rem }
+  .ai-table thead th {
+    text-align:left;font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;
+    color:var(--ui-text-3);padding:0.625rem 0.875rem;border-bottom:1px solid var(--ui-border);white-space:nowrap
+  }
+  .ai-table .ai-th-num { text-align:right }
+  .ai-table tbody td { padding:0.6875rem 0.875rem;border-bottom:1px solid var(--ui-border);color:var(--ui-text-2);vertical-align:middle }
+  .ai-table tbody tr:last-child td { border-bottom:none }
+  .ai-table tbody tr.clickable { cursor:pointer;transition:background 0.12s }
+  .ai-table tbody tr.clickable:hover { background:var(--ui-surface) }
+  .ai-td-num { text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--ui-text-1) }
 
   @media (max-width:768px) {
     #view-setup > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important }
@@ -321,16 +354,27 @@ import AppLayout from '../../layouts/AppLayout.astro';
     }
   });
 
-  // ── Historial ───────────────────────────────────────────────────────────
-  aiTriedsApi.findMy(0, 8).then(res => {
-    const list    = document.getElementById('hist-list')!;
+  // ── Historial (tabla) + contadores ───────────────────────────────────────
+  const esc = (v: string) => v.replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c] as string));
+
+  aiTriedsApi.findMy(0, 100).then(res => {
+    const tbody   = document.getElementById('hist-tbody')!;
     const countEl = document.getElementById('hist-count')!;
     const items   = res.data?.content ?? [];
-    countEl.textContent = `${res.data?.totalElements ?? 0} sesión(es)`;
+    countEl.textContent = `${res.data?.totalElements ?? items.length} sesión(es)`;
 
-    list.innerHTML = '';
+    // Contadores por estado (se consumen de verdad).
+    const finished  = items.filter(s => s.status === 'FINISHED').length;
+    const progress  = items.filter(s => s.status === 'IN_PROGRESS').length;
+    const abandoned = items.filter(s => s.status === 'ABANDONED').length;
+    document.getElementById('ai-stat-total')!.textContent     = String(items.length);
+    document.getElementById('ai-stat-finished')!.textContent  = String(finished);
+    document.getElementById('ai-stat-progress')!.textContent  = String(progress);
+    document.getElementById('ai-stat-abandoned')!.textContent = String(abandoned);
+
+    tbody.innerHTML = '';
     if (!items.length) {
-      list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">No tienes sesiones aún. ¡Inicia tu primera práctica!</p>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--ui-text-3)">No tienes sesiones aún. ¡Inicia tu primera práctica!</td></tr>';
       return;
     }
 
@@ -338,41 +382,42 @@ import AppLayout from '../../layouts/AppLayout.astro';
       FINISHED:    { label: 'Finalizada',  color: '#059669', bg: '#D1FAE5' },
       IN_PROGRESS: { label: 'En progreso', color: '#6366F1', bg: '#EDE9FE' },
       ABANDONED:   { label: 'Abandonada',  color: '#DC2626', bg: '#FEE2E2' },
+      ANULADO:     { label: 'Anulada',     color: '#991B1B', bg: '#FEE2E2' },
     };
 
     items.forEach((s: AiTriedDto) => {
-      const sc  = scoreColor(s.score ?? 0);
-      const st  = STATUS[s.status] ?? { label: s.status, color: '#6B7280', bg: '#F3F4F6' };
-      const div = document.createElement('div');
-      div.className = 'hist-item';
-      div.onclick = () => {
-        if (s.status === 'IN_PROGRESS')
-          window.location.href = `/ai-practice/exam?tried=${s.aiTriedId}&resume=1`;
-      };
-      div.innerHTML = `
-        <div style="width:36px;height:36px;border-radius:9px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#818CF8">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
-        </div>
-        <div style="flex:1;min-width:0">
-          <p style="font-size:0.8125rem;font-weight:700;color:var(--ui-text-1);margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            ${s.description ?? 'Sesión de práctica'}
-            ${s.status === 'IN_PROGRESS' ? '<span style="font-size:0.625rem;background:#EDE9FE;color:#6366F1;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:700">Reanudar</span>' : ''}
-          </p>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <span style="font-size:0.6875rem;font-weight:700;padding:2px 8px;border-radius:12px;background:${st.bg};color:${st.color}">${st.label}</span>
-            <span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(s.attemptTimestamp)}</span>
-            <span style="font-size:0.6875rem;color:var(--ui-text-3)">${s.totalQuestions} preguntas</span>
-          </div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          ${s.score != null
-            ? `<p style="font-size:1rem;font-weight:900;color:${sc};margin:0">${s.score.toFixed(0)}</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0">/100 pts</p>`
-            : `<p style="font-size:0.75rem;color:var(--ui-text-3);margin:0">${s.correctAnswers ?? 0}/${s.totalQuestions}</p>`}
-        </div>`;
-      list.appendChild(div);
+      const st        = STATUS[s.status] ?? { label: s.status, color: '#6B7280', bg: '#F3F4F6' };
+      const generated = s.questionsGenerated ?? s.totalQuestions;
+      const correct   = s.correctAnswers ?? 0;
+      // El puntaje es sobre el total posible de las preguntas generadas (no /100).
+      const maxPts    = s.maxPossibleScore ?? 0;
+      const sc        = scoreColor(maxPts > 0 ? ((s.score ?? 0) / maxPts) * 100 : 0);
+      const resumable = s.status === 'IN_PROGRESS';
+
+      const tr = document.createElement('tr');
+      if (resumable) {
+        tr.className = 'clickable';
+        tr.onclick = () => { window.location.href = `/ai-practice/exam?tried=${s.aiTriedId}&resume=1`; };
+      }
+      const scoreCell = s.score != null
+        ? `<span style="color:${sc};font-weight:900">${s.score.toFixed(0)}</span><span style="color:var(--ui-text-3);font-weight:600"> / ${maxPts || '–'}</span>`
+        : '<span style="color:var(--ui-text-3)">–</span>';
+
+      tr.innerHTML = `
+        <td>
+          <div style="font-weight:700;color:var(--ui-text-1);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.description ?? 'Sesión de práctica')}</div>
+          ${resumable ? '<span style="font-size:0.625rem;background:#EDE9FE;color:#6366F1;padding:1px 7px;border-radius:8px;font-weight:700">Reanudar →</span>' : ''}
+        </td>
+        <td><span style="font-size:0.6875rem;font-weight:700;padding:3px 9px;border-radius:12px;background:${st.bg};color:${st.color}">${st.label}</span></td>
+        <td class="ai-td-num">${correct}<span style="color:var(--ui-text-3);font-weight:500"> / ${s.answeredQuestions ?? generated}</span></td>
+        <td class="ai-td-num">${generated}</td>
+        <td class="ai-td-num">${s.totalQuestions}</td>
+        <td class="ai-td-num">${scoreCell}</td>
+        <td style="white-space:nowrap;color:var(--ui-text-3);font-size:0.75rem">${fmtDate(s.finishedAt ?? s.attemptTimestamp)}</td>`;
+      tbody.appendChild(tr);
     });
   }).catch(() => {
-    document.getElementById('hist-list')!.innerHTML =
-      '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Error al cargar el historial</p>';
+    document.getElementById('hist-tbody')!.innerHTML =
+      '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--ui-text-3)">Error al cargar el historial</td></tr>';
   });
 </script>

@@ -128,6 +128,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </select>
           </div>
         </div>
+        <div class="field-grp">
+          <label class="field-lbl">Competencia</label>
+          <select id="r-comp" class="field-inp">
+            <option value="">Todas las competencias (general)</option>
+          </select>
+        </div>
         <!-- Preview de la config -->
         <div id="config-preview" style="background:var(--ui-surface);border-radius:9px;padding:10px 12px;border:1px solid var(--ui-border);font-size:0.8125rem;color:var(--ui-text-2)">
           <strong style="color:var(--ui-text-1)">Resumen:</strong> Ranking acumulado histórico basado en todos los intentos (tests y sesiones IA).
@@ -180,6 +186,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <script>
   import { requireAuth, isAdmin, getUser } from '../../lib/auth';
   import { rankingsApi } from '../../lib/api/rankings.api';
+  import { competencesApi } from '../../lib/api/competences.api';
   import { toast }       from '../../lib/toast';
   import type { RankingDto, RankingStudentDto } from '../../lib/api/types';
 
@@ -205,12 +212,28 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   };
 
   let allRankings: RankingDto[] = [];
+  let competencesMap: Record<string, string> = {};
   let pendingDeactivateId = '';
   let selectedRankingId   = '';
   let lbPage = 0;
   const LB_SIZE = 20;
   let lbTotalPages = 1;
   let lbTotalParticipants = 0;
+
+  // ── Cargar competencias para el selector ──────────────────────────
+  competencesApi.findAll(false).then(res => {
+    (res.data ?? []).forEach(c => { competencesMap[c.competenceId] = c.competenceName; });
+    const sel = document.getElementById('r-comp') as HTMLSelectElement | null;
+    if (sel) {
+      (res.data ?? []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.competenceId;
+        opt.textContent = c.competenceName;
+        sel.appendChild(opt);
+      });
+    }
+    if (allRankings.length) renderTable();
+  }).catch(() => {});
 
   // ── Cargar rankings ───────────────────────────────────────────────
   async function load() {
@@ -247,7 +270,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             ${PERIOD_LABEL[r.periodType] ?? r.periodType}
           </span>
         </td>
-        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${SOURCE_LABEL[r.sourceFilter] ?? r.sourceFilter}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">
+          ${SOURCE_LABEL[r.sourceFilter] ?? r.sourceFilter}
+          ${r.competenceId
+            ? `<span style="display:block;margin-top:3px;font-size:0.625rem;font-weight:700;color:#7C3AED">${competencesMap[r.competenceId] ?? r.competenceId}</span>`
+            : `<span style="display:block;margin-top:3px;font-size:0.625rem;color:var(--ui-text-3)">General</span>`}
+        </td>
         <td class="td">
           <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${r.isActive?'#D1FAE5':'#FEE2E2'};color:${r.isActive?'#059669':'#DC2626'}">
             ${r.isActive ? 'Activo' : 'Inactivo'}
@@ -264,7 +292,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                   style="border-color:#FECACA;background:#FEF2F2;color:#DC2626">
                   Desactivar
                 </button>`
-              : ''
+              : `<button class="action-btn btn-act" data-id="${r.rankingId}" data-name="${r.rankingName}"
+                  style="border-color:#A7F3D0;background:#F0FDF4;color:#059669">
+                  Activar
+                </button>`
             }
           </div>
         </td>`;
@@ -288,6 +319,22 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         (document.getElementById('deact-desc') as HTMLElement).textContent =
           `Se desactivará el ranking "${btn.dataset.name}". No aparecerá en la vista de los estudiantes.`;
         (document.getElementById('deactivate-modal') as HTMLElement).style.display = 'flex';
+      });
+    });
+
+    // Activar (reactivar un ranking inactivo)
+    document.querySelectorAll<HTMLButtonElement>('.btn-act').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id!;
+        btn.disabled = true;
+        try {
+          await rankingsApi.activate(id);
+          toast.success('Ranking activado');
+          load();
+        } catch (err: any) {
+          toast.error('Error al activar', { description: err?.message });
+          btn.disabled = false;
+        }
       });
     });
   }
@@ -416,6 +463,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const description = (document.getElementById('r-desc') as HTMLInputElement).value.trim() || undefined;
     const periodType  = (document.getElementById('r-period') as HTMLSelectElement).value;
     const sourceFilter = (document.getElementById('r-source') as HTMLSelectElement).value;
+    const competenceId = (document.getElementById('r-comp') as HTMLSelectElement).value || undefined;
 
     if (!rankingName) {
       errEl.textContent = 'El nombre del ranking es obligatorio.';
@@ -424,7 +472,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
     submit.disabled = true; lblEl.textContent = 'Creando...';
     try {
-      await rankingsApi.create({ rankingName, description, periodType, sourceFilter });
+      await rankingsApi.create({ rankingName, description, periodType, sourceFilter, competenceId });
       toast.success('Ranking creado correctamente');
       closeCreate();
       (document.getElementById('ranking-form') as HTMLFormElement).reset();

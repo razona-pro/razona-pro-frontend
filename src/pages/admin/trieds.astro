@@ -250,7 +250,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
 
     trieds.forEach(t => {
-      const s  = getCompStyle(t.competenceId ?? '', '');
+      const s  = getCompStyle(t.testId ?? '', t.testName ?? '');
       const accPct = t.totalQuestions > 0 ? ((t.correctAnswers ?? 0) / t.totalQuestions) * 100 : 0;
       const sc = scoreColor(accPct);
       const stColor = STATUS_COLOR[t.status] ?? '#6B7280';
@@ -265,7 +265,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <td class="td">
           <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${s.bg};color:${s.color}">
             <span style="width:6px;height:6px;border-radius:50%;background:${s.color}"></span>
-            ${t.competenceId}
+            Multicompetencia
           </span>
         </td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${stBg};color:${stColor}">${stLabel}</span></td>

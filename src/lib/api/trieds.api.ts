@@ -3,9 +3,9 @@ import type { PagedResponse, TriedDto, TriedReviewDto, TriedResumeDto, TriedElig
 
 export const triedsApi = {
   /** ¿Puede el estudiante entrar a esta prueba? Indica también si hay un intento activo para reanudar. */
-  eligibility: (testId: string, competenceId: string) =>
+  eligibility: (testId: string) =>
     apiFetch<TriedEligibilityDto>(
-      `/api/trieds/eligibility?testId=${encodeURIComponent(testId)}&competenceId=${encodeURIComponent(competenceId)}`),
+      `/api/trieds/eligibility?testId=${encodeURIComponent(testId)}`),
   findMy: (page = 0, size = 100) =>
     apiFetch<PagedResponse<TriedDto>>(`/api/trieds/my?page=${page}&size=${size}`),
   /** Admin: historial de intentos. studentId y status son filtros opcionales. */
@@ -22,10 +22,10 @@ export const triedsApi = {
   /** Registra un evento sospechoso (cambio de pestaña, etc.). */
   reportFraud: (triedId: string) =>
     apiFetch<TriedDto>(`/api/trieds/${triedId}/fraud`, { method: 'POST' }),
-  start: (testId: string, competenceId: string) =>
+  start: (testId: string) =>
     apiFetch<TriedDto>('/api/trieds/start', {
       method: 'POST',
-      body: JSON.stringify({ testId, competenceId }),
+      body: JSON.stringify({ testId }),
     }),
   submitAnswer: (triedId: string, questionId: string, optionId: string) =>
     apiFetch<TriedDto>(`/api/trieds/${triedId}/answer`, {

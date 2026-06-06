@@ -55,7 +55,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
   </div>
 
   <!-- List -->
-  <div id="history-list"></div>
+  <div id="history-list" style="display:flex;flex-direction:column;gap:0.625rem"></div>
 </AppLayout>
 
 <style>
@@ -74,12 +74,12 @@ import AppLayout from '../../layouts/AppLayout.astro';
   .hstat-val   { font-size: 1.5rem; font-weight: 900; margin: 4px 0 0; line-height: 1; }
 
   .tried-item {
-    background: var(--ui-card); border-radius: 14px; border: 1px solid var(--ui-border);
-    padding: 1rem 1.25rem; margin-bottom: 0.4375rem;
+    background: var(--ui-card); border-radius: 16px; border: 1px solid var(--ui-border);
+    padding: 1.0625rem 1.25rem;
     display: flex; align-items: center; gap: 1rem;
-    transition: all 0.15s; flex-wrap: wrap;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; flex-wrap: wrap;
   }
-  .tried-item:hover { border-color: var(--ui-border-2); background: var(--ui-surface); transform: translateX(2px); }
+  .tried-item:hover { border-color: var(--ui-border-2); box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
 
   @media (max-width: 768px) {
     #history-stats { grid-template-columns: repeat(2,1fr) !important; }
@@ -144,8 +144,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
       div.innerHTML = `
         <div style="width:42px;height:42px;border-radius:11px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:900;color:${s.color}">${s.short}</div>
         <div style="flex:1;min-width:160px">
-          <p style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.testName ?? t.aiTriedId ?? t.triedId}</p>
+          <p style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.testName ?? (currentTab === 'trieds' ? (t.triedId) : 'Práctica con IA')}</p>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            ${t.competenceId ? `<span style="font-size:0.6875rem;font-weight:700;padding:2px 9px;border-radius:12px;background:${s.bg};color:${s.color}">${competencesMap[t.competenceId] ?? t.competenceId}</span>` : ''}
             <span style="font-size:0.6875rem;font-weight:700;padding:2px 8px;border-radius:12px;background:${statusColor[t.status] ?? '#6B7280'}18;color:${statusColor[t.status] ?? '#6B7280'}">${statusLabel[t.status] ?? t.status}</span>
             <span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(t.finishedAt ?? t.attemptTimestamp)}</span>
             ${t.timeSpentSeconds ? `<span style="font-size:0.6875rem;color:var(--ui-text-3)">${fmtDuration(t.timeSpentSeconds)}</span>` : ''}
@@ -209,17 +210,18 @@ import AppLayout from '../../layouts/AppLayout.astro';
       }
       if (triedsR.status === 'fulfilled' && triedsR.value.data) {
         allTrieds = triedsR.value.data.content;
+      }
+      if (aiR.status === 'fulfilled' && aiR.value.data) {
+        allAiTrieds = aiR.value.data.content;
+        // El filtro por competencia solo aplica a la práctica IA (cada sesión es de una competencia).
         const compSel = document.getElementById('comp-filter') as HTMLSelectElement;
-        const compIds = [...new Set(allTrieds.map(t => t.competenceId))];
+        const compIds = [...new Set(allAiTrieds.map(t => t.competenceId).filter(Boolean))] as string[];
         compIds.forEach(id => {
           const opt = document.createElement('option');
           opt.value = id;
           opt.textContent = competencesMap[id] ?? id;
           compSel.appendChild(opt);
         });
-      }
-      if (aiR.status === 'fulfilled' && aiR.value.data) {
-        allAiTrieds = aiR.value.data.content;
       }
       updateStats('trieds');
       renderTrieds();

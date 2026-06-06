@@ -10,7 +10,9 @@ interface Props {
 }
 
 const { test, bestScore } = Astro.props;
-const comp    = getCompStyle(test.competenceId, test.competenceName ?? '');
+const firstComp = (test.competences ?? [])[0];
+const compName = (test.competences ?? []).map(c => c.competenceName).join(', ') || 'Multicompetencia';
+const comp    = firstComp ? getCompStyle(firstComp.competenceId, firstComp.competenceName) : getCompStyle(test.testId, 'Prueba');
 const durLabel = test.durationSeconds != null ? `${Math.floor(test.durationSeconds / 60)} min` : 'Sin límite';
 const modeColor = TEST_MODE_COLOR[test.testMode] ?? '#6B7280';
 const modeBg    = TEST_MODE_BG[test.testMode]    ?? '#F3F4F6';
@@ -20,7 +22,6 @@ const modeLabel = TEST_MODE_LABEL[test.testMode] ?? test.testMode;
 <div
   class="test-card"
   data-test-id={test.testId}
-  data-competence-id={test.competenceId}
 >
   <div class="test-card-stripe" style={`background:linear-gradient(to right,${comp.color},${comp.color}88)`}></div>
 
@@ -31,7 +32,7 @@ const modeLabel = TEST_MODE_LABEL[test.testMode] ?? test.testMode;
           {comp.short}
         </div>
         <div class="comp-info">
-          <span class="comp-name">{test.competenceName ?? test.competenceId}</span>
+          <span class="comp-name">{compName}</span>
           <span class="test-name">{test.testName}</span>
         </div>
       </div>
@@ -73,7 +74,6 @@ const modeLabel = TEST_MODE_LABEL[test.testMode] ?? test.testMode;
     <button
       class="btn-start"
       data-test-id={test.testId}
-      data-competence-id={test.competenceId}
     >
       <Icon name="tabler:player-play" size={13} />
       {bestScore != null ? 'Reintentar' : 'Iniciar test'}

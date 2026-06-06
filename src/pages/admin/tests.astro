@@ -81,12 +81,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     <form id="test-form" novalidate>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1rem">
         <div class="field-grp">
-          <label class="field-lbl">Competencia *</label>
-          <select id="f-comp" class="field-inp"><option value="">- Selecciona -</option></select>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Nombre del test * <span style="font-weight:400;opacity:0.6">(único por competencia)</span></label>
-          <input id="f-name" type="text" class="field-inp" placeholder="Ej: Simulacro Lectura Crítica I" maxlength="50" required />
+          <label class="field-lbl">Nombre de la prueba *</label>
+          <input id="f-name" type="text" class="field-inp" placeholder="Ej: Simulacro Saber Pro I" maxlength="50" required />
+          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:4px 0 0">Una prueba es multicompetencia: sus competencias salen de las preguntas que le asignes.</p>
         </div>
         <div class="field-grp">
           <label class="field-lbl">Descripción</label>
@@ -150,10 +147,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <div id="existing-list" style="display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto"></div>
     </div>
 
-    <!-- Panel agregar - SIN filtro de competencia (ya viene fijo de la competencia del test) -->
+    <!-- Panel agregar - una prueba puede incluir preguntas de VARIAS competencias -->
     <div id="panel-add" style="display:none;flex-direction:column">
       <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--ui-border);display:flex;gap:10px;flex-wrap:wrap">
-        <input id="assoc-search" type="text" placeholder="Buscar por enunciado..." style="flex:2;min-width:200px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-surface);font-family:inherit;font-size:0.8125rem;color:var(--ui-text-1);outline:none"/>
+        <select id="assoc-comp-filter" title="Competencia de las preguntas a agregar" style="flex:1;min-width:160px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-surface);font-family:inherit;font-size:0.8125rem;color:var(--ui-text-1)"></select>
+        <input id="assoc-search" type="text" placeholder="Buscar por enunciado..." style="flex:2;min-width:160px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-surface);font-family:inherit;font-size:0.8125rem;color:var(--ui-text-1);outline:none"/>
         <select id="assoc-filter-diff" style="flex:1;min-width:130px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-surface);font-family:inherit;font-size:0.8125rem;color:var(--ui-text-1)">
           <option value="ALL">Todas las dificultades</option>
           <option value="B">Básico</option>
@@ -222,21 +220,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   let allTests: TestDto[] = [];
   let filteredTests: TestDto[] = [];
   let competenceMap: Record<string,string> = {};
-  let editingTestId = ''; let editingCompId = '';
-  let pendingToggle = { testId:'', competenceId:'', activate: false };
+  let editingTestId = '';
+  let pendingToggle = { testId:'', activate: false };
 
-  // Cargar competencias
+  // Cargar competencias (para el filtro de la tabla y el selector del modal de preguntas)
   competencesApi.findAll(false).then(res => {
     if (!res.data) return;
     res.data.forEach(c => { competenceMap[c.competenceId] = c.competenceName; });
     const filterSel = document.getElementById('filter-comp') as HTMLSelectElement;
-    const formSel   = document.getElementById('f-comp')      as HTMLSelectElement;
     res.data.forEach(c => {
-      [filterSel, formSel].forEach(sel => {
-        const opt = document.createElement('option');
-        opt.value = c.competenceId; opt.textContent = c.competenceName;
-        sel.appendChild(opt);
-      });
+      const opt = document.createElement('option');
+      opt.value = c.competenceId; opt.textContent = c.competenceName;
+      filterSel.appendChild(opt);
     });
   }).catch(() => {});
 
@@ -245,7 +240,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const mode   = (document.getElementById('filter-mode') as HTMLSelectElement).value;
     const status = (document.getElementById('filter-status') as HTMLSelectElement).value;
     filteredTests = allTests.filter(t =>
-      (comp === 'ALL'   || t.competenceId === comp) &&
+      (comp === 'ALL'   || (t.competences ?? []).some(c => c.competenceId === comp)) &&
       (mode === 'ALL'   || t.testMode === mode) &&
       (status === 'ALL' || (status === 'active' && t.isActive) || (status === 'inactive' && !t.isActive))
     );
@@ -287,21 +282,24 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
     filteredTests.forEach(t => {
       const durLabel = t.durationSeconds != null ? `${Math.floor(t.durationSeconds / 60)} min` : 'Sin límite';
-      const compName = t.competenceName ?? competenceMap[t.competenceId] ?? t.competenceId;
+      const comps = t.competences ?? [];
+      const compChips = comps.length
+        ? comps.map(c => `<span style="display:inline-block;padding:2px 7px;border-radius:9px;font-size:0.625rem;font-weight:700;background:#7C3AED1A;color:#7C3AED;margin:1px 2px 1px 0">${c.competenceName}</span>`).join('')
+        : '<span style="font-size:0.75rem;color:#DC2626">Sin competencias</span>';
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="td"><code style="background:var(--ui-surface);padding:2px 7px;border-radius:5px;font-size:0.75rem;font-family:monospace">${t.testId}</code></td>
         <td class="td" style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${t.testName}">${t.testName}</td>
-        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2)">${compName}</td>
+        <td class="td" style="font-size:0.8125rem;color:var(--ui-text-2);max-width:220px">${compChips}</td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${MODE_BG[t.testMode]??'#F3F4F6'};color:${MODE_COLOR[t.testMode]??'#6B7280'}">${MODE_LABEL[t.testMode]??t.testMode}</span></td>
         <td class="td" style="font-size:0.8125rem">${durLabel}</td>
         <td class="td" style="font-size:0.8125rem">${renderQuestionCount(t)}</td>
         <td class="td"><span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${t.isActive?'#D1FAE5':'#FEE2E2'};color:${t.isActive?'#059669':'#DC2626'}">${t.isActive?'Activo':'Inactivo'}</span></td>
         <td class="td">
           <div style="display:flex;gap:5px;flex-wrap:wrap">
-            <button class="act-btn btn-edit" data-id="${t.testId}" data-comp="${t.competenceId}">Editar</button>
-            <button class="act-btn btn-manage" data-test="${t.testId}" data-comp="${t.competenceId}" data-name="${t.testName.replace(/"/g,'&quot;')}">Preguntas</button>
-            <button class="act-btn ${t.isActive ? 'act-btn-danger' : 'act-btn-success'} btn-toggle" data-test="${t.testId}" data-comp="${t.competenceId}" data-name="${t.testName.replace(/"/g,'&quot;')}" data-active="${t.isActive}">
+            <button class="act-btn btn-edit" data-id="${t.testId}">Editar</button>
+            <button class="act-btn btn-manage" data-test="${t.testId}" data-name="${t.testName.replace(/"/g,'&quot;')}">Preguntas</button>
+            <button class="act-btn ${t.isActive ? 'act-btn-danger' : 'act-btn-success'} btn-toggle" data-test="${t.testId}" data-name="${t.testName.replace(/"/g,'&quot;')}" data-active="${t.isActive}">
               ${t.isActive ? 'Desactivar' : 'Activar'}
             </button>
           </div>
@@ -312,21 +310,21 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     // Editar
     document.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach(btn => {
       btn.addEventListener('click', () => {
-        const t = allTests.find(x => x.testId === btn.dataset.id && x.competenceId === btn.dataset.comp);
+        const t = allTests.find(x => x.testId === btn.dataset.id);
         if (t) openFormModal(t);
       });
     });
 
     // Gestionar preguntas
     document.querySelectorAll<HTMLButtonElement>('.btn-manage').forEach(btn => {
-      btn.addEventListener('click', () => openAssocModal(btn.dataset.test!, btn.dataset.comp!, btn.dataset.name!));
+      btn.addEventListener('click', () => openAssocModal(btn.dataset.test!, btn.dataset.name!));
     });
 
     // Toggle
     document.querySelectorAll<HTMLButtonElement>('.btn-toggle').forEach(btn => {
       btn.addEventListener('click', () => {
         const isActive = btn.dataset.active === 'true';
-        pendingToggle = { testId: btn.dataset.test!, competenceId: btn.dataset.comp!, activate: !isActive };
+        pendingToggle = { testId: btn.dataset.test!, activate: !isActive };
         const icon    = document.getElementById('toggle-icon')!;
         const title   = document.getElementById('toggle-title')!;
         const desc    = document.getElementById('toggle-desc')!;
@@ -367,10 +365,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     window.rpLoader?.show(pendingToggle.activate ? 'Activando test...' : 'Desactivando test...');
     try {
       if (pendingToggle.activate) {
-        await testsApi.activate(pendingToggle.testId, pendingToggle.competenceId);
+        await testsApi.activate(pendingToggle.testId);
         toast.success('Prueba activada');
       } else {
-        await testsApi.deactivate(pendingToggle.testId, pendingToggle.competenceId);
+        await testsApi.deactivate(pendingToggle.testId);
         toast.success('Prueba desactivada');
       }
       loadPage();
@@ -392,11 +390,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   function openFormModal(test?: TestDto) {
     editingTestId = test?.testId ?? '';
-    editingCompId = test?.competenceId ?? '';
-    (document.getElementById('form-modal-title') as HTMLElement).textContent = test ? 'Editar test' : 'Nuevo test';
-    (document.getElementById('form-label') as HTMLElement).textContent        = test ? 'Guardar cambios' : 'Crear test';
-    (document.getElementById('f-comp') as HTMLSelectElement).value            = test?.competenceId ?? '';
-    (document.getElementById('f-comp') as HTMLSelectElement).disabled         = !!test; // no se puede cambiar competencia
+    (document.getElementById('form-modal-title') as HTMLElement).textContent = test ? 'Editar prueba' : 'Nueva prueba';
+    (document.getElementById('form-label') as HTMLElement).textContent        = test ? 'Guardar cambios' : 'Crear prueba';
     (document.getElementById('f-name') as HTMLInputElement).value             = test?.testName ?? '';
     (document.getElementById('f-desc') as HTMLInputElement).value             = test?.description ?? '';
     (document.getElementById('f-mode') as HTMLSelectElement).value            = test?.testMode ?? 'PRACTICE';
@@ -408,7 +403,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     formModal.style.display = 'flex';
   }
 
-  const closeFormModal = () => { formModal.style.display='none'; editingTestId=''; editingCompId=''; };
+  const closeFormModal = () => { formModal.style.display='none'; editingTestId=''; };
   document.getElementById('btn-new-test')?.addEventListener('click', () => openFormModal());
   document.getElementById('form-modal-close')?.addEventListener('click', closeFormModal);
   document.getElementById('form-cancel')?.addEventListener('click', closeFormModal);
@@ -421,7 +416,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const submit = document.getElementById('form-submit') as HTMLButtonElement;
     errEl.style.display = 'none';
 
-    const competenceId       = (document.getElementById('f-comp') as HTMLSelectElement).value;
     const testName           = (document.getElementById('f-name') as HTMLInputElement).value.trim();
     const description        = (document.getElementById('f-desc') as HTMLInputElement).value.trim() || undefined;
     const testMode           = (document.getElementById('f-mode') as HTMLSelectElement).value;
@@ -431,7 +425,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const questionsToPresent = qcountRaw ? Number(qcountRaw) : undefined;
     const notifyStudents     = (document.getElementById('f-notify') as HTMLInputElement)?.checked ?? true;
 
-    if (!competenceId || !testName) {
+    if (!testName) {
       errEl.textContent = 'Completa los campos obligatorios.'; errEl.style.display='block'; return;
     }
     // Práctica puede ir sin tiempo; examen/cronometrado lo exigen
@@ -444,18 +438,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     window.rpLoader?.show(editingTestId ? 'Guardando cambios...' : 'Creando test...');
     try {
       if (editingTestId) {
-        await testsApi.update(editingTestId, editingCompId, {
+        await testsApi.update(editingTestId, {
           testName, description, testMode,
           durationSeconds, questionsToPresent,
         });
         toast.success('Prueba actualizada correctamente');
         closeFormModal(); loadPage();
       } else {
-        const res = await testsApi.create({ competenceId, testName, description, durationSeconds, questionsToPresent, testMode, notifyStudents });
+        const res = await testsApi.create({ testName, description, durationSeconds, questionsToPresent, testMode, notifyStudents });
         const t = res.data!;
-        toast.success('Prueba creada. Ahora agrega preguntas.');
+        toast.success('Prueba creada. Ahora agrega preguntas de una o varias competencias.');
         closeFormModal(); await loadPage();
-        openAssocModal(t.testId, t.competenceId, t.testName);
+        openAssocModal(t.testId, t.testName);
       }
     } catch (err: any) {
       errEl.textContent = err?.message ?? 'Error al guardar.'; errEl.style.display='block';
@@ -468,18 +462,30 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // ══════════════════════════════════════════════════════════════════
   //  MODAL GESTIONAR PREGUNTAS (sin filtro de competencia)
   // ══════════════════════════════════════════════════════════════════
-  let assocTestId  = ''; let assocCompId = '';
+  let assocTestId  = '';
+  let assocAddCompId = '';   // competencia de la que se están agregando preguntas
   let assocSelected = new Set<string>();
   let allAvailableQuestions: any[] = [];
-  let assignedQuestionIds = new Set<string>();
+  let assignedQuestionIds = new Set<string>();   // claves "competenceId:questionId"
 
-  async function openAssocModal(testId: string, compId: string, testName: string) {
-    assocTestId = testId; assocCompId = compId;
+  async function openAssocModal(testId: string, testName: string) {
+    assocTestId = testId;
     assocSelected.clear();
     (document.getElementById('assoc-test-name') as HTMLElement).textContent = testName;
     (document.getElementById('assoc-modal') as HTMLElement).style.display = 'flex';
     (document.getElementById('assoc-selected-count') as HTMLElement).textContent = '0 seleccionadas';
     (document.getElementById('assoc-search') as HTMLInputElement).value = '';
+    // Poblar el selector de competencia (cualquier competencia; la primera por defecto).
+    const compSel = document.getElementById('assoc-comp-filter') as HTMLSelectElement;
+    if (compSel) {
+      compSel.innerHTML = '';
+      Object.entries(competenceMap).forEach(([id, name]) => {
+        const opt = document.createElement('option');
+        opt.value = id; opt.textContent = name;
+        compSel.appendChild(opt);
+      });
+    }
+    assocAddCompId = compSel?.value || Object.keys(competenceMap)[0] || '';
     switchAssocTab('existing');
     await loadExistingQuestions();
     await loadAvailableQuestions();
@@ -491,12 +497,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     listEl.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1rem">Cargando...</p>';
     try {
       const token = localStorage.getItem('rp_token');
-      const res   = await fetch(`${import.meta.env.PUBLIC_API_URL||'http://localhost:8080'}/api/tests/${assocTestId}/${assocCompId}/questions`, {
+      const res   = await fetch(`${import.meta.env.PUBLIC_API_URL||'http://localhost:8080'}/api/tests/${assocTestId}/questions`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const json = await res.json();
       const questions: any[] = json.data ?? [];
-      assignedQuestionIds = new Set(questions.map((q:any) => q.questionId));
+      // Clave compuesta competencia:pregunta (los ids de pregunta no son únicos entre competencias).
+      assignedQuestionIds = new Set(questions.map((q:any) => `${q.competenceId}:${q.questionId}`));
       badge.textContent = String(questions.length);
       listEl.innerHTML = '';
       if (!questions.length) {
@@ -514,16 +521,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <div style="flex:1;min-width:0">
             <p style="font-size:0.8125rem;color:var(--ui-text-1);margin:0 0 4px;line-height:1.5">${(q.statement||'').substring(0,120)}${(q.statement?.length||0)>120?'…':''}</p>
             <span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:10px;color:${diffColors[diff]};background:${diffColors[diff]}1A">${diffMap[diff]??diff}</span>
+            <span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:10px;color:#7C3AED;background:#7C3AED1A;margin-left:4px">${competenceMap[q.competenceId] ?? q.competenceId}</span>
           </div>
-          <button class="btn-remove-q" data-qid="${q.questionId}" style="flex-shrink:0;padding:4px 10px;border-radius:7px;border:1.5px solid #FECACA;background:#FEF2F2;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Quitar</button>`;
+          <button class="btn-remove-q" data-qid="${q.questionId}" data-comp="${q.competenceId}" style="flex-shrink:0;padding:4px 10px;border-radius:7px;border:1.5px solid #FECACA;background:#FEF2F2;color:#DC2626;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit">Quitar</button>`;
         listEl.appendChild(row);
       });
       document.querySelectorAll<HTMLButtonElement>('.btn-remove-q').forEach(btn => {
         btn.addEventListener('click', async () => {
           const qid = btn.dataset.qid!;
+          const qComp = btn.dataset.comp || assocAddCompId;
           btn.disabled=true; btn.textContent='...';
           try {
-            await testsApi.removeQuestion(assocTestId, assocCompId, qid);
+            await testsApi.removeQuestion(assocTestId, qComp, qid);
             toast.success('Pregunta quitada'); await loadExistingQuestions(); await loadAvailableQuestions();
           } catch (err:any) { toast.error('Error', { description: err?.message }); btn.disabled=false; btn.textContent='Quitar'; }
         });
@@ -535,8 +544,8 @@ async function loadAvailableQuestions() {
   const list = document.getElementById('assoc-question-list')!;
   list.innerHTML = '<p style="font-size:0.875rem;color:var(--ui-text-3);text-align:center;padding:1.5rem">Cargando...</p>';
   try {
-    // ← SIN filtro de competencia: ya viene fijo por la competencia del test
-    const res = await competencesApi.getQuestions(assocCompId, 0, 200);
+    // Preguntas de la competencia elegida en el selector (puede no ser la principal del test).
+    const res = await competencesApi.getQuestions(assocAddCompId, 0, 200);
     allAvailableQuestions = (res.data?.content ?? []).filter((q: any) => q.isActive !== false);
     renderAvailableQuestions();
   } catch {
@@ -551,7 +560,7 @@ function renderAvailableQuestions() {
   const filtered = allAvailableQuestions.filter(q => {
     const matchSearch = !search || (q.statement || '').toLowerCase().includes(search);
     const matchDiff   = diff === 'ALL' || q.difficultyLevel === diff;
-    const notAssigned = !assignedQuestionIds.has(q.questionId);
+    const notAssigned = !assignedQuestionIds.has(`${assocAddCompId}:${q.questionId}`);
     return matchSearch && matchDiff && notAssigned;
   });
     if (!filtered.length) {
@@ -596,6 +605,12 @@ function renderAvailableQuestions() {
   document.getElementById('tab-add')?.addEventListener('click', () => switchAssocTab('add'));
 
   document.getElementById('assoc-filter-diff')?.addEventListener('change', renderAvailableQuestions);
+  document.getElementById('assoc-comp-filter')?.addEventListener('change', async (e) => {
+    assocAddCompId = (e.target as HTMLSelectElement).value;
+    assocSelected.clear();
+    (document.getElementById('assoc-selected-count') as HTMLElement).textContent = '0 seleccionada(s)';
+    await loadAvailableQuestions();
+  });
   let searchDebounce: ReturnType<typeof setTimeout>;
   document.getElementById('assoc-search')?.addEventListener('input', () => {
     clearTimeout(searchDebounce); searchDebounce = setTimeout(renderAvailableQuestions, 250);
@@ -610,7 +625,7 @@ function renderAvailableQuestions() {
     window.rpLoader?.show('Asociando preguntas...');
     try {
       for (const questionId of assocSelected) {
-        await testsApi.addQuestion(assocTestId, assocCompId, questionId);
+        await testsApi.addQuestion(assocTestId, assocAddCompId, questionId);
       }
       toast.success(`${assocSelected.size} pregunta(s) agregadas`);
       assocSelected.clear();

@@ -264,6 +264,17 @@ import { Icon } from 'astro-icon/components';
     </div>
   </div>
 
+  <!-- Modal "Finalizando prueba" (bloquea toda acción mientras se procesa) -->
+  <div id="finishing-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:450;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1.25rem;text-align:center;padding:2rem">
+      <div style="width:60px;height:60px;border-radius:50%;border:4px solid rgba(255,255,255,0.18);border-top-color:#fff;animation:spin 0.85s linear infinite"></div>
+      <div>
+        <p style="font-size:1.125rem;font-weight:800;color:#fff;margin:0 0 6px">Finalizando prueba…</p>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.7);margin:0">Estamos guardando y calculando tu puntaje. No cierres esta ventana.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Resultados finales -->
   <div id="results-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
     <div style="background:var(--ui-card);border-radius:24px;padding:2.5rem 2rem;max-width:440px;width:calc(100%-2rem);text-align:center;animation:modalIn 0.4s cubic-bezier(0.34,1.46,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.25)">
@@ -337,6 +348,7 @@ import { Icon } from 'astro-icon/components';
 <script>
   import { requireRole, isStudent }   from '../../lib/auth';
   import { testsApi }                 from '../../lib/api/tests.api';
+  import { competencesApi }           from '../../lib/api/competences.api';
   import { triedsApi }                from '../../lib/api/trieds.api';
   import { aiHintApi }                from '../../lib/api/ai-trieds.api';
   import { apiFetch }                 from '../../lib/api/client';
@@ -349,15 +361,15 @@ import { Icon } from 'astro-icon/components';
   const params       = new URLSearchParams(window.location.search);
   const triedId      = params.get('tried');
   const testId       = params.get('test');
-  const competenceId = params.get('comp');
-
-  if (!triedId || !testId || !competenceId) {
+  // Multicompetencia: la prueba ya no se identifica por competencia.
+  if (!triedId || !testId) {
     window.location.replace('/tests');
     throw new Error('Missing params');
   }
 
   // ── Estado ───────────────────────────────────────────────────────
   let questions:   QuestionDto[] = [];
+  const competenceNames: Record<string, string> = {};   // competenceId → nombre (multi-competencia)
   let answers:     Record<string, string> = {};   // selección local (aún no necesariamente guardada)
   let saved:       Record<string, string> = {};   // última respuesta persistida en el servidor por pregunta
   let savingNow    = false;
@@ -448,12 +460,9 @@ import { Icon } from 'astro-icon/components';
     window.addEventListener('pagehide', () => { if (!examFinished) triggerViolation(); });
     document.addEventListener('freeze', () => triggerViolation());
 
-    const onFsChange = () => {
-      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
-      if (!isFs && examStarted) triggerViolation();
-    };
-    document.addEventListener('fullscreenchange',       onFsChange);
-    document.addEventListener('webkitfullscreenchange', onFsChange);
+    // NOTA: entrar/salir de pantalla completa (F11) NO se considera plagio.
+    // El estudiante puede activar/desactivar pantalla completa cuantas veces quiera.
+    // Solo cambiar de ventana o pestaña (blur/visibilitychange) cuenta como fraude.
   }
 
   // ── Timer ────────────────────────────────────────────────────────
@@ -590,12 +599,14 @@ import { Icon } from 'astro-icon/components';
     const q    = questions[idx];
     if (!q) return;
 
-    const s = getCompStyle(competenceId!, '');
+    // Multi-competencia: cada pregunta muestra SU competencia (no la principal del test).
+    const qComp = q.competenceId ?? '';
+    const s = getCompStyle(qComp, competenceNames[qComp] ?? '');
     (document.getElementById('q-number-badge')  as HTMLElement).textContent = `P${idx + 1}`;
     (document.getElementById('mobile-q-num')    as HTMLElement).textContent = String(idx + 1);
 
     const chipEl = document.getElementById('q-comp-chip')!;
-    chipEl.textContent = s.short;
+    chipEl.textContent = competenceNames[qComp] ?? s.short;
     chipEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700`;
 
     const diffEl = document.getElementById('q-diff-badge')!;
@@ -783,7 +794,7 @@ import { Icon } from 'astro-icon/components';
       loading.style.display  = 'flex';
       btn.disabled = true;
       try {
-        const res  = await aiHintApi.getHint(competenceId!, q.questionId, level);
+        const res  = await aiHintApi.getHint(q.competenceId ?? '', q.questionId, level);
         const text = res.data!.hint;
         qHints.set(level, text);
         hintCache.set(q.questionId, qHints);
@@ -827,7 +838,7 @@ import { Icon } from 'astro-icon/components';
         method: 'POST',
         body: JSON.stringify({
           source:       'STATIC',
-          competenceId: competenceId,
+          competenceId: q.competenceId,
           questionId:   q.questionId,
           message:      message || undefined,
         }),
@@ -883,11 +894,15 @@ import { Icon } from 'astro-icon/components';
     if (examFinished) return;
     examFinished = true;
     if (timerInt) clearInterval(timerInt);
+    // Bloquear toda acción mientras se procesa el cierre del intento
+    (document.getElementById('finishing-overlay') as HTMLElement).style.display = 'flex';
     const elapsed = Math.round((Date.now() - startTime) / 1000);
     try {
       const res = await triedsApi.finish(triedId!, elapsed);
+      (document.getElementById('finishing-overlay') as HTMLElement).style.display = 'none';
       if (res.data) showResults(res.data.score ?? 0, res.data.correctAnswers ?? 0, elapsed, res.data.totalQuestions, true);
     } catch (err: any) {
+      (document.getElementById('finishing-overlay') as HTMLElement).style.display = 'none';
       toast.error('Error al finalizar', { description: err?.message });
       showResults(0, 0, elapsed, questions.length, false);
     }
@@ -990,12 +1005,18 @@ import { Icon } from 'astro-icon/components';
       }
 
       const [testRes, questionsRes] = await Promise.all([
-        testsApi.findById(testId!, competenceId!),
-        testsApi.getQuestions(testId!, competenceId!),
+        testsApi.findById(testId!),
+        testsApi.getQuestions(testId!),
       ]);
 
       const test = testRes.data;
       questions  = questionsRes.data ?? [];
+
+      // Cargar nombres de competencias para mostrar la de cada pregunta (multi-competencia)
+      try {
+        const comps = await competencesApi.findAll(false);
+        (comps.data ?? []).forEach(c => { competenceNames[c.competenceId] = c.competenceName; });
+      } catch {}
 
       if (!test || questions.length === 0) {
         toast.error('La prueba no tiene preguntas disponibles o no existe');
@@ -1018,9 +1039,13 @@ import { Icon } from 'astro-icon/components';
       const serverRemaining = resume?.remainingSeconds;
       const hasTimer = serverRemaining != null && durationSecs > 0;
 
-      const s = getCompStyle(competenceId!, test.competenceName ?? '');
+      // Cabecera: la prueba es multicompetencia → mostramos cuántas competencias abarca.
+      const comps = test.competences ?? [];
+      const s = comps[0] ? getCompStyle(comps[0].competenceId, comps[0].competenceName) : getCompStyle(testId!, 'Prueba');
       const badgeEl = document.getElementById('exam-comp-badge')!;
-      badgeEl.textContent = test.competenceName ?? competenceId!;
+      badgeEl.textContent = comps.length <= 1
+        ? (comps[0]?.competenceName ?? 'Prueba')
+        : `${comps.length} competencias`;
       badgeEl.style.cssText = `background:${s.bg};color:${s.color};padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0`;
       (document.getElementById('exam-name')       as HTMLElement).textContent = test.testName;
       (document.getElementById('mobile-q-total')  as HTMLElement).textContent = String(questions.length);

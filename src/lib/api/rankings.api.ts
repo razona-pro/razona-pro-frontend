@@ -8,9 +8,9 @@ export const rankingsApi = {
     apiFetch<PagedResponse<RankingStudentDto>>(
       `/api/rankings/${rankingId}/leaderboard?page=${page}&size=${size}`
     ),
-  create: (p: { rankingName: string; description?: string; periodType: string; sourceFilter: string }) =>
+  create: (p: { rankingName: string; description?: string; periodType: string; sourceFilter: string; competenceId?: string }) =>
     apiFetch<RankingDto>('/api/rankings', { method: 'POST', body: JSON.stringify(p) }),
-  update: (id: string, p: { rankingName?: string; description?: string; periodType?: string; sourceFilter?: string }) =>
+  update: (id: string, p: { rankingName?: string; description?: string; periodType?: string; sourceFilter?: string; competenceId?: string }) =>
     apiFetch<RankingDto>(`/api/rankings/${id}`, { method: 'PUT', body: JSON.stringify(p) }),
   activate:   (id: string) => apiFetch<RankingDto>(`/api/rankings/${id}/activate`, { method: 'PUT' }),
   deactivate: (id: string) => apiFetch<void>(`/api/rankings/${id}`, { method: 'DELETE' }),

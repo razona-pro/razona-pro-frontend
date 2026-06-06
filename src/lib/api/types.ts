@@ -81,16 +81,21 @@ export interface QuestionDto {
 }
 
 // ── Tests ─────────────────────────────────────────────────────────
+export interface CompetenceRef {
+  competenceId: string;
+  competenceName: string;
+}
+
 export interface TestDto {
   testId: string;
-  competenceId: string;
-  competenceName?: string;
   testName: string;
   description?: string;
   durationSeconds: number | null;
   questionsToPresent?: number;
   testMode: 'PRACTICE' | 'EXAM' | 'TIMED';
   isActive: boolean;
+  /** Competencias asociadas a la prueba (multicompetencia). */
+  competences?: CompetenceRef[];
   difficultyBreakdown?: { B?: number; M?: number; A?: number };
   /** Total de preguntas asignadas (se presentan todas si questionsToPresent es null). */
   questionCount?: number;
@@ -103,7 +108,6 @@ export interface TriedDto {
   programId?: string;
   testId: string;
   testName?: string;
-  competenceId: string;
   status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED' | 'TIMED_OUT' | 'ANULADO';
   score?: number;
   totalQuestions: number;
@@ -147,6 +151,7 @@ export interface RankingDto {
   description?: string;
   periodType: string;
   sourceFilter: string;
+  competenceId?: string | null;
   isActive: boolean;
 }
 
@@ -173,19 +178,6 @@ export interface HomeStatsDto {
 }
 
 // ── AI Trieds ─────────────────────────────────────────────────────
-export interface AiTriedDto {
-  aiTriedId: string;
-  status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED';
-  score?: number;
-  totalQuestions: number;
-  correctAnswers?: number;
-  timeSpentSeconds?: number;
-  description?: string;
-  attemptTimestamp: string;
-  finishedAt?: string;
-  totalAnswered?: number;
-}
-
 export interface OptionReview {
   optionId: string;
   optionText: string;
@@ -195,6 +187,7 @@ export interface OptionReview {
 
 export interface QuestionReview {
   questionId: string;
+  competenceId?: string;
   statement: string;
   explanation?: string;
   source?: string;
@@ -209,7 +202,6 @@ export interface TriedReviewDto {
   triedId: string;
   testId: string;
   testName?: string;
-  competenceId: string;
   status: string;
   score?: number;
   totalQuestions: number;
@@ -222,10 +214,16 @@ export interface TriedReviewDto {
 
 export interface AiTriedDto {
   aiTriedId: string;
-  status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED';
+  studentId?: string;
+  programId?: string;
+  competenceId?: string;
+  status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED' | 'ANULADO';
   score?: number;
   totalQuestions: number;
   correctAnswers?: number;
+  questionsGenerated?: number;
+  answeredQuestions?: number;
+  maxPossibleScore?: number;
   timeSpentSeconds?: number;
   description?: string;
   attemptTimestamp: string;

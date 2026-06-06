@@ -31,7 +31,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   </div>
 
   <!-- Lista -->
-  <div id="doubts-list"></div>
+  <div id="doubts-list" style="display:flex;flex-direction:column;gap:0.75rem"></div>
 
   <!-- Paginación -->
   <div style="margin-top:1rem;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -107,10 +107,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   .sfilt.active { background:var(--brand);color:white;border-color:var(--brand); }
 
   .doubt-card {
-    background:var(--ui-card);border-radius:14px;border:1px solid var(--ui-border);
-    padding:1rem 1.25rem;margin-bottom:0.5rem;cursor:pointer;transition:all 0.15s;
+    background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);
+    padding:1.25rem 1.5rem;cursor:pointer;
+    transition:border-color 0.15s,box-shadow 0.15s,transform 0.15s;
   }
-  .doubt-card:hover { border-color:var(--ui-border-2);background:var(--ui-surface);transform:translateX(2px); }
+  .doubt-card:hover { border-color:var(--ui-border-2);box-shadow:0 6px 20px rgba(0,0,0,0.06);transform:translateY(-2px); }
 
   .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
   .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }

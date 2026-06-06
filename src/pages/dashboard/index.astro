@@ -592,7 +592,7 @@ async function initStudentDashboard() {
         const recent = sorted.slice(1, 5);
         if (recent.length > 0) {
           recent.forEach(t => {
-            const s = getCompStyle(t.competenceId, t.testName ?? '');
+            const s = getCompStyle(t.testId, t.testName ?? '');
             const div = document.createElement('div');
             div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--ui-border);background:var(--ui-surface);margin-bottom:6px;cursor:pointer;transition:all 0.15s';
             div.onclick = () => window.location.href = '/dashboard/history';
@@ -608,13 +608,31 @@ async function initStudentDashboard() {
       }
 
       if (compsR.status === 'fulfilled' && compsR.value.data) {
-        // Dominio por competencia = promedio del % de aciertos (no de los puntos crudos).
+        // Multicompetencia: una prueba ya no tiene una sola competencia, así que el dominio
+        // por competencia se calcula desde la revisión por pregunta (sumando aciertos por
+        // competencia a partir del review de cada intento finalizado).
         const byComp: Record<string, number[]> = {};
-        finished.forEach(t => {
-          if (!byComp[t.competenceId]) byComp[t.competenceId] = [];
-          byComp[t.competenceId].push(accOf(t));
-        });
+        Promise.allSettled(sorted.slice(0, 30).map(t => triedsApi.getReview(t.triedId)))
+          .then(reviews => {
+            reviews.forEach(r => {
+              if (r.status !== 'fulfilled' || !r.value.data) return;
+              const perComp: Record<string, { ok: number; tot: number }> = {};
+              (r.value.data.questions ?? []).forEach(q => {
+                const cid = q.competenceId;
+                if (!cid || !q.selectedOptionId) return;
+                if (!perComp[cid]) perComp[cid] = { ok: 0, tot: 0 };
+                perComp[cid].tot++;
+                if (q.answeredCorrectly) perComp[cid].ok++;
+              });
+              Object.entries(perComp).forEach(([cid, v]) => {
+                if (v.tot === 0) return;
+                (byComp[cid] ??= []).push((v.ok / v.tot) * 100);
+              });
+            });
+            renderCompList();
+          });
 
+        const renderCompList = () => {
         const compList = document.getElementById('comp-list');
         if (compList) {
           compList.innerHTML = '';
@@ -647,6 +665,8 @@ async function initStudentDashboard() {
             setTimeout(() => { const bar = document.getElementById(`cbar-${i}`); if (bar) bar.style.width = `${score}%`; }, 350 + i * 80);
           });
         }
+        };
+        renderCompList();   // render inicial (se repinta cuando llegan las revisiones)
       }
     }
 

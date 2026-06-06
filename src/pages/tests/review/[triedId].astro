@@ -96,6 +96,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 <script>
   import { requireAuth } from '../../../lib/auth';
   import { triedsApi }  from '../../../lib/api/trieds.api';
+  import { competencesApi } from '../../../lib/api/competences.api';
   import type { TriedReviewDto, QuestionReview } from '../../../lib/api/types';
   import { getCompStyle, fmtDuration, scoreColor } from '../../../lib/utils';
   import { toast } from '../../../lib/toast';
@@ -118,6 +119,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
   let reviewData: TriedReviewDto | null = null;
   let questionsToShow: QuestionReview[] = [];
   let currentFilter = 'all';
+  const competenceNamesMap: Record<string, string> = {};
 
   function renderText(el: HTMLElement, raw: string) {
     el.innerHTML = '';
@@ -183,6 +185,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
             <span style="font-size:0.6875rem;font-weight:800;color:var(--brand);background:var(--brand-pale);padding:3px 10px;border-radius:20px;border:1.5px solid rgba(212,18,36,0.2)">P${realIdx + 1}</span>
             <span style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${DIFF_BG[q.difficultyLevel]??'#F3F4F6'};color:${DIFF_COLOR[q.difficultyLevel]??'#6B7280'}">${DIFF_LABEL[q.difficultyLevel]??q.difficultyLevel}</span>
+            ${q.competenceId ? `<span style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#7C3AED1A;color:#7C3AED">${competenceNamesMap[q.competenceId] ?? q.competenceId}</span>` : ''}
             <span style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:${statusBg};color:${statusColor}">${statusIcon} ${statusLabel}</span>
           </div>
           <div id="stmt-${triedId}-${realIdx}" style="font-size:0.9375rem;color:var(--ui-text-1);line-height:1.85;margin-bottom:1rem;font-weight:500;padding:14px 16px;background:var(--ui-surface);border-radius:10px;border:1px solid var(--ui-border)"></div>
@@ -209,6 +212,12 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 
   async function loadReview() {
     try {
+      // Cargar nombres de competencias (para mostrar la de cada pregunta — multi-competencia)
+      try {
+        const cr = await competencesApi.findAll(false);
+        (cr.data ?? []).forEach(c => { competenceNamesMap[c.competenceId] = c.competenceName; });
+      } catch {}
+
       const res = await triedsApi.getReview(triedId);
       if (!res.data) throw new Error('Sin datos');
       reviewData = res.data;
@@ -220,22 +229,33 @@ import AppLayout from '../../../layouts/AppLayout.astro';
         if (stored) presentedIds = JSON.parse(stored);
       } catch {}
 
-      // Filtrar preguntas a las que fueron presentadas
+      // Mostrar las preguntas presentadas, pero SIN ocultar nunca una que el
+      // estudiante haya respondido (la unión garantiza que se vean TODAS las que vivió).
+      const answeredIds = new Set(
+        reviewData.questions.filter(q => q.selectedOptionId).map(q => q.questionId)
+      );
       if (presentedIds && presentedIds.length > 0) {
-        questionsToShow = reviewData.questions.filter(q => presentedIds!.includes(q.questionId));
-        // Si el filtro redujo la cantidad, mostrar aviso
+        const present = new Set(presentedIds);
+        questionsToShow = reviewData.questions.filter(
+          q => present.has(q.questionId) || answeredIds.has(q.questionId)
+        );
+        // Si quedó un subconjunto real del banco, avisar.
         if (questionsToShow.length < reviewData.questions.length) {
           const notice = document.getElementById('filter-notice')!;
           notice.style.display = 'block';
           (document.getElementById('filter-count') as HTMLElement).textContent = String(questionsToShow.length);
         }
       } else {
-        // Sin sessionStorage, mostrar solo las respondidas o todas
+        // Sin info de presentadas: mostrar TODAS las del intento.
         questionsToShow = reviewData.questions;
       }
 
       const r = reviewData;
-      (document.getElementById('review-subtitle') as HTMLElement).textContent = r.testName ?? r.testId;
+      const subEl = document.getElementById('review-subtitle') as HTMLElement;
+      // Multicompetencia: competencias distintas presentes en las preguntas del intento.
+      const distinctComps = [...new Set((r.questions ?? []).map(q => q.competenceId).filter(Boolean))] as string[];
+      const compsLabel = distinctComps.map(id => competenceNamesMap[id] ?? id).join(' · ');
+      subEl.textContent = compsLabel ? `${r.testName ?? r.testId} · ${compsLabel}` : (r.testName ?? r.testId);
 
       // Score chip
       const scoreChip = document.getElementById('score-chip')!;
