@@ -98,10 +98,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               <option value="TIMED">Cronometrado</option>
             </select>
           </div>
-          <div class="field-grp">
+          <div class="field-grp" id="dur-field-grp">
             <label class="field-lbl">Duración (min)</label>
             <input id="f-dur" type="number" class="field-inp" min="1" value="60" />
             <span id="f-dur-hint" style="font-size:0.6875rem;color:var(--ui-text-3);margin-top:3px;display:none">En práctica puede quedar vacío (sin límite de tiempo).</span>
+          </div>
+          <div class="field-grp" id="timed-note-grp" style="display:none">
+            <label class="field-lbl">Tiempo</label>
+            <span style="font-size:0.75rem;color:var(--ui-text-2);background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:8px 10px;display:block;line-height:1.5">⏱ El tiempo se calcula <strong>por pregunta</strong> según su dificultad (15–30s). No se define una duración total.</span>
           </div>
           <div class="field-grp">
             <label class="field-lbl">Preguntas a presentar</label>
@@ -262,6 +266,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     } catch (err: any) { toast.error('Error al cargar tests', { description: err?.message }); }
   }
 
+  function fmtSecs(s: number): string {
+    const m = Math.floor(s / 60), sec = s % 60;
+    if (m === 0) return `${sec}s`;
+    return sec > 0 ? `${m}m ${sec}s` : `${m} min`;
+  }
+
   function renderQuestionCount(t: TestDto): string {
     const bd = t.difficultyBreakdown as Record<string, number> | undefined;
     const total = bd ? ((bd.B ?? 0) + (bd.M ?? 0) + (bd.A ?? 0) + (bd.NA ?? 0)) : null;
@@ -282,7 +292,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       return;
     }
     filteredTests.forEach(t => {
-      const durLabel = t.durationSeconds != null ? `${Math.floor(t.durationSeconds / 60)} min` : 'Sin límite';
+      let durLabel: string;
+      if (t.testMode === 'TIMED') {
+        // Tiempo total calculado a partir de las preguntas asociadas (por dificultad).
+        const bd = (t.difficultyBreakdown ?? {}) as Record<string, number>;
+        const secs = (bd.B ?? 0) * 15 + (bd.M ?? 0) * 25 + (bd.A ?? 0) * 30 + (bd.NA ?? 0) * 20;
+        durLabel = secs > 0 ? `${fmtSecs(secs)}` : 'Calculado por pregunta';
+      } else {
+        durLabel = t.durationSeconds != null ? `${Math.floor(t.durationSeconds / 60)} min` : 'Sin límite';
+      }
       const comps = t.competences ?? [];
       const compChips = comps.length
         ? comps.map(c => `<span style="display:inline-block;padding:2px 7px;border-radius:9px;font-size:0.625rem;font-weight:700;background:#7C3AED1A;color:#7C3AED;margin:1px 2px 1px 0">${c.competenceName}</span>`).join('')
@@ -386,6 +404,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const mode = (document.getElementById('f-mode') as HTMLSelectElement)?.value;
     const hint = document.getElementById('f-dur-hint');
     if (hint) hint.style.display = mode === 'PRACTICE' ? 'block' : 'none';
+    // Cronometrado: el tiempo es por pregunta → ocultar la duración total y mostrar la nota.
+    const durGrp  = document.getElementById('dur-field-grp');
+    const noteGrp = document.getElementById('timed-note-grp');
+    if (durGrp)  durGrp.style.display  = mode === 'TIMED' ? 'none' : '';
+    if (noteGrp) noteGrp.style.display = mode === 'TIMED' ? 'block' : 'none';
   }
   document.getElementById('f-mode')?.addEventListener('change', syncDurHint);
 
@@ -429,11 +452,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     if (!testName) {
       errEl.textContent = 'Completa los campos obligatorios.'; errEl.style.display='block'; return;
     }
-    // Práctica puede ir sin tiempo; examen/cronometrado lo exigen
-    if (testMode !== 'PRACTICE' && (durMin == null || durMin < 1)) {
-      errEl.textContent = 'Los modos Examen y Cronometrado requieren una duración.'; errEl.style.display='block'; return;
+    // Solo Examen exige duración total. Cronometrado la calcula por pregunta; Práctica es opcional.
+    if (testMode === 'EXAM' && (durMin == null || durMin < 1)) {
+      errEl.textContent = 'El modo Examen requiere una duración.'; errEl.style.display='block'; return;
     }
-    const durationSeconds = durMin != null ? durMin * 60 : null;
+    const durationSeconds = (testMode === 'TIMED') ? null : (durMin != null ? durMin * 60 : null);
 
     submit.disabled = true; lblEl.textContent = editingTestId ? 'Guardando...' : 'Creando...';
     window.rpLoader?.show(editingTestId ? 'Guardando cambios...' : 'Creando test...');
