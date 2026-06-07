@@ -308,6 +308,12 @@ const adminAnalysisNav = [
     max-height: 0;
     opacity: 0;
   }
+  /* En colapsado, la info del usuario se oculta por completo (evita que el nombre/programa
+     se apilen verticalmente al envolver el texto con ancho 0). */
+  #rp-sidebar.collapsed .sb-user-info,
+  html.sb-collapsed #rp-sidebar:not(.sb-ready) .sb-user-info {
+    overflow: hidden; max-height: 0; max-width: 0; opacity: 0;
+  }
   /* Elementos que no necesitan transición: ocultar directamente */
   #rp-sidebar.collapsed .sb-submenu,
   #rp-sidebar.collapsed .sb-subitem { display: none !important; }

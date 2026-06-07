@@ -359,7 +359,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
             data-comp-name="${compNames(t).replace(/"/g,'&quot;')}"
             data-diff-b="${t.difficultyBreakdown?.B ?? 0}"
             data-diff-m="${t.difficultyBreakdown?.M ?? 0}"
-            data-diff-a="${t.difficultyBreakdown?.A ?? 0}">
+            data-diff-a="${t.difficultyBreakdown?.A ?? 0}"
+            data-diff-na="${(t.difficultyBreakdown as any)?.NA ?? 0}">
             <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             ${bestScore != null ? 'Reintentar' : 'Iniciar test'}
           </button>`}
@@ -392,10 +393,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
     const mode  = btn.dataset.mode ?? 'PRACTICE';
     const comp  = btn.dataset.compName ?? '';
     const color = btn.dataset.color ?? '#D41224';
-    const diffB = Number(btn.dataset.diffB ?? 0);
-    const diffM = Number(btn.dataset.diffM ?? 0);
-    const diffA = Number(btn.dataset.diffA ?? 0);
-    const total = Number(q) || (diffB + diffM + diffA);
+    const diffB  = Number(btn.dataset.diffB ?? 0);
+    const diffM  = Number(btn.dataset.diffM ?? 0);
+    const diffA  = Number(btn.dataset.diffA ?? 0);
+    const diffNA = Number(btn.dataset.diffNa ?? 0);
+    const total = Number(q) || (diffB + diffM + diffA + diffNA);
 
     (document.getElementById('modal-comp') as HTMLElement).textContent = comp;
     (document.getElementById('modal-comp') as HTMLElement).style.color = color;
@@ -417,18 +419,20 @@ import AppLayout from '../../layouts/AppLayout.astro';
       </div>`).join('');
 
     const diffEl = document.getElementById('modal-difficulty')!;
-    if (diffB + diffM + diffA > 0) {
+    if (diffB + diffM + diffA + diffNA > 0) {
       diffEl.innerHTML = `
         <p style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ui-text-3);margin:0 0 6px">Distribución de dificultad</p>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${diffB > 0 ? `<span style="padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;background:#D1FAE5;color:#059669">✓ Básico ×${diffB}</span>` : ''}
-          ${diffM > 0 ? `<span style="padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;background:#FEF3C7;color:#D97706">◆ Medio ×${diffM}</span>` : ''}
-          ${diffA > 0 ? `<span style="padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;background:#FEE2E2;color:#DC2626">▲ Alto ×${diffA}</span>` : ''}
+          ${diffB  > 0 ? `<span style="padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;background:#D1FAE5;color:#059669">✓ Básico ×${diffB}</span>` : ''}
+          ${diffM  > 0 ? `<span style="padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;background:#FEF3C7;color:#D97706">◆ Medio ×${diffM}</span>` : ''}
+          ${diffA  > 0 ? `<span style="padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;background:#FEE2E2;color:#DC2626">▲ Alto ×${diffA}</span>` : ''}
+          ${diffNA > 0 ? `<span style="padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;background:#F3F4F6;color:#6B7280">● Sin dificultad ×${diffNA}</span>` : ''}
         </div>
         <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:8px;gap:2px">
-          ${diffB > 0 ? `<div style="flex:${diffB};background:#059669;border-radius:3px"></div>` : ''}
-          ${diffM > 0 ? `<div style="flex:${diffM};background:#D97706;border-radius:3px"></div>` : ''}
-          ${diffA > 0 ? `<div style="flex:${diffA};background:#DC2626;border-radius:3px"></div>` : ''}
+          ${diffB  > 0 ? `<div style="flex:${diffB};background:#059669;border-radius:3px"></div>` : ''}
+          ${diffM  > 0 ? `<div style="flex:${diffM};background:#D97706;border-radius:3px"></div>` : ''}
+          ${diffA  > 0 ? `<div style="flex:${diffA};background:#DC2626;border-radius:3px"></div>` : ''}
+          ${diffNA > 0 ? `<div style="flex:${diffNA};background:#9CA3AF;border-radius:3px"></div>` : ''}
         </div>`;
       diffEl.style.display = 'block';
     } else { diffEl.style.display = 'none'; }

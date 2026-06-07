@@ -214,7 +214,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 
   async function loadReview() {
     try {
-      // Cargar nombres de competencias (para mostrar la de cada pregunta — multi-competencia)
+      // Cargar nombres de competencias (para mostrar la de cada pregunta - multi-competencia)
       try {
         const cr = await competencesApi.findAll(false);
         (cr.data ?? []).forEach(c => { competenceNamesMap[c.competenceId] = c.competenceName; });
@@ -296,6 +296,19 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     } catch (err: any) {
       (document.getElementById('review-loading') as HTMLElement).style.display = 'none';
       const list = document.getElementById('questions-list')!;
+      // Retroalimentación de un solo uso ya consumida.
+      if (err?.code === 'REVIEW_ALREADY_VIEWED') {
+        const statsRow = document.getElementById('stats-row');
+        if (statsRow) statsRow.style.display = 'none';
+        list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--ui-text-3)">
+          <div style="width:64px;height:64px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+            <svg width="30" height="30" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </div>
+          <p style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0 0 6px">La retroalimentación ya fue vista</p>
+          <p style="font-size:0.875rem;margin:0 0 16px;max-width:380px;margin-left:auto;margin-right:auto;line-height:1.6">La revisión de un intento solo puede consultarse <strong>una vez</strong>. Tu puntaje sigue disponible en tu historial.</p>
+          <a href="/dashboard/history" style="color:var(--brand);font-weight:700;text-decoration:none">← Volver al historial</a></div>`;
+        return;
+      }
       list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--ui-text-3)"><p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 8px">No se pudo cargar la revisión</p><p style="font-size:0.875rem;margin:0 0 16px">${err?.message ?? 'Error desconocido'}</p><a href="/dashboard/history" style="color:var(--brand);font-weight:600;text-decoration:none">← Volver al historial</a></div>`;
       toast.error('Error al cargar review', { description: err?.message });
     }

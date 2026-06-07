@@ -92,6 +92,8 @@ const { currentPage = '' } = Astro.props;
     }
   }
   paintTopbarUser();
+  // Repintar cuando el usuario edita su perfil en esta misma sesión.
+  window.addEventListener('rp:user-updated', paintTopbarUser);
 
   // Escuchar actualización de datos desde Sidebar
   window.addEventListener('rp:user-updated', () => paintTopbarUser());

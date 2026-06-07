@@ -174,8 +174,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   .field-lbl { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ui-text-3) }
   .field-inp { padding:8px 12px;background:var(--ui-surface);border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);outline:none;transition:border-color 0.2s;width:100%;appearance:none }
   .field-inp:focus { border-color:var(--brand);box-shadow:0 0 0 3px rgba(212,18,36,0.1) }
-  .action-btn { display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:9px;border:1.5px solid var(--ui-border);background:var(--ui-surface);color:var(--ui-text-1);font-size:0.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap;line-height:1 }
-  .action-btn:hover { filter:brightness(0.97);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,0.08) }
+  /* Botón "Ver" cuando el ranking está seleccionado (usa el mismo estilo base .act-btn global) */
+  .act-btn-active { border-color:var(--brand)!important;background:rgba(212,18,36,0.08)!important;color:var(--brand)!important; }
   .page-btn { padding:5px 12px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
   .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
   .page-btn:disabled { opacity:0.4;cursor:not-allowed }
@@ -311,31 +311,36 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </td>
         <td class="td">
           <div style="display:flex;gap:5px;flex-wrap:wrap">
-            <button class="action-btn btn-view" data-id="${r.rankingId}" data-name="${r.rankingName}"
-              style="border-color:${isSelected?'var(--brand)':'var(--ui-border-2)'};background:${isSelected?'rgba(212,18,36,0.08)':'var(--ui-surface)'};color:${isSelected?'var(--brand)':'var(--ui-text-1)'}">
-              ${isSelected ? '● Ver' : 'Ver'}
+            <button class="act-btn btn-view${isSelected ? ' act-btn-active' : ''}" data-id="${r.rankingId}" data-name="${r.rankingName}">
+              ${isSelected ? '✕ Dejar de ver' : 'Ver'}
             </button>
             ${r.isActive
-              ? `<button class="action-btn btn-deact" data-id="${r.rankingId}" data-name="${r.rankingName}"
-                  style="border-color:#FECACA;background:#FEF2F2;color:#DC2626">
-                  Desactivar
-                </button>`
-              : `<button class="action-btn btn-act" data-id="${r.rankingId}" data-name="${r.rankingName}"
-                  style="border-color:#A7F3D0;background:#F0FDF4;color:#059669">
-                  Activar
-                </button>`
+              ? `<button class="act-btn act-btn-danger btn-deact" data-id="${r.rankingId}" data-name="${r.rankingName}">Desactivar</button>`
+              : `<button class="act-btn act-btn-success btn-act" data-id="${r.rankingId}" data-name="${r.rankingName}">Activar</button>`
             }
           </div>
         </td>`;
       tbody.appendChild(tr);
     });
 
-    // Ver leaderboard
+    // Ver / Dejar de ver leaderboard (toggle)
     document.querySelectorAll<HTMLButtonElement>('.btn-view').forEach(btn => {
       btn.addEventListener('click', () => {
-        selectedRankingId = btn.dataset.id!;
-        lbPage = 0;
-        loadLeaderboard(selectedRankingId, btn.dataset.name!);
+        const id = btn.dataset.id!;
+        if (selectedRankingId === id) {
+          // Dejar de ver: deseleccionar y limpiar el panel.
+          selectedRankingId = '';
+          (document.getElementById('lb-title') as HTMLElement).textContent = 'Leaderboard';
+          (document.getElementById('lb-subtitle') as HTMLElement).textContent = 'Selecciona un ranking para ver posiciones';
+          (document.getElementById('lb-total') as HTMLElement).textContent = '';
+          (document.getElementById('lb-list') as HTMLElement).innerHTML =
+            '<div style="text-align:center;padding:2.5rem 1rem;color:var(--ui-text-3);font-size:0.875rem">Selecciona un ranking para ver sus posiciones.</div>';
+          (document.getElementById('lb-pagination') as HTMLElement).style.display = 'none';
+        } else {
+          selectedRankingId = id;
+          lbPage = 0;
+          loadLeaderboard(selectedRankingId, btn.dataset.name!);
+        }
         renderTable(); // refrescar para marcar fila seleccionada
       });
     });
