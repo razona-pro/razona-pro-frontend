@@ -357,6 +357,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
   document.getElementById('start-btn')?.addEventListener('click', () => {
     if (!selectedCompId || !selectedQ || !aiEnabled) return;
 
+    // Toda competencia elegida debe poder evaluarse: se necesitan >= tantas preguntas como competencias.
+    if (selectedCompIds.length > selectedQ) {
+      const errEl = document.getElementById('setup-error')!;
+      errEl.textContent = `Elegiste ${selectedCompIds.length} competencias: aumenta el número de preguntas a por lo menos ${selectedCompIds.length} para evaluarlas todas.`;
+      errEl.style.display = 'block';
+      return;
+    }
+    (document.getElementById('setup-error') as HTMLElement).style.display = 'none';
+
     // Llenar datos del modal
     document.getElementById('ps-subtitle')!.textContent  = selectedCompName;
     document.getElementById('ps-q-count')!.textContent   = String(selectedQ);

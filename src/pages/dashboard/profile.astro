@@ -187,6 +187,78 @@ import AppLayout from '../../layouts/AppLayout.astro';
     </div>
   </div>
 </div>
+
+<!-- ── Editar mi información ── -->
+<div style="max-width:640px;margin:1.25rem auto 0;background:var(--ui-card);border:1px solid var(--ui-border);border-radius:16px;padding:1.5rem">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div style="width:36px;height:36px;border-radius:9px;background:var(--brand-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="18" height="18" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    </div>
+    <div>
+      <h2 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0">Editar mi información</h2>
+      <p style="font-size:0.75rem;color:var(--ui-text-3);margin:0">Tu código y correo no se pueden cambiar aquí.</p>
+    </div>
+  </div>
+  <div id="ep-msg" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:9px;font-size:0.8125rem"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div><label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Primer nombre *</label>
+      <input id="ep-fname" type="text" maxlength="15" class="ep-inp"/></div>
+    <div><label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Segundo nombre</label>
+      <input id="ep-mname" type="text" maxlength="15" class="ep-inp"/></div>
+    <div><label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Primer apellido *</label>
+      <input id="ep-lname1" type="text" maxlength="15" class="ep-inp"/></div>
+    <div><label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Segundo apellido</label>
+      <input id="ep-lname2" type="text" maxlength="15" class="ep-inp"/></div>
+    <div style="grid-column:1 / -1"><label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Celular (+57...)</label>
+      <input id="ep-phone" type="tel" maxlength="15" class="ep-inp"/></div>
+  </div>
+  <button id="ep-save" type="button" style="margin-top:12px;padding:0.625rem 1.125rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Guardar cambios</button>
+</div>
+<style>
+  .ep-inp { width:100%;padding:10px 12px;border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;background:var(--ui-surface);color:var(--ui-text-1);box-sizing:border-box;outline:none }
+  .ep-inp:focus { border-color:var(--brand) }
+</style>
+
+<!-- ── Cambiar contraseña ── -->
+<div style="max-width:640px;margin:1.25rem auto 0;background:var(--ui-card);border:1px solid var(--ui-border);border-radius:16px;padding:1.5rem">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+    <div style="width:36px;height:36px;border-radius:9px;background:var(--brand-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="18" height="18" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <div>
+      <h2 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0">Cambiar contraseña</h2>
+      <p style="font-size:0.75rem;color:var(--ui-text-3);margin:0">Por seguridad, te enviaremos un código a tu correo.</p>
+    </div>
+  </div>
+
+  <div id="cp-msg" style="display:none;margin:12px 0 0;padding:10px 12px;border-radius:9px;font-size:0.8125rem"></div>
+
+  <!-- Paso 1: solicitar código -->
+  <div id="cp-step1" style="margin-top:14px">
+    <button id="cp-request" type="button" style="padding:0.625rem 1.125rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Enviar código de verificación</button>
+  </div>
+
+  <!-- Paso 2: formulario -->
+  <div id="cp-step2" style="display:none;margin-top:14px;flex-direction:column;gap:10px">
+    <div>
+      <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Código de verificación (correo)</label>
+      <input id="cp-code" type="text" inputmode="numeric" maxlength="6" placeholder="6 dígitos" style="width:100%;padding:10px 12px;border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.9375rem;letter-spacing:3px;background:var(--ui-surface);color:var(--ui-text-1);box-sizing:border-box;outline:none"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Contraseña actual</label>
+      <input id="cp-current" type="password" style="width:100%;padding:10px 12px;border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;background:var(--ui-surface);color:var(--ui-text-1);box-sizing:border-box;outline:none"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Nueva contraseña (mín. 8)</label>
+      <input id="cp-new" type="password" style="width:100%;padding:10px 12px;border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;background:var(--ui-surface);color:var(--ui-text-1);box-sizing:border-box;outline:none"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--ui-text-2);margin-bottom:4px">Confirmar nueva contraseña</label>
+      <input id="cp-confirm" type="password" style="width:100%;padding:10px 12px;border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;background:var(--ui-surface);color:var(--ui-text-1);box-sizing:border-box;outline:none"/>
+    </div>
+    <button id="cp-submit" type="button" style="margin-top:4px;padding:0.625rem 1.125rem;border-radius:10px;border:none;background:linear-gradient(135deg,#059669,#047857);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Actualizar contraseña</button>
+  </div>
+</div>
 </AppLayout>
 
 <script>
@@ -282,6 +354,11 @@ if (isAdmin()) {
     set('d-email',   s.email?.toLowerCase() ?? '-');
     set('d-code',    s.studentId ?? user.id);
     if (s.phone) { set('d-phone', s.phone); show('row-phone', 'flex'); }
+    // Prefill del formulario de edición
+    const setVal = (id: string, v?: string) => { const el = document.getElementById(id) as HTMLInputElement | null; if (el) el.value = v ?? ''; };
+    setVal('ep-fname', s.firstName); setVal('ep-mname', s.secondName);
+    setVal('ep-lname1', s.firstSurname); setVal('ep-lname2', s.secondSurname);
+    setVal('ep-phone', s.phone);
     if (s.programId) {
       show('row-program', 'flex');
       set('d-program', `${s.programId}: Cargando...`);
@@ -291,5 +368,88 @@ if (isAdmin()) {
       }).catch(() => set('d-program', s.programId!));
     }
   }).catch(() => {});
+}
+
+// ── Editar mi información ─────────────────────────────────────────────────
+{
+  const epMsg = (t: string, ok: boolean) => {
+    const el = document.getElementById('ep-msg')!;
+    el.textContent = t; el.style.display = 'block';
+    el.style.background = ok ? '#D1FAE5' : '#FEF2F2';
+    el.style.color = ok ? '#065F46' : '#B91C1C';
+    el.style.border = `1px solid ${ok ? '#A7F3D0' : '#FECACA'}`;
+  };
+  document.getElementById('ep-save')?.addEventListener('click', async () => {
+    const v = (id: string) => (document.getElementById(id) as HTMLInputElement).value.trim();
+    const firstName = v('ep-fname'), firstSurname = v('ep-lname1'), phone = v('ep-phone');
+    if (!firstName || !firstSurname) return epMsg('El primer nombre y el primer apellido son obligatorios.', false);
+    if (phone && !/^\+[1-9][0-9]{10,13}$/.test(phone)) return epMsg('El celular debe ir en formato internacional, ej: +573001234567', false);
+    const btn = document.getElementById('ep-save') as HTMLButtonElement;
+    btn.disabled = true; const prev = btn.textContent; btn.textContent = 'Guardando...';
+    try {
+      const { studentsApi } = await import('../../lib/api/students.api');
+      const res = await studentsApi.updateMe({
+        firstName, secondName: v('ep-mname') || undefined,
+        firstSurname, secondSurname: v('ep-lname2') || undefined, phone: phone || undefined,
+      });
+      const s = res.data!;
+      const full = [s.firstName, s.secondName, s.firstSurname, s.secondSurname].filter(Boolean).join(' ');
+      set('hero-name', full); set('d-name', full);
+      if (s.phone) { set('d-phone', s.phone); show('row-phone', 'flex'); }
+      updateStoredUser({ firstName: s.firstName, secondName: s.secondName, firstSurname: s.firstSurname, secondSurname: s.secondSurname });
+      epMsg('¡Datos actualizados!', true);
+    } catch (e: any) {
+      epMsg(e?.message ?? 'No se pudo actualizar.', false);
+    } finally {
+      btn.disabled = false; btn.textContent = prev ?? 'Guardar cambios';
+    }
+  });
+}
+
+// ── Cambiar contraseña (código por correo) ───────────────────────────────
+{
+  const cpMsg = (t: string, ok: boolean) => {
+    const el = document.getElementById('cp-msg')!;
+    el.textContent = t;
+    el.style.display = 'block';
+    el.style.background = ok ? '#D1FAE5' : '#FEF2F2';
+    el.style.color = ok ? '#065F46' : '#B91C1C';
+    el.style.border = `1px solid ${ok ? '#A7F3D0' : '#FECACA'}`;
+  };
+  document.getElementById('cp-request')?.addEventListener('click', async () => {
+    const btn = document.getElementById('cp-request') as HTMLButtonElement;
+    btn.disabled = true; const prev = btn.textContent; btn.textContent = 'Enviando...';
+    try {
+      const { authApi } = await import('../../lib/api/auth.api');
+      await authApi.requestPasswordCode();
+      cpMsg('Te enviamos un código a tu correo. Revisa tu bandeja (vence en 10 min).', true);
+      (document.getElementById('cp-step1') as HTMLElement).style.display = 'none';
+      (document.getElementById('cp-step2') as HTMLElement).style.display = 'flex';
+    } catch (e: any) {
+      cpMsg(e?.message ?? 'No se pudo enviar el código.', false);
+      btn.disabled = false; btn.textContent = prev ?? 'Enviar código de verificación';
+    }
+  });
+  document.getElementById('cp-submit')?.addEventListener('click', async () => {
+    const code = (document.getElementById('cp-code') as HTMLInputElement).value.trim();
+    const cur  = (document.getElementById('cp-current') as HTMLInputElement).value;
+    const nw   = (document.getElementById('cp-new') as HTMLInputElement).value;
+    const cf   = (document.getElementById('cp-confirm') as HTMLInputElement).value;
+    if (code.length !== 6) return cpMsg('Ingresa el código de 6 dígitos.', false);
+    if (nw.length < 8)     return cpMsg('La nueva contraseña debe tener al menos 8 caracteres.', false);
+    if (nw !== cf)         return cpMsg('Las contraseñas nuevas no coinciden.', false);
+    const btn = document.getElementById('cp-submit') as HTMLButtonElement;
+    btn.disabled = true; const prev = btn.textContent; btn.textContent = 'Actualizando...';
+    try {
+      const { authApi } = await import('../../lib/api/auth.api');
+      await authApi.changePassword(code, cur, nw);
+      cpMsg('¡Contraseña actualizada! Úsala en tu próximo inicio de sesión.', true);
+      (document.getElementById('cp-step2') as HTMLElement).style.display = 'none';
+    } catch (e: any) {
+      cpMsg(e?.message ?? 'No se pudo cambiar la contraseña.', false);
+    } finally {
+      btn.disabled = false; btn.textContent = prev ?? 'Actualizar contraseña';
+    }
+  });
 }
 </script>

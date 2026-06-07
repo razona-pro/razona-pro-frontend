@@ -288,7 +288,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
         ${conf.crown ? `<div class="podium-crown">👑</div>` : ''}
         <div class="podium-avatar ${conf.avClass}" style="animation-delay:${i*0.1}s">${ini(name, entry.studentId)}</div>
         <p class="podium-name ${conf.nameClass}" title="${name}">${name.split(' ')[0]}</p>
-        <p class="podium-prog">Prog. ${entry.programId}</p>
+        <p class="podium-prog">${entry.programName ?? ('Prog. ' + entry.programId)}</p>
         <p class="podium-score ${conf.pos === 1 ? 'podium-score-1' : ''}" style="color:${conf.scoreColor}">
           ${Number(entry.totalScore).toFixed(1)} pts
         </p>
@@ -345,7 +345,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
       const metaEl = document.createElement('p');
       metaEl.className = 'lb-meta';
-      metaEl.textContent = `Prog. ${entry.programId} · ${entry.triedsCount} test(s)`;
+      metaEl.textContent = `${entry.programName ?? ('Prog. ' + entry.programId)} · ${entry.triedsCount} test(s)`;
 
       infoEl.appendChild(nameEl);
       infoEl.appendChild(metaEl);

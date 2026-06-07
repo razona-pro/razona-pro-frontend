@@ -672,6 +672,15 @@ import { Icon } from 'astro-icon/components';
 
   redirectIfAuthenticated(); // Redirige al home del rol (admin→/admin/home, student→/dashboard)
 
+  // Si llegamos aquí por pérdida de sesión / cuenta desactivada, avisar.
+  const _reason = new URLSearchParams(window.location.search).get('reason');
+  if (_reason === 'disabled') {
+    setTimeout(() => toast.error('Tu cuenta fue desactivada', {
+      description: 'Inicia sesión para ver el motivo y enviar una apelación.' }), 300);
+  } else if (_reason === 'session') {
+    setTimeout(() => toast.warning('Tu sesión expiró', { description: 'Vuelve a iniciar sesión.' }), 300);
+  }
+
   // ── View management ───────────────────────────────────────────────
   type View = 'login' | 'register' | 'forgot';
 

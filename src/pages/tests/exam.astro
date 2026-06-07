@@ -200,7 +200,7 @@ import { Icon } from 'astro-icon/components';
       <h3 style="font-size:1.25rem;font-weight:900;color:#DC2626;margin:0 0 0.75rem">Examen anulado y cuenta desactivada</h3>
       <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 0.75rem;line-height:1.65">Se detectaron <strong>2 eventos de plagio</strong> durante el examen. El intento fue <strong>anulado</strong> y tu cuenta ha sido <strong>desactivada</strong> automáticamente.</p>
       <p style="font-size:0.8125rem;color:var(--ui-text-3);margin:0 0 1.5rem">Para recuperar el acceso debes <strong>enviar una apelación</strong> a un administrador. Mientras tanto no podrás iniciar sesión.</p>
-      <a href="/auth" style="display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Entendido</a>
+      <button id="annulled-ok" type="button" style="width:100%;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Entendido</button>
     </div>
   </div>
 
@@ -222,6 +222,26 @@ import { Icon } from 'astro-icon/components';
           Continuar sin pantalla completa (bajo tu responsabilidad)
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal introducción modo cronometrado -->
+  <div id="timed-intro-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9200;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+    <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:460px;width:calc(100%-2rem);animation:modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;box-shadow:0 24px 60px rgba(0,0,0,0.35)">
+      <div style="width:72px;height:72px;border-radius:50%;margin:0 auto 1.125rem;display:flex;align-items:center;justify-content:center;background:#FEF3C7">
+        <svg width="34" height="34" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 7 12 12 15 14"/></svg>
+      </div>
+      <h3 style="font-size:1.1875rem;font-weight:900;color:var(--ui-text-1);margin:0 0 0.75rem;text-align:center">Prueba cronometrada por pregunta</h3>
+      <div style="font-size:0.875rem;color:var(--ui-text-2);line-height:1.7;margin:0 0 1.25rem">
+        <p style="margin:0 0 8px">Esta prueba funciona distinto:</p>
+        <ul style="margin:0 0 0 1.1rem;padding:0;display:flex;flex-direction:column;gap:6px">
+          <li>Cada pregunta tiene su <strong>propio tiempo</strong> según su dificultad (entre 15 y 30 segundos).</li>
+          <li>Cuando el tiempo de una pregunta se agota, queda <strong>sin responder</strong> y pasas a la siguiente.</li>
+          <li><strong>No puedes volver atrás</strong>: cada pregunta se contesta una sola vez.</li>
+          <li>El tiempo empieza a correr <strong>al pulsar “Entendido, comenzar”</strong>.</li>
+        </ul>
+      </div>
+      <button id="timed-start" type="button" style="width:100%;padding:0.8125rem;border-radius:12px;border:none;background:linear-gradient(135deg,#D97706,#B45309);color:white;font-family:inherit;font-weight:800;font-size:0.9375rem;cursor:pointer;box-shadow:0 4px 14px rgba(217,119,6,0.35)">Entendido, comenzar</button>
     </div>
   </div>
 
@@ -382,6 +402,17 @@ import { Icon } from 'astro-icon/components';
   // Modo real del test (se asigna desde el servidor en init(), no de la URL)
   let testMode     = params.get('mode') ?? 'PRACTICE';
 
+  // ── CRONOMETRADO POR PREGUNTA (modo TIMED) ───────────────────────
+  let IS_TIMED = false;
+  let qTimerInt: ReturnType<typeof setInterval> | null = null;
+  // Segundos por pregunta según dificultad: sin dificultad=20, Básico=15, Medio=25, Alto=30.
+  function perQuestionSecs(diff?: string | null): number {
+    if (diff === 'B') return 15;
+    if (diff === 'M') return 25;
+    if (diff === 'A') return 30;
+    return 20; // sin dificultad / no aplica
+  }
+
   // ── ANTI-FRAUDE ──────────────────────────────────────────────────
   let fraudViolations  = 0;
   let fraudModalOpen   = false;
@@ -485,9 +516,47 @@ import { Icon } from 'astro-icon/components';
 
   function activateExam() {
     examStarted = true;
+    if (IS_TIMED) {
+      startQuestionTimer();   // el tiempo es por pregunta, no por test
+      return;
+    }
     if (pendingRemaining !== null) {
       startCountdown(pendingRemaining);
       pendingRemaining = null;
+    }
+  }
+
+  // ── Cronómetro POR PREGUNTA (modo TIMED) ─────────────────────────
+  function startQuestionTimer() {
+    if (!IS_TIMED || !examStarted || examFinished) return;
+    if (qTimerInt) clearInterval(qTimerInt);
+    const q = questions[currentIdx];
+    let remaining = perQuestionSecs(q?.difficultyLevel);
+    const wrap = document.getElementById('timer-wrap');
+    wrap?.classList.remove('timer-danger');
+    updateTimer(remaining);
+    qTimerInt = setInterval(() => {
+      remaining--;
+      updateTimer(remaining);
+      if (remaining <= 5) wrap?.classList.add('timer-danger');
+      if (remaining <= 0) {
+        clearInterval(qTimerInt!);
+        // Se acabó el tiempo de ESTA pregunta: queda sin responder y avanza.
+        advanceTimed(false);
+      }
+    }, 1000);
+  }
+
+  // Avanza a la siguiente pregunta en modo TIMED (sin volver atrás).
+  // save=true guarda la selección actual; save=false la deja sin responder.
+  async function advanceTimed(save: boolean) {
+    if (qTimerInt) clearInterval(qTimerInt);
+    if (save) { try { await saveCurrentAnswer(); } catch {} }
+    if (currentIdx >= questions.length - 1) {
+      finishExam(false);
+    } else {
+      renderQuestion(currentIdx + 1);
+      startQuestionTimer();
     }
   }
 
@@ -502,6 +571,16 @@ import { Icon } from 'astro-icon/components';
   });
   document.getElementById('fs-skip')?.addEventListener('click', () => {
     (document.getElementById('fs-modal') as HTMLElement).style.display = 'none';
+    activateExam();
+  });
+
+  // Cronometrado: al aceptar las reglas arranca el cronómetro de la primera pregunta.
+  document.getElementById('timed-start')?.addEventListener('click', () => {
+    (document.getElementById('timed-intro-modal') as HTMLElement).style.display = 'none';
+    try {
+      const el = document.documentElement;
+      (el.requestFullscreen?.() ?? (el as any).webkitRequestFullscreen?.())?.catch(() => {});
+    } catch {}
     activateExam();
   });
 
@@ -550,6 +629,12 @@ import { Icon } from 'astro-icon/components';
     (document.getElementById('annulled-modal') as HTMLElement).style.display = 'flex';
   }
 
+  // Al confirmar el intento plagiado: limpiar sesión (cuenta desactivada) y volver al login.
+  document.getElementById('annulled-ok')?.addEventListener('click', () => {
+    try { localStorage.removeItem('rp_token'); } catch {}
+    window.location.replace('/auth?reason=disabled');
+  });
+
   // ── Opciones aleatorias (cacheadas) ───────────────────────────────
   function getShuffledOptions(q: QuestionDto): OptionDto[] {
     if (!optionOrderCache.has(q.questionId)) {
@@ -567,7 +652,9 @@ import { Icon } from 'astro-icon/components';
       const btn = document.createElement('button');
       btn.className = 'q-nav-item' + (i === 0 ? ' current' : '');
       btn.textContent = String(i + 1);
-      btn.addEventListener('click', () => renderQuestion(i));
+      // En TIMED no se puede saltar entre preguntas.
+      if (!IS_TIMED) btn.addEventListener('click', () => renderQuestion(i));
+      else { btn.style.cursor = 'default'; btn.style.pointerEvents = 'none'; }
       nav.appendChild(btn);
     });
   }
@@ -684,6 +771,8 @@ import { Icon } from 'astro-icon/components';
     // Botones nav
     const prevBtn = document.getElementById('btn-prev') as HTMLButtonElement;
     const nextBtn = document.getElementById('btn-next') as HTMLButtonElement;
+    // En modo TIMED no se puede volver atrás: ocultar "Anterior".
+    prevBtn.style.display = IS_TIMED ? 'none' : 'inline-flex';
     prevBtn.disabled = idx === 0;
     prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
     const isLast = idx === questions.length - 1;
@@ -854,9 +943,15 @@ import { Icon } from 'astro-icon/components';
 
   // ── Navegación ────────────────────────────────────────────────────
   document.getElementById('btn-prev')?.addEventListener('click', () => {
+    if (IS_TIMED) return;   // sin volver atrás en cronometrado
     if (currentIdx > 0) renderQuestion(currentIdx - 1);
   });
   document.getElementById('btn-next')?.addEventListener('click', () => {
+    if (IS_TIMED) {
+      // Guarda la selección actual (si la hay) y avanza; en la última, finaliza.
+      advanceTimed(true);
+      return;
+    }
     if (currentIdx < questions.length - 1) renderQuestion(currentIdx + 1);
     else openSummaryModal();
   });
@@ -894,6 +989,7 @@ import { Icon } from 'astro-icon/components';
     if (examFinished) return;
     examFinished = true;
     if (timerInt) clearInterval(timerInt);
+    if (qTimerInt) clearInterval(qTimerInt);
     // Bloquear toda acción mientras se procesa el cierre del intento
     (document.getElementById('finishing-overlay') as HTMLElement).style.display = 'flex';
     const elapsed = Math.round((Date.now() - startTime) / 1000);
@@ -962,6 +1058,7 @@ import { Icon } from 'astro-icon/components';
       // Usar el testMode real del servidor (no confiar en el parámetro de URL)
       testMode = resume.testMode ?? params.get('mode') ?? 'PRACTICE';
       IS_STRICT_MODE = testMode === 'EXAM' || testMode === 'TIMED';
+      IS_TIMED = testMode === 'TIMED';
 
       // Sincronizar contador de fraude con el backend para resistir recargas de página
       fraudViolations = resume.tried?.fraudAttempts ?? 0;
@@ -1045,7 +1142,11 @@ import { Icon } from 'astro-icon/components';
 
       // Timer diferido: solo se muestra el valor inicial; el countdown arranca en activateExam()
       // para que el tiempo no corra mientras se lee el modal de pantalla completa.
-      if (hasTimer) {
+      if (IS_TIMED) {
+        // El cronómetro por pregunta se muestra; el valor real lo pone startQuestionTimer().
+        const tw = document.getElementById('timer-wrap');
+        if (tw) tw.style.display = 'flex';
+      } else if (hasTimer) {
         pendingRemaining = serverRemaining as number;
         updateTimer(pendingRemaining);
       } else {
@@ -1056,10 +1157,20 @@ import { Icon } from 'astro-icon/components';
       buildQNav();
       (document.getElementById('exam-loading')   as HTMLElement).style.display = 'none';
       (document.getElementById('question-card')  as HTMLElement).style.display = 'block';
-      renderQuestion(0);
+      // TIMED: si recargó, retomar en la primera pregunta sin responder (no se vuelve atrás).
+      let startIdx = 0;
+      if (IS_TIMED) {
+        const fi = questions.findIndex(q => !saved[q.questionId]);
+        startIdx = fi >= 0 ? fi : 0;
+      }
+      renderQuestion(startIdx);
 
-      // Registrar protecciones de modo estricto ahora que IS_STRICT_MODE está definido
-      if (IS_STRICT_MODE) {
+      // Modo cronometrado: explicar las reglas ANTES de empezar. El tiempo por pregunta
+      // solo corre cuando el estudiante acepta.
+      if (IS_TIMED) {
+        setupStrictModeListeners();
+        (document.getElementById('timed-intro-modal') as HTMLElement).style.display = 'flex';
+      } else if (IS_STRICT_MODE) {
         setupStrictModeListeners();
         const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         if (!isMobile) {

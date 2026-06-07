@@ -14,6 +14,4 @@ export const rankingsApi = {
     apiFetch<RankingDto>(`/api/rankings/${id}`, { method: 'PUT', body: JSON.stringify(p) }),
   activate:   (id: string) => apiFetch<RankingDto>(`/api/rankings/${id}/activate`, { method: 'PUT' }),
   deactivate: (id: string) => apiFetch<void>(`/api/rankings/${id}`, { method: 'DELETE' }),
-  /** Reparación: recalcula las tablas de posiciones desde los intentos existentes. */
-  recompute:  () => apiFetch<number>('/api/rankings/recompute', { method: 'POST' }),
 };

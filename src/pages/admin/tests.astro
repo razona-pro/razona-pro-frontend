@@ -157,6 +157,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <option value="B">Básico</option>
           <option value="M">Medio</option>
           <option value="A">Alto</option>
+          <option value="NONE">Sin dificultad / No aplica</option>
         </select>
       </div>
       <div id="assoc-question-list" style="max-height:320px;overflow-y:auto;padding:0.75rem 1.5rem;display:flex;flex-direction:column;gap:6px">
@@ -262,8 +263,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   }
 
   function renderQuestionCount(t: TestDto): string {
-    const bd = t.difficultyBreakdown;
-    const total = bd ? ((bd.B ?? 0) + (bd.M ?? 0) + (bd.A ?? 0)) : null;
+    const bd = t.difficultyBreakdown as Record<string, number> | undefined;
+    const total = bd ? ((bd.B ?? 0) + (bd.M ?? 0) + (bd.A ?? 0) + (bd.NA ?? 0)) : null;
     const need  = t.questionsToPresent;
     if (total === null) return need ? String(need) : '-';
     if (total === 0)
@@ -510,10 +511,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--ui-text-3)"><p style="font-size:0.875rem;font-weight:600;margin:0 0 4px">Sin preguntas asignadas</p><p style="font-size:0.8125rem">Usa "Agregar preguntas" para añadir.</p></div>';
         return;
       }
-      const diffMap: Record<string,string>    = { B:'Básico', M:'Medio', A:'Alto' };
-      const diffColors: Record<string,string> = { B:'#059669', M:'#D97706', A:'#DC2626' };
+      const diffMap: Record<string,string>    = { B:'Básico', M:'Medio', A:'Alto', NA:'No aplica' };
+      const diffColors: Record<string,string> = { B:'#059669', M:'#D97706', A:'#DC2626', NA:'#6B7280' };
       questions.forEach((q:any, i:number) => {
-        const diff = q.difficultyLevel ?? 'M';
+        const diff = q.difficultyLevel || 'NA';
         const row  = document.createElement('div');
         row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--ui-border);background:var(--ui-surface)';
         row.innerHTML = `
@@ -559,7 +560,8 @@ function renderAvailableQuestions() {
   const diff   = (document.getElementById('assoc-filter-diff') as HTMLSelectElement)?.value ?? 'ALL';
   const filtered = allAvailableQuestions.filter(q => {
     const matchSearch = !search || (q.statement || '').toLowerCase().includes(search);
-    const matchDiff   = diff === 'ALL' || q.difficultyLevel === diff;
+    const matchDiff   = diff === 'ALL'
+      || (diff === 'NONE' ? !q.difficultyLevel : q.difficultyLevel === diff);
     const notAssigned = !assignedQuestionIds.has(`${assocAddCompId}:${q.questionId}`);
     return matchSearch && matchDiff && notAssigned;
   });
@@ -568,11 +570,11 @@ function renderAvailableQuestions() {
       return;
     }
     list.innerHTML = '';
-    const diffMap:    Record<string,string> = { B:'Básico', M:'Medio', A:'Alto' };
-    const diffColors: Record<string,string> = { B:'#059669', M:'#D97706', A:'#DC2626' };
+    const diffMap:    Record<string,string> = { B:'Básico', M:'Medio', A:'Alto', NA:'No aplica' };
+    const diffColors: Record<string,string> = { B:'#059669', M:'#D97706', A:'#DC2626', NA:'#6B7280' };
     filtered.forEach(q => {
       const checked = assocSelected.has(q.questionId);
-      const diff    = q.difficultyLevel ?? 'M';
+      const diff    = q.difficultyLevel || 'NA';
       const row     = document.createElement('label');
       row.style.cssText = `display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid ${checked?'var(--brand)':'var(--ui-border)'};background:${checked?'rgba(212,18,36,0.04)':'var(--ui-surface)'};cursor:pointer;transition:all 0.15s`;
       row.innerHTML = `

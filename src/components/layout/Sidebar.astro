@@ -350,6 +350,8 @@ const adminAnalysisNav = [
   @media (max-width: 1023px) {
     #rp-sidebar { position: fixed; top:0; left:0; bottom:0; transform: translateX(-260px); box-shadow: none; }
     #rp-sidebar.open { transform: translateX(0); box-shadow: 8px 0 40px rgba(0,0,0,0.25); }
+    /* En móvil se usa el menú hamburguesa: el botón de contraer no aplica */
+    #sb-collapse-btn { display: none !important; }
     /* En móvil el collapse no aplica */
     #rp-sidebar.collapsed { width: 232px; min-width: 232px; }
     #rp-sidebar.collapsed .sb-label, #rp-sidebar.collapsed .sb-logo-text,
@@ -369,7 +371,7 @@ const adminAnalysisNav = [
   .sb-avatar { width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#D41224,#9B1F24);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:0.75rem;flex-shrink:0; }
   .sb-user-info { flex:1;min-width:0; }
   .sb-user-name { color:var(--sidebar-hover-txt);font-weight:700;font-size:0.8125rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px; }
-  .sb-user-sub  { color:var(--sidebar-text);font-size:0.6875rem;margin:0;opacity:0.6; }
+  .sb-user-sub  { color:var(--sidebar-text);font-size:0.6875rem;margin:0;opacity:0.6;white-space:normal;overflow-wrap:anywhere;line-height:1.3; }
   .sb-settings  { color:var(--sidebar-text);opacity:0.45;text-decoration:none;padding:0.2rem;flex-shrink:0;transition:opacity 0.2s;display:flex;align-items:center; }
   .sb-settings:hover { opacity:0.85; }
   .sb-nav { padding:0.5rem;flex:1; }
@@ -452,17 +454,23 @@ const adminAnalysisNav = [
   const u = getUser();
   if (!u) return;
 
-  // Nombre completo con los 4 segmentos
-  const full     = getFullName(u) || u.id;
-  const initials = getInitials(u);
-  const avatarEl = document.getElementById('sb-avatar');
-  const nameEl   = document.getElementById('sb-name');
-  const subEl    = document.getElementById('sb-sub');
+  // Por espacio: solo primer nombre + primer apellido.
+  const shortName = [u.firstName, u.firstSurname].filter(Boolean).join(' ') || getFullName(u) || u.id;
+  const initials  = getInitials(u);
+  const avatarEl  = document.getElementById('sb-avatar');
+  const nameEl    = document.getElementById('sb-name');
+  const subEl     = document.getElementById('sb-sub');
   if (avatarEl) avatarEl.textContent = initials;
-  if (nameEl)   nameEl.textContent   = full;
-  if (subEl)    subEl.textContent    = isAdmin()
-    ? 'Administrador'
-    : (u.programId ? `Programa ${u.programId}` : 'Estudiante');
+  if (nameEl)   nameEl.textContent   = shortName;
+  if (subEl)    subEl.textContent    = isAdmin() ? 'Administrador' : 'Estudiante';
+
+  // Estudiante: mostrar el NOMBRE del programa (no "Programa 019").
+  if (!isAdmin() && u.programId && subEl) {
+    import('../../lib/api/programs.api')
+      .then(({ programsApi }) => programsApi.findById(u.programId!))
+      .then(pr => { if (pr?.data?.programName) subEl.textContent = `Programa · ${pr.data.programName}`; })
+      .catch(() => {});
+  }
 
   if (isAdmin()) {
     // Admin: solo panel de administración, NO historial/rankings de estudiantes

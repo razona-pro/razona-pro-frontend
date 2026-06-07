@@ -161,6 +161,7 @@ export interface RankingStudentDto {
   studentId: string;
   studentName?: string;
   programId: string;
+  programName?: string;
   totalScore: number;
   triedsScore: number;
   aiTriedsScore: number;
@@ -249,6 +250,7 @@ export interface AiQuestionDto {
   isCorrect:       boolean | null;  // null = no respondida
   correctIndex:    number | null;   // null = no revelada (solo admin/review)
   explanation:     string | null;   // null = no revelada (solo admin/review)
+  competenceId?:   string;          // competencia de esta pregunta (multi-competencia)
 }
 
 export interface AiStartResponseDto {

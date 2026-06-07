@@ -117,6 +117,7 @@ import { Icon } from 'astro-icon/components';
           <!-- Cabecera -->
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
             <span id="q-number-badge" style="font-size:0.6875rem;font-weight:800;color:#7C3AED;background:#EDE9FE;border:1.5px solid #C4B5FD;padding:3px 10px;border-radius:20px">P1</span>
+            <span id="q-comp-chip" style="display:none;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#EEF2FF;color:#4F46E5"></span>
             <span id="q-diff-badge" style="padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700"></span>
             <span id="q-answered-badge" style="display:none;padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#D1FAE5;color:#059669">✓ Respondida</span>
             <button id="ai-doubt-btn"
@@ -331,6 +332,7 @@ import { Icon } from 'astro-icon/components';
 
   // ── Estado ───────────────────────────────────────────────────────
   let allQuestions:   AiQuestionDto[] = [];   // preguntas generadas hasta ahora
+  const compNameById: Record<string, string> = {};   // competenceId → nombre (multi-competencia)
   let currentQ:       AiQuestionDto | null = null;
   let totalQuestions  = totalQParam;
   let answeredCount   = 0;
@@ -395,6 +397,15 @@ import { Icon } from 'astro-icon/components';
     const qNum = (allQuestions.indexOf(q)) + 1;
     (document.getElementById('q-number-badge') as HTMLElement).textContent   = `P${qNum}`;
     (document.getElementById('q-progress-label') as HTMLElement).textContent = `Pregunta ${qNum} de ${totalQuestions}`;
+
+    // Competencia de esta pregunta (multi-competencia)
+    const compChip = document.getElementById('q-comp-chip') as HTMLElement;
+    if (q.competenceId) {
+      compChip.textContent = compNameById[q.competenceId] ?? q.competenceId;
+      compChip.style.display = 'inline';
+    } else {
+      compChip.style.display = 'none';
+    }
 
     // Dificultad
     const diff   = q.difficultyLevel ?? 5;
@@ -855,12 +866,11 @@ import { Icon } from 'astro-icon/components';
       // Mostrar las competencias de la sesión en la cabecera (multi-competencia).
       try {
         const compsRes = await competencesApi.findAll(false);
-        const nameById: Record<string, string> = {};
-        (compsRes.data ?? []).forEach(c => { nameById[c.competenceId] = c.competenceName; });
+        (compsRes.data ?? []).forEach(c => { compNameById[c.competenceId] = c.competenceName; });
         const ids = (triedData?.competenceIds && triedData.competenceIds.length)
           ? triedData.competenceIds
           : (triedData?.competenceId ? [triedData.competenceId] : []);
-        if (ids.length) badgeEl.textContent = ids.map(id => nameById[id] ?? id).join(' + ');
+        if (ids.length) badgeEl.textContent = ids.map(id => compNameById[id] ?? id).join(' + ');
       } catch {}
 
       if (triedData?.status === 'FINISHED') {

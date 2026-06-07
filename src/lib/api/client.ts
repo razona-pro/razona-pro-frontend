@@ -37,6 +37,15 @@ export async function apiFetch<T>(
   const json: ApiResponse<T> = await res.json();
 
   if (!res.ok || !json.success) {
+    // Sesión perdida (token inválido o cuenta desactivada a mitad de sesión):
+    // si teníamos token y NO es un endpoint público de auth/apelación, cerramos
+    // sesión y mandamos al login con el motivo, en vez de dejar la página vacía.
+    const isAuthPath = path.startsWith('/api/auth') || path.startsWith('/api/appeals');
+    if (res.status === 401 && token && !isAuthPath && typeof window !== 'undefined') {
+      localStorage.removeItem('rp_token');
+      const reason = json.code === 'ACCOUNT_DISABLED' ? 'disabled' : 'session';
+      window.location.replace(`/auth?reason=${reason}`);
+    }
     throw new ApiError(
       json.code ?? 'INTERNAL_ERROR',
       json.message ?? 'Error inesperado.',
