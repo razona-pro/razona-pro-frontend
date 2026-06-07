@@ -310,6 +310,7 @@ import { Icon } from 'astro-icon/components';
 <script>
   import { requireRole, isStudent } from '../../lib/auth';
   import { aiTriedsApi }           from '../../lib/api/ai-trieds.api';
+  import { competencesApi }        from '../../lib/api/competences.api';
   import { apiFetch }              from '../../lib/api/client';
   import { getCompStyle }          from '../../lib/utils';
   import { toast }                 from '../../lib/toast';
@@ -323,7 +324,7 @@ import { Icon } from 'astro-icon/components';
   const competenceId = params.get('comp')  ?? '';
   const totalQParam  = Number(params.get('total') ?? '10');
 
-  if (!aiTriedId || !competenceId) {
+  if (!aiTriedId) {
     window.location.replace('/ai-practice');
     throw new Error('Missing params');
   }
@@ -835,20 +836,32 @@ import { Icon } from 'astro-icon/components';
 
   // ── Init ────────────────────────────────────────────────────────
   async function init() {
-    // Pintar competencia
+    // Color base de la cabecera (competencia principal de la URL).
     const s = getCompStyle(competenceId, '');
     const badgeEl = document.getElementById('ai-comp-badge')!;
     badgeEl.style.cssText = `padding:3px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;flex-shrink:0;background:${s.bg || '#EDE9FE'};color:${s.color || '#7C3AED'}`;
+    badgeEl.textContent = 'Práctica IA';
 
     try {
       // Cargar preguntas ya generadas de la sesión (creada en index.astro)
       const questRes = await aiTriedsApi.listQuestions(aiTriedId);
       allQuestions   = questRes.data ?? [];
 
-      // Obtener info de la sesión para saber totalQuestions
+      // Obtener info de la sesión para saber totalQuestions y competencias
       const triedRes  = await aiTriedsApi.findById(aiTriedId);
       const triedData = triedRes.data;
       if (triedData?.totalQuestions) totalQuestions = triedData.totalQuestions;
+
+      // Mostrar las competencias de la sesión en la cabecera (multi-competencia).
+      try {
+        const compsRes = await competencesApi.findAll(false);
+        const nameById: Record<string, string> = {};
+        (compsRes.data ?? []).forEach(c => { nameById[c.competenceId] = c.competenceName; });
+        const ids = (triedData?.competenceIds && triedData.competenceIds.length)
+          ? triedData.competenceIds
+          : (triedData?.competenceId ? [triedData.competenceId] : []);
+        if (ids.length) badgeEl.textContent = ids.map(id => nameById[id] ?? id).join(' + ');
+      } catch {}
 
       if (triedData?.status === 'FINISHED') {
         showResults(triedData.score ?? 0, triedData.correctAnswers ?? 0, triedData.totalQuestions);

@@ -612,21 +612,14 @@ async function initStudentDashboard() {
         // por competencia se calcula desde la revisión por pregunta (sumando aciertos por
         // competencia a partir del review de cada intento finalizado).
         const byComp: Record<string, number[]> = {};
-        Promise.allSettled(sorted.slice(0, 30).map(t => triedsApi.getReview(t.triedId)))
-          .then(reviews => {
-            reviews.forEach(r => {
+        // Desglose por competencia SIN revelar respuestas (endpoint seguro para el estudiante).
+        Promise.allSettled(sorted.slice(0, 30).map(t => triedsApi.getBreakdown(t.triedId)))
+          .then(breakdowns => {
+            breakdowns.forEach(r => {
               if (r.status !== 'fulfilled' || !r.value.data) return;
-              const perComp: Record<string, { ok: number; tot: number }> = {};
-              (r.value.data.questions ?? []).forEach(q => {
-                const cid = q.competenceId;
-                if (!cid || !q.selectedOptionId) return;
-                if (!perComp[cid]) perComp[cid] = { ok: 0, tot: 0 };
-                perComp[cid].tot++;
-                if (q.answeredCorrectly) perComp[cid].ok++;
-              });
-              Object.entries(perComp).forEach(([cid, v]) => {
-                if (v.tot === 0) return;
-                (byComp[cid] ??= []).push((v.ok / v.tot) * 100);
+              r.value.data.forEach(({ competenceId, correct, total }) => {
+                if (!competenceId || total === 0) return;
+                (byComp[competenceId] ??= []).push((correct / total) * 100);
               });
             });
             renderCompList();

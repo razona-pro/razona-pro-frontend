@@ -568,6 +568,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   const createModal = document.getElementById('create-modal')!;
 
   const openModal = () => {
+    // Estado limpio SIEMPRE: el navegador puede restaurar el valor previo de los
+    // <select> al recargar (bfcache/autocompletado) y enviar una dificultad vieja.
+    (document.getElementById('create-form') as HTMLFormElement).reset();
+    (document.getElementById('c-diff') as HTMLSelectElement).value = '';   // "No aplica"
+    const errEl = document.getElementById('create-error'); if (errEl) errEl.style.display = 'none';
+    // Reiniciar las opciones a 4 vacías (la primera marcada como correcta)
+    document.getElementById('options-container')!.innerHTML = '';
+    optionCount = 0;
+    for (let i = 0; i < 4; i++) addOption('', i === 0);
     // Pre-seleccionar competencia actual si hay una
     if (currentComp) (document.getElementById('c-comp') as HTMLSelectElement).value = currentComp;
     createModal.style.display = 'flex';

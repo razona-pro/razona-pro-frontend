@@ -3,7 +3,7 @@ export const prerender = false;
 import AppLayout from '../../../layouts/AppLayout.astro';
 ---
 
-<AppLayout title="Revisión de la prueba" currentPage="history" requiredRole="STUDENT">
+<AppLayout title="Revisión de la prueba" currentPage="admin-trieds" requiredRole="ADMIN">
   <div style="margin-bottom:1.25rem">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:8px;flex-wrap:wrap">
       <a href="/dashboard" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
@@ -94,14 +94,18 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 </style>
 
 <script>
-  import { requireAuth } from '../../../lib/auth';
+  import { requireAuth, isAdmin } from '../../../lib/auth';
   import { triedsApi }  from '../../../lib/api/trieds.api';
   import { competencesApi } from '../../../lib/api/competences.api';
   import type { TriedReviewDto, QuestionReview } from '../../../lib/api/types';
   import { getCompStyle, fmtDuration, scoreColor } from '../../../lib/utils';
   import { toast } from '../../../lib/toast';
 
-  try { requireAuth(); } catch { throw new Error('redirect'); }
+  // La revisión con respuestas correctas es solo para administradores.
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
 
   const pathParts = window.location.pathname.split('/');
   const triedId   = pathParts[pathParts.length - 1];

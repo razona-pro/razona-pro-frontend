@@ -240,6 +240,35 @@ import { Icon } from 'astro-icon/components';
     <button id="info-modal-ok" style="width:100%;padding:0.75rem;border-radius:12px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-family:var(--font-sans);font-weight:700;font-size:0.875rem;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(212,18,36,.3)">Entendido</button>
   </div>
 </div>
+
+    <!-- ── MODAL: Verificación de correo (reenvío) ── -->
+    <div id="verify-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:210;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+      <div style="background:var(--ui-card,#fff);border-radius:20px;padding:2.25rem 2rem;max-width:400px;width:calc(100% - 2rem);text-align:center;animation:slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;box-shadow:0 20px 60px rgba(0,0,0,0.18)">
+        <div style="width:64px;height:64px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;background:#DBEAFE">
+          <svg width="30" height="30" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        </div>
+        <h3 style="font-size:1.125rem;font-weight:800;color:var(--ui-text-1,#1A1A1A);margin:0 0 0.5rem">Verifica tu correo</h3>
+        <p style="font-size:0.875rem;color:var(--ui-text-2,#6B7280);margin:0 0 1.25rem;line-height:1.6">Aún no has confirmado tu cuenta. Te enviamos un enlace de verificación a <strong id="verify-email" style="color:var(--ui-text-1,#1A1A1A)"></strong>. Revisa tu bandeja y la carpeta de spam.</p>
+        <button id="verify-resend-btn" style="width:100%;padding:0.75rem;border-radius:12px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:white;font-weight:700;font-size:0.875rem;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,.3);font-family:inherit">Reenviar correo de verificación</button>
+        <button id="verify-close-btn" style="width:100%;margin-top:8px;padding:0.6875rem;border-radius:12px;background:transparent;color:var(--ui-text-3,#9CA3AF);font-weight:600;font-size:0.8125rem;border:1.5px solid var(--ui-border,#E5E7EB);cursor:pointer;font-family:inherit">Cerrar</button>
+      </div>
+    </div>
+
+    <!-- ── MODAL: Cuenta desactivada / Apelación ── -->
+    <div id="appeal-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:210;align-items:center;justify-content:center;backdrop-filter:blur(5px)">
+      <div style="background:var(--ui-card,#fff);border-radius:20px;padding:2rem;max-width:440px;width:calc(100% - 2rem);animation:slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;box-shadow:0 24px 70px rgba(0,0,0,0.22)">
+        <div style="width:64px;height:64px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;background:#FEE2E2">
+          <svg width="30" height="30" fill="none" stroke="#DC2626" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3 id="appeal-title" style="font-size:1.1875rem;font-weight:900;color:#DC2626;margin:0 0 0.5rem;text-align:center">Cuenta desactivada</h3>
+        <p id="appeal-desc" style="font-size:0.875rem;color:var(--ui-text-2,#6B7280);margin:0 0 1.25rem;line-height:1.6;text-align:center"></p>
+
+        <!-- Cuerpo dinámico -->
+        <div id="appeal-body"></div>
+
+        <button id="appeal-close-btn" style="width:100%;margin-top:10px;padding:0.6875rem;border-radius:12px;background:transparent;color:var(--ui-text-3,#9CA3AF);font-weight:600;font-size:0.8125rem;border:1.5px solid var(--ui-border,#E5E7EB);cursor:pointer;font-family:inherit">Cerrar</button>
+      </div>
+    </div>
   </main>
 </BaseLayout>
 
@@ -637,6 +666,7 @@ import { Icon } from 'astro-icon/components';
 
 <script>
   import { authApi } from '../lib/api/auth.api';
+  import { appealsApi } from '../lib/api/appeals.api';
   import { saveSession, redirectIfAuthenticated } from '../lib/auth';
   import { toast } from '../lib/toast';
 
@@ -671,8 +701,6 @@ import { Icon } from 'astro-icon/components';
       const input = document.getElementById(btn.dataset.target ?? '') as HTMLInputElement | null;
       if (input) input.type = 'password';
     });
-    // Quitar el aviso de reenvío de verificación si estaba visible
-    document.getElementById('resend-box')?.remove();
   }
 
   function switchView(v: View) {
@@ -780,10 +808,12 @@ import { Icon } from 'astro-icon/components';
       }
     } catch (err: any) {
       (window as any).rpLoader?.hide();
-      // EMAIL_NOT_VERIFIED → ofrecer reenvío en vez del modal de error
+      // EMAIL_NOT_VERIFIED → modal de reenvío de verificación
       if (err?.code === 'EMAIL_NOT_VERIFIED') {
-        showMsg('login-msg', 'Debes verificar tu correo antes de ingresar.', 'error');
-        showResendVerification(email);
+        openVerifyModal(email);
+      } else if (err?.code === 'ACCOUNT_DISABLED' && /^[0-9]{7}$/.test(code)) {
+        // Estudiante desactivado → flujo de apelación (requiere credenciales válidas)
+        openAppealFlow(code, email, password);
       } else {
         showInfoModal('error', 'Error al ingresar', err?.message ?? 'Credenciales incorrectas.');
       }
@@ -792,40 +822,130 @@ import { Icon } from 'astro-icon/components';
     }
   });
 
-  // ── Reenvío de verificación (con cooldown manejado por el backend) ──
-  function showResendVerification(email: string) {
-    document.getElementById('resend-box')?.remove();
-    const anchor = document.getElementById('login-msg');
-    if (!anchor) return;
-    const box = document.createElement('div');
-    box.id = 'resend-box';
-    box.className = 'auth-msg';
-    box.style.cssText = 'display:block;margin-top:10px;background:var(--brand-muted);border:1px solid var(--brand-light);border-radius:10px;padding:12px 14px;color:var(--ui-text-1)';
-    box.innerHTML =
-      `<span style="display:block;font-size:0.8125rem;margin-bottom:9px">¿No recibiste el correo? Reenviar el enlace de verificación a <strong>${email}</strong>.</span>` +
-      `<button type="button" id="resend-btn" style="border:none;border-radius:8px;padding:8px 16px;font-size:0.8125rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff;font-family:inherit">Reenviar correo</button>`;
-    anchor.insertAdjacentElement('afterend', box);
+  // ════════════════════════════════════════════════════════════════════
+  //  MODAL: Verificación de correo (reenvío con cooldown)
+  // ════════════════════════════════════════════════════════════════════
+  function openVerifyModal(email: string) {
+    const modal = document.getElementById('verify-modal') as HTMLElement;
+    (document.getElementById('verify-email') as HTMLElement).textContent = email;
+    const btn = document.getElementById('verify-resend-btn') as HTMLButtonElement;
+    btn.disabled = false; btn.textContent = 'Reenviar correo de verificación';
+    modal.style.display = 'flex';
 
-    const btn = document.getElementById('resend-btn') as HTMLButtonElement;
-    btn.addEventListener('click', async () => {
+    btn.onclick = async () => {
       btn.disabled = true; btn.textContent = 'Enviando...';
       try {
         const res = await authApi.resendVerification(email);
         toast.success('Correo reenviado', { description: 'Revisa tu bandeja de entrada y la carpeta de spam.' });
         startResendCooldown(btn, res.data?.cooldownSeconds ?? 60);
       } catch (e: any) {
-        // El backend devuelve el mensaje con los segundos restantes si va muy rápido
-        btn.disabled = false; btn.textContent = 'Reenviar correo';
+        btn.disabled = false; btn.textContent = 'Reenviar correo de verificación';
         toast.error('No se pudo reenviar', { description: e?.message ?? 'Intenta más tarde.' });
       }
-    });
+    };
+  }
+  document.getElementById('verify-close-btn')?.addEventListener('click', () => {
+    (document.getElementById('verify-modal') as HTMLElement).style.display = 'none';
+  });
+
+  // ════════════════════════════════════════════════════════════════════
+  //  MODAL: Cuenta desactivada / Apelación
+  // ════════════════════════════════════════════════════════════════════
+  const REASON_TEXT: Record<string, string> = {
+    FRAUD:  'Tu cuenta fue desactivada por detectarse plagio durante un examen.',
+    MANUAL: 'Un administrador desactivó tu cuenta.',
+  };
+
+  async function openAppealFlow(code: string, email: string, password: string) {
+    const modal = document.getElementById('appeal-modal') as HTMLElement;
+    const descEl = document.getElementById('appeal-desc') as HTMLElement;
+    const bodyEl = document.getElementById('appeal-body') as HTMLElement;
+    descEl.textContent = 'Consultando el estado de tu cuenta...';
+    bodyEl.innerHTML = '';
+    modal.style.display = 'flex';
+
+    let status;
+    try {
+      status = (await appealsApi.accountStatus(code, email, password)).data;
+    } catch (e: any) {
+      modal.style.display = 'none';
+      showInfoModal('error', 'No se pudo continuar', e?.message ?? 'Credenciales incorrectas.');
+      return;
+    }
+    if (!status) return;
+
+    if (status.active) {
+      modal.style.display = 'none';
+      showInfoModal('success', 'Cuenta activa', 'Tu cuenta está activa. Intenta iniciar sesión nuevamente.');
+      return;
+    }
+
+    descEl.textContent = REASON_TEXT[status.deactivationReason ?? 'MANUAL'] ?? REASON_TEXT.MANUAL;
+
+    // Ya tiene una apelación en revisión → no puede enviar otra.
+    if (status.hasPendingAppeal) {
+      bodyEl.innerHTML = `
+        <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:14px 16px;text-align:center">
+          <p style="font-size:0.875rem;font-weight:700;color:#92400E;margin:0 0 4px">Apelación en revisión</p>
+          <p style="font-size:0.8125rem;color:#92400E;margin:0;line-height:1.55">Ya enviaste una apelación. Un administrador la revisará y, si procede, tu cuenta será reactivada. Te llegará la respuesta por correo.</p>
+        </div>`;
+      return;
+    }
+
+    // Si fue rechazada antes, mostrar la respuesta del admin y permitir apelar de nuevo.
+    const rejectedNote = status.lastAppealStatus === 'REJECTED'
+      ? `<div style="background:#FEE2E2;border:1px solid #FECACA;border-radius:10px;padding:10px 13px;margin-bottom:12px">
+           <p style="font-size:0.75rem;font-weight:700;color:#991B1B;margin:0 0 3px">Tu apelación anterior fue rechazada</p>
+           ${status.lastAdminResponse ? `<p style="font-size:0.75rem;color:#991B1B;margin:0;line-height:1.5">Motivo: ${escapeHtml(status.lastAdminResponse)}</p>` : ''}
+         </div>`
+      : '';
+
+    bodyEl.innerHTML = `
+      ${rejectedNote}
+      <label style="display:block;font-size:0.8125rem;font-weight:700;color:var(--ui-text-1,#1A1A1A);margin-bottom:6px">Escribe tu apelación</label>
+      <textarea id="appeal-message" maxlength="1000" placeholder="Explica por qué deberían reactivar tu cuenta (mínimo 10 caracteres)..."
+        style="width:100%;min-height:110px;padding:11px 13px;border:1.5px solid var(--ui-border,#E5E7EB);border-radius:11px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1,#1A1A1A);background:var(--ui-surface,#F9FAFB);resize:vertical;outline:none;box-sizing:border-box"></textarea>
+      <div id="appeal-error" style="display:none;color:#DC2626;font-size:0.75rem;margin-top:6px"></div>
+      <button id="appeal-send-btn" style="width:100%;margin-top:12px;padding:0.75rem;border-radius:12px;background:linear-gradient(135deg,#D41224,#9B1F24);color:white;font-weight:700;font-size:0.875rem;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(212,18,36,.28);font-family:inherit">Enviar apelación</button>`;
+
+    const sendBtn = document.getElementById('appeal-send-btn') as HTMLButtonElement;
+    const errEl   = document.getElementById('appeal-error') as HTMLElement;
+    sendBtn.onclick = async () => {
+      const msg = (document.getElementById('appeal-message') as HTMLTextAreaElement).value.trim();
+      errEl.style.display = 'none';
+      if (msg.length < 10) {
+        errEl.textContent = 'La apelación debe tener al menos 10 caracteres.';
+        errEl.style.display = 'block';
+        return;
+      }
+      sendBtn.disabled = true; sendBtn.textContent = 'Enviando...';
+      try {
+        await appealsApi.submit(code, email, password, msg);
+        modal.style.display = 'none';
+        showInfoModal('success', 'Apelación enviada',
+          'Tu apelación fue enviada. Un administrador la revisará y, si procede, tu cuenta será reactivada.');
+      } catch (e: any) {
+        sendBtn.disabled = false; sendBtn.textContent = 'Enviar apelación';
+        errEl.textContent = e?.message ?? 'No se pudo enviar la apelación.';
+        errEl.style.display = 'block';
+      }
+    };
+  }
+  document.getElementById('appeal-close-btn')?.addEventListener('click', () => {
+    (document.getElementById('appeal-modal') as HTMLElement).style.display = 'none';
+  });
+
+  function escapeHtml(s: string): string {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
   }
 
   function startResendCooldown(btn: HTMLButtonElement, seconds: number) {
     let s = seconds;
     btn.disabled = true;
     const tick = () => {
-      if (s <= 0) { btn.disabled = false; btn.textContent = 'Reenviar correo'; return; }
+      if (s <= 0) { btn.disabled = false; btn.textContent = 'Reenviar correo de verificación'; return; }
       btn.textContent = `Reenviar en ${s}s`;
       s--; setTimeout(tick, 1000);
     };

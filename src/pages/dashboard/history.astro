@@ -47,6 +47,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
       <option value="ABANDONED">Abandonados</option>
       <option value="TIMED_OUT">Tiempo agotado</option>
       <option value="ANULADO">Anulados por fraude</option>
+      <option value="PLAGIO">Anulados por plagio</option>
     </select>
     <select id="comp-filter" style="padding:7px 14px;border:1.5px solid var(--ui-border);border-radius:10px;background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;outline:none;cursor:pointer">
       <option value="ALL">Todas las competencias</option>
@@ -129,17 +130,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
       const accPct = t.totalQuestions > 0 ? ((t.correctAnswers ?? 0) / t.totalQuestions) * 100 : 0;
       const sc = scoreColor(accPct);
       const statusColor: Record<string, string> = {
-        FINISHED: '#059669', IN_PROGRESS: '#2563EB', ABANDONED: '#DC2626', TIMED_OUT: '#D97706', ANULADO: '#991B1B',
+        FINISHED: '#059669', IN_PROGRESS: '#2563EB', ABANDONED: '#DC2626', TIMED_OUT: '#D97706', ANULADO: '#991B1B', PLAGIO: '#991B1B',
       };
       const statusLabel: Record<string, string> = {
-        FINISHED: 'Finalizado', IN_PROGRESS: 'En progreso', ABANDONED: 'Abandonado', TIMED_OUT: 'Tiempo agotado', ANULADO: 'Anulado por fraude',
+        FINISHED: 'Finalizado', IN_PROGRESS: 'En progreso', ABANDONED: 'Abandonado', TIMED_OUT: 'Tiempo agotado', ANULADO: 'Anulado por fraude', PLAGIO: 'Anulado por plagio',
       };
 
       const div = document.createElement('div');
       div.className = 'tried-item';
 
-      const showReviewBtn = currentTab === 'trieds' && t.status === 'FINISHED';
-      const reviewHref    = `/tests/review/${t.triedId}`;
 
       div.innerHTML = `
         <div style="width:42px;height:42px;border-radius:11px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:900;color:${s.color}">${s.short}</div>
@@ -156,9 +155,6 @@ import AppLayout from '../../layouts/AppLayout.astro';
           ${t.score != null
             ? `<div><p style="font-size:1.5rem;font-weight:900;color:${sc};margin:0;line-height:1">${t.score.toFixed(0)} <span style="font-size:0.875rem;font-weight:700;color:var(--ui-text-3)">pts</span></p><p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0">${t.correctAnswers ?? 0}/${t.totalQuestions} correctas</p></div>`
             : `<p style="font-size:0.875rem;color:var(--ui-text-3);margin:0">${t.totalQuestions} preg.</p>`}
-          ${showReviewBtn
-            ? `<a href="${reviewHref}" style="font-size:0.6875rem;font-weight:700;color:var(--brand);text-decoration:none;padding:4px 10px;border-radius:8px;border:1.5px solid rgba(212,18,36,0.3);background:rgba(212,18,36,0.05);white-space:nowrap;transition:all 0.15s" onmouseover="this.style.background='rgba(212,18,36,0.1)'" onmouseout="this.style.background='rgba(212,18,36,0.05)'">📋 Ver revisión</a>`
-            : ''}
         </div>`;
 
       list.appendChild(div);

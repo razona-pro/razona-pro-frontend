@@ -1,0 +1,250 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Apelaciones" currentPage="admin-appeals">
+  <div style="margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--ui-text-3);margin-bottom:6px">
+      <a href="/admin/students" style="color:var(--ui-text-3);text-decoration:none" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--ui-text-3)'">Panel de control</a>
+      <span>›</span><span style="color:var(--ui-text-1);font-weight:600">Apelaciones</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 3px;letter-spacing:-0.5px">Apelaciones de estudiantes</h1>
+        <p style="font-size:0.875rem;color:var(--ui-text-2);margin:0">Solicitudes de reactivación de cuentas desactivadas por plagio o por un administrador.</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div class="stat-chip" style="border-left-color:#D97706"><span class="sc-label">Pendientes</span><p id="n-pending" class="sc-val" style="color:#D97706">-</p></div>
+        <div class="stat-chip" style="border-left-color:#059669"><span class="sc-label">Aprobadas</span><p id="n-approved" class="sc-val" style="color:#059669">-</p></div>
+        <div class="stat-chip" style="border-left-color:#991B1B"><span class="sc-label">Rechazadas</span><p id="n-rejected" class="sc-val" style="color:#991B1B">-</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
+    <button class="sfilt active" data-status="">Todas</button>
+    <button class="sfilt" data-status="PENDING">Pendientes</button>
+    <button class="sfilt" data-status="APPROVED">Aprobadas</button>
+    <button class="sfilt" data-status="REJECTED">Rechazadas</button>
+    <span id="count-label" style="font-size:0.8125rem;color:var(--ui-text-3);margin-left:auto"></span>
+  </div>
+
+  <div id="appeals-list" style="display:flex;flex-direction:column;gap:0.75rem"></div>
+
+  <div style="margin-top:1rem;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <span id="page-info" style="font-size:0.8125rem;color:var(--ui-text-3)"></span>
+    <div style="display:flex;gap:6px">
+      <button id="btn-prev" class="page-btn" disabled>← Anterior</button>
+      <button id="btn-next" class="page-btn">Siguiente →</button>
+    </div>
+  </div>
+</AdminLayout>
+
+<!-- Modal detalle / resolver -->
+<div id="detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:20px;padding:2rem;max-width:520px;width:calc(100%-2rem);max-height:90vh;overflow-y:auto;animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h2 style="font-size:1.0625rem;font-weight:800;color:var(--ui-text-1);margin:0">Detalle de la apelación</h2>
+      <button id="detail-close" style="background:none;border:none;cursor:pointer;color:var(--ui-text-3);font-size:1.25rem;line-height:1;padding:4px">×</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div class="info-row"><span class="info-label">Estudiante</span><p id="d-student" class="info-val"></p></div>
+      <div class="info-row"><span class="info-label">Código</span><p id="d-code" class="info-val"></p></div>
+      <div class="info-row"><span class="info-label">Motivo de desactivación</span><p id="d-reason" class="info-val"></p></div>
+      <div class="info-row"><span class="info-label">Fecha</span><p id="d-date" class="info-val"></p></div>
+    </div>
+
+    <div class="info-row" style="margin-bottom:12px">
+      <span class="info-label">Mensaje del estudiante</span>
+      <div id="d-message" style="padding:11px 13px;background:var(--ui-surface);border-radius:8px;border:1px solid var(--ui-border);font-size:0.875rem;color:var(--ui-text-1);line-height:1.6;margin-top:4px;white-space:pre-wrap"></div>
+    </div>
+
+    <!-- Si ya está resuelta -->
+    <div id="d-resolved" style="display:none;margin-bottom:12px"></div>
+
+    <!-- Resolver (solo si PENDING) -->
+    <div id="d-resolve-box" style="border-top:1px solid var(--ui-border);padding-top:1rem">
+      <label class="info-label" style="display:block;margin-bottom:6px">Respuesta al estudiante (opcional)</label>
+      <textarea id="d-response" maxlength="1000" placeholder="Mensaje que verá el estudiante (opcional)..."
+        style="width:100%;min-height:70px;padding:10px 12px;border:1.5px solid var(--ui-border);border-radius:9px;font-family:inherit;font-size:0.875rem;color:var(--ui-text-1);background:var(--ui-surface);resize:vertical;outline:none;box-sizing:border-box;margin-bottom:10px"></textarea>
+      <div style="display:flex;gap:8px">
+        <button id="btn-reject"  style="flex:1;padding:0.6875rem;border-radius:10px;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;background:#FEE2E2;border:1.5px solid #FECACA;color:#991B1B">Rechazar</button>
+        <button id="btn-approve" style="flex:1;padding:0.6875rem;border-radius:10px;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;background:linear-gradient(135deg,#059669,#047857);border:none;color:white">Aprobar y reactivar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)} }
+  @keyframes shimmer { 0%{background-position:-400px 0}100%{background-position:400px 0} }
+  .stat-chip { background:var(--ui-card);border-radius:12px;padding:10px 14px;border:1px solid var(--ui-border);border-left:3px solid;text-align:center;min-width:80px }
+  .sc-label  { font-size:0.625rem;font-weight:700;color:var(--ui-text-3);text-transform:uppercase;letter-spacing:0.5px;display:block }
+  .sc-val    { font-size:1.375rem;font-weight:900;margin:2px 0 0;line-height:1 }
+  .sfilt { padding:6px 16px;border-radius:20px;font-size:0.8125rem;font-weight:600;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-2);cursor:pointer;transition:all 0.15s;font-family:inherit }
+  .sfilt:hover  { border-color:var(--brand);color:var(--brand); }
+  .sfilt.active { background:var(--brand);color:white;border-color:var(--brand); }
+  .appeal-card { background:var(--ui-card);border-radius:16px;border:1px solid var(--ui-border);padding:1.25rem 1.5rem;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s,transform 0.15s }
+  .appeal-card:hover { border-color:var(--ui-border-2);box-shadow:0 6px 20px rgba(0,0,0,0.06);transform:translateY(-2px) }
+  .page-btn { padding:6px 14px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--ui-text-1);font-family:inherit;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:all 0.15s }
+  .page-btn:hover:not(:disabled) { border-color:var(--brand);color:var(--brand) }
+  .page-btn:disabled { opacity:0.4;cursor:not-allowed }
+  .info-row  { display:flex;flex-direction:column;gap:3px }
+  .info-label { font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ui-text-3) }
+  .info-val  { font-size:0.875rem;font-weight:600;color:var(--ui-text-1);background:var(--ui-surface);border-radius:7px;padding:5px 9px;border:1px solid var(--ui-border);margin:0 }
+  .skel { background:linear-gradient(90deg,var(--ui-surface) 25%,var(--ui-border) 50%,var(--ui-surface) 75%);background-size:400px 100%;animation:shimmer 1.5s infinite;border-radius:14px }
+</style>
+
+<script>
+  import { requireAuth, isAdmin } from '../../lib/auth';
+  import { appealsApi, type AppealDto } from '../../lib/api/appeals.api';
+  import { toast } from '../../lib/toast';
+
+  try {
+    requireAuth();
+    if (!isAdmin()) { window.location.replace('/dashboard'); throw new Error(); }
+  } catch { throw new Error('redirect'); }
+
+  let page = 0;
+  const SIZE = 15;
+  let totalPages = 1;
+  let filterStatus = '';
+  let selected: AppealDto | null = null;
+
+  const STATUS: Record<string, { label: string; bg: string; color: string; border: string }> = {
+    PENDING:  { label: 'Pendiente', bg:'#FEF3C7', color:'#92400E', border:'#FDE68A' },
+    APPROVED: { label: 'Aprobada',  bg:'#D1FAE5', color:'#065F46', border:'#A7F3D0' },
+    REJECTED: { label: 'Rechazada', bg:'#FEE2E2', color:'#991B1B', border:'#FECACA' },
+  };
+  const REASON: Record<string, string> = { FRAUD: 'Plagio', MANUAL: 'Manual (admin)' };
+
+  const fmtDate = (iso: string) => new Date(iso).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+
+  async function loadPage() {
+    const list = document.getElementById('appeals-list')!;
+    list.innerHTML = '<div class="skel" style="height:80px;margin-bottom:8px"></div><div class="skel" style="height:80px;width:90%"></div>';
+    try {
+      const res = await appealsApi.list(filterStatus || undefined, page, SIZE);
+      const data = res.data!;
+      totalPages = data.totalPages;
+      (document.getElementById('page-info') as HTMLElement).textContent  = `Pág. ${page + 1} de ${totalPages || 1} - ${data.totalElements} apelación(es)`;
+      (document.getElementById('count-label') as HTMLElement).textContent = `${data.totalElements} resultado(s)`;
+      (document.getElementById('btn-prev') as HTMLButtonElement).disabled = page === 0;
+      (document.getElementById('btn-next') as HTMLButtonElement).disabled = page >= totalPages - 1;
+
+      if (!filterStatus) {
+        (document.getElementById('n-pending')  as HTMLElement).textContent = String(data.content.filter(a => a.status === 'PENDING').length);
+        (document.getElementById('n-approved') as HTMLElement).textContent = String(data.content.filter(a => a.status === 'APPROVED').length);
+        (document.getElementById('n-rejected') as HTMLElement).textContent = String(data.content.filter(a => a.status === 'REJECTED').length);
+      }
+      renderList(data.content);
+    } catch (err: any) {
+      list.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--ui-text-3)">Error al cargar: ${err?.message}</div>`;
+    }
+  }
+
+  function renderList(items: AppealDto[]) {
+    const list = document.getElementById('appeals-list')!;
+    list.innerHTML = '';
+    if (!items.length) {
+      list.innerHTML = '<div style="text-align:center;padding:2.5rem;color:var(--ui-text-3)"><p style="font-size:1rem;font-weight:700;color:var(--ui-text-1);margin:0 0 4px">Sin apelaciones</p><p style="font-size:0.875rem">No hay solicitudes con los filtros actuales.</p></div>';
+      return;
+    }
+    items.forEach(a => {
+      const sc = STATUS[a.status] ?? { label: a.status, bg:'#F3F4F6', color:'#6B7280', border:'#E5E7EB' };
+      const card = document.createElement('div');
+      card.className = 'appeal-card';
+      card.style.borderLeft = `4px solid ${sc.color}`;
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:${sc.bg};color:${sc.color};border:1px solid ${sc.border}">${sc.label}</span>
+          <span style="padding:3px 9px;border-radius:12px;font-size:0.6875rem;font-weight:700;background:rgba(212,18,36,0.08);color:#D41224">${REASON[a.deactivationReason ?? 'MANUAL'] ?? 'Manual'}</span>
+          <span style="margin-left:auto;font-size:0.6875rem;color:var(--ui-text-3)">${fmtDate(a.createdAt)}</span>
+        </div>
+        <p style="font-size:0.875rem;color:var(--ui-text-1);margin:0 0 8px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtml(a.message)}</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px solid var(--ui-border)">
+          <span style="font-size:0.75rem;color:var(--ui-text-2);font-weight:600">👤 ${escapeHtml(a.studentName ?? a.studentId)} (${a.studentId})</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;color:var(--brand)">Ver detalle <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+        </div>`;
+      card.addEventListener('click', () => openDetail(a));
+      list.appendChild(card);
+    });
+  }
+
+  function openDetail(a: AppealDto) {
+    selected = a;
+    (document.getElementById('d-student') as HTMLElement).textContent = a.studentName ?? a.studentId;
+    (document.getElementById('d-code') as HTMLElement).textContent    = a.studentId;
+    (document.getElementById('d-reason') as HTMLElement).textContent  = REASON[a.deactivationReason ?? 'MANUAL'] ?? 'Manual';
+    (document.getElementById('d-date') as HTMLElement).textContent    = fmtDate(a.createdAt);
+    (document.getElementById('d-message') as HTMLElement).textContent = a.message;
+
+    const resolvedEl   = document.getElementById('d-resolved') as HTMLElement;
+    const resolveBox   = document.getElementById('d-resolve-box') as HTMLElement;
+    if (a.status === 'PENDING') {
+      resolvedEl.style.display = 'none';
+      resolveBox.style.display = 'block';
+      (document.getElementById('d-response') as HTMLTextAreaElement).value = '';
+    } else {
+      resolveBox.style.display = 'none';
+      const sc = STATUS[a.status];
+      resolvedEl.style.display = 'block';
+      resolvedEl.innerHTML = `
+        <div style="background:${sc.bg};border:1px solid ${sc.border};border-radius:10px;padding:11px 13px">
+          <p style="font-size:0.75rem;font-weight:800;color:${sc.color};margin:0 0 3px">Apelación ${sc.label.toLowerCase()}</p>
+          ${a.adminResponse ? `<p style="font-size:0.8125rem;color:${sc.color};margin:0;line-height:1.5">Respuesta: ${escapeHtml(a.adminResponse)}</p>` : '<p style="font-size:0.8125rem;color:'+sc.color+';margin:0;opacity:0.8">Sin respuesta escrita.</p>'}
+          ${a.resolvedAt ? `<p style="font-size:0.6875rem;color:${sc.color};margin:6px 0 0;opacity:0.8">Resuelta el ${fmtDate(a.resolvedAt)}${a.resolvedBy ? ' por ' + a.resolvedBy : ''}</p>` : ''}
+        </div>`;
+    }
+    (document.getElementById('detail-modal') as HTMLElement).style.display = 'flex';
+  }
+
+  async function resolve(approve: boolean) {
+    if (!selected) return;
+    const response = (document.getElementById('d-response') as HTMLTextAreaElement).value.trim() || undefined;
+    const approveBtn = document.getElementById('btn-approve') as HTMLButtonElement;
+    const rejectBtn  = document.getElementById('btn-reject') as HTMLButtonElement;
+    approveBtn.disabled = true; rejectBtn.disabled = true;
+    try {
+      await appealsApi.resolve(selected.appealId, approve, response);
+      toast.success(approve ? 'Apelación aprobada' : 'Apelación rechazada',
+        { description: approve ? 'La cuenta del estudiante fue reactivada.' : 'La cuenta sigue desactivada.' });
+      (document.getElementById('detail-modal') as HTMLElement).style.display = 'none';
+      selected = null;
+      loadPage();
+    } catch (err: any) {
+      toast.error('Error al resolver', { description: err?.message });
+    } finally {
+      approveBtn.disabled = false; rejectBtn.disabled = false;
+    }
+  }
+
+  function escapeHtml(s: string): string {
+    const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+  }
+
+  document.getElementById('btn-approve')?.addEventListener('click', () => resolve(true));
+  document.getElementById('btn-reject')?.addEventListener('click', () => resolve(false));
+  document.getElementById('detail-close')?.addEventListener('click', () => {
+    (document.getElementById('detail-modal') as HTMLElement).style.display = 'none'; selected = null;
+  });
+  document.getElementById('detail-modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('detail-modal')) {
+      (document.getElementById('detail-modal') as HTMLElement).style.display = 'none'; selected = null;
+    }
+  });
+  document.querySelectorAll<HTMLButtonElement>('.sfilt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sfilt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterStatus = btn.dataset.status ?? '';
+      page = 0; loadPage();
+    });
+  });
+  document.getElementById('btn-prev')?.addEventListener('click', () => { if (page > 0) { page--; loadPage(); } });
+  document.getElementById('btn-next')?.addEventListener('click', () => { if (page < totalPages - 1) { page++; loadPage(); } });
+
+  loadPage();
+</script>

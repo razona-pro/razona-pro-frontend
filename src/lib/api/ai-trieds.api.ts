@@ -18,11 +18,11 @@ export const aiTriedsApi = {
   findById: (aiTriedId: string) =>
     apiFetch<AiTriedDto>(`/api/ai-trieds/${aiTriedId}`),
 
-  // Iniciar sesión - genera batch completo y devuelve primera pregunta
-  start: (competenceId: string, totalQuestions: number, description?: string) =>
+  // Iniciar sesión multi-competencia - genera la primera pregunta y la devuelve
+  start: (competenceIds: string[], totalQuestions: number, description?: string) =>
     apiFetch<AiStartResponseDto>('/api/ai-trieds/start', {
       method: 'POST',
-      body:   JSON.stringify({ competenceId, totalQuestions, description }),
+      body:   JSON.stringify({ competenceIds, totalQuestions, description }),
     }),
 
   // Listar todas las preguntas del intento (para navegación)

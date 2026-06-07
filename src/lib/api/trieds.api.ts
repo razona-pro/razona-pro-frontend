@@ -37,6 +37,11 @@ export const triedsApi = {
       `/api/trieds/${triedId}/finish${timeSpentSeconds != null ? `?timeSpentSeconds=${timeSpentSeconds}` : ''}`,
       { method: 'PUT' }
     ),
+  /** Solo administradores: revisión completa con respuestas correctas y explicaciones. */
   getReview: (triedId: string) =>
     apiFetch<TriedReviewDto>(`/api/trieds/${triedId}/review`),
+  /** Desglose de aciertos por competencia (sin revelar respuestas); lo puede ver el estudiante dueño. */
+  getBreakdown: (triedId: string) =>
+    apiFetch<{ competenceId: string; correct: number; total: number }[]>(
+      `/api/trieds/${triedId}/breakdown`),
 };

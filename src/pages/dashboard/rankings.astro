@@ -230,8 +230,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
 <script>
   import { requireAuth, getUser } from '../../lib/auth';
   import { rankingsApi } from '../../lib/api/rankings.api';
+  import { competencesApi } from '../../lib/api/competences.api';
   import type { RankingStudentDto } from '../../lib/api/types';
   import { toast } from '../../lib/toast';
+
+  // Nombres de competencias para mostrar el alcance de cada ranking.
+  const competencesMap: Record<string, string> = {};
+  competencesApi.findAll(false)
+    .then(res => { (res.data ?? []).forEach(c => { competencesMap[c.competenceId] = c.competenceName; }); })
+    .catch(() => {});
 
   try { requireAuth(); } catch { throw new Error('redirect'); }
   const currentUser = getUser();
@@ -415,6 +422,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
         </span>
         <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#F3F4F6;color:#6B7280">
           📊 ${SOURCE_LABEL[ranking.sourceFilter] ?? ranking.sourceFilter}
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.6875rem;font-weight:700;background:#EDE9FE;color:#7C3AED">
+          🎯 ${(ranking.competenceIds && ranking.competenceIds.length)
+                ? ranking.competenceIds.map((id: string) => competencesMap[id] ?? id).join(' + ')
+                : 'Todas las competencias'}
         </span>
       </div>
       ${ranking.description

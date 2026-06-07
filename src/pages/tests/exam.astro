@@ -290,7 +290,7 @@ import { Icon } from 'astro-icon/components';
       <p id="result-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.65"></p>
       <div style="display:flex;gap:8px">
         <a href="/tests" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Otra prueba</a>
-        <a id="btn-review" href="#" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Ver revisión</a>
+        <a href="/dashboard/history" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Mi historial</a>
       </div>
       <a href="/dashboard" style="display:block;margin-top:10px;font-size:0.8125rem;color:var(--ui-text-3);text-decoration:none">Ir al panel de control →</a>
     </div>
@@ -516,7 +516,7 @@ import { Icon } from 'astro-icon/components';
     } catch { /* continuar con lógica local */ }
 
     // Límite = 2 eventos. Al segundo (o si el backend ya anuló) → anulación + cuenta desactivada.
-    if (resultStatus === 'ANULADO' || fraudViolations >= 2) {
+    if (resultStatus === 'PLAGIO' || resultStatus === 'ANULADO' || fraudViolations >= 2) {
       annulExam();
       return;
     }
@@ -927,14 +927,7 @@ import { Icon } from 'astro-icon/components';
     (document.getElementById('result-msg')  as HTMLElement).textContent = pct >= 80
       ? '¡Excelente! Estás muy bien preparado.' : pct >= 60
       ? '¡Buen trabajo! Sigue practicando.' : '¡Ánimo! Revisa los temas y vuelve a intentarlo.';
-    const reviewBtn = document.getElementById('btn-review') as HTMLAnchorElement;
-    if (reviewBtn) {
-      if (canReview) {
-        reviewBtn.href = `/tests/review/${triedId}`;
-      } else {
-        reviewBtn.style.display = 'none';
-      }
-    }
+    // La revisión con respuestas correctas es solo para administradores.
     (document.getElementById('results-overlay') as HTMLElement).style.display = 'flex';
     // Animar score
     let n = 0;

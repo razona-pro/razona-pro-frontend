@@ -30,6 +30,7 @@ export interface StudentDto {
   email: string;
   phone: string;
   isActive: boolean;
+  deactivationReason?: 'FRAUD' | 'MANUAL' | null;
   emailVerified: boolean;
   identityVerified: boolean;
 }
@@ -108,7 +109,7 @@ export interface TriedDto {
   programId?: string;
   testId: string;
   testName?: string;
-  status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED' | 'TIMED_OUT' | 'ANULADO';
+  status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED' | 'TIMED_OUT' | 'ANULADO' | 'PLAGIO';
   score?: number;
   totalQuestions: number;
   correctAnswers?: number;
@@ -151,7 +152,7 @@ export interface RankingDto {
   description?: string;
   periodType: string;
   sourceFilter: string;
-  competenceId?: string | null;
+  competenceIds?: string[];
   isActive: boolean;
 }
 
@@ -217,6 +218,7 @@ export interface AiTriedDto {
   studentId?: string;
   programId?: string;
   competenceId?: string;
+  competenceIds?: string[];
   status: 'IN_PROGRESS' | 'FINISHED' | 'ABANDONED' | 'ANULADO';
   score?: number;
   totalQuestions: number;

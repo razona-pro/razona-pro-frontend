@@ -32,10 +32,14 @@ import AppLayout from '../../layouts/AppLayout.astro';
         <h2 style="font-size:0.9375rem;font-weight:800;color:var(--ui-text-1);margin:0 0 1.125rem">Configurar sesión</h2>
 
         <div class="fg">
-          <label class="fl">Competencia a practicar</label>
-          <select id="setup-comp" class="fi">
-            <option value="">Selecciona una competencia...</option>
-          </select>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+            <label class="fl" style="margin:0">Competencias a practicar</label>
+            <button type="button" id="setup-comp-toggle" style="font-size:0.6875rem;font-weight:700;color:#6366F1;background:none;border:none;cursor:pointer;font-family:inherit;padding:2px 4px">Marcar todas</button>
+          </div>
+          <p style="font-size:0.6875rem;color:var(--ui-text-3);margin:0 0 8px">Marca una o varias; la sesión irá alternando entre ellas.</p>
+          <div id="setup-comp-list" style="display:flex;flex-direction:column;gap:6px;max-height:170px;overflow-y:auto;border:1.5px solid var(--ui-border);border-radius:9px;padding:8px 10px;background:var(--ui-surface)">
+            <span style="font-size:0.8125rem;color:var(--ui-text-3)">Cargando competencias...</span>
+          </div>
         </div>
 
         <div class="fg">
@@ -244,7 +248,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
   let aiEnabled      = false;
   let selectedQ      = 10;
-  let selectedCompId = '';
+  let selectedCompId = '';            // primera competencia seleccionada (para la URL del examen)
+  let selectedCompIds: string[] = []; // todas las competencias marcadas
   let selectedCompName = '';
 
   // ── Estado IA ──────────────────────────────────────────────────────────
@@ -283,23 +288,51 @@ import AppLayout from '../../layouts/AppLayout.astro';
     document.getElementById('banner-title')!.textContent = 'No se pudo verificar el módulo IA';
   });
 
-  // ── Competencias ────────────────────────────────────────────────────────
+  // ── Competencias (checkboxes multi-selección) ────────────────────────────
+  const compNameById: Record<string, string> = {};
   competencesApi.findAll(true).then(res => {
-    const sel = document.getElementById('setup-comp') as HTMLSelectElement;
-    sel.innerHTML = '<option value="">Selecciona una competencia...</option>';
-    (res.data ?? []).forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.competenceId;
-      opt.textContent = c.competenceName;
-      sel.appendChild(opt);
+    const comps = res.data ?? [];
+    comps.forEach(c => { compNameById[c.competenceId] = c.competenceName; });
+    const list = document.getElementById('setup-comp-list')!;
+    if (comps.length === 0) {
+      list.innerHTML = '<span style="font-size:0.8125rem;color:var(--ui-text-3)">No hay competencias disponibles.</span>';
+      return;
+    }
+    list.innerHTML = '';
+    comps.forEach(c => {
+      const lbl = document.createElement('label');
+      lbl.style.cssText = 'display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.8125rem;color:var(--ui-text-1)';
+      lbl.innerHTML =
+        `<input type="checkbox" class="setup-comp-cb" value="${c.competenceId}" style="width:16px;height:16px;accent-color:#6366F1;cursor:pointer">` +
+        `<span>${c.competenceName}</span>`;
+      list.appendChild(lbl);
     });
-    sel.addEventListener('change', () => {
-      selectedCompId   = sel.value;
-      const opt = sel.options[sel.selectedIndex];
-      selectedCompName = opt ? opt.textContent ?? '' : '';
-      validateForm();
-    });
+    list.addEventListener('change', () => { syncSelectedComps(); updateToggleLabel(); });
   }).catch(() => {});
+
+  function selectedCompCheckboxes() {
+    return Array.from(document.querySelectorAll<HTMLInputElement>('.setup-comp-cb'));
+  }
+  function syncSelectedComps() {
+    const checked = selectedCompCheckboxes().filter(cb => cb.checked);
+    selectedCompIds  = checked.map(cb => cb.value);
+    selectedCompId   = selectedCompIds[0] ?? '';
+    selectedCompName = checked.map(cb => compNameById[cb.value] ?? cb.value).join(' + ');
+    validateForm();
+  }
+  function updateToggleLabel() {
+    const cbs = selectedCompCheckboxes();
+    const all = cbs.length > 0 && cbs.every(cb => cb.checked);
+    const btn = document.getElementById('setup-comp-toggle');
+    if (btn) btn.textContent = all ? 'Desmarcar todas' : 'Marcar todas';
+  }
+  document.getElementById('setup-comp-toggle')?.addEventListener('click', () => {
+    const cbs = selectedCompCheckboxes();
+    const all = cbs.length > 0 && cbs.every(cb => cb.checked);
+    cbs.forEach(cb => { cb.checked = !all; });
+    syncSelectedComps();
+    updateToggleLabel();
+  });
 
   // ── Pills cantidad ──────────────────────────────────────────────────────
   document.querySelector<HTMLButtonElement>('.qpill[data-q="10"]')?.classList.add('active');
@@ -344,7 +377,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
     window.rpLoader?.show('Generando la primera pregunta con IA...');
     try {
-      const res = await aiTriedsApi.start(selectedCompId, selectedQ, desc);
+      const res = await aiTriedsApi.start(selectedCompIds, selectedQ, desc);
       const triedId = res.data!.tried.aiTriedId;
       window.location.href = `/ai-practice/exam?tried=${triedId}&comp=${selectedCompId}&total=${selectedQ}`;
     } catch (err: any) {
