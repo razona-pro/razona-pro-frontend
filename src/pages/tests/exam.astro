@@ -307,10 +307,15 @@ import { Icon } from 'astro-icon/components';
         <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-wrong"   style="font-size:1.625rem;font-weight:900;color:#DC2626;margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Incorrectas</p></div>
         <div style="background:var(--ui-surface);border-radius:12px;padding:14px 8px;border:1px solid var(--ui-border)"><p id="res-time"    style="font-size:1.625rem;font-weight:900;color:var(--ui-text-1);margin:0 0 2px">0</p><p style="font-size:0.625rem;color:var(--ui-text-3);margin:0;text-transform:uppercase">Minutos</p></div>
       </div>
-      <p id="result-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.65"></p>
-      <div style="display:flex;gap:8px">
+      <p id="result-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1rem;line-height:1.65"></p>
+      <a id="btn-review" href="#" style="display:none;align-items:center;justify-content:center;gap:7px;width:100%;padding:0.8125rem;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:800;font-size:0.9375rem;box-shadow:0 4px 14px rgba(212,18,36,0.28);box-sizing:border-box">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Ver respuestas con retroalimentación
+      </a>
+      <p id="review-warn" style="display:none;font-size:0.6875rem;color:#B45309;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:7px 10px;margin:8px 0 0;line-height:1.4">⚠ Solo podrás verla <strong>una vez</strong>. Si sales, no podrás volver a abrirla.</p>
+      <div style="display:flex;gap:8px;margin-top:12px">
         <a href="/tests" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Otra prueba</a>
-        <a href="/dashboard/history" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;text-decoration:none;font-weight:700;font-size:0.875rem">Mi historial</a>
+        <a href="/dashboard/history" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.75rem;border-radius:11px;border:1.5px solid var(--ui-border);color:var(--ui-text-1);text-decoration:none;font-weight:600;font-size:0.875rem">Mi historial</a>
       </div>
       <a href="/dashboard" style="display:block;margin-top:10px;font-size:0.8125rem;color:var(--ui-text-3);text-decoration:none">Ir al panel de control →</a>
     </div>
@@ -1023,7 +1028,14 @@ import { Icon } from 'astro-icon/components';
     (document.getElementById('result-msg')  as HTMLElement).textContent = pct >= 80
       ? '¡Excelente! Estás muy bien preparado.' : pct >= 60
       ? '¡Buen trabajo! Sigue practicando.' : '¡Ánimo! Revisa los temas y vuelve a intentarlo.';
-    // La revisión con respuestas correctas es solo para administradores.
+    // Retroalimentación de un solo uso: se ofrece aquí mismo si el intento se completó.
+    const reviewBtn = document.getElementById('btn-review') as HTMLAnchorElement | null;
+    const reviewWarn = document.getElementById('review-warn') as HTMLElement | null;
+    if (reviewBtn && canReview) {
+      reviewBtn.href = `/tests/review/${triedId}`;
+      reviewBtn.style.display = 'flex';
+      if (reviewWarn) reviewWarn.style.display = 'block';
+    }
     (document.getElementById('results-overlay') as HTMLElement).style.display = 'flex';
     // Animar score
     let n = 0;
