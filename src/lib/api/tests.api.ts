@@ -6,8 +6,9 @@ export const testsApi = {
     apiFetch<PagedResponse<TestDto>>(`/api/tests?page=${page}&size=${size}`),
   findById: (testId: string) =>
     apiFetch<TestDto>(`/api/tests/${testId}`),
-  getQuestions: (testId: string) =>
-    apiFetch<QuestionDto[]>(`/api/tests/${testId}/questions`),
+  getQuestions: (testId: string, triedId?: string) =>
+    apiFetch<QuestionDto[]>(
+      `/api/tests/${testId}/questions${triedId ? `?triedId=${encodeURIComponent(triedId)}` : ''}`),
   create: (p: {
     testName: string; description?: string;
     durationSeconds: number | null; questionsToPresent?: number; testMode: string;

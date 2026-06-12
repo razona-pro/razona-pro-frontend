@@ -244,6 +244,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
   const currentUser = getUser();
 
   let currentRankingId = '';
+  let currentRanking: any = null;
   let page = 0;
   const PAGE_SIZE = 20;
   let lbTotalPages = 1;
@@ -257,6 +258,22 @@ import AppLayout from '../../layouts/AppLayout.astro';
   function ini(name: string, id: string) {
     const parts = (name || id).trim().split(' ');
     return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? parts[0]?.[1] ?? '')).toUpperCase();
+  }
+
+  // Texto de actividad según el tipo de ranking. Siempre dice "prueba(s)" (no "test").
+  function activityMeta(entry: RankingStudentDto): string {
+    const src = currentRanking?.sourceFilter ?? 'ALL';
+    const t = entry.triedsCount ?? 0;
+    const a = entry.aiTriedsCount ?? 0;
+    const plural = (n: number, s: string, p: string) => `${n} ${n === 1 ? s : p}`;
+    if (src === 'TRIEDS')    return plural(t, 'prueba', 'pruebas');
+    if (src === 'AI_TRIEDS') return plural(a, 'sesión IA', 'sesiones IA');
+    // ALL: suma pruebas normales + IA, con desglose si hay de ambas.
+    const total = t + a;
+    let txt = plural(total, 'prueba', 'pruebas');
+    if (t > 0 && a > 0) txt += ` (${t} normal${t === 1 ? '' : 'es'} · ${a} IA)`;
+    else if (a > 0)     txt = plural(a, 'sesión IA', 'sesiones IA');
+    return txt;
   }
 
   // ── PODIO ──────────────────────────────────────────────────────────
@@ -345,7 +362,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
       const metaEl = document.createElement('p');
       metaEl.className = 'lb-meta';
-      metaEl.textContent = `${entry.programName ?? ('Prog. ' + entry.programId)} · ${entry.triedsCount} test(s)`;
+      metaEl.textContent = `${entry.programName ?? ('Prog. ' + entry.programId)} · ${activityMeta(entry)}`;
 
       infoEl.appendChild(nameEl);
       infoEl.appendChild(metaEl);
@@ -370,7 +387,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
         document.getElementById('my-pos-num')!.textContent   = `#${pos}`;
         document.getElementById('my-pos-name')!.textContent  = name;
         document.getElementById('my-pos-score')!.textContent = Number(entry.totalScore).toFixed(1);
-        document.getElementById('my-trieds-count')!.textContent = String(entry.triedsCount);
+        const src = currentRanking?.sourceFilter ?? 'ALL';
+        const myCount = src === 'TRIEDS' ? (entry.triedsCount ?? 0)
+                      : src === 'AI_TRIEDS' ? (entry.aiTriedsCount ?? 0)
+                      : (entry.triedsCount ?? 0) + (entry.aiTriedsCount ?? 0);
+        document.getElementById('my-trieds-count')!.textContent = String(myCount);
       }
     });
   }
@@ -459,6 +480,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
         document.querySelectorAll('.ranking-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentRankingId = r.rankingId;
+        currentRanking = r;
         nameEl.textContent = r.rankingName;
         page = 0;
         document.getElementById('leaderboard-list')!.innerHTML = '';
@@ -471,6 +493,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
     });
 
     currentRankingId = rankings[0].rankingId;
+    currentRanking = rankings[0];
     nameEl.textContent = rankings[0].rankingName;
     updateInfoCard(rankings[0]);
     loadRanking(currentRankingId);

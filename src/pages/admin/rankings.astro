@@ -122,8 +122,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <div class="field-grp">
             <label class="field-lbl">Fuente de datos *</label>
             <select id="r-source" class="field-inp">
-              <option value="ALL">Todo (tests + IA)</option>
-              <option value="TRIEDS">Solo tests</option>
+              <option value="ALL">Todo (pruebas + IA)</option>
+              <option value="TRIEDS">Solo pruebas</option>
               <option value="AI_TRIEDS">Solo sesiones IA</option>
             </select>
           </div>
@@ -140,7 +140,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
         <!-- Preview de la config -->
         <div id="config-preview" style="background:var(--ui-surface);border-radius:9px;padding:10px 12px;border:1px solid var(--ui-border);font-size:0.8125rem;color:var(--ui-text-2)">
-          <strong style="color:var(--ui-text-1)">Resumen:</strong> Ranking acumulado histórico basado en todos los intentos (tests y sesiones IA).
+          <strong style="color:var(--ui-text-1)">Resumen:</strong> Ranking acumulado histórico basado en todos los intentos (pruebas y sesiones IA).
         </div>
       </div>
       <div style="display:flex;gap:8px">
@@ -423,7 +423,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               ${entry.studentName ?? entry.studentId}${isMe ? ' (tú)' : ''}
             </p>
             <p style="font-size:0.625rem;color:var(--ui-text-3);margin:1px 0 0">
-              ${entry.programName ?? ('Prog. ' + entry.programId)} · ${entry.triedsCount} test(s) · ${entry.aiTriedsCount} IA
+              ${entry.programName ?? ('Prog. ' + entry.programId)} · ${entry.triedsCount} prueba(s) · ${entry.aiTriedsCount} IA
             </p>
           </div>
           <div style="text-align:right;flex-shrink:0">
@@ -482,8 +482,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       GENERAL: 'acumulado histórico', WEEKLY: 'semanal', MONTHLY: 'mensual', DAILY: 'diario'
     };
     const sourceTxt: Record<string, string> = {
-      ALL: 'todos los intentos (tests y sesiones IA)',
-      TRIEDS: 'únicamente intentos de tests',
+      ALL: 'todos los intentos (pruebas y sesiones IA)',
+      TRIEDS: 'únicamente intentos de pruebas',
       AI_TRIEDS: 'únicamente sesiones de práctica IA'
     };
     const checked = Array.from(document.querySelectorAll<HTMLInputElement>('.r-comp-cb'))

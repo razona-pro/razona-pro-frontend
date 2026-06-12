@@ -384,7 +384,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
     const errEl = document.getElementById('setup-error')!;
     errEl.style.display = 'none';
 
-    window.rpLoader?.show('Generando la primera pregunta con IA...');
+    window.rpLoader?.show('Cargando prueba con IA...');
     try {
       const res = await aiTriedsApi.start(selectedCompIds, selectedQ, desc);
       const triedId = res.data!.tried.aiTriedId;

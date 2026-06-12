@@ -118,6 +118,9 @@ html.high-contrast {
   --ui-text-1:    #FFFFFF;
   --ui-text-2:    #E0E0E0;
   --ui-text-3:    #BBBBBB;
+  --ui-overlay:   rgba(0, 0, 0, 0.95);
+  --ui-shadow:    rgba(0, 0, 0, 0.6);
+  --ui-shadow-md: rgba(0, 0, 0, 0.85);
   --ui-input-bg:  #111111;
   --ui-hover:     #1A1A1A;
   --brand-muted:  rgba(255, 51, 68, 0.25);
@@ -201,6 +204,9 @@ html.contrast-dark {
   --ui-text-1:    #FFFFFF;
   --ui-text-2:    #DDDDDD;
   --ui-text-3:    #AAAAAA;
+  --ui-overlay:   rgba(0, 0, 0, 0.95);
+  --ui-shadow:    rgba(0, 0, 0, 0.6);
+  --ui-shadow-md: rgba(0, 0, 0, 0.85);
   --ui-input-bg:  #111111;
   --ui-hover:     #181818;
   --sidebar-bg:         #000000;
@@ -266,6 +272,47 @@ html[data-font="dyslexia"] {
 html[data-align="center"]  body :is(p, h1, h2, h3, h4, h5, h6, li, label) { text-align: center !important; }
 html[data-align="right"]   body :is(p, h1, h2, h3, h4, h5, h6, li, label) { text-align: right  !important; }
 html[data-align="justify"] body :is(p, h1, h2, h3, h4, h5, h6, li, label) { text-align: justify !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   14b. ADAPTACIÓN DE COLORES "QUEMADOS" EN MODOS OSCUROS
+   Muchos badges/chips usan colores HEX fijos en style="" inline (no var()),
+   tanto estáticos como armados por JS (innerHTML). En modo claro se ven bien;
+   en oscuro/alto contraste quedarían como "pastillas claras" sobre fondo negro.
+   Estas reglas SOLO actúan bajo los modos OSCUROS (dark / high-contrast /
+   contrast-dark) — el modo claro y contrast-light NO se tocan. El selector de
+   subcadena (case-insensitive, " i") empareja el color dentro del atributo
+   style; !important le gana al estilo inline. Convierte fondos pálidos en
+   translúcidos del mismo tono y aclara los textos demasiado oscuros.
+═══════════════════════════════════════════════════════════════ */
+/* Fondos pálidos → translúcidos del mismo tono */
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#D1FAE5" i] { background-color: rgba(5,150,105,0.18) !important; }   /* success */
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#DCFCE7" i] { background-color: rgba(5,150,105,0.18) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#FEE2E2" i] { background-color: rgba(220,38,38,0.18) !important; }   /* danger */
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#FECACA" i] { background-color: rgba(220,38,38,0.30) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#FEF2F2" i] { background-color: rgba(220,38,38,0.12) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#FEF3C7" i] { background-color: rgba(217,119,6,0.18) !important; }   /* warning */
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#FDE68A" i] { background-color: rgba(217,119,6,0.30) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#DBEAFE" i] { background-color: rgba(37,99,235,0.18) !important; }   /* info */
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#EFF6FF" i] { background-color: rgba(37,99,235,0.12) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#BFDBFE" i] { background-color: rgba(37,99,235,0.30) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#BAE6FD" i] { background-color: rgba(37,99,235,0.30) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#EDE9FE" i] { background-color: rgba(124,58,237,0.20) !important; }  /* violeta/IA */
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#DDD6FE" i] { background-color: rgba(124,58,237,0.30) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#F5F3FF" i] { background-color: rgba(124,58,237,0.12) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#F3F4F6" i] { background-color: rgba(255,255,255,0.06) !important; } /* neutro */
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#E5E7EB" i] { background-color: rgba(255,255,255,0.10) !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="#E8E8E8" i] { background-color: rgba(255,255,255,0.10) !important; }
+/* Textos demasiado oscuros → tonos claros legibles sobre fondo oscuro */
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#1A1A1A" i] { color: #EDEDED !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#991B1B" i] { color: #F87171 !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#B91C1C" i] { color: #F87171 !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#1E40AF" i] { color: #93C5FD !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#1D4ED8" i] { color: #93C5FD !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#5B21B6" i] { color: #C4B5FD !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#92400E" i] { color: #FCD34D !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#B45309" i] { color: #FCD34D !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#047857" i] { color: #6EE7B7 !important; }
+:where(html.dark, html.high-contrast, html.contrast-dark) [style*="color:#6B7280" i] { color: #9CA3AF !important; }
 
 /* ═══════════════════════════════════════════════════════════════
    15. CURSOR GRANDE

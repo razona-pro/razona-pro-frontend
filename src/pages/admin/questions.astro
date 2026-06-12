@@ -257,8 +257,24 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         sel.appendChild(opt);
       });
     });
-    // Cargar todas las preguntas al iniciar
-    loadQuestions();
+    // Deep-link desde el análisis de preguntas: ?comp=CPE00X&q=QTNYYYY abre el modal de edición.
+    const dl = new URLSearchParams(window.location.search);
+    const dlComp = dl.get('comp');
+    const dlQ    = dl.get('q');
+    if (dlComp && dlQ) {
+      currentComp = dlComp;
+      (document.getElementById('filter-comp') as HTMLSelectElement).value = dlComp;
+      loadQuestions().then(() => {
+        const editBtn = document.querySelector<HTMLButtonElement>(`.btn-edit[data-q="${dlQ}"]`);
+        if (editBtn) editBtn.click();
+        else toast.info?.('La pregunta está en otra página del banco. Usa los filtros para ubicarla.');
+        // Limpiar la query para no reabrir al refrescar.
+        window.history.replaceState({}, '', '/admin/questions');
+      });
+    } else {
+      // Cargar todas las preguntas al iniciar
+      loadQuestions();
+    }
   }).catch(() => { loadQuestions(); });
 
   async function loadQuestions() {

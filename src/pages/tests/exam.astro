@@ -851,7 +851,7 @@ import { Icon } from 'astro-icon/components';
     const label = document.getElementById('btn-save-label');
     if (label) label.textContent = 'Guardando...';
     try {
-      await triedsApi.submitAnswer(triedId!, q.questionId, sel);
+      await triedsApi.submitAnswer(triedId!, q.questionId, sel, q.competenceId);
       saved[q.questionId] = sel;
       toast.success('Respuesta guardada');
     } catch (err: any) {
@@ -1108,7 +1108,9 @@ import { Icon } from 'astro-icon/components';
 
       const [testRes, questionsRes] = await Promise.all([
         testsApi.findById(testId!),
-        testsApi.getQuestions(testId!),
+        // Pasar triedId: el subconjunto de preguntas es determinista por intento
+        // (mismas preguntas tras recargar y consistente con el cierre del intento).
+        testsApi.getQuestions(testId!, triedId!),
       ]);
 
       const test = testRes.data;
@@ -1201,6 +1203,37 @@ import { Icon } from 'astro-icon/components';
       window.location.replace('/tests');
     }
   }
+
+  // ── Retroalimentación de un solo uso ─────────────────────────────
+  // Si el estudiante SALE de la pantalla de resultados sin abrir "Ver respuestas",
+  // renuncia a la revisión: el backend la marca como vista y la URL directa ya no
+  // la mostrará ("decidiste no ver tus respuestas").
+  let reviewOpened   = false;
+  let reviewForfeited = false;
+  document.getElementById('btn-review')?.addEventListener('click', () => { reviewOpened = true; });
+
+  function resultsVisible() {
+    return (document.getElementById('results-overlay') as HTMLElement | null)?.style.display === 'flex';
+  }
+
+  // Botones de salida dentro del overlay de resultados (todos menos "Ver respuestas").
+  document.querySelectorAll<HTMLAnchorElement>('#results-overlay a').forEach(a => {
+    if (a.id === 'btn-review') return;
+    a.addEventListener('click', (e) => {
+      if (reviewOpened || reviewForfeited) return;   // dejar navegar normal
+      reviewForfeited = true;
+      const href = a.href;
+      e.preventDefault();
+      triedsApi.forfeitReview(triedId!).catch(() => {}).finally(() => { window.location.href = href; });
+    });
+  });
+
+  // Respaldo: cerrar pestaña/recargar con los resultados visibles también renuncia.
+  window.addEventListener('pagehide', () => {
+    if (reviewOpened || reviewForfeited || !resultsVisible()) return;
+    reviewForfeited = true;
+    try { triedsApi.forfeitReview(triedId!); } catch {}
+  });
 
   init();
 </script>

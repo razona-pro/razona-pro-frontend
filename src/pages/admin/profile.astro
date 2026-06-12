@@ -118,6 +118,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     </div>
     </div><!-- /cp-body -->
   </div>
+
+<!-- Modal de éxito -->
+<div id="ok-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--ui-card);border-radius:18px;padding:2rem;max-width:400px;width:calc(100%-2rem);text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both">
+    <div style="width:64px;height:64px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;background:#D1FAE5">
+      <svg width="32" height="32" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3 id="ok-modal-title" style="font-size:1.125rem;font-weight:800;color:var(--ui-text-1);margin:0 0 0.5rem">Listo</h3>
+    <p id="ok-modal-msg" style="font-size:0.875rem;color:var(--ui-text-2);margin:0 0 1.5rem;line-height:1.6"></p>
+    <button id="ok-modal-btn" type="button" style="width:100%;padding:0.75rem;border-radius:11px;border:none;background:linear-gradient(135deg,#059669,#047857);color:white;font-family:inherit;font-weight:700;font-size:0.875rem;cursor:pointer">Entendido</button>
+  </div>
+</div>
+<style is:global>@keyframes modalIn { from{opacity:0;transform:scale(0.9) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)} }</style>
 </AdminLayout>
 
 <style>
@@ -217,8 +230,21 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       try {
         const { authApi } = await import('../../lib/api/auth.api');
         await authApi.changePassword(code, cur, nw);
-        cpMsg('¡Contraseña actualizada! Úsala en tu próximo inicio de sesión.', true);
+        // Reset + cierre de la sección "Cambiar contraseña".
         (document.getElementById('cp-step2') as HTMLElement).style.display = 'none';
+        (document.getElementById('cp-step1') as HTMLElement).style.display = 'flex';
+        ['cp-code','cp-current','cp-new','cp-confirm'].forEach(elId => {
+          const el = document.getElementById(elId) as HTMLInputElement | null; if (el) el.value = '';
+        });
+        (document.getElementById('cp-msg') as HTMLElement).style.display = 'none';
+        const cpBody = document.getElementById('cp-body'); if (cpBody) cpBody.style.display = 'none';
+        const cpToggle = document.getElementById('cp-toggle');
+        if (cpToggle) { cpToggle.classList.remove('open');
+          const svg = cpToggle.querySelector('svg')?.outerHTML ?? '';
+          cpToggle.innerHTML = `${svg} Cambiar`; }
+        (document.getElementById('ok-modal-title') as HTMLElement).textContent = 'Contraseña actualizada';
+        (document.getElementById('ok-modal-msg')   as HTMLElement).textContent = 'Tu contraseña se cambió correctamente. Úsala en tu próximo inicio de sesión.';
+        (document.getElementById('ok-modal') as HTMLElement).style.display = 'flex';
       } catch (e: any) {
         cpMsg(e?.message ?? 'No se pudo cambiar la contraseña.', false);
       } finally {
@@ -226,4 +252,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       }
     });
   }
+
+  // Cierre del modal de éxito.
+  document.getElementById('ok-modal-btn')?.addEventListener('click', () => {
+    (document.getElementById('ok-modal') as HTMLElement).style.display = 'none';
+  });
+  document.getElementById('ok-modal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('ok-modal'))
+      (document.getElementById('ok-modal') as HTMLElement).style.display = 'none';
+  });
 </script>

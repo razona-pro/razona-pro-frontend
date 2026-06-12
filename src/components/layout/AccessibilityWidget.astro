@@ -272,172 +272,159 @@
   }
 </style>
 
-<script>
-const KEY = 'rp-a11y';
+<!--
+  is:inline a propósito: el menú de accesibilidad debe funcionar en TODAS las páginas
+  sin excepción. Al ser inline, su lógica NO depende del bundle de scripts de cada página,
+  así que un error en el script de cualquier page no puede "tumbar" el widget.
+-->
+<script is:inline>
+(function () {
+  var KEY = 'rp-a11y';
 
-interface Prefs {
-  fs: string; mode: string; vision: string;
-  ls: string; lh: string; font: string;
-  align: string; sat: string; cursor: string;
-  links: boolean; mask: boolean; guide: boolean;
-}
-
-const DEFAULTS: Prefs = {
-  fs: 'normal', mode: 'light', vision: 'none',
-  ls: 'normal', lh: '1.6', font: 'default',
-  align: 'left', sat: 'normal', cursor: 'normal',
-  links: false, mask: false, guide: false,
-};
-
-const FONT_URLS: Record<string, string> = {
-  dyslexia: 'https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap',
-};
-
-function load(): Prefs {
-  try {
-    const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}');
-    if (saved.font === 'legible' || saved.font === 'lora') saved.font = 'default';
-    return { ...DEFAULTS, ...saved };
-  }
-  catch { return { ...DEFAULTS }; }
-}
-function save(p: Prefs) { localStorage.setItem(KEY, JSON.stringify(p)); }
-
-function buildHtmlFilter(p: Prefs): string {
-  const parts: string[] = [];
-  if (p.vision !== 'none') parts.push(`url('#rp-filter-${p.vision}')`);
-  if (p.sat === 'low')         parts.push('saturate(0.4)');
-  else if (p.sat === 'high')   parts.push('saturate(1.8)');
-  else if (p.sat === 'desaturate') parts.push('grayscale(1)');
-  return parts.join(' ');
-}
-
-function ensureFont(font: string) {
-  if (font === 'default' || document.getElementById(`rp-f-${font}`)) return;
-  const l = document.createElement('link');
-  l.id = `rp-f-${font}`; l.rel = 'stylesheet'; l.href = FONT_URLS[font] ?? '';
-  document.head.appendChild(l);
-}
-
-function apply(p: Prefs) {
-  const h = document.documentElement;
-  h.setAttribute('data-fs', p.fs);
-  h.classList.remove('dark','high-contrast','contrast-inverted','contrast-light','contrast-dark');
-  const modeMap: Record<string, string> = {
-    dark: 'dark', 'high-contrast': 'high-contrast',
-    inverted: 'contrast-inverted', 'contrast-light': 'contrast-light', 'contrast-dark': 'contrast-dark',
+  var DEFAULTS = {
+    fs: 'normal', mode: 'light', vision: 'none',
+    ls: 'normal', lh: '1.6', font: 'default',
+    align: 'left', sat: 'normal', cursor: 'normal',
+    links: false, mask: false, guide: false
   };
-  if (modeMap[p.mode]) h.classList.add(modeMap[p.mode]);
-  if (p.ls === 'normal') h.removeAttribute('data-ls');
-  else h.setAttribute('data-ls', p.ls);
-  h.setAttribute('data-lh', p.lh);
-  ensureFont(p.font);
-  if (p.font === 'default') h.removeAttribute('data-font');
-  else h.setAttribute('data-font', p.font);
-  if (p.align === 'left') h.removeAttribute('data-align');
-  else h.setAttribute('data-align', p.align);
 
-  // ── KEY FIX: aplicar filter al documentElement, NO al body ──
-  // Si se aplica al body, los elementos position:fixed quedan atrapados
-  // en el stacking context del filter y se descolocan del viewport.
-  // Al aplicarlo al html, el widget con isolation:isolate queda libre.
-  const filterVal = buildHtmlFilter(p);
+  var FONT_URLS = {
+    dyslexia: 'https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap'
+  };
 
-  // Para invertido: el CSS maneja html.contrast-inverted con filter,
-  // aquí solo aplicamos saturación/daltonismo sobre el html directamente.
-  // Evitamos sobreescribir el filter de contrast-inverted del CSS.
-  if (p.mode !== 'inverted') {
-    h.style.filter = filterVal;
-  } else {
-    // En modo invertido, el CSS ya pone invert+hue-rotate en html.contrast-inverted.
-    // Combinamos saturación/daltonismo encima si aplica.
-    h.style.filter = filterVal;
+  function load() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+      if (saved.font === 'legible' || saved.font === 'lora') saved.font = 'default';
+      return Object.assign({}, DEFAULTS, saved);
+    } catch (e) { return Object.assign({}, DEFAULTS); }
+  }
+  function save(p) { localStorage.setItem(KEY, JSON.stringify(p)); }
+
+  function buildHtmlFilter(p) {
+    var parts = [];
+    if (p.vision !== 'none') parts.push("url('#rp-filter-" + p.vision + "')");
+    if (p.sat === 'low')             parts.push('saturate(0.4)');
+    else if (p.sat === 'high')       parts.push('saturate(1.8)');
+    else if (p.sat === 'desaturate') parts.push('grayscale(1)');
+    return parts.join(' ');
   }
 
-  h.classList.toggle('cursor-large', p.cursor === 'large');
-  h.classList.toggle('highlight-links', p.links);
-  h.classList.toggle('reading-mask', p.mask);
-  h.classList.toggle('reading-guide', p.guide);
-  syncButtons(p);
-}
+  function ensureFont(font) {
+    if (font === 'default' || document.getElementById('rp-f-' + font)) return;
+    var l = document.createElement('link');
+    l.id = 'rp-f-' + font; l.rel = 'stylesheet'; l.href = FONT_URLS[font] || '';
+    document.head.appendChild(l);
+  }
 
-function syncButtons(p: Prefs) {
-  const setActive = (el: Element, on: boolean) => {
-    el.classList.toggle('active', on);
-    el.setAttribute('aria-pressed', String(on));
+  function apply(p) {
+    var h = document.documentElement;
+    h.setAttribute('data-fs', p.fs);
+    h.classList.remove('dark','high-contrast','contrast-inverted','contrast-light','contrast-dark');
+    var modeMap = {
+      dark: 'dark', 'high-contrast': 'high-contrast',
+      inverted: 'contrast-inverted', 'contrast-light': 'contrast-light', 'contrast-dark': 'contrast-dark'
+    };
+    if (modeMap[p.mode]) h.classList.add(modeMap[p.mode]);
+    if (p.ls === 'normal') h.removeAttribute('data-ls');
+    else h.setAttribute('data-ls', p.ls);
+    h.setAttribute('data-lh', p.lh);
+    ensureFont(p.font);
+    if (p.font === 'default') h.removeAttribute('data-font');
+    else h.setAttribute('data-font', p.font);
+    if (p.align === 'left') h.removeAttribute('data-align');
+    else h.setAttribute('data-align', p.align);
+
+    // El filter se aplica al documentElement (no al body) para que los elementos
+    // position:fixed (como este widget, con isolation:isolate) no se descoloquen.
+    h.style.filter = buildHtmlFilter(p);
+
+    h.classList.toggle('cursor-large', p.cursor === 'large');
+    h.classList.toggle('highlight-links', p.links);
+    h.classList.toggle('reading-mask', p.mask);
+    h.classList.toggle('reading-guide', p.guide);
+    syncButtons(p);
+  }
+
+  function syncButtons(p) {
+    var setActive = function (el, on) {
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-pressed', String(on));
+    };
+    document.querySelectorAll('[data-fs]').forEach(function (b) { setActive(b, b.dataset.fs === p.fs); });
+    document.querySelectorAll('[data-mode]').forEach(function (b) { setActive(b, b.dataset.mode === p.mode); });
+    document.querySelectorAll('[data-ls]').forEach(function (b) { setActive(b, b.dataset.ls === (p.ls || 'normal')); });
+    document.querySelectorAll('[data-lh]').forEach(function (b) { setActive(b, b.dataset.lh === p.lh); });
+    document.querySelectorAll('[data-font]').forEach(function (b) { setActive(b, b.dataset.font === p.font); });
+    document.querySelectorAll('[data-sat]').forEach(function (b) { setActive(b, b.dataset.sat === (p.sat || 'normal')); });
+    document.querySelectorAll('[data-vision]').forEach(function (b) { setActive(b, b.dataset.vision === p.vision); });
+    ['cursor','links','mask','guide'].forEach(function (k) {
+      var el = document.getElementById('rp-toggle-' + k);
+      if (!el) return;
+      var val = k === 'cursor' ? p.cursor === 'large' : p[k];
+      el.classList.toggle('active', val);
+      el.setAttribute('aria-pressed', String(val));
+    });
+  }
+
+  // La guía de lectura sigue el mouse
+  var raf = 0;
+  document.addEventListener('mousemove', function (e) {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(function () {
+      document.documentElement.style.setProperty('--rp-mask-y', e.clientY + 'px');
+      var guide = document.getElementById('rp-reading-guide');
+      if (guide) guide.style.top = e.clientY + 'px';
+    });
+  });
+
+  var prefs = load();
+  apply(prefs);
+
+  var fab      = document.getElementById('rp-a11y-fab');
+  var panel    = document.getElementById('rp-a11y-panel');
+  var closeBtn = document.getElementById('rp-a11y-close');
+  var resetBtn = document.getElementById('rp-a11y-reset');
+  if (!fab || !panel) return;   // por si el markup aún no está, no rompe nada
+
+  var openPanel  = function () { panel.removeAttribute('hidden'); fab.setAttribute('aria-expanded','true'); };
+  var closePanel = function () { panel.setAttribute('hidden',''); fab.setAttribute('aria-expanded','false'); };
+
+  fab.addEventListener('click', function () { panel.hasAttribute('hidden') ? openPanel() : closePanel(); });
+  if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+  var btnHandler = function (selector, key, getValue) {
+    document.querySelectorAll(selector).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        prefs[key] = getValue(btn);
+        save(prefs); apply(prefs);
+      });
+    });
   };
-  document.querySelectorAll('[data-fs]').forEach(b => setActive(b, (b as HTMLElement).dataset.fs === p.fs));
-  document.querySelectorAll('[data-mode]').forEach(b => setActive(b, (b as HTMLElement).dataset.mode === p.mode));
-  document.querySelectorAll('[data-ls]').forEach(b => setActive(b, (b as HTMLElement).dataset.ls === (p.ls || 'normal')));
-  document.querySelectorAll('[data-lh]').forEach(b => setActive(b, (b as HTMLElement).dataset.lh === p.lh));
-  document.querySelectorAll('[data-font]').forEach(b => setActive(b, (b as HTMLElement).dataset.font === p.font));
-  document.querySelectorAll('[data-sat]').forEach(b => setActive(b, (b as HTMLElement).dataset.sat === (p.sat || 'normal')));
-  document.querySelectorAll('[data-vision]').forEach(b => setActive(b, (b as HTMLElement).dataset.vision === p.vision));
-  ['cursor','links','mask','guide'].forEach(k => {
-    const el = document.getElementById(`rp-toggle-${k}`);
-    if (!el) return;
-    const val = k === 'cursor' ? p.cursor === 'large' : (p as any)[k] as boolean;
-    el.classList.toggle('active', val);
-    el.setAttribute('aria-pressed', String(val));
-  });
-}
 
-// Reading guide follows mouse
-let raf = 0;
-document.addEventListener('mousemove', e => {
-  cancelAnimationFrame(raf);
-  raf = requestAnimationFrame(() => {
-    document.documentElement.style.setProperty('--rp-mask-y', e.clientY + 'px');
-    const guide = document.getElementById('rp-reading-guide');
-    if (guide) guide.style.top = e.clientY + 'px';
-  });
-});
+  btnHandler('[data-fs]',     'fs',     function (el) { return el.dataset.fs || 'normal'; });
+  btnHandler('[data-mode]',   'mode',   function (el) { return el.dataset.mode || 'light'; });
+  btnHandler('[data-ls]',     'ls',     function (el) { return el.dataset.ls || 'normal'; });
+  btnHandler('[data-lh]',     'lh',     function (el) { return el.dataset.lh || '1.6'; });
+  btnHandler('[data-font]',   'font',   function (el) { return el.dataset.font || 'default'; });
+  btnHandler('[data-sat]',    'sat',    function (el) { return el.dataset.sat || 'normal'; });
+  btnHandler('[data-vision]', 'vision', function (el) { return el.dataset.vision || 'none'; });
 
-const prefs = load();
-apply(prefs);
-
-const fab      = document.getElementById('rp-a11y-fab')!;
-const panel    = document.getElementById('rp-a11y-panel')!;
-const closeBtn = document.getElementById('rp-a11y-close')!;
-const resetBtn = document.getElementById('rp-a11y-reset')!;
-
-const openPanel  = () => { panel.removeAttribute('hidden'); fab.setAttribute('aria-expanded','true'); };
-const closePanel = () => { panel.setAttribute('hidden',''); fab.setAttribute('aria-expanded','false'); };
-
-fab.addEventListener('click', () => panel.hasAttribute('hidden') ? openPanel() : closePanel());
-closeBtn.addEventListener('click', closePanel);
-
-const btnHandler = (selector: string, key: keyof Prefs, getValue: (el: HTMLElement) => unknown) => {
-  document.querySelectorAll<HTMLElement>(selector).forEach(btn => {
-    btn.addEventListener('click', () => {
-      (prefs as any)[key] = getValue(btn);
+  document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var k = btn.dataset.toggle;
+      if (k === 'cursor') prefs.cursor = prefs.cursor === 'large' ? 'normal' : 'large';
+      else prefs[k] = !prefs[k];
       save(prefs); apply(prefs);
     });
   });
-};
 
-btnHandler('[data-fs]',     'fs',     el => el.dataset.fs ?? 'normal');
-btnHandler('[data-mode]',   'mode',   el => el.dataset.mode ?? 'light');
-btnHandler('[data-ls]',     'ls',     el => el.dataset.ls ?? 'normal');
-btnHandler('[data-lh]',     'lh',     el => el.dataset.lh ?? '1.6');
-btnHandler('[data-font]',   'font',   el => el.dataset.font ?? 'default');
-btnHandler('[data-sat]',    'sat',    el => el.dataset.sat ?? 'normal');
-btnHandler('[data-vision]', 'vision', el => el.dataset.vision ?? 'none');
+  if (resetBtn) resetBtn.addEventListener('click', function () { Object.assign(prefs, DEFAULTS); save(prefs); apply(prefs); });
 
-document.querySelectorAll<HTMLElement>('[data-toggle]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const k = btn.dataset.toggle!;
-    if (k === 'cursor') prefs.cursor = prefs.cursor === 'large' ? 'normal' : 'large';
-    else (prefs as any)[k] = !(prefs as any)[k];
-    save(prefs); apply(prefs);
+  document.addEventListener('click', function (e) {
+    var root = document.getElementById('rp-a11y-root');
+    if (root && !root.contains(e.target) && !panel.hasAttribute('hidden')) closePanel();
   });
-});
-
-resetBtn.addEventListener('click', () => { Object.assign(prefs, DEFAULTS); save(prefs); apply(prefs); });
-
-document.addEventListener('click', e => {
-  const root = document.getElementById('rp-a11y-root');
-  if (root && !root.contains(e.target as Node) && !panel.hasAttribute('hidden')) closePanel();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hasAttribute('hidden')) closePanel(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hasAttribute('hidden')) closePanel(); });
+})();
 </script>

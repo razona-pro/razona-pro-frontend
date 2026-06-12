@@ -27,10 +27,10 @@ export const triedsApi = {
       method: 'POST',
       body: JSON.stringify({ testId }),
     }),
-  submitAnswer: (triedId: string, questionId: string, optionId: string) =>
+  submitAnswer: (triedId: string, questionId: string, optionId: string, competenceId?: string) =>
     apiFetch<TriedDto>(`/api/trieds/${triedId}/answer`, {
       method: 'POST',
-      body: JSON.stringify({ questionId, optionId }),
+      body: JSON.stringify({ questionId, optionId, competenceId }),
     }),
   finish: (triedId: string, timeSpentSeconds?: number) =>
     apiFetch<TriedDto>(
@@ -40,6 +40,9 @@ export const triedsApi = {
   /** Solo administradores: revisión completa con respuestas correctas y explicaciones. */
   getReview: (triedId: string) =>
     apiFetch<TriedReviewDto>(`/api/trieds/${triedId}/review`),
+  /** El estudiante renuncia a su retroalimentación de un solo uso (al salir sin verla). */
+  forfeitReview: (triedId: string) =>
+    apiFetch<void>(`/api/trieds/${triedId}/forfeit-review`, { method: 'POST' }),
   /** Desglose de aciertos por competencia (sin revelar respuestas); lo puede ver el estudiante dueño. */
   getBreakdown: (triedId: string) =>
     apiFetch<{ competenceId: string; correct: number; total: number }[]>(

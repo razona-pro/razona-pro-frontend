@@ -297,6 +297,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
     filtered.forEach(t => {
       const s         = primaryStyle(t);
+      // El icono usa las iniciales de la PRUEBA (no de la primera competencia).
+      const testInitials = (t.testName ?? 'Prueba').trim().split(/\s+/)
+        .map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'PR';
       const durMin    = t.durationSeconds != null ? Math.floor(t.durationSeconds / 60) : null;
       const durLabel  = durMin != null ? `${durMin} min` : 'Sin límite';
       const myTrieds  = allTrieds.filter(tr => tr.testId === t.testId && tr.status === 'FINISHED' && tr.score != null);
@@ -319,7 +322,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
         <div style="padding:1.125rem 1.25rem">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px">
             <div style="display:flex;align-items:center;gap:10px;min-width:0">
-              <div style="width:40px;height:40px;border-radius:11px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:900;color:${s.color}">${s.short}</div>
+              <div style="width:40px;height:40px;border-radius:11px;background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:900;color:${s.color}">${testInitials}</div>
               <div style="min-width:0">
                 <h3 style="font-size:0.875rem;font-weight:800;color:var(--ui-text-1);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px" title="${t.testName}">${t.testName}</h3>
               </div>

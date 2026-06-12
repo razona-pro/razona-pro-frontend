@@ -173,7 +173,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 </style>
 
 <script>
-  import { requireAuth, isAdmin, getUser } from '../../lib/auth';
+  import { requireAuth, isAdmin, getUser, updateStoredUser } from '../../lib/auth';
   import { adminsApi } from '../../lib/api/admins.api';
   import { toast } from '../../lib/toast';
   import type { AdminDto } from '../../lib/api/types';
@@ -342,9 +342,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     errEl.style.display = 'none';
     const id            = (document.getElementById('e-id')     as HTMLInputElement).value;
     const firstName     = (document.getElementById('e-fname')  as HTMLInputElement).value.trim();
-    const secondName    = (document.getElementById('e-mname')  as HTMLInputElement).value.trim() || undefined;
+    // Segundo nombre/apellido: enviar '' (no undefined) para poder BORRARLOS en el backend.
+    const secondName    = (document.getElementById('e-mname')  as HTMLInputElement).value.trim();
     const firstSurname  = (document.getElementById('e-lname1') as HTMLInputElement).value.trim();
-    const secondSurname = (document.getElementById('e-lname2') as HTMLInputElement).value.trim() || undefined;
+    const secondSurname = (document.getElementById('e-lname2') as HTMLInputElement).value.trim();
     const email         = (document.getElementById('e-email')  as HTMLInputElement).value.trim() || undefined;
     const phone         = (document.getElementById('e-phone')  as HTMLInputElement).value.trim() || undefined;
     if (!firstName || !firstSurname) {
@@ -353,6 +354,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     submit.disabled = true; lblEl.textContent = 'Guardando...';
     try {
       await adminsApi.update(id, { firstName, secondName, firstSurname, secondSurname, email, phone });
+      // Si el admin se editó A SÍ MISMO, refrescar el nombre del sidebar/topbar al instante.
+      if (currentUser?.id === id) {
+        updateStoredUser({ firstName, secondName: secondName || undefined,
+          firstSurname, secondSurname: secondSurname || undefined, email });
+      }
       toast.success('Administrador actualizado');
       closeEdit(); loadPage();
     } catch (err: any) {

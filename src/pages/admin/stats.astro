@@ -124,16 +124,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <table style="width:100%;border-collapse:collapse">
           <thead>
             <tr style="border-bottom:1px solid var(--ui-border)">
-              <th class="th">ID Pregunta</th>
+              <th class="th">Ítem</th>
+              <th class="th">Competencia</th>
               <th class="th">Enunciado (extracto)</th>
               <th class="th">Total resp.</th>
               <th class="th">Correctas</th>
               <th class="th">Tasa de error</th>
               <th class="th">Dificultad</th>
+              <th class="th">Acción</th>
             </tr>
           </thead>
           <tbody id="trends-tbody">
-            <tr><td colspan="6" style="padding:2.5rem;text-align:center;color:var(--ui-text-3)">
+            <tr><td colspan="8" style="padding:2.5rem;text-align:center;color:var(--ui-text-3)">
               <div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px">
                 <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 <span style="font-size:0.8125rem">Selecciona una competencia o presiona "Cargar" para ver todas.</span>
@@ -400,7 +402,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // ── Tendencias de preguntas ──────────────────────────────────
   async function loadTrends(competenceId?: string) {
     const tbody = document.getElementById('trends-tbody')!;
-    tbody.innerHTML = `<tr><td colspan="6" style="padding:1.5rem;text-align:center;color:var(--ui-text-3)">
+    tbody.innerHTML = `<tr><td colspan="8" style="padding:1.5rem;text-align:center;color:var(--ui-text-3)">
       <div style="display:inline-flex;align-items:center;gap:8px">
         <div style="width:16px;height:16px;border:2px solid rgba(212,18,36,0.2);border-top-color:var(--brand);border-radius:50%;animation:spin 0.7s linear infinite"></div> Cargando...
       </div>
@@ -411,7 +413,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       const data = res.data ?? [];
       tbody.innerHTML = '';
       if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="padding:2.5rem;text-align:center">
+        tbody.innerHTML = `<tr><td colspan="8" style="padding:2.5rem;text-align:center">
           <div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px">
             <svg width="36" height="36" fill="none" stroke="var(--ui-text-3)" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             <p style="font-size:0.875rem;font-weight:700;color:var(--ui-text-1);margin:0">Sin datos de respuestas</p>
@@ -420,17 +422,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </td></tr>`;
         return;
       }
-      data.slice(0, 50).forEach(q => {
+      data.slice(0, 50).forEach((q, idx) => {
         const er    = q.errorRate ?? 0;
         const color = er >= 70 ? '#DC2626' : er >= 40 ? '#D97706' : '#059669';
         const label = er >= 70 ? 'Alta' : er >= 40 ? 'Media' : 'Baja';
         const badgeClass = er >= 70 ? 'rp-badge-danger' : er >= 40 ? 'rp-badge-warning' : 'rp-badge-success';
+        const compName = competenceNames[q.competenceId] ?? q.competenceId ?? '-';
+        // Deep-link al banco: abre directamente el modal de edición de esta pregunta.
+        const bankUrl = `/admin/questions?comp=${encodeURIComponent(q.competenceId)}&q=${encodeURIComponent(q.questionId)}`;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="td">
-            <code style="background:var(--ui-surface);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;color:var(--brand);border:1px solid var(--ui-border)">${q.questionId}</code>
-          </td>
-          <td class="td" style="max-width:260px;font-size:0.8125rem;color:var(--ui-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${q.statement ?? ''}">${q.statement ?? '-'}</td>
+          <td class="td" style="font-weight:800;color:var(--ui-text-1)">Ítem ${idx + 1}</td>
+          <td class="td"><span style="font-size:0.75rem;font-weight:700;padding:2px 9px;border-radius:12px;background:#EDE9FE;color:#7C3AED">${compName}</span></td>
+          <td class="td" style="max-width:240px;font-size:0.8125rem;color:var(--ui-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${q.statement ?? ''}">${q.statement ?? '-'}</td>
           <td class="td" style="text-align:center;font-weight:700">${q.totalAnswers}</td>
           <td class="td" style="text-align:center;font-weight:700;color:#059669">${q.correctAnswers}</td>
           <td class="td">
@@ -439,18 +443,26 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               <span style="font-weight:800;color:${color};min-width:44px">${er.toFixed(1)}%</span>
             </div>
           </td>
-          <td class="td"><span class="rp-badge ${badgeClass}">${label}</span></td>`;
+          <td class="td"><span class="rp-badge ${badgeClass}">${label}</span></td>
+          <td class="td">
+            <a href="${bankUrl}" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;border:1.5px solid var(--ui-border);background:var(--ui-card);color:var(--brand);font-size:0.75rem;font-weight:700;text-decoration:none;white-space:nowrap" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='var(--ui-border)'">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Ver pregunta
+            </a>
+          </td>`;
         tbody.appendChild(tr);
       });
     } catch (err: any) {
-      tbody.innerHTML = `<tr><td colspan="6" style="padding:2rem;text-align:center;color:#DC2626;font-size:0.875rem">Error: ${err?.message}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" style="padding:2rem;text-align:center;color:#DC2626;font-size:0.875rem">Error: ${err?.message}</td></tr>`;
     }
   }
 
-  // Cargar competencias en el selector
+  // Cargar competencias en el selector (y guardar nombres para el análisis).
+  const competenceNames: Record<string, string> = {};
   competencesApi.findAll(false).then(res => {
     const sel = document.getElementById('filter-competence') as HTMLSelectElement;
     (res.data ?? []).forEach(c => {
+      competenceNames[c.competenceId] = c.competenceName;
       const opt = document.createElement('option');
       opt.value = c.competenceId;
       opt.textContent = c.competenceName;

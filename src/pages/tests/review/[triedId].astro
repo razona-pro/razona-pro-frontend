@@ -296,6 +296,10 @@ import AppLayout from '../../../layouts/AppLayout.astro';
     } catch (err: any) {
       (document.getElementById('review-loading') as HTMLElement).style.display = 'none';
       const list = document.getElementById('questions-list')!;
+      // Ya no hay nada cargando: limpiar el subtítulo "Cargando..." y ocultar filtros.
+      const subEl = document.getElementById('review-subtitle') as HTMLElement | null;
+      if (subEl) subEl.textContent = 'Revisión no disponible';
+      document.querySelectorAll('.rfilt').forEach(b => ((b as HTMLElement).style.display = 'none'));
       // Retroalimentación de un solo uso ya consumida.
       if (err?.code === 'REVIEW_ALREADY_VIEWED') {
         const statsRow = document.getElementById('stats-row');

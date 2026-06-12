@@ -353,9 +353,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     errEl.style.display = 'none';
     const id            = (document.getElementById('se-id')     as HTMLInputElement).value;
     const firstName     = (document.getElementById('se-fname')  as HTMLInputElement).value.trim();
-    const secondName    = (document.getElementById('se-mname')  as HTMLInputElement).value.trim() || undefined;
+    // Segundo nombre/apellido: enviar '' (no undefined) para poder BORRARLOS en el backend.
+    const secondName    = (document.getElementById('se-mname')  as HTMLInputElement).value.trim();
     const firstSurname  = (document.getElementById('se-lname1') as HTMLInputElement).value.trim();
-    const secondSurname = (document.getElementById('se-lname2') as HTMLInputElement).value.trim() || undefined;
+    const secondSurname = (document.getElementById('se-lname2') as HTMLInputElement).value.trim();
     const email         = (document.getElementById('se-email')  as HTMLInputElement).value.trim() || undefined;
     const phone         = (document.getElementById('se-phone')  as HTMLInputElement).value.trim() || undefined;
     if (!firstName || !firstSurname) {

@@ -641,8 +641,9 @@ import { Icon } from 'astro-icon/components';
       if (!res.data) throw new Error('Sin pregunta disponible');
       allQuestions.push(res.data);
       renderQuestion(res.data);
-    } catch (err: any) {
-      toast.error('Error al obtener siguiente pregunta', { description: err?.message });
+    } catch {
+      // Mensaje genérico: no exponer el error técnico/IA en la tarjeta.
+      toast.error('Error al cargar la siguiente pregunta. Intenta de nuevo.');
       (document.getElementById('ai-loading') as HTMLElement).style.display  = 'none';
       (document.getElementById('question-card') as HTMLElement).style.display = 'block';
     }
