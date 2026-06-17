@@ -37,6 +37,7 @@ PUBLIC_API_URL=http://localhost:8080
 
 ## Estructura del proyecto
 
+```text
 razonapro/
 ├── public/                        # Archivos estáticos (favicon, imágenes)
 ├── src/
@@ -125,7 +126,7 @@ razonapro/
 ├── astro.config.mjs
 ├── package.json
 └── tsconfig.json
-
+```
 ## Características principales
 
 ### Para estudiantes
