@@ -1,4 +1,4 @@
-# RazonaPro — Frontend
+# RazonaPro - Frontend
 
 Plataforma de preparación Saber Pro de la Universidad Francisco de Paula Santander Ocaña (UFPSO).
 
@@ -156,7 +156,7 @@ Widget flotante con las siguientes opciones sin recarga de página:
 
 ## Créditos
 
-**Trabajo de Grado — Ingeniería de Sistemas, UFPSO**
+**Trabajo de Grado - Ingeniería de Sistemas, UFPSO**
 
 - Fabian Rojas · Código: 0192270
 - Andres Gomez · Código: 0192250
